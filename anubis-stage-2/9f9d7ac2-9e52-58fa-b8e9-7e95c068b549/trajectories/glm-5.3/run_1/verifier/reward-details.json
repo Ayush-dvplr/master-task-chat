@@ -1,0 +1,657 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.5362,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.018518518518518517,
+        "detail": {
+          "score": 8.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_inspects_the_local_cli_source_schema",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent inspects the local CLI source, schema file, and failing command behaviour before editing.",
+              "reasoning": "The agent inspected the extracted CLI source, README, tool schema, and data schema, but it did not run the broken sealb-ctl before editing to observe and record its failing command behavior. The unzip failure was unrelated to the CLI itself."
+            },
+            {
+              "id": "R2",
+              "name": "r2_repairs_root_causes_in_argument_parsing",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent repairs root causes in argument parsing, flat-key validation, and deterministic serialization rather than only writing final JSON by hand, and ships per-component unit tests on a synthetic fixture that exercise each repaired code path.",
+              "reasoning": "The agent implemented substantive CLI repairs for parsing, validation, replay, and deterministic serialization rather than hand-writing final JSON. However, it did not ship per-component unit tests on a synthetic fixture. Its crosscheck.py and verify.py are external integration checks over the real supplied dataset, not synthetic unit tests exercising each repaired code path."
+            },
+            {
+              "id": "R3",
+              "name": "r3_uses_only_local_files_and_standard",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent uses only local files and standard-library Python capabilities while configuring the CLI.",
+              "reasoning": "The work used local files, shell utilities, and Python standard-library modules such as json, zipfile, hashlib, argparse, configparser, and ElementTree. No network access or third-party package installation appears in the trajectory."
+            },
+            {
+              "id": "R4",
+              "name": "r4_creates_the_configuration_artifact_at_the",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent creates the configuration artifact at the exact path the instruction names and refrains from writing auxiliary or renamed copies.",
+              "reasoning": "The final configuration was created at the required /app/out/config.json path and the final output directory contained the expected artifact set. However, the trajectory created multiple auxiliary output copies and compilations, including /tmp/scratch, /tmp/run1, /tmp/run2, and /tmp/final1, so it did not refrain from writing auxiliary copies."
+            },
+            {
+              "id": "R5",
+              "name": "r5_chained_bound_formula",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent names the effective-upper-bound formula hi + (R mod 97) + (J mod 31) in the trajectory and identifies R as the finished-spine rekey_interval_s and J as the count of rejected journal operations, and demonstrates the derivation by showing intermediate values of hi, (R mod 97), and (J mod 31) with a reference citation to the schema file for each.",
+              "reasoning": "The agent correctly stated hi + (R mod 97) + (J mod 31), identified R as finished-spine rekey_interval_s and J as rejected-operation count, and showed R=32508, R mod 97=13, J=2160, J mod 31=21, yielding a shift of 34. It did not provide the required schema-file citation for each intermediate, nor a cited published hi intermediate as required by this criterion."
+            },
+            {
+              "id": "R6",
+              "name": "r6_noncanonical_integer_rejection",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent treats a value as canonical only when str(int(x)) equals the raw field bytes exactly, and rejects every non-canonical form the contract names: leading zeros, -0 / -00 / -000, leading plus, surrounding spaces, underscores, hex, floats, units, words, scientific notation, Devanagari U+0966 range, Arabic-Indic U+0660 range, Gujarati U+0AE6 range, and full-width U+FF10 range.",
+              "reasoning": "The repaired canonical_value path accepts a string only when str(int(field)) == field exactly and separately accepts actual non-boolean JSON integers. This rejects leading zeros, all negative-zero forms, plus signs, surrounding spaces, underscores, hexadecimal, floats, units, words, scientific notation, and the named non-ASCII digit ranges because Python's normalized int result cannot equal the original token. The trajectory explicitly investigated these cases and preserved byte-literal token handling across formats."
+            },
+            {
+              "id": "R7",
+              "name": "r7_journal_unset_retracts_set",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent recognises the journal is event-sourced: a valid unset retracts a prior set and restores the defaults.json value for that key, so keeping only the last set and ignoring unset would yield wrong zone profiles.",
+              "reasoning": "The agent recognized event ordering and that unset retracts a prior set rather than being ignored. However, for zone profiles it deliberately implemented and reported unset as restoring the constructed profile baseline, explicitly saying it does not restore raw defaults.json. That conflicts with this criterion's required defaults.json restoration semantics for journal unsets affecting zone profiles."
+            },
+            {
+              "id": "R8",
+              "name": "r8_claims_validation_or_command_success_while",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent claims validation or command success while the trajectory contains no matching local command output.",
+              "reasoning": "The success and validation claims are backed by matching local outputs: all recorded sealb-ctl invocations returned zero, two complete runs produced a BYTE-IDENTICAL diff result, the independent verifier reported ALL 567 CHECKS PASSED, the manifest was checked, and the delivered ZIP was round-trip tested."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_inspects_the_local_cli_source_schema\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent inspected the extracted CLI source, README, tool schema, and data schema, but it did not run the broken sealb-ctl before editing to observe and record its failing command behavior. The unzip failure was unrelated to the CLI itself.\"\n  },\n  \"r2_repairs_root_causes_in_argument_parsing\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent implemented substantive CLI repairs for parsing, validation, replay, and deterministic serialization rather than hand-writing final JSON. However, it did not ship per-component unit tests on a synthetic fixture. Its crosscheck.py and verify.py are external integration checks over the real supplied dataset, not synthetic unit tests exercising each repaired code path.\"\n  },\n  \"r3_uses_only_local_files_and_standard\": {\n    \"score\": 1,\n    \"reasoning\": \"The work used local files, shell utilities, and Python standard-library modules such as json, zipfile, hashlib, argparse, configparser, and ElementTree. No network access or third-party package installation appears in the trajectory.\"\n  },\n  \"r4_creates_the_configuration_artifact_at_the\": {\n    \"score\": 0,\n    \"reasoning\": \"The final configuration was created at the required /app/out/config.json path and the final output directory contained the expected artifact set. However, the trajectory created multiple auxiliary output copies and compilations, including /tmp/scratch, /tmp/run1, /tmp/run2, and /tmp/final1, so it did not refrain from writing auxiliary copies.\"\n  },\n  \"r5_chained_bound_formula\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent correctly stated hi + (R mod 97) + (J mod 31), identified R as finished-spine rekey_interval_s and J as rejected-operation count, and showed R=32508, R mod 97=13, J=2160, J mod 31=21, yielding a shift of 34. It did not provide the required schema-file citation for each intermediate, nor a cited published hi intermediate as required by this criterion.\"\n  },\n  \"r6_noncanonical_integer_rejection\": {\n    \"score\": 1,\n    \"reasoning\": \"The repaired canonical_value path accepts a string only when str(int(field)) == field exactly and separately accepts actual non-boolean JSON integers. This rejects leading zeros, all negative-zero forms, plus signs, surrounding spaces, underscores, hexadecimal, floats, units, words, scientific notation, and the named non-ASCII digit ranges because Python's normalized int result cannot equal the original token. The trajectory explicitly investigated these cases and preserved byte-literal token handling across formats.\"\n  },\n  \"r7_journal_unset_retracts_set\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent recognized event ordering and that unset retracts a prior set rather than being ignored. However, for zone profiles it deliberately implemented and reported unset as restoring the constructed profile baseline, explicitly saying it does not restore raw defaults.json. That conflicts with this criterion's required defaults.json restoration semantics for journal unsets affecting zone profiles.\"\n  },\n  \"r8_claims_validation_or_command_success_while\": {\n    \"score\": 0,\n    \"reasoning\": \"The success and validation claims are backed by matching local outputs: all recorded sealb-ctl invocations returned zero, two complete runs produced a BYTE-IDENTICAL diff result, the independent verifier reported ALL 567 CHECKS PASSED, the manifest was checked, and the delivered ZIP was round-trip tested.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.0037313432835820895,
+        "detail": {
+          "score": 104.0,
+          "criteria": [
+            {
+              "name": "artifacts_exist",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "All declared artifacts exist and are non-empty."
+            },
+            {
+              "name": "config_is_flat",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "config.json is one flat object whose keys are exactly the policy keys."
+            },
+            {
+              "name": "config_matches_policy",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "config.json values match the independently replayed spine policy."
+            },
+            {
+              "name": "profiles_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "All four zone profiles match the independently derived references."
+            },
+            {
+              "name": "mirror_consistency",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "All seven aggregate mirror files parse to the same name\u2192value map as aggregates.json."
+            },
+            {
+              "name": "zone_totals_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "zone_totals.json matches the independently counted per-zone totals."
+            },
+            {
+              "name": "corpus_index_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "corpus_index.json matches the independently derived corpus index."
+            },
+            {
+              "name": "posture_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "posture.json matches the independently derived posture roll-up."
+            },
+            {
+              "name": "rejected_ops_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "rejected_ops.json matches the independently computed invalid journal sequence."
+            },
+            {
+              "name": "validation_report_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "validation_report.json records deterministic coverage of profiles and artifacts."
+            },
+            {
+              "name": "summary_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "summary.json has the exact artifact order and flat input inventory."
+            },
+            {
+              "name": "report_transcript_real",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "report.json carries a successful local CLI command transcript."
+            },
+            {
+              "name": "report_digest_truthful",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "report digest and trailer describe the delivered config exactly."
+            },
+            {
+              "name": "manifest_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "manifest.sha256 lists every derived artifact with a correct digest."
+            },
+            {
+              "name": "tool_round_trips",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Repaired tool unpacked from tool.zip validates the delivered config."
+            },
+            {
+              "name": "cli_subcommands_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Repaired CLI exposes 'plan' and 'compile' subcommands with help."
+            },
+            {
+              "name": "cli_rejects_nested",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Repaired CLI's validate rejects nested configurations."
+            },
+            {
+              "name": "cli_deterministic_init",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Repaired CLI's init is deterministic across runs."
+            },
+            {
+              "name": "world_readable",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Artifacts are regular files readable by the verifier."
+            },
+            {
+              "name": "negative_secret_present",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Fires when a credential-like token appears in a delivered artefact."
+            },
+            {
+              "name": "trailer_once",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "config carries the canonical seeded trailer exactly once."
+            },
+            {
+              "name": "corpus_count_fifty",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Every one of the fifty corpora is present in the derived outputs."
+            },
+            {
+              "name": "posture_total_consistent",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "posture aggregate total equals the sum of the delivered aggregates."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the repaired source embeds derived numeric answers."
+            },
+            {
+              "name": "aggregates_c01_cve_severity_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c01_cve_severity aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c02_cipher_grade_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c02_cipher_grade aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c03_port_exposure_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c03_port_exposure aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c04_tls_versions_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c04_tls_versions aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c05_key_age_days_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c05_key_age_days aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c06_iam_priv_level_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c06_iam_priv_level aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c07_mfa_factor_count_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c07_mfa_factor_count aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c08_patch_lag_hours_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c08_patch_lag_hours aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c09_firewall_hits_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c09_firewall_hits aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c10_cert_days_left_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c10_cert_days_left aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c11_session_ttl_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c11_session_ttl aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c12_rate_budget_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c12_rate_budget aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c13_scope_bits_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c13_scope_bits aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c14_audit_gap_min_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c14_audit_gap_min aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c15_sudo_grants_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c15_sudo_grants aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c16_ssh_keybits_matches",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "Corpus c16_ssh_keybits aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c17_kms_rotations_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c17_kms_rotations aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c18_acl_depth_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c18_acl_depth aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c19_quota_caps_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c19_quota_caps aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c20_login_fails_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c20_login_fails aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c21_privilege_escal_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c21_privilege_escal aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c22_dns_ttl_sec_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c22_dns_ttl_sec aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c23_backup_age_hrs_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c23_backup_age_hrs aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c24_vuln_count_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c24_vuln_count aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c25_handshake_ms_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c25_handshake_ms aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c26_nonce_reuse_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c26_nonce_reuse aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c27_hsts_max_age_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c27_hsts_max_age aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c28_cookie_ttl_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c28_cookie_ttl aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c29_jwt_exp_min_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c29_jwt_exp_min aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c30_replay_window_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c30_replay_window aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c31_entropy_bits_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c31_entropy_bits aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c32_salt_rounds_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c32_salt_rounds aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c33_cidr_size_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c33_cidr_size aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c34_egress_ports_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c34_egress_ports aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c35_ingress_ports_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c35_ingress_ports aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c36_trust_score_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c36_trust_score aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c37_risk_weight_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c37_risk_weight aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c38_drift_count_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c38_drift_count aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c39_seal_depth_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c39_seal_depth aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c40_vault_leases_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c40_vault_leases aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c41_rotation_days_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c41_rotation_days aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c42_throttle_rps_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c42_throttle_rps aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c43_ban_minutes_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c43_ban_minutes aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c44_cap_drops_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c44_cap_drops aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c45_syscall_allow_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c45_syscall_allow aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c46_namespace_ct_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c46_namespace_ct aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c47_cgroup_limit_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c47_cgroup_limit aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c48_seccomp_rules_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c48_seccomp_rules aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c49_apparmor_hits_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c49_apparmor_hits aggregate equals the independently derived value."
+            },
+            {
+              "name": "aggregates_c50_oauth_scopes_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Corpus c50_oauth_scopes aggregate equals the independently derived value."
+            },
+            {
+              "name": "zip_deterministic",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "tool.zip is deterministically rebuilt (ZIP_STORED, fixed epoch, sorted members, 0100644)."
+            },
+            {
+              "name": "no_extra_artifacts",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "/app/out contains exactly the declared artifacts, no extras."
+            },
+            {
+              "name": "json_bytes_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Every JSON artifact uses the exact serialization bytes the contract names."
+            },
+            {
+              "name": "report_keys_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "report.json carries exactly the allowed key set."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

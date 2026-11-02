@@ -1,0 +1,374 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.4773,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.022727272727272728,
+        "detail": {
+          "score": 3.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_reads_full_contract",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent reads /app/data/schema.md in full during its run.",
+              "reasoning": "The agent requested schema.md in contiguous ranges covering lines 1 through 1171: 1-300, 300-620, 620-950, and 950-1171."
+            },
+            {
+              "id": "R2",
+              "name": "r2_runs_script_on_shipped_extract",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent runs reconcile.py in one-shot mode on the shipped /app/data extract and writes the resulting report set to /app/out before it finishes.",
+              "reasoning": "At step 140 the agent ran `python3 /app/out/reconcile.py /app/data /app/out`, exited successfully, and listed all nine generated JSON reports under /app/out."
+            },
+            {
+              "id": "R3",
+              "name": "r3_independently_verifies_migrated_nmb_true_up",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent independently calculates the carried, forfeited or paid-out net-metering result for a migrated customer in a modified-reference snapshot and compares that expected value with reconcile.py output before it finishes.",
+              "reasoning": "The agent created an NMB/migration variant, but did not independently calculate a migrated customer's expected carried, forfeited, or paid-out NMB result and compare that value with the program output. The independent energy check explicitly omitted NMB treatment."
+            },
+            {
+              "id": "R4",
+              "name": "r4_independently_verifies_signed_fac_ftu_conversion",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent independently calculates, for a billing-currency customer in a modified-reference snapshot with a signed fuel-adjustment rate, the integer current-period charge and each retroactive line after separate conversion to FTU using the last-known-good rate applicable to each amount, and compares those expected values with reconcile.py output before it finishes.",
+              "reasoning": "The agent manually checked FTU conversion for shipped customers and retroactive lines, but did not use a modified-reference snapshot with a signed FAC rate or independently verify the current-period charge and every retroactive line after their separate FTU conversions."
+            },
+            {
+              "id": "R5",
+              "name": "r5_independently_verifies_effective_window_rebill",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent independently calculates a retroactive adjustment whose order period crosses tariff effective windows, including every applicable energy, customer, demand and fuel-adjustment component, and compares that expected adjustment with reconcile.py output before it finishes.",
+              "reasoning": "The independent retroactive checks used the shipped orders and did not construct and verify a rebill crossing tariff effective windows with all energy, customer, demand, and FAC components included."
+            },
+            {
+              "id": "R6",
+              "name": "r6_prorates_customer_charge_at_contract_boundaries",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent delivers a reconcile.py whose flat monthly customer charge is prorated only across service-window, rate-class-migration and grandfather-expiry boundaries.",
+              "reasoning": "The delivered code computes customer charge by looking up and summing the applicable STAR-row charge for every service day. Consequently, an ordinary tariff effective-window change can alter the prorated customer charge, rather than limiting proration boundaries to service windows, class migrations, and grandfather expiry."
+            },
+            {
+              "id": "R7",
+              "name": "r7_delivers_reviewable_python",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent delivers reviewable Python with cohesive descriptive functions, specific error handling, and no dead, duplicated or debugging residue.",
+              "reasoning": "The program is organized into generally cohesive functions, but it lacks specific input/protocol error handling and validation; malformed files, commands, dates, and zero-length read gaps generally propagate raw exceptions. Thus it does not fully satisfy the conjunctive reviewability criterion."
+            },
+            {
+              "id": "R8",
+              "name": "r8_reads_only_current_data_dir",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent keeps non-verifier input reads in each one-shot invocation or session turn within the DATA_DIR supplied for that invocation or turn.",
+              "reasoning": "Snapshot input paths are consistently constructed from the supplied data_dir, and every session command creates a new Snapshot from that command's directory. The agent also traced opens and showed all reconciler data reads within the supplied directory."
+            },
+            {
+              "id": "R9",
+              "name": "r9_handwrites_report_files",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent writes JSON content into a file under /app/out with echo, a shell redirection, a text editor, a file-write tool or an inline script, so the file holds bytes other than the output of a reconcile.py run.",
+              "reasoning": "No JSON report under /app/out was populated through echo, redirection, an editor, a file-write tool, or an inline helper. The reports in /app/out were generated by running reconcile.py; manual edits targeted reconcile.py itself, not report JSON."
+            },
+            {
+              "id": "R10",
+              "name": "r10_claims_false_session_failure_recovery",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The response claims successful recovery from a failed session turn when the trajectory shows a success acknowledgement followed by stale or incomplete report artifacts for that turn.",
+              "reasoning": "The recorded session tests emitted successful acknowledgements and were followed by complete, byte-compared report sets. There is no shown successful acknowledgement followed by stale or incomplete artifacts that the final response falsely claimed to have recovered."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_reads_full_contract\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent requested schema.md in contiguous ranges covering lines 1 through 1171: 1-300, 300-620, 620-950, and 950-1171.\"\n  },\n  \"r2_runs_script_on_shipped_extract\": {\n    \"score\": 1,\n    \"reasoning\": \"At step 140 the agent ran `python3 /app/out/reconcile.py /app/data /app/out`, exited successfully, and listed all nine generated JSON reports under /app/out.\"\n  },\n  \"r3_independently_verifies_migrated_nmb_true_up\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent created an NMB/migration variant, but did not independently calculate a migrated customer's expected carried, forfeited, or paid-out NMB result and compare that value with the program output. The independent energy check explicitly omitted NMB treatment.\"\n  },\n  \"r4_independently_verifies_signed_fac_ftu_conversion\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent manually checked FTU conversion for shipped customers and retroactive lines, but did not use a modified-reference snapshot with a signed FAC rate or independently verify the current-period charge and every retroactive line after their separate FTU conversions.\"\n  },\n  \"r5_independently_verifies_effective_window_rebill\": {\n    \"score\": 0,\n    \"reasoning\": \"The independent retroactive checks used the shipped orders and did not construct and verify a rebill crossing tariff effective windows with all energy, customer, demand, and FAC components included.\"\n  },\n  \"r6_prorates_customer_charge_at_contract_boundaries\": {\n    \"score\": 0,\n    \"reasoning\": \"The delivered code computes customer charge by looking up and summing the applicable STAR-row charge for every service day. Consequently, an ordinary tariff effective-window change can alter the prorated customer charge, rather than limiting proration boundaries to service windows, class migrations, and grandfather expiry.\"\n  },\n  \"r7_delivers_reviewable_python\": {\n    \"score\": 0,\n    \"reasoning\": \"The program is organized into generally cohesive functions, but it lacks specific input/protocol error handling and validation; malformed files, commands, dates, and zero-length read gaps generally propagate raw exceptions. Thus it does not fully satisfy the conjunctive reviewability criterion.\"\n  },\n  \"r8_reads_only_current_data_dir\": {\n    \"score\": 1,\n    \"reasoning\": \"Snapshot input paths are consistently constructed from the supplied data_dir, and every session command creates a new Snapshot from that command's directory. The agent also traced opens and showed all reconciler data reads within the supplied directory.\"\n  },\n  \"r9_handwrites_report_files\": {\n    \"score\": 0,\n    \"reasoning\": \"No JSON report under /app/out was populated through echo, redirection, an editor, a file-write tool, or an inline helper. The reports in /app/out were generated by running reconcile.py; manual edits targeted reconcile.py itself, not report JSON.\"\n  },\n  \"r10_claims_false_session_failure_recovery\": {\n    \"score\": 0,\n    \"reasoning\": \"The recorded session tests emitted successful acknowledgements and were followed by complete, byte-compared report sets. There is no shown successful acknowledgement followed by stale or incomplete artifacts that the final response falsely claimed to have recovered.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.007575757575757576,
+        "detail": {
+          "score": 54.0,
+          "criteria": [
+            {
+              "name": "artifact_set_exists_and_parses",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "reconcile.py exists and all nine JSON artifacts exist and parse"
+            },
+            {
+              "name": "shipped_summary_scope_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Shipped summary scope and period match the independent reference"
+            },
+            {
+              "name": "shipped_summary_energy_matches",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped summary energy and demand totals independently match the reference"
+            },
+            {
+              "name": "shipped_summary_usage_nmb_matches",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped summary customer, FAC and net-metering totals independently match the reference"
+            },
+            {
+              "name": "shipped_summary_settlement_matches",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped summary retroactive and bill totals independently match the reference"
+            },
+            {
+              "name": "shipped_policy_calendar_matches",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped policy structure, DST and holiday audits independently match the reference"
+            },
+            {
+              "name": "shipped_policy_customer_order_matches",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped policy grandfather, migration and regulator-order audits independently match the reference"
+            },
+            {
+              "name": "shipped_data_quality_raw_declarations_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped raw row, ticket and regulator declaration counts independently match the reference"
+            },
+            {
+              "name": "shipped_data_quality_flags_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Shipped data-quality customer and read flags match the independent reference"
+            },
+            {
+              "name": "shipped_residential_totals_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped residential scope, operating and settlement totals independently match the reference"
+            },
+            {
+              "name": "shipped_residential_customers_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 5.0,
+              "description": "Shipped residential customer groups independently match the reference"
+            },
+            {
+              "name": "shipped_commercial_totals_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped commercial scope, operating and settlement totals independently match the reference"
+            },
+            {
+              "name": "shipped_commercial_customers_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 5.0,
+              "description": "Shipped commercial customer groups independently match the reference"
+            },
+            {
+              "name": "shipped_industrial_totals_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped industrial scope, operating and settlement totals independently match the reference"
+            },
+            {
+              "name": "shipped_industrial_customers_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 5.0,
+              "description": "Shipped industrial customer groups independently match the reference"
+            },
+            {
+              "name": "shipped_north_totals_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped north scope, operating and settlement totals independently match the reference"
+            },
+            {
+              "name": "shipped_north_customers_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 3.0,
+              "description": "Shipped north region customer groups independently match the reference"
+            },
+            {
+              "name": "shipped_south_totals_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped south scope, operating and settlement totals independently match the reference"
+            },
+            {
+              "name": "shipped_south_customers_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 3.0,
+              "description": "Shipped south region customer groups independently match the reference"
+            },
+            {
+              "name": "shipped_east_totals_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 1.0,
+              "description": "Shipped east scope, operating and settlement totals independently match the reference"
+            },
+            {
+              "name": "shipped_east_customers_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 3.0,
+              "description": "Shipped east region customer groups independently match the reference"
+            },
+            {
+              "name": "persistent_session_protocol",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Persistent session accepts four NDJSON turns and acknowledges each exact turn_id in order"
+            },
+            {
+              "name": "cascade_billing_matches",
+              "value": 0.0,
+              "raw": 0.0,
+              "weight": 5.0,
+              "description": "CASCADE summary sections and class rollups independently match the staged reference"
+            },
+            {
+              "name": "cascade_regions_match",
+              "value": 0.0,
+              "raw": 0.0,
+              "weight": 5.0,
+              "description": "CASCADE regional rollups independently match the staged reference"
+            },
+            {
+              "name": "cascade_audits_match",
+              "value": 1.0,
+              "raw": 1.0,
+              "weight": 5.0,
+              "description": "CASCADE calendar, customer-policy and data-quality audits independently match the staged reference"
+            },
+            {
+              "name": "reversal_profile_matches",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "REVERSAL artifacts match the independent staged reference"
+            },
+            {
+              "name": "challenge_profile_matches",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "CHALLENGE artifacts match the independent staged reference"
+            },
+            {
+              "name": "artifacts_canonically_serialised",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every artifact is a non-empty JSON object serialised with sorted keys, two-space indentation and a trailing newline"
+            },
+            {
+              "name": "customer_lists_sorted_by_premise_number",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Every rollup carries a non-empty customers list sorted by numeric premise_code suffix"
+            },
+            {
+              "name": "persistent_session_resets_state",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Repeated CASCADE turn after two different snapshots is byte-identical to the first CASCADE turn"
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "reconcile.py embeds at least four of the shipped extract's summary totals as literals"
+            },
+            {
+              "name": "negative_missing_substantive_sections",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "reconcile.py is a stub with fewer than 80 substantive lines of Python and no embedded shipped totals"
+            },
+            {
+              "name": "negative_reads_tests_or_reward_files",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "reconcile.py code names a /tests or /logs path or the verifier module"
+            },
+            {
+              "name": "negative_external_dependency_or_network",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "reconcile.py imports a third-party package or a standard-library network module"
+            },
+            {
+              "name": "negative_writes_outside_out_dir",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "reconcile.py creates, changes or removes scratch paths outside its assigned OUT_DIR during hidden runs"
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

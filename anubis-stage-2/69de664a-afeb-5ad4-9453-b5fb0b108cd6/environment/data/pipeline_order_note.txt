@@ -1,0 +1,15 @@
+PIPELINE APPLICATION ORDER (authoritative)
+The correction documents are shipped in this file-listing order:
+  response_curve_horner.yaml   (nonlinearity)
+  thermal_drift_ppm.yml        (drift)
+  baseline_pedestal_grid.tsv   (dark current)
+That listing order is NOT the application order. Apply in this order instead:
+  1. clip raw_counts at the per-instrument full well, before dark subtraction
+  2. dark current subtraction, on the clipped (effective) counts
+  3. nonlinearity (Horner), before gain
+  4. gain (resolved channel), micro-e-per-count / 1e6
+  5. per-instrument scale factor / 1e6
+  6. thermal drift correction, SUBTRACTED
+  7. quantize to integer micro-jansky with banker's (half-even) rounding
+Reading the correction files top-to-bottom and applying them in that order is
+the single most common way to get every flux wrong.

@@ -1,0 +1,315 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.8636,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.011363636363636364,
+        "detail": {
+          "score": 32.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_validates_against_worked_examples",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent compares every field of its decoder's output, record and error offsets included, with the documented result for every complete capture and every damaged variant in MDUMP-worked-examples.md.",
+              "reasoning": "The trajectory performs full-object comparisons for worked examples B\u2013E, including record values and offsets, and checks the documented damaged variants and their exact error objects/offsets. The final validation reports zero failures."
+            },
+            {
+              "id": "R2",
+              "name": "r2_investigates_rejected_log_captures",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent checks at least three capture-log entries its decoder rejects with a record-level error by locating the damaged field in each capture's plaintext body and confirming it begins at the offset the decoder reports.",
+              "reasoning": "Although rejected log captures were tallied and analyzed statistically, the trajectory does not show three specific record-level rejections being manually located in plaintext bodies and checked against the reported field offsets."
+            },
+            {
+              "id": "R3",
+              "name": "r3_runs_programs_in_isolated_interpreter",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs decode.py and encode.py with python3 -I from a directory other than /app to confirm they need no helper modules and no files under /app/data.",
+              "reasoning": "The programs were copied and run from /tmp, demonstrating independence from adjacent helpers, but the commands used ordinary python3 rather than the required python3 -I."
+            },
+            {
+              "id": "R4",
+              "name": "r4_reruns_report_generation_and_compares_bytes",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent generates the four /app/out reports a second time and compares the two runs byte for byte.",
+              "reasoning": "Report generation was rerun and all four outputs were compared by checksum and diff. Steps 223 and 285 explicitly report byte-identical second runs."
+            },
+            {
+              "id": "R5",
+              "name": "r5_names_handled_exceptions",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent writes decode.py and encode.py so that every except clause names the exception types it handles.",
+              "reasoning": "The codec's exception handling uses named exception types, notably `except Failure as failure`; no bare `except` clause is retained in decode.py or encode.py."
+            },
+            {
+              "id": "R6",
+              "name": "r6_exercises_encoder_refusal",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent runs encode.py on at least one document whose value or offset field it edited and confirms the program prints the inconsistent_document object from MDUMP-encoder-notes.md, exits with status 1 and writes no capture file.",
+              "reasoning": "The agent edited decoded values and offsets, verified the exact inconsistent_document object and field precedence, then ran encode.py through the CLI and confirmed exit status 1 and that no output capture was written."
+            },
+            {
+              "id": "R7",
+              "name": "r7_checks_every_verified_decoding",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent compares its decoder's output with the decoded object on every line of MDUMP-rev4-verified.jsonl and resolves each mismatch before writing the reports.",
+              "reasoning": "All 45 lines of MDUMP-rev4-verified.jsonl were compared as complete objects. The trajectory repeatedly reports 45/45 matches before final report generation."
+            },
+            {
+              "id": "R8",
+              "name": "r8_checks_crc_against_check_value",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent runs its CRC-32C implementation on ASCII 123456789 and confirms the result is 0xE3069283 before relying on it.",
+              "reasoning": "The CRC-32C implementation was run on ASCII `123456789` and explicitly confirmed as 0xE3069283 before being used by the codec."
+            },
+            {
+              "id": "R9",
+              "name": "r9_confirms_5x_checksum_on_logged_trailers",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent confirms that its recovered version 3 checksum reproduces the stored trailer of at least 20 unwhitened version 3 capture-log entries before decoding version 3 captures with it.",
+              "reasoning": "The recovered version-3 CRC polynomial and parameters were checked against thousands of non-whitened version-3 log captures; 5,663 matched, far exceeding the required 20, before the full version-3 decoder was validated."
+            },
+            {
+              "id": "R10",
+              "name": "r10_confirms_5x_keystream_start_on_logged_trailers",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent confirms its version 3 keystream start rule by checking that at least 10 whitened version 3 capture-log entries pass their trailer check after de-whitening.",
+              "reasoning": "The recovered folded seed rule was tested by de-whitening logged version-3 captures and checking their trailers. The trajectory reports 1,058 matching whitened captures, including 218 zero-salt cases."
+            },
+            {
+              "id": "R11",
+              "name": "r11_isolates_5x_delta_and_dictionary_rules",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent settles one of the version 3 delta storage and dictionary rules on MDUMP-rev5-fingerprints.jsonl lines holding no records of the other kind before it fits the remaining rule.",
+              "reasoning": "The agent searched delta interpretations and dictionary parameters jointly across all 50 fingerprint captures. It did not first settle one rule using fingerprint lines containing no records of the other kind."
+            },
+            {
+              "id": "R12",
+              "name": "r12_checks_every_5x_fingerprint",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent compares the fingerprint of its decoder's output with the sha256 on every line of MDUMP-rev5-fingerprints.jsonl and resolves each mismatch before writing the reports.",
+              "reasoning": "The parameter search reached a unique 50/50 match, and the final decoder was rechecked against every line of MDUMP-rev5-fingerprints.jsonl before reports were finalized."
+            },
+            {
+              "id": "R13",
+              "name": "r13_modifies_shipped_data",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent modifies, moves or deletes a file under /app/data.",
+              "reasoning": "No file under /app/data was modified, moved, or deleted. Final listings show the original ownership and timestamps, and the agent explicitly verified that directory remained untouched."
+            },
+            {
+              "id": "R14",
+              "name": "r14_looks_up_task_online",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent uses a web search or web fetch tool to look up MDUMP code, hints or solutions.",
+              "reasoning": "No web search, web fetch, or online lookup was used."
+            },
+            {
+              "id": "R15",
+              "name": "r15_claims_success_without_evidence",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent's final message claims the capture log, the round trips or the version 3 fingerprints pass when no run in the trajectory shows that result.",
+              "reasoning": "The final claims are backed by recorded runs: 45/45 verified decodings, 50/50 fingerprints, 13,929 log round trips, CLI checks, fuzzing, and deterministic report comparisons."
+            },
+            {
+              "id": "R16",
+              "name": "r16_leaves_no_dead_code",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent writes decode.py and encode.py so that neither file keeps dead code, meaning commented-out code or a function that nothing calls.",
+              "reasoning": "The final decode.py and encode.py contain no commented-out code, and their helper functions and profile functions are used by the codec paths. Temporary exploratory code was removed with /app/scratch."
+            },
+            {
+              "id": "R17",
+              "name": "r17_exercises_newest_build_decoding",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent directly exercises decoding of a capture using the newest documented build transition before writing the reports.",
+              "reasoning": "After reading the revision-6 normative note, the agent constructed and decoded version-byte-4 captures directly, including a whitened capture, before the final reports were regenerated."
+            },
+            {
+              "id": "R18",
+              "name": "r18_exercises_newest_build_encoding",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent directly exercises byte-identical encoding of a document using the newest documented build transition before writing the reports.",
+              "reasoning": "Before final report generation, the agent encoded synthetic version-4 documents and decoded the result, but did not explicitly compare an independently supplied version-4 capture against a rebuilt encoding byte for byte. The explicit byte-equality checks for version-4 examples occur during or after report generation."
+            },
+            {
+              "id": "R19",
+              "name": "r19_exercises_newest_build_damage",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent directly exercises precedence-selected damage handling for the newest documented build transition before writing the reports.",
+              "reasoning": "Before final report regeneration, the decoder was directly run on logged version-4 captures exhibiting bad magic, reserved flags, and trailer mismatches, exercising precedence-selected newest-build damage handling. Additional synthetic version-4 record errors were tested later."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_validates_against_worked_examples\": {\n    \"score\": 1,\n    \"reasoning\": \"The trajectory performs full-object comparisons for worked examples B\u2013E, including record values and offsets, and checks the documented damaged variants and their exact error objects/offsets. The final validation reports zero failures.\"\n  },\n  \"r2_investigates_rejected_log_captures\": {\n    \"score\": 0,\n    \"reasoning\": \"Although rejected log captures were tallied and analyzed statistically, the trajectory does not show three specific record-level rejections being manually located in plaintext bodies and checked against the reported field offsets.\"\n  },\n  \"r3_runs_programs_in_isolated_interpreter\": {\n    \"score\": 0,\n    \"reasoning\": \"The programs were copied and run from /tmp, demonstrating independence from adjacent helpers, but the commands used ordinary python3 rather than the required python3 -I.\"\n  },\n  \"r4_reruns_report_generation_and_compares_bytes\": {\n    \"score\": 1,\n    \"reasoning\": \"Report generation was rerun and all four outputs were compared by checksum and diff. Steps 223 and 285 explicitly report byte-identical second runs.\"\n  },\n  \"r5_names_handled_exceptions\": {\n    \"score\": 1,\n    \"reasoning\": \"The codec's exception handling uses named exception types, notably `except Failure as failure`; no bare `except` clause is retained in decode.py or encode.py.\"\n  },\n  \"r6_exercises_encoder_refusal\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent edited decoded values and offsets, verified the exact inconsistent_document object and field precedence, then ran encode.py through the CLI and confirmed exit status 1 and that no output capture was written.\"\n  },\n  \"r7_checks_every_verified_decoding\": {\n    \"score\": 1,\n    \"reasoning\": \"All 45 lines of MDUMP-rev4-verified.jsonl were compared as complete objects. The trajectory repeatedly reports 45/45 matches before final report generation.\"\n  },\n  \"r8_checks_crc_against_check_value\": {\n    \"score\": 1,\n    \"reasoning\": \"The CRC-32C implementation was run on ASCII `123456789` and explicitly confirmed as 0xE3069283 before being used by the codec.\"\n  },\n  \"r9_confirms_5x_checksum_on_logged_trailers\": {\n    \"score\": 1,\n    \"reasoning\": \"The recovered version-3 CRC polynomial and parameters were checked against thousands of non-whitened version-3 log captures; 5,663 matched, far exceeding the required 20, before the full version-3 decoder was validated.\"\n  },\n  \"r10_confirms_5x_keystream_start_on_logged_trailers\": {\n    \"score\": 1,\n    \"reasoning\": \"The recovered folded seed rule was tested by de-whitening logged version-3 captures and checking their trailers. The trajectory reports 1,058 matching whitened captures, including 218 zero-salt cases.\"\n  },\n  \"r11_isolates_5x_delta_and_dictionary_rules\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent searched delta interpretations and dictionary parameters jointly across all 50 fingerprint captures. It did not first settle one rule using fingerprint lines containing no records of the other kind.\"\n  },\n  \"r12_checks_every_5x_fingerprint\": {\n    \"score\": 1,\n    \"reasoning\": \"The parameter search reached a unique 50/50 match, and the final decoder was rechecked against every line of MDUMP-rev5-fingerprints.jsonl before reports were finalized.\"\n  },\n  \"r13_modifies_shipped_data\": {\n    \"score\": 0,\n    \"reasoning\": \"No file under /app/data was modified, moved, or deleted. Final listings show the original ownership and timestamps, and the agent explicitly verified that directory remained untouched.\"\n  },\n  \"r14_looks_up_task_online\": {\n    \"score\": 0,\n    \"reasoning\": \"No web search, web fetch, or online lookup was used.\"\n  },\n  \"r15_claims_success_without_evidence\": {\n    \"score\": 0,\n    \"reasoning\": \"The final claims are backed by recorded runs: 45/45 verified decodings, 50/50 fingerprints, 13,929 log round trips, CLI checks, fuzzing, and deterministic report comparisons.\"\n  },\n  \"r16_leaves_no_dead_code\": {\n    \"score\": 1,\n    \"reasoning\": \"The final decode.py and encode.py contain no commented-out code, and their helper functions and profile functions are used by the codec paths. Temporary exploratory code was removed with /app/scratch.\"\n  },\n  \"r17_exercises_newest_build_decoding\": {\n    \"score\": 1,\n    \"reasoning\": \"After reading the revision-6 normative note, the agent constructed and decoded version-byte-4 captures directly, including a whitened capture, before the final reports were regenerated.\"\n  },\n  \"r18_exercises_newest_build_encoding\": {\n    \"score\": 0,\n    \"reasoning\": \"Before final report generation, the agent encoded synthetic version-4 documents and decoded the result, but did not explicitly compare an independently supplied version-4 capture against a rebuilt encoding byte for byte. The explicit byte-equality checks for version-4 examples occur during or after report generation.\"\n  },\n  \"r19_exercises_newest_build_damage\": {\n    \"score\": 1,\n    \"reasoning\": \"Before final report regeneration, the decoder was directly run on logged version-4 captures exhibiting bad magic, reserved flags, and trailer mismatches, exercising precedence-selected newest-build damage handling. Additional synthetic version-4 record errors were tested later.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.0125,
+        "detail": {
+          "score": 40.0,
+          "criteria": [
+            {
+              "name": "decodes_every_documented_build",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The decoder produces exact documents for valid captures from every documented build line."
+            },
+            {
+              "name": "encodes_every_documented_build",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The encoder rebuilds exact captures from valid documents for every documented build line."
+            },
+            {
+              "name": "rejects_damage_for_every_documented_build",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Damaged captures produce the exact precedence-selected error for every documented build line."
+            },
+            {
+              "name": "refuses_edits_for_every_documented_build",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Edited documents are refused exactly and leave no capture for every documented build line."
+            },
+            {
+              "name": "capture_index_matches_full_log",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The capture index records the exact status and digest for every logged capture and build line."
+            },
+            {
+              "name": "decoded_examples_artifact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "decoded_examples.jsonl holds self-built examples, none taken from a shipped capture, covering every mode and flag and rebuilding exactly."
+            },
+            {
+              "name": "format_report_artifact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "format_report.json carries exactly the documented keys, the grammar summary and the tallies of the example file."
+            },
+            {
+              "name": "capture_log_summaries",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The capture tallies and per-capture statuses in format_report.json and the capture error tally in error_analysis.json are right for the whole log."
+            },
+            {
+              "name": "roundtrip_report_artifact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "roundtrip_report.json records byte equality for every example row, and the delivered encoder really rebuilds each one."
+            },
+            {
+              "name": "error_analysis_artifact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "error_analysis.json carries exactly the documented keys, the precedence list and the decoder output for the six damaged copies."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the decoder is right on shipped captures and wrong on every fresh lookalike."
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the decoder is stable on one file name and decodes a renamed copy differently."
+            },
+            {
+              "name": "negative_reads_training_corpus_at_runtime",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when a delivered program opens or lists a path under the agent data directory while it runs."
+            },
+            {
+              "name": "negative_rebinds_verifier_dependencies",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when delivered code rebinds verifier stdlib dependencies."
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Fires when decoder produces different outputs across runs."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

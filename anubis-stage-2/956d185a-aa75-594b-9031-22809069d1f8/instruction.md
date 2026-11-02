@@ -1,0 +1,23 @@
+You are the policy convergence engineer for the offline deterministic policy compiler shipped as `sealb-ctl` inside `/app/data/tool.zip`. Everything you need is on disk under `/app/data/`. The derivation contract is `/app/data/config_contract.md` and it is the sole authority on how the spine, the four zone profiles, the fifty evidence corpora and the delivered byte-shape of every artifact are produced; the broken source archive for the tool itself is `/app/data/tool.zip`. Repair the tool so every subcommand runs, drive the pipeline through it, and deliver the end state below. Use only the Python standard library. You may not pip-install, fetch over the network, synthesise, or hand-write any value: every bit of every artifact must be derived from files already in `/app/data/`.
+
+Deliver all of these artifacts, byte-identical across repeated runs, each at the exact absolute path given:
+
+- `/app/out/config.json` - the finished scalar-flat spine, produced by driving the repaired CLI (not by writing JSON by hand).
+- `/app/out/profile_core.json`, `/app/out/profile_edge.json`, `/app/out/profile_dmz.json`, `/app/out/profile_mgmt.json` - the four per-zone scalar-flat profiles.
+- `/app/out/aggregates.json` - one derived integer per corpus, keyed by corpus name.
+- `/app/out/aggregates.csv`, `/app/out/aggregates.tsv`, `/app/out/aggregates.xml`, `/app/out/aggregates.ini`, `/app/out/aggregates.env`, `/app/out/aggregates.md`, `/app/out/aggregates.txt` - the aggregate map mirrored into each of the seven ancillary formats, corpora in sorted name order; the `.env` keys are the corpus names upper-cased.
+- `/app/out/zone_totals.json` - counted-row totals per active zone, aggregated across every corpus.
+- `/app/out/corpus_index.json` - a top-level `count` and a `corpora` list, each entry carrying `name`, `format`, `op`, `lo`, `hi`, `eligible_rows` and `value`.
+- `/app/out/posture.json` - `aggregate_total`, `corpus_count`, `max_corpus`, `max_value` (ties broken by the earlier corpus name) and `nonzero_corpora`.
+- `/app/out/rejected_ops.json` - a `rejected` list of every invalid journal operation and a `count`.
+- `/app/out/validation_report.json` - `ok` and `checks` covering `all_artifacts_present`, `config_matches_policy`, `config_scalar_flat`, `command_failures`, `rejected_ops`, per-zone `profiles` (each with `scalar_flat` and `trailer`), `corpus_count` and `aggregate_total`.
+- `/app/out/summary.json` - `tool`, `profile_tag`, `trailer`, `profiles`, `artifacts`, `artifact_count`, `inputs` (sorted names of every file under `/app/data/`), `input_count`, `corpus_count` and `aggregate_total`.
+- `/app/out/report.json` - emitted by the repaired tool's own CLI as its run record; it carries `ok`, `tool`, `config_path`, `config_sha256` (the sha256 hex of the delivered `/app/out/config.json` bytes), `trailer`, and `commands` (one object per CLI call, each with `argv`, `returncode` and `stdout`). No timestamps or run-dependent fields anywhere.
+- `/app/out/tool.zip` - the repaired tool, rebuilt so its sha256 is reproducible across repeated runs on the same inputs.
+- `/app/out/manifest.sha256` - one `<sha256>  <name>` line per delivered artifact except `tool.zip`, `report.json`, and `manifest.sha256` itself, names in sorted order.
+
+Honour every rule in `/app/data/config_contract.md`: how the spine is produced from the defaults, schema, validation rules and the journal; how each zone profile folds in `env_overrides.json`; how a journal operation is classified as valid or rejected; which journal operations drive which zone; what makes an evidence row countable; how each corpus's effective upper bound is derived; how each wire format is parsed; how each aggregation operator behaves when no row is counted; and the exact serialisation parameters for every JSON byte, every ZIP byte and the manifest. The contract carries the numeric offsets, the canonical-integer rule, the active zone names, the per-corpus bounds and operators, and the determinism requirements of every output. Nothing in `config_contract.md` is restated here; nothing outside it may be assumed. A manifest produced by `json.dumps(obj)` with default parameters will not match the contract.
+
+The configuration is flat scalars only: no nested dicts or lists in the spine or in any zone profile. The pipeline is offline and deterministic: no network access, no wall-clock timestamps, no random seeds, no reliance on dict insertion order. Running the pipeline twice on the same `/app/data/` must produce byte-identical `/app/out/` artifacts, and every artifact the manifest lists must match the sha256 recorded there.
+
+You have 7200 seconds to complete this task. Do not consult online solutions or hints specific to this task.

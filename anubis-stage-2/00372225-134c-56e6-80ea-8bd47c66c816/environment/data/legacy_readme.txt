@@ -1,0 +1,1 @@
+Legacy readme. This directory once shipped flat coefficient files and a single-sheet calibration csv. Those are retained only as superseded references; the current run reads the recalibration grid workbook and the governance envelope document.

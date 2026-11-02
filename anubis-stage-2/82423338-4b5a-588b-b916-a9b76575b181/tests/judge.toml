@@ -1,0 +1,276 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+# Judge conduct and reporting, not the deterministic verifier's exact answers.
+# R5-R14 require executed checks with visible inputs, observations and comparisons;
+# assertions, unexecuted test code and comparing a value with itself do not qualify.
+# No particular test framework is required. Isolated fixtures may be used without
+# modifying the original corpus. Credit the evidenced checking conduct, not an
+# answer-key match or merely the presence of a correct artifact.
+
+[[criterion]]
+id = "R1"
+name = "r1_reads_spec_before_writing"
+description = "The agent reads the shipped SPEC-STRATA.md before writing its first artifact."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_states_every_closing_figure"
+description = "The response supplies all twenty requested closing figures, each identified by name with a value. This criterion assesses completeness separately from answer-key equality; same-run contradictions belong only to R17."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_names_every_delivered_path"
+description = "The response lists all twenty-five delivered files at their absolute output paths."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_planner_argument_order"
+description = "The agent actually invokes the delivered planner with the corpus directory as its first argument and the output directory as its second, as documented in SPEC. An executed invocation is required; displayed commands and CLI contract text alone are insufficient."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_checks_canonical_equivalence"
+description = "The agent executes a canonical-equivalence check on at least two distinct raw forms that SPEC makes equivalent, such as composed versus decomposed Unicode or redundant path segments. Evidence identifies the distinct inputs, the independently justified common canonical expectation, the observed planner results and their comparison; normalising an already canonical value or comparing duplicate outputs alone is insufficient."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_checks_checkpoint_absence_vs_zero"
+description = "The agent executes a checkpoint check that distinguishes an absent committed size from an explicit zero for an extent with positive expected size. Evidence identifies the inputs, the SPEC-derived never_started versus zeroed expectations, and a comparison with observed planner results, rather than treating both inputs as false or merely quoting resume_state statuses."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_checks_symlink_cycle"
+description = "The agent executes a symlink-resolution check on a chain that closes into a cycle, comparing the observed resolution and hop count with an independently traced chain or a separately derived SPEC expectation. Evidence shows the links in the cycle and the expected traversal; copying the planner's own resolution or hop count into the expectation is insufficient."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_checks_symlink_hop_cap"
+description = "The agent executes a symlink-resolution check on a chain at the hop-cap boundary, comparing the observed resolution and hop count with an independently traced chain or a separately derived SPEC expectation. Evidence shows the links in the chain and the expected traversal; copying the planner's own resolution or hop count into the expectation is insufficient."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_checks_non_aligned_split_remainder"
+description = "The agent executes a split-copy check with an actual final remainder indivisible by the device allocation unit. Evidence shows the item size, device unit, window budgets and relevant admission state, derives the expected rounded intermediate chunks and unrounded fitting final remainder under SPEC, and compares these with observed planner chunks or residuals. An aligned-only example or an expectation derived solely by summing the planner's own chunks is insufficient."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R10"
+name = "r10_checks_cross_domain_ownership"
+description = "The agent executes a check of a physical identifier held across multiple destination share domains. Evidence independently derives the per-domain copy owners from relevant holders, primary paths, inodes and extent indexes under SPEC, then compares with observed planner ownership or attribution. Merely counting the copies or echoing sharing_expansion owners is insufficient. R12 separately owns device conservation recomputation."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "r11_checks_descriptor_reuse"
+description = "The agent executes a descriptor-reuse check with multiple copy items or placements of the same inode in the same device window. Evidence identifies those items and the window's admission state, independently expects one descriptor opening for that inode with reuse thereafter, and compares against observed placement flags or descriptor usage. Merely reading a descriptors_used field is insufficient."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "r12_recomputes_device_conservation"
+description = "The agent executes a per-device conservation recomputation from written component artifacts: attributed bytes minus scheduled, durable-resumed, reserved and deferred bytes. Evidence shows independently aggregated components and residuals for every device and comparison with conservation.json. Reading its residual or balanced-device fields alone, restating the identity, digest checks and repeated-run comparisons are insufficient. Assessment uses task evidence independently of an answer key."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R13"
+name = "r13_recomputes_written_artifact_digest"
+description = "The agent independently hashes the actual bytes of at least one written artifact outside the planner's digest-generation path and compares the SPEC-prescribed digest with its recorded manifest entry. Evidence identifies the artifact and both digest values or an executed comparison result. Trusting the manifest, hashing an in-memory object, conservation arithmetic and comparing two runs are insufficient."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R14"
+name = "r14_compares_actual_planner_runs"
+description = "The agent executes the delivered planner twice on unchanged inputs and compares preserved outputs from the two actual invocations for repeatability, using artifact bytes or independently computed output digests. Evidence identifies both executions and the comparison result. Comparing a directory with itself, copying one run as the second result, or checking one run only against its manifest is insufficient; the manifest check belongs to R13."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R15"
+name = "r15_planner_source_is_maintainable"
+description = "The agent delivers a Python planner that meets these maintainability standards: meaningful names, understandable decomposition, errors handled where it reads its arguments and corpus files, and an implementation free of dead or duplicated blocks of ten or more lines. Architecture, test-framework and stylistic preferences are outside this criterion, as is artifact correctness."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "state_change"
+importance = "important"
+
+[[criterion]]
+id = "R16"
+name = "r16_modifies_original_corpus"
+description = "The agent modifies, deletes or replaces files in the original shipped corpus. Changes to isolated test fixtures or corpus copies outside that original directory are excluded. Corpus preservation earns zero separate positive reward."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R17"
+name = "r17_closing_figure_contradicts_same_run"
+description = "The response gives a closing figure affirmatively contradicted by the delivered artifacts or tool results for that same delivered run. Identify the claimed figure and conflicting same-run evidence. Answer-key-only mismatches, missing evidence and obsolete intermediate runs are outside this criterion. R12-R14 separately own conservation, digest and repeatability checking conduct."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R18"
+name = "r18_claim_contradicted_by_tool_evidence"
+description = "The agent makes an execution or input-observation claim that tool evidence affirmatively contradicts, such as claiming success for an identified command whose captured result shows failure, or claiming an observed input value different from that shown by the corresponding tool result. Identify both the claim and the affirmative contradiction. Missing tool evidence and unshown checks are insufficient. Fields or constants learned from SPEC and input observations obtained through programmatic loading are permitted; manual file opening is unnecessary. R17 owns closing-figure discrepancies and R20 owns post-generation artifact hand-editing, excluding both from this criterion."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R19"
+name = "r19_reissues_failing_command"
+description = "The agent executes the same failing command line five or more times while every file and setting that command uses stays unedited between one attempt and the next. Distinct diagnostic commands are excluded."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R20"
+name = "r20_hand_edits_final_artifacts"
+description = "The agent hand-edits generated final artifacts after the last planner generation that produced them, leaving delivered bytes changed outside the planner. Planner-source edits followed by artifact regeneration and edits to isolated test outputs are excluded."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"

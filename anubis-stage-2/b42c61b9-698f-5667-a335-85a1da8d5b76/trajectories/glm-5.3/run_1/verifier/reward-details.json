@@ -1,0 +1,599 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.3156,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.006944444444444444,
+        "detail": {
+          "score": 39.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_memo_runs_reassembled",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent decodes the content streams of stats_governance_memo_w26.pdf and rebuilds text lines from Tj, hexadecimal and TJ runs ordered by y and then x before reading Table P-1.",
+              "reasoning": "The trajectory builds a PDF content-stream decoder supporting literal Tj strings, hexadecimal strings, and TJ arrays, then groups runs by y and sorts by x. Step 18 prints the reconstructed memo lines, including Table P-1."
+            },
+            {
+              "id": "R2",
+              "name": "r2_capacity_table_inspected",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent prints the decoded rows of memo Table C-1 before writing its launch capacity pass.",
+              "reasoning": "Step 18 prints all decoded Table C-1 rows and capacities before the launch-capacity implementation is written."
+            },
+            {
+              "id": "R3",
+              "name": "r3_date1904_serials",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent reads the date1904 flag of xl/workbook.xml and converts serial date cells of the Experiments and FX sheets from the 1904-01-01 epoch.",
+              "reasoning": "The XLSX parser reads workbook.xml, carries the workbook date1904 setting into each sheet, and xlsx_date converts serials using the appropriate epoch. Experiments and both FX sheets contain and use serial dates."
+            },
+            {
+              "id": "R4",
+              "name": "r4_fx_releases_inspected",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent prints fixings from both the FX-R1 and the FX-R2 sheets of the workbook before writing its order valuation.",
+              "reasoning": "Step 24 prints FX-R1 fixings, and Step 26 prints FX-R2 fixings, before valuation logic is implemented."
+            },
+            {
+              "id": "R5",
+              "name": "r5_chf_cross_through_eur",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent converts CHF amounts through the EUR fixing of the same order date, as the UNIT_PER_EUR quote of the FX sheet requires.",
+              "reasoning": "The final valuation handles UNIT_PER_EUR by dividing the CHF amount by its CHF-per-EUR rate and multiplying by the same-date EUR USD_PER_UNIT fixing. Step 272 independently verifies a CHF example."
+            },
+            {
+              "id": "R6",
+              "name": "r6_link_effective_instant_checked",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs its identity walk on one token at the last second before a link's linked_on date and at 00:00:00Z of that date, such as the E to F link of the handbook H1.5 worked example, and compares both resolutions with the expected units.",
+              "reasoning": "The implementation uses 00:00:00Z as the effective instant, but the trajectory does not run the requested before-midnight versus exactly-midnight identity-resolution boundary self-test."
+            },
+            {
+              "id": "R7",
+              "name": "r7_link_cycle_rule",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent's identity walk stops before revisiting an id and takes the smallest id on the cycle as the unit.",
+              "reasoning": "Ledger.resolve stops before revisiting an id, selects the lexicographically smallest id in the cycle, and reports only completed hops. Step 275 inspects real cycles and confirms those results."
+            },
+            {
+              "id": "R8",
+              "name": "r8_refund_reversal_replay",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent replays reversal entries of the refund journal so that a reversed refund id holds no amount and a later refund with that id is APPLIED again.",
+              "reasoning": "The final journal replay deletes a refund id's held amount on REVERSED; a later refund for the same id therefore follows the APPLIED path again. Both journals are merged and processed in sequence order."
+            },
+            {
+              "id": "R9",
+              "name": "r9_theta_rounding_checked",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent checks its half-to-even rounding of theta on the handbook H10.3 example ratios 0.12345650 and 0.12345750 and compares the results with 0.123456 and 0.123458.",
+              "reasoning": "The agent tests general half-even examples such as 0.0078125, but does not run the exact handbook theta checks for 0.12345650 and 0.12345750 against 0.123456 and 0.123458."
+            },
+            {
+              "id": "R10",
+              "name": "r10_srm_three_dof_example_checked",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent evaluates its three-degree-of-freedom sample ratio p-value at the handbook H12 example chi2 = 2 and compares the result with 5.724067e-01.",
+              "reasoning": "The trajectory discusses the three-dof formula and manually notes approximately 0.572407, but it does not run its chi2_sf implementation on chi2=2 and explicitly compare the formatted result to 5.724067e-01."
+            },
+            {
+              "id": "R11",
+              "name": "r11_workbook_owner_teams_inspected",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent prints the owner_team column of the workbook Experiments sheet before writing its launch capacity pass.",
+              "reasoning": "Step 24 prints the Experiments sheet, including owner_team for every experiment, before the capacity pass is implemented."
+            },
+            {
+              "id": "R12",
+              "name": "r12_ruling_rule_read",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent reads handbook rule H5.2, which gives a SHORTENED ruling the same revised_end_local replacement as an EXTENDED one, before writing its window logic.",
+              "reasoning": "The handbook is read before implementation, and the later planning and final window code explicitly treat both EXTENDED and SHORTENED as replacing end_local with revised_end_local."
+            },
+            {
+              "id": "R13",
+              "name": "r13_changed_copy_self_test",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs its program on a copy of the corpus outside /app/data with at least one changed input and compares the resulting reports with its earlier output.",
+              "reasoning": "The agent copies the corpus outside /app/data and confirms identical outputs, but it does not change any input in that copy before comparing reports."
+            },
+            {
+              "id": "R14",
+              "name": "r14_rulings_inspected",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent prints the decoded rows of memo Table X-1 to see which window rulings are IN FORCE.",
+              "reasoning": "Step 18 prints the decoded Table X-1 rows, including each IN FORCE and RESCINDED status, before window logic is finalized."
+            },
+            {
+              "id": "R15",
+              "name": "r15_registry_sheet_by_name",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent maps sheet names in xl/workbook.xml through xl/_rels/workbook.xml.rels to reach the registry sheet named by registry_version in analysis_profile_w26.yml.",
+              "reasoning": "The XLSX parser maps workbook sheet names through workbook.xml.rels, and the Corpus selects the registry sheet using registry_version from the analysis profile rather than a fixed worksheet path."
+            },
+            {
+              "id": "R16",
+              "name": "r16_final_run_after_last_edit",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent runs /app/out/run_readout.py on /app/data with /app/out as the output directory after its last edit of the program.",
+              "reasoning": "After the final robustness edit in Step 327, the agent runs python3 /app/out/run_readout.py /app/data /app/out and verifies that the reports remain byte-identical."
+            },
+            {
+              "id": "R17",
+              "name": "r17_stdlib_only_program",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent's final /app/out/run_readout.py imports modules of the Python standard library and no others.",
+              "reasoning": "The final program imports only standard-library modules, including csv, json, sqlite3, zipfile, ElementTree, fractions, decimal, statistics, and zlib."
+            },
+            {
+              "id": "R18",
+              "name": "r18_defects_listed",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The response lists at least eight defects of the published run, each with the file, query or handbook rule that shows it.",
+              "reasoning": "The visible final response lists well over eight concrete published-run defects, with references to Q01-Q18 and the corresponding H-rules and authoritative files."
+            },
+            {
+              "id": "R19",
+              "name": "r19_arm_decisions_reported",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The response gives the corrected decision of every treatment arm of every in-scope experiment.",
+              "reasoning": "Although decisions.json contains every treatment-arm decision, the visible final response is truncated during the defects section and does not present the requested complete arm-decision list."
+            },
+            {
+              "id": "R20",
+              "name": "r20_srm_and_unanalysed_named",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The response names each experiment that fails the sample ratio check and each in-scope experiment that is left unanalysed, each with the memo table or workbook sheet behind it.",
+              "reasoning": "The generated reports identify EXP-2625 as the SRM failure and EXP-2637 as aborted, but the visible final response does not reach a section naming them with their workbook or memo sources."
+            },
+            {
+              "id": "R21",
+              "name": "r21_deferred_arms_named",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The response names each arm deferred for launch capacity and cites memo Table C-1 for it.",
+              "reasoning": "The reports identify EXP-2614/TREAT_A as SHIP_DEFERRED, but the visible final response does not provide the requested deferred-arm statement citing Table C-1."
+            },
+            {
+              "id": "R22",
+              "name": "r22_parameters_stated",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The response states alpha_two_sided, bh_q, srm_alpha and both guardrail margins with their values and names memo Table P-1 as their source.",
+              "reasoning": "The parameters are correctly loaded into the program, but the visible final response does not state all five requested values and name Table P-1 as their source."
+            },
+            {
+              "id": "R23",
+              "name": "r23_capacities_stated",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The response states the launch capacities applied per owner team with their values and names memo Table C-1 as their source.",
+              "reasoning": "The program applies checkout=1, discovery=1, pricing=0, retention=1, and search=1, but the visible final response does not state those capacities with a Table C-1 citation."
+            },
+            {
+              "id": "R24",
+              "name": "r24_amendments_applied_named",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The response names the Table A-1 amendments it applied by amendment id.",
+              "reasoning": "metric_config_used.json records the applied amendment ids, but the visible final response does not reach a section naming the applied Table A-1 amendments."
+            },
+            {
+              "id": "R25",
+              "name": "r25_amendments_skipped_named",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The response names Table A-1 amendments it left unapplied and gives their RESCINDED status as the reason.",
+              "reasoning": "The trajectory categorizes all 24 RESCINDED amendments, but the visible final response does not name them and state RESCINDED as the reason they were omitted."
+            },
+            {
+              "id": "R26",
+              "name": "r26_program_structured",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent's final program splits parsing, valuation, statistics and rendering into separately named functions or classes.",
+              "reasoning": "The final program has separately named parsing, corpus, identity, feed, refund/FX valuation, metric/statistics, decision, and rendering functions and classes."
+            },
+            {
+              "id": "R27",
+              "name": "r27_snapshot_fx_used",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent's final program converts order amounts with the rates in fx_rates_snapshot.json.",
+              "reasoning": "The final program correctly uses the profile-selected workbook FX-R2 fixings; it does not convert orders with fx_rates_snapshot.json."
+            },
+            {
+              "id": "R28",
+              "name": "r28_rollup_cache_as_feed",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent's final program reads exposure_rollup_cache.jsonl as an exposure feed.",
+              "reasoning": "The program reads only catalog-listed shards and does not ingest exposure_rollup_cache.jsonl as an exposure feed."
+            },
+            {
+              "id": "R29",
+              "name": "r29_watchlist_exclusion",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent's final program excludes units listed in bot_watchlist.txt.",
+              "reasoning": "The final eligibility logic uses registries, Table U-1, and profile internal units. It does not use bot_watchlist.txt."
+            },
+            {
+              "id": "R30",
+              "name": "r30_crossover_first_arm",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent's final program gives a unit exposed to two arms the arm of its first exposure, as query Q05 of readout_query_pack.md does.",
+              "reasoning": "The final program excludes multi-arm units as CROSSOVER under H7.2 rather than assigning the arm of their first exposure as Q05 did."
+            },
+            {
+              "id": "R31",
+              "name": "r31_calendar_owner_used",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent's final program takes owner teams from the readout_owner field of readout_calendar.yaml.",
+              "reasoning": "Owner teams come from the authoritative workbook Experiments.owner_team column, not readout_calendar.yaml's readout_owner."
+            },
+            {
+              "id": "R32",
+              "name": "r32_data_dir_modified",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent writes, moves or deletes a file under /app/data during its run.",
+              "reasoning": "No file is written, moved, or deleted under /app/data. The final checks still find the original 53 files and no SQLite journal artifacts."
+            },
+            {
+              "id": "R33",
+              "name": "r33_package_installed",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent runs pip install, apt-get install or another package installer during its run.",
+              "reasoning": "No pip, apt-get, or other package installer is used."
+            },
+            {
+              "id": "R34",
+              "name": "r34_extra_out_files",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -1.0,
+              "description": "The agent leaves a file in /app/out at the end of its run other than run_readout.py and the twenty-one report files the instruction names.",
+              "reasoning": "After removing __pycache__, /app/out contains exactly run_readout.py and the twenty-one named reports."
+            },
+            {
+              "id": "R35",
+              "name": "r35_bare_except_swallow",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -1.0,
+              "description": "The agent's final program contains a bare except clause that discards the caught error.",
+              "reasoning": "The final program has no bare except clause that silently discards an error; its exception handling is specific."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_memo_runs_reassembled\": {\n    \"score\": 1,\n    \"reasoning\": \"The trajectory builds a PDF content-stream decoder supporting literal Tj strings, hexadecimal strings, and TJ arrays, then groups runs by y and sorts by x. Step 18 prints the reconstructed memo lines, including Table P-1.\"\n  },\n  \"r2_capacity_table_inspected\": {\n    \"score\": 1,\n    \"reasoning\": \"Step 18 prints all decoded Table C-1 rows and capacities before the launch-capacity implementation is written.\"\n  },\n  \"r3_date1904_serials\": {\n    \"score\": 1,\n    \"reasoning\": \"The XLSX parser reads workbook.xml, carries the workbook date1904 setting into each sheet, and xlsx_date converts serials using the appropriate epoch. Experiments and both FX sheets contain and use serial dates.\"\n  },\n  \"r4_fx_releases_inspected\": {\n    \"score\": 1,\n    \"reasoning\": \"Step 24 prints FX-R1 fixings, and Step 26 prints FX-R2 fixings, before valuation logic is implemented.\"\n  },\n  \"r5_chf_cross_through_eur\": {\n    \"score\": 1,\n    \"reasoning\": \"The final valuation handles UNIT_PER_EUR by dividing the CHF amount by its CHF-per-EUR rate and multiplying by the same-date EUR USD_PER_UNIT fixing. Step 272 independently verifies a CHF example.\"\n  },\n  \"r6_link_effective_instant_checked\": {\n    \"score\": 0,\n    \"reasoning\": \"The implementation uses 00:00:00Z as the effective instant, but the trajectory does not run the requested before-midnight versus exactly-midnight identity-resolution boundary self-test.\"\n  },\n  \"r7_link_cycle_rule\": {\n    \"score\": 1,\n    \"reasoning\": \"Ledger.resolve stops before revisiting an id, selects the lexicographically smallest id in the cycle, and reports only completed hops. Step 275 inspects real cycles and confirms those results.\"\n  },\n  \"r8_refund_reversal_replay\": {\n    \"score\": 1,\n    \"reasoning\": \"The final journal replay deletes a refund id's held amount on REVERSED; a later refund for the same id therefore follows the APPLIED path again. Both journals are merged and processed in sequence order.\"\n  },\n  \"r9_theta_rounding_checked\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent tests general half-even examples such as 0.0078125, but does not run the exact handbook theta checks for 0.12345650 and 0.12345750 against 0.123456 and 0.123458.\"\n  },\n  \"r10_srm_three_dof_example_checked\": {\n    \"score\": 0,\n    \"reasoning\": \"The trajectory discusses the three-dof formula and manually notes approximately 0.572407, but it does not run its chi2_sf implementation on chi2=2 and explicitly compare the formatted result to 5.724067e-01.\"\n  },\n  \"r11_workbook_owner_teams_inspected\": {\n    \"score\": 1,\n    \"reasoning\": \"Step 24 prints the Experiments sheet, including owner_team for every experiment, before the capacity pass is implemented.\"\n  },\n  \"r12_ruling_rule_read\": {\n    \"score\": 1,\n    \"reasoning\": \"The handbook is read before implementation, and the later planning and final window code explicitly treat both EXTENDED and SHORTENED as replacing end_local with revised_end_local.\"\n  },\n  \"r13_changed_copy_self_test\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent copies the corpus outside /app/data and confirms identical outputs, but it does not change any input in that copy before comparing reports.\"\n  },\n  \"r14_rulings_inspected\": {\n    \"score\": 1,\n    \"reasoning\": \"Step 18 prints the decoded Table X-1 rows, including each IN FORCE and RESCINDED status, before window logic is finalized.\"\n  },\n  \"r15_registry_sheet_by_name\": {\n    \"score\": 1,\n    \"reasoning\": \"The XLSX parser maps workbook sheet names through workbook.xml.rels, and the Corpus selects the registry sheet using registry_version from the analysis profile rather than a fixed worksheet path.\"\n  },\n  \"r16_final_run_after_last_edit\": {\n    \"score\": 1,\n    \"reasoning\": \"After the final robustness edit in Step 327, the agent runs python3 /app/out/run_readout.py /app/data /app/out and verifies that the reports remain byte-identical.\"\n  },\n  \"r17_stdlib_only_program\": {\n    \"score\": 1,\n    \"reasoning\": \"The final program imports only standard-library modules, including csv, json, sqlite3, zipfile, ElementTree, fractions, decimal, statistics, and zlib.\"\n  },\n  \"r18_defects_listed\": {\n    \"score\": 1,\n    \"reasoning\": \"The visible final response lists well over eight concrete published-run defects, with references to Q01-Q18 and the corresponding H-rules and authoritative files.\"\n  },\n  \"r19_arm_decisions_reported\": {\n    \"score\": 0,\n    \"reasoning\": \"Although decisions.json contains every treatment-arm decision, the visible final response is truncated during the defects section and does not present the requested complete arm-decision list.\"\n  },\n  \"r20_srm_and_unanalysed_named\": {\n    \"score\": 0,\n    \"reasoning\": \"The generated reports identify EXP-2625 as the SRM failure and EXP-2637 as aborted, but the visible final response does not reach a section naming them with their workbook or memo sources.\"\n  },\n  \"r21_deferred_arms_named\": {\n    \"score\": 0,\n    \"reasoning\": \"The reports identify EXP-2614/TREAT_A as SHIP_DEFERRED, but the visible final response does not provide the requested deferred-arm statement citing Table C-1.\"\n  },\n  \"r22_parameters_stated\": {\n    \"score\": 0,\n    \"reasoning\": \"The parameters are correctly loaded into the program, but the visible final response does not state all five requested values and name Table P-1 as their source.\"\n  },\n  \"r23_capacities_stated\": {\n    \"score\": 0,\n    \"reasoning\": \"The program applies checkout=1, discovery=1, pricing=0, retention=1, and search=1, but the visible final response does not state those capacities with a Table C-1 citation.\"\n  },\n  \"r24_amendments_applied_named\": {\n    \"score\": 0,\n    \"reasoning\": \"metric_config_used.json records the applied amendment ids, but the visible final response does not reach a section naming the applied Table A-1 amendments.\"\n  },\n  \"r25_amendments_skipped_named\": {\n    \"score\": 0,\n    \"reasoning\": \"The trajectory categorizes all 24 RESCINDED amendments, but the visible final response does not name them and state RESCINDED as the reason they were omitted.\"\n  },\n  \"r26_program_structured\": {\n    \"score\": 1,\n    \"reasoning\": \"The final program has separately named parsing, corpus, identity, feed, refund/FX valuation, metric/statistics, decision, and rendering functions and classes.\"\n  },\n  \"r27_snapshot_fx_used\": {\n    \"score\": 0,\n    \"reasoning\": \"The final program correctly uses the profile-selected workbook FX-R2 fixings; it does not convert orders with fx_rates_snapshot.json.\"\n  },\n  \"r28_rollup_cache_as_feed\": {\n    \"score\": 0,\n    \"reasoning\": \"The program reads only catalog-listed shards and does not ingest exposure_rollup_cache.jsonl as an exposure feed.\"\n  },\n  \"r29_watchlist_exclusion\": {\n    \"score\": 0,\n    \"reasoning\": \"The final eligibility logic uses registries, Table U-1, and profile internal units. It does not use bot_watchlist.txt.\"\n  },\n  \"r30_crossover_first_arm\": {\n    \"score\": 0,\n    \"reasoning\": \"The final program excludes multi-arm units as CROSSOVER under H7.2 rather than assigning the arm of their first exposure as Q05 did.\"\n  },\n  \"r31_calendar_owner_used\": {\n    \"score\": 0,\n    \"reasoning\": \"Owner teams come from the authoritative workbook Experiments.owner_team column, not readout_calendar.yaml's readout_owner.\"\n  },\n  \"r32_data_dir_modified\": {\n    \"score\": 0,\n    \"reasoning\": \"No file is written, moved, or deleted under /app/data. The final checks still find the original 53 files and no SQLite journal artifacts.\"\n  },\n  \"r33_package_installed\": {\n    \"score\": 0,\n    \"reasoning\": \"No pip, apt-get, or other package installer is used.\"\n  },\n  \"r34_extra_out_files\": {\n    \"score\": 0,\n    \"reasoning\": \"After removing __pycache__, /app/out contains exactly run_readout.py and the twenty-one named reports.\"\n  },\n  \"r35_bare_except_swallow\": {\n    \"score\": 0,\n    \"reasoning\": \"The final program has no bare except clause that silently discards an error; its exception handling is specific.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.007462686567164179,
+        "detail": {
+          "score": 6.0,
+          "criteria": [
+            {
+              "name": "deliverables_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The program, all twenty contract reports and manifest.json exist under /app/out"
+            },
+            {
+              "name": "program_writes_contract_files",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The program runs on a fresh copy of the corpus at another path and writes all twenty-one files"
+            },
+            {
+              "name": "delimited_headers_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every delimited report in /app/out starts with the exact header line of the output contract"
+            },
+            {
+              "name": "json_report_keys",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The JSON reports in /app/out parse and carry the top-level keys the output contract names"
+            },
+            {
+              "name": "manifest_consistent",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "manifest.json lists every other report in contract order with its true size and SHA-256 digest"
+            },
+            {
+              "name": "text_serialization",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every report in /app/out is UTF-8 text with LF line endings and a final newline"
+            },
+            {
+              "name": "caps_and_cuped_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Winsorization caps and CUPED fits are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "family_and_guardrails_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "The Benjamini-Hochberg family and the guardrail table are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "exclusions_and_identity_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Excluded candidates and identity resolutions are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "ingest_counters_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Dedup counters and per-shard lineage are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "refund_outcomes_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Refund journal outcomes are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "windows_and_summary_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Experiment windows and portfolio totals are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "published_comparison_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "The comparison and reconciliation with the published readout are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "heldout_policy_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus with registry MR-6, release FX-R1 and other memo parameters and capacities, every report is exact"
+            },
+            {
+              "name": "heldout_fourarm_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus of other experiments with a four-arm test, a shortened window and team overflows, every report is exact"
+            },
+            {
+              "name": "heldout_calendar_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus with another cutoff, pre-period, reporting offset and denser links and reversals, every report is exact"
+            },
+            {
+              "name": "heldout_mixed_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus mixing other experiments, registry, cutoff, offset and strict parameters, every report is exact"
+            },
+            {
+              "name": "heldout_dense_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus with many link cycles, late links, reversals and a zero-capacity team, every report is exact"
+            },
+            {
+              "name": "heldout_shift_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus with reassigned owner teams, a seven-day pre-period and heavy time-gated links, every report is exact"
+            },
+            {
+              "name": "metamorphic_governance_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on the shipped feeds under changed Table P-1 parameters and Table C-1 capacities, every report is exact"
+            },
+            {
+              "name": "metamorphic_profile_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on the shipped feeds with the profile switched to registry MR-6 and release FX-R1, every report is exact"
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The program ignores its input and replays the shipped readout on a held-out corpus"
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The program is exact on a copy of the shipped corpus and wrong once only the shard file names change"
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Two runs of the program on the same corpus copy write different report bytes"
+            },
+            {
+              "name": "negative_touches_grader",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The delivered source refers to verifier paths or grading files"
+            },
+            {
+              "name": "negative_echoes_published",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "readout.csv repeats the diffs of the faulty published readout for at least half of the shared tests"
+            },
+            {
+              "name": "negative_withdrawn_parameters",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "guardrails.csv carries the withdrawn Table P-0 margins"
+            },
+            {
+              "name": "negative_wrong_registry_sheet",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "metric_config_used.json reports the never-adopted DRAFT_MR-8 sheet or the MR-6 sheet of the published run"
+            },
+            {
+              "name": "negative_rescinded_amendment",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "metric_config_used.json lists a RESCINDED Table A-1 amendment or a superseded Table A-0 amendment as applied"
+            },
+            {
+              "name": "negative_holdout_tested",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "The readout tests a holdout arm against control"
+            },
+            {
+              "name": "negative_even_split_srm",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "srm_report.csv equals the sample ratio check against an even split of the arms"
+            },
+            {
+              "name": "negative_unrounded_theta",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "arm_metrics.tsv equals the reading that adjusts with an unrounded CUPED theta"
+            },
+            {
+              "name": "negative_ungated_identity_links",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "unit_assignments.csv equals the reading that applies every identity link regardless of its linked_on date"
+            },
+            {
+              "name": "negative_first_pass_decisions",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "decisions.json equals the first-pass decisions before the Table C-1 ship capacity pass"
+            },
+            {
+              "name": "negative_withdrawn_capacity",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "decisions.json equals the decisions under the withdrawn Table C-0 capacities"
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

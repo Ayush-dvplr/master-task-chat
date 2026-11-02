@@ -1,0 +1,115 @@
+{
+  "model": "glm-5.3",
+  "run_index": 1,
+  "rubric": [
+    {
+      "number": 1,
+      "criterion": "The agent reads /app/data/schema.md in full during its run.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 1.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 2,
+      "criterion": "The agent runs reconcile.py in one-shot mode on the shipped /app/data extract and writes the resulting report set to /app/out before it finishes.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 1.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 3,
+      "criterion": "The agent independently calculates the carried, forfeited or paid-out net-metering result for a migrated customer in a modified-reference snapshot and compares that expected value with reconcile.py output before it finishes.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The agent created an NMB/migration variant, but did not independently calculate a migrated customer's expected carried, forfeited, or paid-out NMB result and compare that value with the program output. The independent energy check explicitly omitted NMB treatment."
+    },
+    {
+      "number": 4,
+      "criterion": "The agent independently calculates, for a billing-currency customer in a modified-reference snapshot with a signed fuel-adjustment rate, the integer current-period charge and each retroactive line after separate conversion to FTU using the last-known-good rate applicable to each amount, and compares those expected values with reconcile.py output before it finishes.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The agent manually checked FTU conversion for shipped customers and retroactive lines, but did not use a modified-reference snapshot with a signed FAC rate or independently verify the current-period charge and every retroactive line after their separate FTU conversions."
+    },
+    {
+      "number": 5,
+      "criterion": "The agent independently calculates a retroactive adjustment whose order period crosses tariff effective windows, including every applicable energy, customer, demand and fuel-adjustment component, and compares that expected adjustment with reconcile.py output before it finishes.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 5.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The independent retroactive checks used the shipped orders and did not construct and verify a rebill crossing tariff effective windows with all energy, customer, demand, and FAC components included."
+    },
+    {
+      "number": 6,
+      "criterion": "The agent delivers a reconcile.py whose flat monthly customer charge is prorated only across service-window, rate-class-migration and grandfather-expiry boundaries.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "critically_important",
+      "score": 5.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The delivered code computes customer charge by looking up and summing the applicable STAR-row charge for every service day. Consequently, an ordinary tariff effective-window change can alter the prorated customer charge, rather than limiting proration boundaries to service windows, class migrations, and grandfather expiry."
+    },
+    {
+      "number": 7,
+      "criterion": "The agent delivers reviewable Python with cohesive descriptive functions, specific error handling, and no dead, duplicated or debugging residue.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The program is organized into generally cohesive functions, but it lacks specific input/protocol error handling and validation; malformed files, commands, dates, and zero-length read gaps generally propagate raw exceptions. Thus it does not fully satisfy the conjunctive reviewability criterion."
+    },
+    {
+      "number": 8,
+      "criterion": "The agent keeps non-verifier input reads in each one-shot invocation or session turn within the DATA_DIR supplied for that invocation or turn.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 1.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 9,
+      "criterion": "The agent writes JSON content into a file under /app/out with echo, a shell redirection, a text editor, a file-write tool or an inline script, so the file holds bytes other than the output of a reconcile.py run.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": -5.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 10,
+      "criterion": "The response claims successful recovery from a failed session turn when the trajectory shows a success acknowledgement followed by stale or incomplete report artifacts for that turn.",
+      "type": "binary",
+      "evaluation_target": "user_facing_message",
+      "importance": "critically_important",
+      "score": -5.0,
+      "is_positive": false,
+      "passed": true
+    }
+  ],
+  "rubric_weights_percentage": 13.64,
+  "test_weights_percentage": 81.82,
+  "final_reward": 47.73,
+  "judge_model": "gpt-5.6-sol"
+}

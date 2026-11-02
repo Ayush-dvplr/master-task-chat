@@ -1,0 +1,392 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.4902,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.022727272727272728,
+        "detail": {
+          "score": 10.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_compares_control_outcomes_with_the_worked_example",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs its derivation on the calibration control records and compares the outcomes it gets with the outcomes recorded in calibration_slice.json or calibration_example.json.",
+              "reasoning": "The agent inspected calibration_slice.json and calibration_example.json and inferred rules from them, but it never constructed or ran the derivation on the calibration control records and compared a complete set of computed control outcomes against the recorded control outputs."
+            },
+            {
+              "id": "R2",
+              "name": "r2_hand_rounds_one_half_nanounit_case",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent works through one calibration control quantity that lands exactly on a half nanounit, rounds it by hand, and compares the result with the figure in calibration_example.json.",
+              "reasoning": "The agent manually noted examples such as C-07: 1 \u00d7 0.5 \u2192 1 and C-08: -1 \u00d7 0.5 \u2192 -1. However, those per-record figures are in calibration_slice.json, and it did not compare a manually derived half-case result with a corresponding figure in calibration_example.json."
+            },
+            {
+              "id": "R3",
+              "name": "r3_program_reconciles_its_own_reports",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent writes derive_report.py so that it re-reads the reports it has just written, checks them against one another, and exits with a nonzero status on a disagreement, following the instruction sentence that the program itself re-reads the reports it has just written, checks that they agree with one another, and exits with a nonzero status when they disagree.",
+              "reasoning": "derive_report.py writes the reports, reopens every expected report in reconcile(), checks lifecycle, partitions, totals, allocations, alerts, and audit relationships, raises Fault on disagreement, and main() returns status 1 when that happens. The reconciliation logic was also exercised against several tampered reports."
+            },
+            {
+              "id": "R4",
+              "name": "r4_prints_raw_amendment_ledger_lines",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent prints raw lines of /app/data/amendments.jsonl, a damaged line that json.loads rejects among them, before it writes its ledger replay code.",
+              "reasoning": "Before writing derive_report.py, the agent ran cat amendments.jsonl and printed all raw ledger lines, including the truncated AM-25 line that json.loads would reject."
+            },
+            {
+              "id": "R5",
+              "name": "r5_hand_traces_one_reporting_round",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent works out by hand the reporting round of one channel from its qualifying count, the threshold bands and its custody holder, and compares that round with reporting_round_by_array in the policy audit its program wrote.",
+              "reasoning": "The generated policy audit displayed qualifying counts and reporting rounds, and the final response summarized the custody-chain rounds. It did not explicitly hand-work one channel through its qualifying count, applicable threshold band, named custody holder, and then compare that calculation with the written reporting_round_by_array value."
+            },
+            {
+              "id": "R6",
+              "name": "r6_hand_sums_one_ladder_correction",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent sums the ratios on one certificate's traceability path toward the primary standard by hand and compares the total with ladder_ppm_by_certificate in the policy audit its program wrote.",
+              "reasoning": "The agent printed ladder_ppm_by_certificate values but never explicitly summed the ratios along one certificate's standard path by hand and compared that hand total with the policy audit."
+            },
+            {
+              "id": "R7",
+              "name": "r7_runs_the_program_on_an_archive_it_altered",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent builds a second archive by changing a copy of /app/data, runs derive_report.py on it into a separate output location, and reads the reports that run produced.",
+              "reasoning": "The agent created /tmp/empty_arch from copies of the shipped CSV and JSON files, replaced observations.csv with only its header, supplied an empty amendments ledger, ran derive_report.py into /tmp/deep/a/b/c, and read the resulting summary, data-quality, and region reports. It also ran a separate synthetic stress archive."
+            },
+            {
+              "id": "R8",
+              "name": "r8_delivers_reviewable_derivation_code",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent leaves /app/out/derive_report.py as reviewable code, with function names that describe their job, except clauses that each name an exception class, and no dead code or leftover debug print.",
+              "reasoning": "/app/out/derive_report.py is structured into descriptively named functions such as apply_ledger, stage_samples, earn_standing, apportion, write_reports, and reconcile. Its exception handlers name ValueError or Fault, and the delivered code contains no evident leftover debug prints or unused experimental branches."
+            },
+            {
+              "id": "R9",
+              "name": "r9_negative_edits_the_shipped_archive",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent changes, renames or deletes a file under /app/data during the session, which the instruction sentence listing what the agent must avoid forbids by naming editing inputs.",
+              "reasoning": "There is no trajectory step that modifies, renames, or deletes anything under /app/data. Altered test archives were created under /tmp instead."
+            },
+            {
+              "id": "R10",
+              "name": "r10_negative_claims_success_its_last_comparison_contradicts",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The response states that the reports reconcile with the calibration control while the last comparison of the two in the trajectory shows a mismatch.",
+              "reasoning": "The last report comparison reported byte-identical outputs, followed by a successful compilation and artifact listing. The final success claim does not contradict the last comparison."
+            },
+            {
+              "id": "R11",
+              "name": "r11_negative_claims_a_check_absent_from_the_session",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The response claims a derive_report.py run or a check that appears nowhere in the trajectory.",
+              "reasoning": "The final response's substantive testing claims are supported by the trajectory: shipped-archive runs, idempotent byte comparisons, empty and missing-table archives, a large-integer stress archive, direct tamper detection across report types, compilation, and final regeneration all appear in the session."
+            },
+            {
+              "id": "R12",
+              "name": "r12_negative_reruns_an_identical_failing_command",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -1.0,
+              "description": "The agent runs the same failing command unchanged on three or more consecutive turns.",
+              "reasoning": "No identical failing command was executed unchanged on three or more consecutive turns."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_compares_control_outcomes_with_the_worked_example\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent inspected calibration_slice.json and calibration_example.json and inferred rules from them, but it never constructed or ran the derivation on the calibration control records and compared a complete set of computed control outcomes against the recorded control outputs.\"\n  },\n  \"r2_hand_rounds_one_half_nanounit_case\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent manually noted examples such as C-07: 1 \u00d7 0.5 \u2192 1 and C-08: -1 \u00d7 0.5 \u2192 -1. However, those per-record figures are in calibration_slice.json, and it did not compare a manually derived half-case result with a corresponding figure in calibration_example.json.\"\n  },\n  \"r3_program_reconciles_its_own_reports\": {\n    \"score\": 1,\n    \"reasoning\": \"derive_report.py writes the reports, reopens every expected report in reconcile(), checks lifecycle, partitions, totals, allocations, alerts, and audit relationships, raises Fault on disagreement, and main() returns status 1 when that happens. The reconciliation logic was also exercised against several tampered reports.\"\n  },\n  \"r4_prints_raw_amendment_ledger_lines\": {\n    \"score\": 1,\n    \"reasoning\": \"Before writing derive_report.py, the agent ran cat amendments.jsonl and printed all raw ledger lines, including the truncated AM-25 line that json.loads would reject.\"\n  },\n  \"r5_hand_traces_one_reporting_round\": {\n    \"score\": 0,\n    \"reasoning\": \"The generated policy audit displayed qualifying counts and reporting rounds, and the final response summarized the custody-chain rounds. It did not explicitly hand-work one channel through its qualifying count, applicable threshold band, named custody holder, and then compare that calculation with the written reporting_round_by_array value.\"\n  },\n  \"r6_hand_sums_one_ladder_correction\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent printed ladder_ppm_by_certificate values but never explicitly summed the ratios along one certificate's standard path by hand and compared that hand total with the policy audit.\"\n  },\n  \"r7_runs_the_program_on_an_archive_it_altered\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent created /tmp/empty_arch from copies of the shipped CSV and JSON files, replaced observations.csv with only its header, supplied an empty amendments ledger, ran derive_report.py into /tmp/deep/a/b/c, and read the resulting summary, data-quality, and region reports. It also ran a separate synthetic stress archive.\"\n  },\n  \"r8_delivers_reviewable_derivation_code\": {\n    \"score\": 1,\n    \"reasoning\": \"/app/out/derive_report.py is structured into descriptively named functions such as apply_ledger, stage_samples, earn_standing, apportion, write_reports, and reconcile. Its exception handlers name ValueError or Fault, and the delivered code contains no evident leftover debug prints or unused experimental branches.\"\n  },\n  \"r9_negative_edits_the_shipped_archive\": {\n    \"score\": 0,\n    \"reasoning\": \"There is no trajectory step that modifies, renames, or deletes anything under /app/data. Altered test archives were created under /tmp instead.\"\n  },\n  \"r10_negative_claims_success_its_last_comparison_contradicts\": {\n    \"score\": 0,\n    \"reasoning\": \"The last report comparison reported byte-identical outputs, followed by a successful compilation and artifact listing. The final success claim does not contradict the last comparison.\"\n  },\n  \"r11_negative_claims_a_check_absent_from_the_session\": {\n    \"score\": 0,\n    \"reasoning\": \"The final response's substantive testing claims are supported by the trajectory: shipped-archive runs, idempotent byte comparisons, empty and missing-table archives, a large-integer stress archive, direct tamper detection across report types, compilation, and final regeneration all appear in the session.\"\n  },\n  \"r12_negative_reruns_an_identical_failing_command\": {\n    \"score\": 0,\n    \"reasoning\": \"No identical failing command was executed unchanged on three or more consecutive turns.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.003703703703703704,
+        "detail": {
+          "score": 71.0,
+          "criteria": [
+            {
+              "name": "visible_summary_matches_reference",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "The network summary for the shipped archive matches the reference derivation exactly."
+            },
+            {
+              "name": "visible_policy_audit_matches_reference",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "The policy audit for the shipped archive matches the reference derivation exactly."
+            },
+            {
+              "name": "visible_data_quality_matches_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The data quality report for the shipped archive matches the reference derivation exactly."
+            },
+            {
+              "name": "visible_bucket_reports_match_reference",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "The four area reports and both operator class reports for the shipped archive match the reference derivation exactly."
+            },
+            {
+              "name": "reusable_script_regenerates_full_artifact_set",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "The delivered program replaces in full every report a stale earlier run left in the output location."
+            },
+            {
+              "name": "empty_archive_yields_complete_report_set",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The delivered program creates an absent nested output location and writes the complete report set for an archive holding no observation."
+            },
+            {
+              "name": "retroactive_revocation_falls_back",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Revoked certificates are never valid at any epoch and the fallback certificate's own ladder, walked over the ledger-revised standards, decides traceability on an unseen archive."
+            },
+            {
+              "name": "reporting_floor_clamps_unseen_archive",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The reporting floor clamps corrected sample values on an unseen archive."
+            },
+            {
+              "name": "canonical_serialisation_format",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Reports are serialised with sorted keys, a two space indent and a trailing newline."
+            },
+            {
+              "name": "precedence_order_inferred_correctly",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The quarantine reason census on the calibration control and its perturbed twin follows the precedence order the control demonstrates."
+            },
+            {
+              "name": "rounding_mode_inferred_correctly",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Non cancelling exact halves on both sides of zero reproduce the published rounded total."
+            },
+            {
+              "name": "naive_single_pass_is_rejected",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The standing set is the earned closure rather than the naive single pass on an unseen archive."
+            },
+            {
+              "name": "fixpoint_generalises_to_restructured_dependency_graph",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Standing closure generalises to a rewired custody dependency graph."
+            },
+            {
+              "name": "fixpoint_generalises_to_threshold_mutation",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Standing closure generalises to stronger reporting floor bands."
+            },
+            {
+              "name": "fixpoint_generalises_to_effective_date_mutation",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Standing closure generalises after effective date resolution changes."
+            },
+            {
+              "name": "fixpoint_generalises_to_population_mutation",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Standing closure generalises to a larger qualifying population."
+            },
+            {
+              "name": "fixpoint_generalises_to_partition_membership_mutation",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Standing closure generalises to changed area membership in the roster."
+            },
+            {
+              "name": "duplicate_rows_held_under_their_own_reason",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Repeated sample rows are held under their own reason on an unseen archive."
+            },
+            {
+              "name": "ledger_sequence_governs_amendment_replay",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Amendment replay follows ascending sequence then code point identifier order on an unseen archive."
+            },
+            {
+              "name": "quoted_archive_fields_read_faithfully",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Quoted archive fields holding a separator are read as one field."
+            },
+            {
+              "name": "budget_apportioned_exactly_beyond_float_precision",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The uncertainty budget is apportioned to the unit beyond exact binary float range."
+            },
+            {
+              "name": "ratio_unit_factors_normalised_exactly",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Ratio unit factors and counts beyond fixed precision range become exact canonical integers on an unseen archive."
+            },
+            {
+              "name": "certificate_restoration_follows_ledger_order",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Certificate restoration is replayed in ledger order on an unseen archive."
+            },
+            {
+              "name": "loose_timestamps_compare_as_instants",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Loosely written timestamps compare as instants on an unseen archive."
+            },
+            {
+              "name": "case_folded_flags_and_basis_revisions",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Flags read in any letter case and standing basis revisions reach the closure on an unseen archive."
+            },
+            {
+              "name": "malformed_ledger_lines_never_post",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Malformed ledger lines are counted as unmatched and never post or claim an entry on an unseen archive."
+            },
+            {
+              "name": "certificate_expiry_bounds_selection",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Certificates stop applying after their inclusive expiry instant on an unseen archive."
+            },
+            {
+              "name": "malformed_sample_values_quarantined",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Raw counts and epochs outside the contract form are held as malformed on an unseen archive."
+            },
+            {
+              "name": "drift_positions_break_epoch_ties_by_sample",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Baseline rows sharing an epoch inside one drift run take drift positions in sample identifier order on an unseen archive."
+            },
+            {
+              "name": "largest_sample_tie_breaks_on_sample_identifier",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The largest sample tie on reported value goes to the lower sample identifier on an unseen archive."
+            },
+            {
+              "name": "variance_alert_fires_at_exact_gate",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A variance alert is raised when an area gap equals the alert gate exactly on an unseen archive."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The agent program embeds shipped archive answers as literals in its own source."
+            },
+            {
+              "name": "negative_reads_tests_or_reward_files",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The agent program reaches for verifier or grading material outside the archive."
+            },
+            {
+              "name": "negative_external_dependency_or_network",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The agent program imports a third party package or reaches the network."
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The agent program writes different bytes on two runs over one archive."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

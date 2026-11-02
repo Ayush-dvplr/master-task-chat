@@ -1,0 +1,464 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_pdf_kids_page_order"
+description = "The agent orders the pages of pricing_bulletin_q4.pdf by the /Kids array of the /Pages object before assembling the bulletin tables."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R2"
+name = "r2_pdf_rows_by_tm_y"
+description = "The agent groups the text objects of each bulletin page by the y operand of their Tm operator and orders the cells of each row by the x operand."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R3"
+name = "r3_pdf_hex_strings"
+description = "The agent decodes the hexadecimal strings of the bulletin content streams into Latin-1 text when reading table cells."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R4"
+name = "r4_m1_commitments_read"
+description = "The agent takes the cluster commitments from Table M-1 of pricing_bulletin_q4.pdf and sets Table M-0 aside as superseded."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R5"
+name = "r5_date1904_flag"
+description = "The agent reads the date1904 attribute of workbookPr in xl/workbook.xml before converting the effective serials of the Adoptions sheet."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R6"
+name = "r6_future_adoption_set_aside"
+description = "The agent sets aside adoption A-104 of sheet RS-C4D because its effective date falls after the date of lookback_start_local."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R7"
+name = "r7_inactive_adoptions_ignored"
+description = "The agent ignores the WITHDRAWN and PROPOSED rows of the Adoptions sheet when it chooses the ruleset sheet in force."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_merge_effect_instant"
+description = "The agent turns each merged_on date of project_merges.psv into the instant 00:00:00 at billing_offset before applying that ledger row."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R9"
+name = "r9_token_resolved_at_query_start"
+description = "The agent resolves the project token of each live query through the merge ledger as of that query's own start."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R10"
+name = "r10_merge_cycle_smallest_id"
+description = "The agent detects a revisited id while walking project_merges.psv and resolves the token to the smallest id on that cycle."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R11"
+name = "r11_query_usage_three_decimals"
+description = "The agent rounds the normalized usage of each query to three decimals half to even before adding it into an hour."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R12"
+name = "r12_grown_usage_two_decimals"
+description = "The agent rounds the grown hourly usage to two decimals half to even before taking the netted reservation units off."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R13"
+name = "r13_tier_rate_four_decimals"
+description = "The agent rounds the discounted tier node rate to four decimals half to even before it prices the cache units."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R14"
+name = "r14_errata_in_id_order"
+description = "The agent applies the IN FORCE errata of Table E-1 in ascending erratum_id order, so the later erratum on a shared field sets the rate."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R15"
+name = "r15_one_cluster_per_round"
+description = "The agent closes one short cluster per round and solves the plan again before checking the commitments a second time."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R16"
+name = "r16_retag_supported"
+description = "The agent implements the RETAG adjustment of rulebook P4 in plan_cache.py although the shipped journals carry no RETAG entry."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R17"
+name = "r17_rerun_on_changed_copy"
+description = "The agent runs plan_cache.py on an edited copy of the corpus outside /app/data and compares the changed outputs with its expectation."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R18"
+name = "r18_limits_rechecked"
+description = "The agent recomputes the family, total node and memory sums of its cache_plan.csv against the limits of the sheet in force."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R19"
+name = "r19_code_split_by_stage"
+description = "The agent writes plan_cache.py as named functions that follow the rulebook stages, with every exception handler naming the exception it catches."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R20"
+name = "r20_defects_listed"
+description = "The response lists at least eight defects of the published run, each with the query pack query, file or rulebook rule that shows it."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R21"
+name = "r21_totals_reported"
+description = "The response reports total_saving_cents, nodes_total and mem_units_total with the values written in /app/out/plan_summary.json."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R22"
+name = "r22_ruleset_named"
+description = "The response names the ruleset sheet in force with its adoption id and effective date from the Adoptions sheet."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R23"
+name = "r23_limits_named"
+description = "The response states the node_cap_total and mem_budget_units values of the ruleset sheet in force."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R24"
+name = "r24_closed_clusters_named"
+description = "The response names every cluster closed for its Table M-1 commitment in the order of the closing rounds."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R25"
+name = "r25_errata_accounted"
+description = "The response names each Table E-1 erratum applied and each erratum left out, giving RESCINDED status or the overriding later erratum as the reason."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R26"
+name = "r26_final_run_after_last_edit"
+description = "The agent runs plan_cache.py on /app/data with /app/out as the output directory after its last edit of plan_cache.py."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R27"
+name = "r27_package_installed"
+description = "The agent runs pip, apt or another package installer during the task."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R28"
+name = "r28_input_corpus_modified"
+description = "The agent writes, renames or deletes a file under /app/data."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R29"
+name = "r29_extra_files_left_in_out"
+description = "The agent leaves a file in /app/out other than plan_cache.py and the twenty-three files the instruction names."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R30"
+name = "r30_reports_written_by_hand"
+description = "The agent writes or edits a report in /app/out with a command other than a run of plan_cache.py."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R31"
+name = "r31_announcement_limits_used"
+description = "The agent takes the approved node count or a family limit of capacity_announce_oct.txt as a planning constant."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R32"
+name = "r32_digest_rates_used"
+description = "The agent prices pools with the flat rates of scan_rates_digest_draft.txt."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R33"
+name = "r33_hint_factors_used"
+description = "The agent converts scanned volumes with the factors of engine_factor_hint.json."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R34"
+name = "r34_announcement_commitments_used"
+description = "The agent closes clusters with the provisional commitments of capacity_announce_oct.txt."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R35"
+name = "r35_success_claim_after_failure"
+description = "The response states that every report matches the contract while the last run of plan_cache.py in the trajectory ended in an error."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"

@@ -1,0 +1,3 @@
+# Pipeline contract
+
+Stages run in order. First order the live readings. Then place each reading in its batch from the batch calendar. Then scale raw and basis signals by the specimen unit scale in basis points. Then apply the method exponent transform and gain. Then apply per-analyte linear recalibration from the LIVE grid sheet. Then apply the recovery reweight with the governance recovery floor. Then admit against the per-batch cap with channel carry. Then clamp the admitted result to the governance floor result and add the matrix shift. Then settle each batch by damped convergence. Then reproject each batch against the carryover ceiling. Every figure in the report is a projection of the committed per-analyte per-batch result.

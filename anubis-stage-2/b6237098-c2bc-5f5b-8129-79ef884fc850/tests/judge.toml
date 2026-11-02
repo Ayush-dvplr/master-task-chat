@@ -1,0 +1,256 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_validates_against_worked_examples"
+description = "The agent compares every field of its decoder's output, record and error offsets included, with the documented result for every complete capture and every damaged variant in MDUMP-worked-examples.md."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_investigates_rejected_log_captures"
+description = "The agent checks at least three capture-log entries its decoder rejects with a record-level error by locating the damaged field in each capture's plaintext body and confirming it begins at the offset the decoder reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_runs_programs_in_isolated_interpreter"
+description = "The agent runs decode.py and encode.py with python3 -I from a directory other than /app to confirm they need no helper modules and no files under /app/data."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_reruns_report_generation_and_compares_bytes"
+description = "The agent generates the four /app/out reports a second time and compares the two runs byte for byte."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_names_handled_exceptions"
+description = "The agent writes decode.py and encode.py so that every except clause names the exception types it handles."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_exercises_encoder_refusal"
+description = "The agent runs encode.py on at least one document whose value or offset field it edited and confirms the program prints the inconsistent_document object from MDUMP-encoder-notes.md, exits with status 1 and writes no capture file."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_checks_every_verified_decoding"
+description = "The agent compares its decoder's output with the decoded object on every line of MDUMP-rev4-verified.jsonl and resolves each mismatch before writing the reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_checks_crc_against_check_value"
+description = "The agent runs its CRC-32C implementation on ASCII 123456789 and confirms the result is 0xE3069283 before relying on it."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_confirms_5x_checksum_on_logged_trailers"
+description = "The agent confirms that its recovered version 3 checksum reproduces the stored trailer of at least 20 unwhitened version 3 capture-log entries before decoding version 3 captures with it."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R10"
+name = "r10_confirms_5x_keystream_start_on_logged_trailers"
+description = "The agent confirms its version 3 keystream start rule by checking that at least 10 whitened version 3 capture-log entries pass their trailer check after de-whitening."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "r11_isolates_5x_delta_and_dictionary_rules"
+description = "The agent settles one of the version 3 delta storage and dictionary rules on MDUMP-rev5-fingerprints.jsonl lines holding no records of the other kind before it fits the remaining rule."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "r12_checks_every_5x_fingerprint"
+description = "The agent compares the fingerprint of its decoder's output with the sha256 on every line of MDUMP-rev5-fingerprints.jsonl and resolves each mismatch before writing the reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R13"
+name = "r13_modifies_shipped_data"
+description = "The agent modifies, moves or deletes a file under /app/data."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R14"
+name = "r14_looks_up_task_online"
+description = "The agent uses a web search or web fetch tool to look up MDUMP code, hints or solutions."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R15"
+name = "r15_claims_success_without_evidence"
+description = "The agent's final message claims the capture log, the round trips or the version 3 fingerprints pass when no run in the trajectory shows that result."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R16"
+name = "r16_leaves_no_dead_code"
+description = "The agent writes decode.py and encode.py so that neither file keeps dead code, meaning commented-out code or a function that nothing calls."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R17"
+name = "r17_exercises_newest_build_decoding"
+description = "The agent directly exercises decoding of a capture using the newest documented build transition before writing the reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R18"
+name = "r18_exercises_newest_build_encoding"
+description = "The agent directly exercises byte-identical encoding of a document using the newest documented build transition before writing the reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R19"
+name = "r19_exercises_newest_build_damage"
+description = "The agent directly exercises precedence-selected damage handling for the newest documented build transition before writing the reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"

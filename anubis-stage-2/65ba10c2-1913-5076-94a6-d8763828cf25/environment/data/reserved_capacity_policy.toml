@@ -1,0 +1,40 @@
+# Reserved capacity, and how it settles against free capacity.
+policy = "reserved_capacity"
+shift_id = "KP-2042-S23"
+
+[precedence]
+statement = """
+Reserved capacity is settled before free capacity is counted. A
+block may carry free slots and still refuse a placement, because the
+slots a reservation withholds were never free to begin with. A stage
+that counts free slots and admits a placement against them without
+first withholding the reserved slots has read this backwards.
+"""
+
+[absent_quantity]
+statement = """
+A reservation whose quantity column carries the not supplied marker
+withholds the whole of the block free capacity for the slots it
+spans. An absent quantity is not a quantity of zero, and the two
+give different answers wherever a block has free capacity at all.
+"""
+
+[qualifying]
+statement = """
+A reservation is consumed only by a move whose box belongs to the
+service group the reservation names. A move belonging to any other
+service group is bound by the reservation and consumes none of it.
+"""
+
+[span]
+statement = """
+A reservation stands over every slot from its first_slot to its
+last_slot, both included.
+"""
+
+[over_reservation]
+statement = """
+A reservation quantity larger than the free capacity of its block
+withholds the free capacity and no more. The excess is recorded as
+unmet reservation and withholds nothing further.
+"""

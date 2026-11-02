@@ -1,0 +1,36 @@
+# Which revision of a register row is in force at the assessment
+# instant. Every register that carries a revision_seq column is read
+# through this paper.
+policy = "revision_precedence"
+shift_id = "KP-2042-S23"
+
+[scope]
+statement = """
+A register row belongs to this shift only when its shift_id column
+names this shift. Rows carrying any other shift identifier are
+earlier material and take no part in this shift's derivation.
+"""
+
+[selection]
+statement = """
+Among the rows of one register that belong to this shift and name one
+subject, set aside every row marked retired and every row marked
+future, then take the row with the highest revision_seq. That row is
+the applicable revision. A subject whose rows are all set aside has
+no applicable revision and the stage that reads it says what happens
+then.
+"""
+
+[withdrawal]
+statement = """
+A vessel call revision marked withdrawn is set aside the same way a
+retired row is. A withdrawn revision never becomes applicable, not
+even when it is the only revision that remains.
+"""
+
+[supersession]
+statement = """
+A notice marked superseded is set aside. Among the notices for one
+subject that are not superseded, the one with the highest notice_seq
+is in force.
+"""

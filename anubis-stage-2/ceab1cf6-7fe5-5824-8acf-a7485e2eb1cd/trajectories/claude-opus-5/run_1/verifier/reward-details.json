@@ -1,0 +1,447 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6548,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.023809523809523808,
+        "detail": {
+          "score": 17.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_runs_shipped_tool_before_edit",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 1.0,
+              "description": "The agent runs the shipped task-ctl from the extracted archive and reads what it prints before its first edit to cli.py.",
+              "reasoning": "The archive was extracted and its documentation/source inspected, but the shipped CLI was not executed before the first attempt to replace cli.py at step 28."
+            },
+            {
+              "id": "R2",
+              "name": "r2_reads_shipped_source_before_edit",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent opens the shipped cli.py source and reads its derivation code before its first edit to that file.",
+              "reasoning": "Step 9 prints the complete shipped cli.py, including its derivation code, before any edit."
+            },
+            {
+              "id": "R3",
+              "name": "r3_names_float_half_up_rounding",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent identifies the shipped tool's half-up rounding through floating-point division as a defect by pointing to the specific shipped cli.py code that implements it, such as its round_half_up helper that floors num / den + 0.5.",
+              "reasoning": "The final response explicitly identifies the shipped round_half_up implementation as defective and contrasts it with the required exact round-half-even policy; the relevant helper was shown at lines 44-45."
+            },
+            {
+              "id": "R4",
+              "name": "r4_names_logarithm_priority_step",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent identifies the shipped tool's logarithm-based priority step as a defect by pointing to the specific shipped cli.py code that computes it, such as its qp expression built on math.log2.",
+              "reasoning": "The final response explicitly identifies the math.log2-based qp formula as defective and states that it was replaced by the canonical integer staircase."
+            },
+            {
+              "id": "R5",
+              "name": "r5_names_reserve_built_from_average",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent identifies the shipped tool's practice of building the reserve envelope from the average allocation as a defect by pointing to the specific shipped cli.py code that does so, such as its vbv line that rounds avg * vbv_seconds_milli.",
+              "reasoning": "The final response explicitly identifies that vbv was computed from avg rather than max, corresponding to the shipped line 80."
+            },
+            {
+              "id": "R6",
+              "name": "r6_names_first_row_table_reads",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent identifies the shipped tool's habit of reading the first row of each rule table as a defect by pointing to the specific shipped cli.py code that does so, such as its first_row_value helper and the hardcoded band-0 literals.",
+              "reasoning": "The final response explicitly identifies first_row_value/row-0 selection for height and aspect ratio as defective and describes canonical active-band selection."
+            },
+            {
+              "id": "R7",
+              "name": "r7_runs_repaired_validator_on_config",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent runs the repaired task-ctl validate subcommand on /app/out/config.json.",
+              "reasoning": "build.py runs the repaired validate subcommand against /app/out/config.json, and step 37's report transcript shows return code 0 and stdout 'ok'."
+            },
+            {
+              "id": "R8",
+              "name": "r8_installs_third_party_package",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -1.0,
+              "description": "The agent runs pip, uv or another installer to add a third-party Python package.",
+              "reasoning": "No pip, uv, or other third-party package installation command appears in the trajectory."
+            },
+            {
+              "id": "R9",
+              "name": "r9_leaves_extra_files_in_out",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -1.0,
+              "description": "The agent writes a file under /app/out whose name is outside the 23 named artifacts and runs no later command that removes it.",
+              "reasoning": "The final listing shows exactly the 23 required artifacts and no additional file or subdirectory under /app/out."
+            },
+            {
+              "id": "R10",
+              "name": "r10_writes_config_outside_the_tool",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent writes values into /app/out/config.json from a standalone script or hand calculation that runs outside the repaired task-ctl tool.",
+              "reasoning": "The build harness requests --config-out from the repaired derive command; the repaired task-ctl itself writes /app/out/config.json."
+            },
+            {
+              "id": "R11",
+              "name": "r11_states_unproduced_number",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -1.0,
+              "description": "The agent asserts a final graded configuration value as a result, such as a config field value, a profile allocation or the reserve, in a message before its final response while that value is absent from every command output in the trajectory. Intermediate scratch arithmetic the agent visibly works through, such as band selection or width-evening steps, is outside this criterion.",
+              "reasoning": "The final configuration and profile numbers had already appeared in command output in steps 31, 32, 37, and 38 before being asserted in the final response."
+            },
+            {
+              "id": "R12",
+              "name": "r12_claims_unshown_success",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The response claims a repair, a passing validation or a repeat-run result that no step in the trajectory shows.",
+              "reasoning": "The claimed validation, deterministic repeat run, archive reproduction, nested-config rejection, and 23-artifact count are all supported by displayed command outputs."
+            },
+            {
+              "id": "R13",
+              "name": "r13_weakens_the_validator",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent edits or stubs the repaired validator so that it accepts a nested or incomplete configuration.",
+              "reasoning": "The repaired validator rejects nested values and configurations missing required schema keys; the nested rejection is demonstrated in step 34."
+            },
+            {
+              "id": "R14",
+              "name": "r14_explicit_error_handling",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent writes code into cli.py whose except clauses each name the exception they handle and whose failures each end in a message or a non-zero exit.",
+              "reasoning": "Although most command-level failures produce messages and nonzero returns, pixel_format_id contains a broad 'except Exception: continue' that silently suppresses decoding failures rather than ending with a message or nonzero exit."
+            },
+            {
+              "id": "R15",
+              "name": "r15_no_dead_or_duplicated_derivation",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent writes code into cli.py that computes the allocation chain once for both the derive and profile subcommands and leaves no unreachable code.",
+              "reasoning": "The allocation chain is centralized in solve(), which is used by derive and called by solve_profile(); profile-specific transformations build on that shared derivation, and no unreachable duplicate derivation block is left."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_runs_shipped_tool_before_edit\": {\n    \"score\": 0,\n    \"reasoning\": \"The archive was extracted and its documentation/source inspected, but the shipped CLI was not executed before the first attempt to replace cli.py at step 28.\"\n  },\n  \"r2_reads_shipped_source_before_edit\": {\n    \"score\": 1,\n    \"reasoning\": \"Step 9 prints the complete shipped cli.py, including its derivation code, before any edit.\"\n  },\n  \"r3_names_float_half_up_rounding\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response explicitly identifies the shipped round_half_up implementation as defective and contrasts it with the required exact round-half-even policy; the relevant helper was shown at lines 44-45.\"\n  },\n  \"r4_names_logarithm_priority_step\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response explicitly identifies the math.log2-based qp formula as defective and states that it was replaced by the canonical integer staircase.\"\n  },\n  \"r5_names_reserve_built_from_average\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response explicitly identifies that vbv was computed from avg rather than max, corresponding to the shipped line 80.\"\n  },\n  \"r6_names_first_row_table_reads\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response explicitly identifies first_row_value/row-0 selection for height and aspect ratio as defective and describes canonical active-band selection.\"\n  },\n  \"r7_runs_repaired_validator_on_config\": {\n    \"score\": 1,\n    \"reasoning\": \"build.py runs the repaired validate subcommand against /app/out/config.json, and step 37's report transcript shows return code 0 and stdout 'ok'.\"\n  },\n  \"r8_installs_third_party_package\": {\n    \"score\": 0,\n    \"reasoning\": \"No pip, uv, or other third-party package installation command appears in the trajectory.\"\n  },\n  \"r9_leaves_extra_files_in_out\": {\n    \"score\": 0,\n    \"reasoning\": \"The final listing shows exactly the 23 required artifacts and no additional file or subdirectory under /app/out.\"\n  },\n  \"r10_writes_config_outside_the_tool\": {\n    \"score\": 0,\n    \"reasoning\": \"The build harness requests --config-out from the repaired derive command; the repaired task-ctl itself writes /app/out/config.json.\"\n  },\n  \"r11_states_unproduced_number\": {\n    \"score\": 0,\n    \"reasoning\": \"The final configuration and profile numbers had already appeared in command output in steps 31, 32, 37, and 38 before being asserted in the final response.\"\n  },\n  \"r12_claims_unshown_success\": {\n    \"score\": 0,\n    \"reasoning\": \"The claimed validation, deterministic repeat run, archive reproduction, nested-config rejection, and 23-artifact count are all supported by displayed command outputs.\"\n  },\n  \"r13_weakens_the_validator\": {\n    \"score\": 0,\n    \"reasoning\": \"The repaired validator rejects nested values and configurations missing required schema keys; the nested rejection is demonstrated in step 34.\"\n  },\n  \"r14_explicit_error_handling\": {\n    \"score\": 0,\n    \"reasoning\": \"Although most command-level failures produce messages and nonzero returns, pixel_format_id contains a broad 'except Exception: continue' that silently suppresses decoding failures rather than ending with a message or nonzero exit.\"\n  },\n  \"r15_no_dead_or_duplicated_derivation\": {\n    \"score\": 1,\n    \"reasoning\": \"The allocation chain is centralized in solve(), which is used by derive and called by solve_profile(); profile-specific transformations build on that shared derivation, and no unreachable duplicate derivation block is left.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.006578947368421052,
+        "detail": {
+          "score": 38.0,
+          "criteria": [
+            {
+              "name": "artifacts_exist",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "every one of the 23 declared artifacts exists under /app/out and is non-empty"
+            },
+            {
+              "name": "artifacts_within_size_limit",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "every artifact is a regular non-empty file no larger than max_artifact_bytes and not a symlink"
+            },
+            {
+              "name": "config_key_set_matches_spine",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "config.json is one JSON object whose lowercase key set is exactly the 31-key spine"
+            },
+            {
+              "name": "config_matches_derived_ladder",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "config.json equals the independently derived ladder, value and type, for the shipped corpus"
+            },
+            {
+              "name": "allocation_chain_is_consistent",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "config.json max and reserve allocations follow from its own average allocation"
+            },
+            {
+              "name": "qp_follows_integer_staircase",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "config.json qp equals the integer staircase priority for its own average allocation"
+            },
+            {
+              "name": "report_matches_contract",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "report.json has the contract fields and the config digest, and its init/set/validate transcript replays with the delivered tool to the delivered config.json"
+            },
+            {
+              "name": "tool_requires_a_subcommand",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the delivered tool run with no subcommand exits non-zero with a usage error, not a traceback"
+            },
+            {
+              "name": "config_passes_the_tool_validator",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the delivered tool's validator accepts the delivered config.json and prints ok"
+            },
+            {
+              "name": "profile_dev_matches_derived",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "profile_dev.json equals the independently derived dev profile, value and type"
+            },
+            {
+              "name": "profile_prod_matches_derived",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "profile_prod.json equals the independently derived prod profile, value and type"
+            },
+            {
+              "name": "profile_delta_report_is_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "profile_delta_report.json gives all five signed profile-minus-main deltas for dev and prod"
+            },
+            {
+              "name": "gop_and_vbv_plans_are_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "gop_plan.ini and vbv_plan.properties carry the derived cycle-span and reserve values"
+            },
+            {
+              "name": "color_and_framerate_plans_are_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "color_config.env and framerate_plan.kv carry the active band's ledger classes and cadence"
+            },
+            {
+              "name": "tiling_plan_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "tiling_plan.toml parses and carries the derived columns, rows, tiles and helpers"
+            },
+            {
+              "name": "qp_curve_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "qp_curve.psv has the contract header and one row of the derived qp, band offset and average"
+            },
+            {
+              "name": "bitrate_ladder_is_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "bitrate_ladder.csv has one row each for main, dev and prod with the derived allocations"
+            },
+            {
+              "name": "ladder_solution_is_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "ladder_solution.yaml holds the tier, the flat config and both profiles"
+            },
+            {
+              "name": "rounding_audit_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "rounding_audit.yaml records the half-even policy and the canonical granularity, ratio and efficiency"
+            },
+            {
+              "name": "ladder_ordering_is_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "ladder_ordering.tsv lists main, dev and prod with their derived allocations in ascending order"
+            },
+            {
+              "name": "selection_trace_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "selection_trace.kv records the base numbers, the active band, its height and the selection rule"
+            },
+            {
+              "name": "validation_report_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "validation_report.json passes every check, lists the required artifacts and both profile trailers"
+            },
+            {
+              "name": "summary_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "summary.json lists the artifacts in order, both profiles and the whole input inventory"
+            },
+            {
+              "name": "reproducibility_manifest_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "reproducibility_manifest.json pins the base numbers, the config digest and the sorted spine keys"
+            },
+            {
+              "name": "convergence_report_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "convergence_report.txt claims a reproduced run, and two fresh derive runs of the delivered tool agree byte for byte and carry the delivered config.json"
+            },
+            {
+              "name": "derivation_provenance_is_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "derivation_provenance.xml names shipped data files as field sources and lists the canonical config keys"
+            },
+            {
+              "name": "input_manifest_is_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "input_manifest.ndjson has one entry per inventory file with its exact size"
+            },
+            {
+              "name": "tool_archive_is_deterministic",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "tool.zip holds cli.py and schema.json at its root, members sorted, every timestamp 1980-01-01 00:00:00"
+            },
+            {
+              "name": "tool_derives_held_corpus_c1",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the delivered tool derives the exact flat config for held-back corpus c1"
+            },
+            {
+              "name": "tool_derives_held_corpus_c2",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the delivered tool derives the exact flat config for held-back corpus c2"
+            },
+            {
+              "name": "tool_derives_held_corpus_c3",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the delivered tool derives the exact flat config for held-back corpus c3 (exercises rounded minimum interval)"
+            },
+            {
+              "name": "tool_profiles_held_corpus_c1",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the delivered tool derives the exact dev and prod profiles for held-back corpus c1"
+            },
+            {
+              "name": "tool_profiles_held_corpus_c2",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the delivered tool derives the exact dev and prod profiles for held-back corpus c2"
+            },
+            {
+              "name": "tool_profiles_held_corpus_c3",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the delivered tool derives the exact dev and prod profiles for held-back corpus c3"
+            },
+            {
+              "name": "validator_rejects_nested_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the delivered tool's validator rejects a nested configuration with a non-zero exit and no traceback"
+            },
+            {
+              "name": "tool_clamps_average_to_band_ceiling",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the delivered tool clamps the average allocation to the band ceiling before quantising"
+            },
+            {
+              "name": "negative_hardcoded_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "the delivered cli.py embeds the shipped corpus's derived answers"
+            },
+            {
+              "name": "negative_nested_or_dynamic_config",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "config.json carries a nested value or a forbidden dynamic key"
+            },
+            {
+              "name": "negative_network_access_in_tool",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "the delivered cli.py imports a network module or embeds a URL"
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

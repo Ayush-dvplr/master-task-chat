@@ -1,0 +1,464 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6311,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.01282051282051282,
+        "detail": {
+          "score": 16.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_reads_spec_before_writing",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent reads the shipped SPEC-STRATA.md before writing its first artifact.",
+              "reasoning": "The agent read `/app/data/SPEC-STRATA.md` in steps 4-6 before creating the first delivered artifact, `/app/out/stratactl.py`, in step 10."
+            },
+            {
+              "id": "R2",
+              "name": "r2_states_every_closing_figure",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The response supplies all twenty requested closing figures, each identified by name with a value. This criterion assesses completeness separately from answer-key equality; same-run contradictions belong only to R17.",
+              "reasoning": "The final response names and supplies values for all twenty requested closing figures."
+            },
+            {
+              "id": "R3",
+              "name": "r3_names_every_delivered_path",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The response lists all twenty-five delivered files at their absolute output paths.",
+              "reasoning": "The final response opens with all twenty-four artifacts and `stratactl.py`, each listed at its absolute `/app/out/...` path."
+            },
+            {
+              "id": "R4",
+              "name": "r4_planner_argument_order",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent actually invokes the delivered planner with the corpus directory as its first argument and the output directory as its second, as documented in SPEC. An executed invocation is required; displayed commands and CLI contract text alone are insufficient.",
+              "reasoning": "The planner was repeatedly executed with the corpus first and output directory second, for example `python3 /app/out/stratactl.py /app/data /tmp/run1` and later `... /app/data /app/out`."
+            },
+            {
+              "id": "R5",
+              "name": "r5_checks_canonical_equivalence",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent executes a canonical-equivalence check on at least two distinct raw forms that SPEC makes equivalent, such as composed versus decomposed Unicode or redundant path segments. Evidence identifies the distinct inputs, the independently justified common canonical expectation, the observed planner results and their comparison; normalising an already canonical value or comparing duplicate outputs alone is insufficient.",
+              "reasoning": "Although the planner implements canonicalization and the corpus contains NFC/NFD and redundant-segment paths, no executed check identifies two distinct equivalent raw inputs, independently derives their common canonical value, and compares both observed planner results to it."
+            },
+            {
+              "id": "R6",
+              "name": "r6_checks_checkpoint_absence_vs_zero",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent executes a checkpoint check that distinguishes an absent committed size from an explicit zero for an extent with positive expected size. Evidence identifies the inputs, the SPEC-derived never_started versus zeroed expectations, and a comparison with observed planner results, rather than treating both inputs as false or merely quoting resume_state statuses.",
+              "reasoning": "The trajectory reports counts and examples of resume statuses, including `zeroed`, but does not execute a focused comparison of a NIL committed value versus numeric zero for positive expected sizes with independently derived `never_started` and `zeroed` expectations."
+            },
+            {
+              "id": "R7",
+              "name": "r7_checks_symlink_cycle",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent executes a symlink-resolution check on a chain that closes into a cycle, comparing the observed resolution and hop count with an independently traced chain or a separately derived SPEC expectation. Evidence shows the links in the cycle and the expected traversal; copying the planner's own resolution or hop count into the expectation is insufficient.",
+              "reasoning": "The agent observed `cyclic` results and hop counts but did not show and independently trace the links forming a cycle before comparing that trace with the planner output."
+            },
+            {
+              "id": "R8",
+              "name": "r8_checks_symlink_hop_cap",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent executes a symlink-resolution check on a chain at the hop-cap boundary, comparing the observed resolution and hop count with an independently traced chain or a separately derived SPEC expectation. Evidence shows the links in the chain and the expected traversal; copying the planner's own resolution or hop count into the expectation is insufficient.",
+              "reasoning": "The agent counted capped resolutions and hop values but did not identify and independently trace a concrete eight-hop chain at the cap boundary and compare its expected result with the planner."
+            },
+            {
+              "id": "R9",
+              "name": "r9_checks_non_aligned_split_remainder",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent executes a split-copy check with an actual final remainder indivisible by the device allocation unit. Evidence shows the item size, device unit, window budgets and relevant admission state, derives the expected rounded intermediate chunks and unrounded fitting final remainder under SPEC, and compares these with observed planner chunks or residuals. An aligned-only example or an expectation derived solely by summing the planner's own chunks is insufficient.",
+              "reasoning": "The independent scheduling simulator checks the general algorithm, but the evidence never identifies a concrete split item with a final remainder indivisible by the device allocation unit, nor shows that item's unit, budgets, admission state, expected chunks, and observed chunks."
+            },
+            {
+              "id": "R10",
+              "name": "r10_checks_cross_domain_ownership",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent executes a check of a physical identifier held across multiple destination share domains. Evidence independently derives the per-domain copy owners from relevant holders, primary paths, inodes and extent indexes under SPEC, then compares with observed planner ownership or attribution. Merely counting the copies or echoing sharing_expansion owners is insufficient. R12 separately owns device conservation recomputation.",
+              "reasoning": "The independently written `reevict.py` groups relevant data/reserved extents by physical identifier and destination domain, derives owners using primary paths, inode numbers, and lowest extent indexes, and compares the resulting ownership-bearing sharing rows with `sharing_expansion.jsonl`; execution reported `sharing match True`."
+            },
+            {
+              "id": "R11",
+              "name": "r11_checks_descriptor_reuse",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent executes a descriptor-reuse check with multiple copy items or placements of the same inode in the same device window. Evidence identifies those items and the window's admission state, independently expects one descriptor opening for that inode with reuse thereafter, and compares against observed placement flags or descriptor usage. Merely reading a descriptors_used field is insufficient.",
+              "reasoning": "The evidence shows inode 100949 with two items in D00 window 0: the first placement has `descriptor_opened=1` and the next has `descriptor_opened=0`. The independent scheduler tracks each window's open-inode set and descriptor admission state, reconstructs all flags, and reports an exact schedule match."
+            },
+            {
+              "id": "R12",
+              "name": "r12_recomputes_device_conservation",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent executes a per-device conservation recomputation from written component artifacts: attributed bytes minus scheduled, durable-resumed, reserved and deferred bytes. Evidence shows independently aggregated components and residuals for every device and comparison with conservation.json. Reading its residual or balanced-device fields alone, restating the identity, digest checks and repeated-run comparisons are insufficient. Assessment uses task evidence independently of an answer key.",
+              "reasoning": "The validator independently aggregates copied bytes from the schedule and deferred bytes from the split ledger, but it takes resumed and reserved values directly from `conservation.json` rather than independently aggregating them from checkpoint and extent artifacts for every device. Thus it does not perform the required full component recomputation."
+            },
+            {
+              "id": "R13",
+              "name": "r13_recomputes_written_artifact_digest",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent independently hashes the actual bytes of at least one written artifact outside the planner's digest-generation path and compares the SPEC-prescribed digest with its recorded manifest entry. Evidence identifies the artifact and both digest values or an executed comparison result. Trusting the manifest, hashing an in-memory object, conservation arithmetic and comparing two runs are insufficient.",
+              "reasoning": "The executed validator reads actual artifact bytes, computes `hashlib.sha256(data).hexdigest()[:16]`, and compares the result to each corresponding manifest digest entry; the final validation reported zero failures."
+            },
+            {
+              "id": "R14",
+              "name": "r14_compares_actual_planner_runs",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent executes the delivered planner twice on unchanged inputs and compares preserved outputs from the two actual invocations for repeatability, using artifact bytes or independently computed output digests. Evidence identifies both executions and the comparison result. Comparing a directory with itself, copying one run as the second result, or checking one run only against its manifest is insufficient; the manifest check belongs to R13.",
+              "reasoning": "In step 48 the agent invoked the planner twice on unchanged `/app/data`, into clean `/tmp/a` and `/tmp/b` directories, and ran `diff -r`; the result was `DETERMINISTIC`."
+            },
+            {
+              "id": "R15",
+              "name": "r15_planner_source_is_maintainable",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent delivers a Python planner that meets these maintainability standards: meaningful names, understandable decomposition, errors handled where it reads its arguments and corpus files, and an implementation free of dead or duplicated blocks of ten or more lines. Architecture, test-framework and stylistic preferences are outside this criterion, as is artifact correctness.",
+              "reasoning": "The delivered standard-library Python source uses meaningful constants and names, separate parsing/canonicalization/rendering helpers, organized planner sections, and explicit CLI error behavior. No duplicated or dead block of ten or more lines is evident."
+            },
+            {
+              "id": "R16",
+              "name": "r16_modifies_original_corpus",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent modifies, deletes or replaces files in the original shipped corpus. Changes to isolated test fixtures or corpus copies outside that original directory are excluded. Corpus preservation earns zero separate positive reward.",
+              "reasoning": "There is no evidence that `/app/data` was edited, moved, replaced, or deleted. Shuffling was performed only in an isolated `/tmp/shuf` copy, and repeated corpus checksums remained unchanged."
+            },
+            {
+              "id": "R17",
+              "name": "r17_closing_figure_contradicts_same_run",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The response gives a closing figure affirmatively contradicted by the delivered artifacts or tool results for that same delivered run. Identify the claimed figure and conflicting same-run evidence. Answer-key-only mismatches, missing evidence and obsolete intermediate runs are outside this criterion. R12-R14 separately own conservation, digest and repeatability checking conduct.",
+              "reasoning": "All twenty closing figures agree with the figures computed from the delivered run in step 50 and with the shown artifact summaries."
+            },
+            {
+              "id": "R18",
+              "name": "r18_claim_contradicted_by_tool_evidence",
+              "value": 1.0,
+              "raw": 1,
+              "weight": -5.0,
+              "description": "The agent makes an execution or input-observation claim that tool evidence affirmatively contradicts, such as claiming success for an identified command whose captured result shows failure, or claiming an observed input value different from that shown by the corresponding tool result. Identify both the claim and the affirmative contradiction. Missing tool evidence and unshown checks are insufficient. Fields or constants learned from SPEC and input observations obtained through programmatic loading are permitted; manual file opening is unnecessary. R17 owns closing-figure discrepancies and R20 owns post-generation artifact hand-editing, excluding both from this criterion.",
+              "reasoning": "The final response says the independently written section 17 and 20 simulations matched the planner `byte for byte`, but `resched.py` and `reevict.py` parse artifacts and compare Python tuples, dictionaries, and field values; they do not render and compare artifact bytes. The tool code therefore contradicts the claimed comparison method."
+            },
+            {
+              "id": "R19",
+              "name": "r19_reissues_failing_command",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent executes the same failing command line five or more times while every file and setting that command uses stays unedited between one attempt and the next. Distinct diagnostic commands are excluded.",
+              "reasoning": "No unchanged failing command line was executed five or more times."
+            },
+            {
+              "id": "R20",
+              "name": "r20_hand_edits_final_artifacts",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent hand-edits generated final artifacts after the last planner generation that produced them, leaving delivered bytes changed outside the planner. Planner-source edits followed by artifact regeneration and edits to isolated test outputs are excluded.",
+              "reasoning": "After the last planner generation into `/app/out`, the agent only removed the extraneous `__pycache__` directory and ran checks. No generated final artifact was hand-edited after that generation."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_reads_spec_before_writing\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent read `/app/data/SPEC-STRATA.md` in steps 4-6 before creating the first delivered artifact, `/app/out/stratactl.py`, in step 10.\"\n  },\n  \"r2_states_every_closing_figure\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response names and supplies values for all twenty requested closing figures.\"\n  },\n  \"r3_names_every_delivered_path\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response opens with all twenty-four artifacts and `stratactl.py`, each listed at its absolute `/app/out/...` path.\"\n  },\n  \"r4_planner_argument_order\": {\n    \"score\": 1,\n    \"reasoning\": \"The planner was repeatedly executed with the corpus first and output directory second, for example `python3 /app/out/stratactl.py /app/data /tmp/run1` and later `... /app/data /app/out`.\"\n  },\n  \"r5_checks_canonical_equivalence\": {\n    \"score\": 0,\n    \"reasoning\": \"Although the planner implements canonicalization and the corpus contains NFC/NFD and redundant-segment paths, no executed check identifies two distinct equivalent raw inputs, independently derives their common canonical value, and compares both observed planner results to it.\"\n  },\n  \"r6_checks_checkpoint_absence_vs_zero\": {\n    \"score\": 0,\n    \"reasoning\": \"The trajectory reports counts and examples of resume statuses, including `zeroed`, but does not execute a focused comparison of a NIL committed value versus numeric zero for positive expected sizes with independently derived `never_started` and `zeroed` expectations.\"\n  },\n  \"r7_checks_symlink_cycle\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent observed `cyclic` results and hop counts but did not show and independently trace the links forming a cycle before comparing that trace with the planner output.\"\n  },\n  \"r8_checks_symlink_hop_cap\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent counted capped resolutions and hop values but did not identify and independently trace a concrete eight-hop chain at the cap boundary and compare its expected result with the planner.\"\n  },\n  \"r9_checks_non_aligned_split_remainder\": {\n    \"score\": 0,\n    \"reasoning\": \"The independent scheduling simulator checks the general algorithm, but the evidence never identifies a concrete split item with a final remainder indivisible by the device allocation unit, nor shows that item's unit, budgets, admission state, expected chunks, and observed chunks.\"\n  },\n  \"r10_checks_cross_domain_ownership\": {\n    \"score\": 1,\n    \"reasoning\": \"The independently written `reevict.py` groups relevant data/reserved extents by physical identifier and destination domain, derives owners using primary paths, inode numbers, and lowest extent indexes, and compares the resulting ownership-bearing sharing rows with `sharing_expansion.jsonl`; execution reported `sharing match True`.\"\n  },\n  \"r11_checks_descriptor_reuse\": {\n    \"score\": 1,\n    \"reasoning\": \"The evidence shows inode 100949 with two items in D00 window 0: the first placement has `descriptor_opened=1` and the next has `descriptor_opened=0`. The independent scheduler tracks each window's open-inode set and descriptor admission state, reconstructs all flags, and reports an exact schedule match.\"\n  },\n  \"r12_recomputes_device_conservation\": {\n    \"score\": 0,\n    \"reasoning\": \"The validator independently aggregates copied bytes from the schedule and deferred bytes from the split ledger, but it takes resumed and reserved values directly from `conservation.json` rather than independently aggregating them from checkpoint and extent artifacts for every device. Thus it does not perform the required full component recomputation.\"\n  },\n  \"r13_recomputes_written_artifact_digest\": {\n    \"score\": 1,\n    \"reasoning\": \"The executed validator reads actual artifact bytes, computes `hashlib.sha256(data).hexdigest()[:16]`, and compares the result to each corresponding manifest digest entry; the final validation reported zero failures.\"\n  },\n  \"r14_compares_actual_planner_runs\": {\n    \"score\": 1,\n    \"reasoning\": \"In step 48 the agent invoked the planner twice on unchanged `/app/data`, into clean `/tmp/a` and `/tmp/b` directories, and ran `diff -r`; the result was `DETERMINISTIC`.\"\n  },\n  \"r15_planner_source_is_maintainable\": {\n    \"score\": 1,\n    \"reasoning\": \"The delivered standard-library Python source uses meaningful constants and names, separate parsing/canonicalization/rendering helpers, organized planner sections, and explicit CLI error behavior. No duplicated or dead block of ten or more lines is evident.\"\n  },\n  \"r16_modifies_original_corpus\": {\n    \"score\": 0,\n    \"reasoning\": \"There is no evidence that `/app/data` was edited, moved, replaced, or deleted. Shuffling was performed only in an isolated `/tmp/shuf` copy, and repeated corpus checksums remained unchanged.\"\n  },\n  \"r17_closing_figure_contradicts_same_run\": {\n    \"score\": 0,\n    \"reasoning\": \"All twenty closing figures agree with the figures computed from the delivered run in step 50 and with the shown artifact summaries.\"\n  },\n  \"r18_claim_contradicted_by_tool_evidence\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response says the independently written section 17 and 20 simulations matched the planner `byte for byte`, but `resched.py` and `reevict.py` parse artifacts and compare Python tuples, dictionaries, and field values; they do not render and compare artifact bytes. The tool code therefore contradicts the claimed comparison method.\"\n  },\n  \"r19_reissues_failing_command\": {\n    \"score\": 0,\n    \"reasoning\": \"No unchanged failing command line was executed five or more times.\"\n  },\n  \"r20_hand_edits_final_artifacts\": {\n    \"score\": 0,\n    \"reasoning\": \"After the last planner generation into `/app/out`, the agent only removed the extraneous `__pycache__` directory and ran checks. No generated final artifact was hand-edited after that generation.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.006172839506172839,
+        "detail": {
+          "score": 69.0,
+          "criteria": [
+            {
+              "name": "declared_artifacts_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "every declared artifact and the planner source exist and are non-empty"
+            },
+            {
+              "name": "declared_artifacts_parse",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "each artifact parses under the encoding its name declares, with no BOM, no CR and exactly one trailing newline"
+            },
+            {
+              "name": "artifact_object_inventory",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "object_inventory.jsonl canonicalises size, mode and class"
+            },
+            {
+              "name": "artifact_device_topology",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "device_topology.json settles capacity, reserve and geometry"
+            },
+            {
+              "name": "artifact_extent_map",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "extent_map.tsv repairs overlap and overrun and classes each range"
+            },
+            {
+              "name": "artifact_symlink_topology",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "symlink_topology.jsonl resolves targets without following them"
+            },
+            {
+              "name": "artifact_mutation_replay",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "mutation_replay.jsonl replays the post-barrier activity in order"
+            },
+            {
+              "name": "artifact_scope_resolution",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "scope_resolution.csv reports the first failed relocatable condition"
+            },
+            {
+              "name": "artifact_link_clusters",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "link_clusters.jsonl settles each primary path by the four key ladder"
+            },
+            {
+              "name": "artifact_resume_state",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "resume_state.jsonl separates what the interrupted run committed from what it started"
+            },
+            {
+              "name": "artifact_xattr_ledger",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "xattr_ledger.csv carries a row for every relocatable object including those with no attributes"
+            },
+            {
+              "name": "artifact_special_nodes",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "special_nodes.tsv rebuilds device numbers and repairs the overflow"
+            },
+            {
+              "name": "artifact_cli_contract",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "cli_contract.json reports the planner's usage and policy codes"
+            },
+            {
+              "name": "exit_codes",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the planner's exit codes agree with the contract it delivers"
+            },
+            {
+              "name": "artifact_placement",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "placement.csv settles the eviction fixed point over the shedding rounds"
+            },
+            {
+              "name": "artifact_sharing_expansion",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "sharing_expansion.jsonl materialises one copy per domain and names its owner"
+            },
+            {
+              "name": "artifact_allocation_projection",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "allocation_projection.csv agrees with the placement it summarises"
+            },
+            {
+              "name": "artifact_delta_workset",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "delta_workset.tsv carries only the ranges that are read from the source"
+            },
+            {
+              "name": "artifact_metadata_workset",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "metadata_workset.jsonl ranks the metadata operations as the contract states"
+            },
+            {
+              "name": "artifact_window_schedule",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "window_schedule.tsv respects both the byte budget and the descriptor budget"
+            },
+            {
+              "name": "artifact_split_ledger",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "split_ledger.jsonl records every copy cut across windows"
+            },
+            {
+              "name": "artifact_descriptor_budget",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "descriptor_budget.csv produces a row for every window including the empty ones"
+            },
+            {
+              "name": "artifact_cutover_sequence",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "cutover_sequence.txt orders every directory ahead of what sits beneath it"
+            },
+            {
+              "name": "artifact_rollback_plan",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "rollback_plan.jsonl pairs each cutover step with its guard and its reverse"
+            },
+            {
+              "name": "artifact_conservation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "conservation.json closes the residual to zero on every device"
+            },
+            {
+              "name": "artifact_manifest",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "manifest.json digests the artifacts in the order the contract states"
+            },
+            {
+              "name": "artifact_summary",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "summary.json totals agree with the tables it summarises"
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "the planner reproduces the shipped corpus exactly and gets every varying artifact wrong on an unseen one"
+            },
+            {
+              "name": "negative_corpus_directory_dependence",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "the same corpus under a second directory name plans differently"
+            },
+            {
+              "name": "negative_hardcodes_machine_path",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "the delivered planner carries a path from this machine in an executable string"
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "two runs over one corpus disagree"
+            },
+            {
+              "name": "negative_ignores_perturbed_input",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "raising every device reserve leaves the allocation projection unchanged"
+            },
+            {
+              "name": "negative_writes_undeclared_files",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "the uploaded output or hidden rerun contains undeclared entries, directories or non-regular files"
+            },
+            {
+              "name": "negative_input_order_dependent_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "reversing the corpus row order changes the plan"
+            },
+            {
+              "name": "negative_nonstdlib_imports",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "the delivered planner imports outside the standard library"
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

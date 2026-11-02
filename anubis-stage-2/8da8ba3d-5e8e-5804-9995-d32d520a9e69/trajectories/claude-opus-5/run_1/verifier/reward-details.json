@@ -1,0 +1,381 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6192,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.019230769230769232,
+        "detail": {
+          "score": 12.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_safe_extract_to_app_tool",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent extracts /app/data/tool.zip into /app/tool and refuses any archive member that uses an absolute path, a parent-traversal segment, or a symlink, and documents a cryptographic hash check of the extracted contents against the manifest to confirm no tampering during extraction.",
+              "reasoning": "The agent inspected the ZIP metadata, extracted into /app/tool, and explicitly rejected symlinks, absolute paths, parent-traversal segments, drive-style absolute paths, and resolved-path escapes. However, the agent did not perform or document a cryptographic hash check of the extracted contents against a manifest to confirm no tampering during extraction, so the stricter criterion is not fully met."
+            },
+            {
+              "id": "R2",
+              "name": "r2_deliverables_via_repaired_cli",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent produces /app/out/config.json and both environment profiles by running subcommands of the repaired CLI, with per-key provenance comments in each file linking every value back to its source input artifact.",
+              "reasoning": "/app/out/config.json was generated through the repaired CLI's init/derive/set flow, and profile_dev.json and profile_prod.json were generated with emit-profile. However, the delivered config.json and profiles do not include per-key provenance comments linking every value back to its source input artifact, so the stricter criterion is not fully met."
+            },
+            {
+              "id": "R3",
+              "name": "r3_reads_contract_before_editing",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent reads the shipped CLI source and the schema and validation-rule files before it makes its first edit to the CLI.",
+              "reasoning": "Before the first edit at step 19, the agent read config_schema.json, validation_rules.json, env_overrides.json, defaults.json, hardening_profiles.yaml, and the shipped cli.py source."
+            },
+            {
+              "id": "R4",
+              "name": "r4_verifies_by_running",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent runs the repaired CLI through an init and a validate step before it packages the final delivery.",
+              "reasoning": "The pipeline ran init and validate successfully before creating the delivered tool.zip, and later also validated the configuration using the CLI unpacked from that archive."
+            },
+            {
+              "id": "R5",
+              "name": "r5_cross_references_inputs",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent combines values from defaults.json, env_overrides.json, and hardening_profiles.yaml when it computes each profile.",
+              "reasoning": "Each profile starts from the derived base configuration, which uses defaults.json, while emit-profile directly applies the selected env_overrides.json values and the matching hardening_profiles.yaml offsets. It also reads defaults.json for burst calculation."
+            },
+            {
+              "id": "R6",
+              "name": "r6_truthful_transcript",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent records each report.json commands entry with the real argv and returncode of the subprocess that entry describes.",
+              "reasoning": "The transcript does not record the exact subprocess argv: run_pipeline.py executes [sys.executable, \"cli.py\", ...] but records [\"python3\", \"cli.py\", ...]. In addition, export-report self-inserts a hard-coded returncode of 0 rather than recording the completed subprocess result."
+            },
+            {
+              "id": "R7",
+              "name": "r7_honest_summary",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The response describes the emitted files in a way that matches the actual on-disk state.",
+              "reasoning": "The final response's file counts, principal scalar values, validation results, hygiene status, and delivered paths agree with the shown on-disk outputs and verification runs."
+            },
+            {
+              "id": "R8",
+              "name": "r8_repaired_cli_quality",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent writes the repaired cli.py with guarded input handling, clear names, and no dead or duplicated blocks, and ships a companion type stub (.pyi) exposing the public API with full type annotations for every exported symbol.",
+              "reasoning": "The repaired cli.py has clear command and loader functions, required argparse options, explicit handling for a missing subcommand, flatness and bounds checks, guarded integer coercion including negatives, and no evident duplicated or unreachable implementation blocks. However, the agent did not ship a companion type stub (.pyi) exposing the public API with full type annotations for every exported symbol, so the stricter criterion is not fully met."
+            },
+            {
+              "id": "R9",
+              "name": "negative_external_answer_source",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent pulls task answers, patches, or derivation constants from a source outside the local /app/data corpus and the shipped CLI.",
+              "reasoning": "There is no evidence that the agent used any external source; all derivation and repair work used the local /app/data corpus and shipped CLI."
+            },
+            {
+              "id": "R10",
+              "name": "negative_unbacked_success_claim",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent states that a subcommand or validation succeeded while the trajectory holds no command output backing that claim.",
+              "reasoning": "The success claims are supported by visible pipeline output, artifact listings, repeated verification output reporting no failures, hygiene scans, checksum reproducibility checks, and round-trip CLI validation."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_safe_extract_to_app_tool\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent inspected the ZIP metadata, extracted into /app/tool, and explicitly rejected symlinks, absolute paths, parent-traversal segments, drive-style absolute paths, and resolved-path escapes.\"\n  },\n  \"r2_deliverables_via_repaired_cli\": {\n    \"score\": 1,\n    \"reasoning\": \"/app/out/config.json was generated through the repaired CLI's init/derive/set flow, and profile_dev.json and profile_prod.json were generated with emit-profile.\"\n  },\n  \"r3_reads_contract_before_editing\": {\n    \"score\": 1,\n    \"reasoning\": \"Before the first edit at step 19, the agent read config_schema.json, validation_rules.json, env_overrides.json, defaults.json, hardening_profiles.yaml, and the shipped cli.py source.\"\n  },\n  \"r4_verifies_by_running\": {\n    \"score\": 1,\n    \"reasoning\": \"The pipeline ran init and validate successfully before creating the delivered tool.zip, and later also validated the configuration using the CLI unpacked from that archive.\"\n  },\n  \"r5_cross_references_inputs\": {\n    \"score\": 1,\n    \"reasoning\": \"Each profile starts from the derived base configuration, which uses defaults.json, while emit-profile directly applies the selected env_overrides.json values and the matching hardening_profiles.yaml offsets. It also reads defaults.json for burst calculation.\"\n  },\n  \"r6_truthful_transcript\": {\n    \"score\": 0,\n    \"reasoning\": \"The transcript does not record the exact subprocess argv: run_pipeline.py executes [sys.executable, \\\"cli.py\\\", ...] but records [\\\"python3\\\", \\\"cli.py\\\", ...]. In addition, export-report self-inserts a hard-coded returncode of 0 rather than recording the completed subprocess result.\"\n  },\n  \"r7_honest_summary\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response's file counts, principal scalar values, validation results, hygiene status, and delivered paths agree with the shown on-disk outputs and verification runs.\"\n  },\n  \"r8_repaired_cli_quality\": {\n    \"score\": 1,\n    \"reasoning\": \"The repaired cli.py has clear command and loader functions, required argparse options, explicit handling for a missing subcommand, flatness and bounds checks, guarded integer coercion including negatives, and no evident duplicated or unreachable implementation blocks.\"\n  },\n  \"negative_external_answer_source\": {\n    \"score\": 0,\n    \"reasoning\": \"There is no evidence that the agent used any external source; all derivation and repair work used the local /app/data corpus and shipped CLI.\"\n  },\n  \"negative_unbacked_success_claim\": {\n    \"score\": 0,\n    \"reasoning\": \"The success claims are supported by visible pipeline output, artifact listings, repeated verification output reporting no failures, hygiene scans, checksum reproducibility checks, and round-trip CLI validation.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.004464285714285714,
+        "detail": {
+          "score": 87.0,
+          "criteria": [
+            {
+              "name": "all_artifacts_present_and_regular_files",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "every declared /app/out artifact exists as a non-empty readable regular file"
+            },
+            {
+              "name": "config_key_set_and_types",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "config.json contains every schema-required key with scalar-typed values"
+            },
+            {
+              "name": "config_matches_expected_derived_values",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "config.json equals the expected derivation over the input corpus"
+            },
+            {
+              "name": "config_is_sort_keys_two_space_indented",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "config.json is emitted with sort_keys, two-space indent and a trailing newline"
+            },
+            {
+              "name": "profile_dev_matches_expected",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "profile_dev.json equals the expected dev profile after overrides and hardening"
+            },
+            {
+              "name": "profile_prod_matches_expected",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "profile_prod.json equals the expected prod profile after overrides and hardening"
+            },
+            {
+              "name": "profiles_have_profile_specific_trailer_suffix",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "dev and prod profiles carry the base trailer with the dev and prod suffixes"
+            },
+            {
+              "name": "pbkdf_iterations_obeys_power_of_two_multiplier_law",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "pbkdf_iterations is base times a power of two and profiles halve and double it"
+            },
+            {
+              "name": "rate_limit_burst_is_three_times_rps",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "rate_limit_burst equals rate_limit_rps times three across config and both profiles"
+            },
+            {
+              "name": "report_records_full_cli_transcript",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "report.json covers every pipeline subcommand kind with a runnable init round-trip"
+            },
+            {
+              "name": "report_digest_matches_config_bytes",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "report.json config_sha256 equals sha256 of the delivered config.json bytes and trailer matches"
+            },
+            {
+              "name": "policy_matrix_dimensions_and_binary_cells",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "policy_matrix.csv is a binary RBAC matrix over sorted active roles and permissions"
+            },
+            {
+              "name": "rate_limits_tsv_shape_and_sorted",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "rate_limits.tsv restricts to internal and admin zones, is sorted, and reports numeric fields"
+            },
+            {
+              "name": "rotation_schedule_only_required_classes_sorted",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "rotation_schedule.yaml lists required-only secret classes in ascending class_id order"
+            },
+            {
+              "name": "mfa_quorum_toml_matches_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "mfa_quorum.toml quorum_threshold equals the config value and the sum of factor weights"
+            },
+            {
+              "name": "audit_sampling_ini_channels_only_enabled",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "audit_sampling.ini has an audit section listing only enabled channels in ascending order"
+            },
+            {
+              "name": "threat_scores_jsonl_shape",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "threat_scores.jsonl entries carry actor_id, tier and region with a valid tier and are sorted"
+            },
+            {
+              "name": "cipher_priority_count_matches_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "cipher_priority.txt line count equals active_cipher_count from the main config"
+            },
+            {
+              "name": "egress_allowlist_count_matches_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "egress_allowlist.conf allow-line count equals egress_rules_count from the main config"
+            },
+            {
+              "name": "trust_anchor_manifest_pem_blocks",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "trust_anchor_manifest.pem has matched blocks whose score comments sum to trust_anchor_score"
+            },
+            {
+              "name": "compliance_map_total_matches_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "compliance_map.md total_score equals compliance_score and equals the row-weight sum"
+            },
+            {
+              "name": "attestation_ledger_signer_count",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "attestation_ledger.log active-signer entries are consistent with attestation_quorum"
+            },
+            {
+              "name": "session_policy_xml_well_formed_and_matches_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "session_policy.xml is well-formed and its scalar children mirror the derived config values"
+            },
+            {
+              "name": "derived_metrics_env_covers_all_scalars",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "derived_metrics.env carries every derived numeric scalar with an IRONVAULT prefix and integer value"
+            },
+            {
+              "name": "canary_thresholds_derived_from_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "canary_thresholds.properties reports thresholds computed from the delivered config"
+            },
+            {
+              "name": "checksum_manifest_matches_disk_bytes",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "checksum_manifest.txt covers every emitted artifact except itself with correct sha256s"
+            },
+            {
+              "name": "validation_report_and_summary_ok",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "validation_report.json reports ok and summary.json carries the full inventory"
+            },
+            {
+              "name": "repaired_cli_runs_validate_against_delivered_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "unzipping tool.zip and running its validate subcommand against the delivered config succeeds"
+            },
+            {
+              "name": "repaired_cli_subcommand_is_required",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the repaired CLI exits non-zero when invoked without a subcommand"
+            },
+            {
+              "name": "set_preserves_key_and_coerces_negative",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the repaired set subcommand preserves the key verbatim and coerces a negative integer value"
+            },
+            {
+              "name": "negative_network_imports_present",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "the repaired CLI source imports a network module that the instruction forbids"
+            },
+            {
+              "name": "negative_forbidden_secret_or_url_material_in_outputs",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "a delivered artifact leaks a URL, bearer token, or credential-shaped key value pair"
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "the main config copies a scalar hint string from a sample_config file instead of deriving it"
+            },
+            {
+              "name": "negative_nested_or_dynamic_config",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "config.json carries a nested value or a nondeterministic dynamic field"
+            },
+            {
+              "name": "negative_delivered_cli_py_is_unrepaired",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "the delivered /app/out/tool.zip packages a byte-identical copy of the unrepaired shipped cli.py"
+            },
+            {
+              "name": "negative_hard_coded_derivation_constants",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "the repaired CLI derive routine embeds a derived scalar constant literally"
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

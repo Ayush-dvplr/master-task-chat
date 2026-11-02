@@ -1,0 +1,94 @@
+{
+  "model": "claude-opus-5",
+  "run_index": 1,
+  "rubric": [
+    {
+      "number": 1,
+      "criterion": "The agent inspects the local CLI source, schema file, and failing command behaviour before editing.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The agent inspected the extracted CLI source, its schema, the data schema, and the contract before editing, but it did not run a broken sealb-ctl command to observe its failing behavior before making edits. The first demonstrated sealb-ctl failure occurred after the replacement implementation was written."
+    },
+    {
+      "number": 2,
+      "criterion": "The agent repairs root causes in argument parsing, flat-key validation, and deterministic serialization rather than only writing final JSON by hand, and ships per-component unit tests on a synthetic fixture that exercise each repaired code path.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 5.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The agent repaired the CLI rather than hand-writing the final JSON: it fixed exact key handling and scalar coercion in set, enforced flat required-key validation, implemented deterministic JSON serialization, and added plan, compile, journal replay, corpus parsing, report generation, deterministic ZIP creation, and manifest generation. However, the delivered program does not ship per-component unit tests on a synthetic fixture that exercise each repaired code path, so the stricter criterion is not fully met."
+    },
+    {
+      "number": 3,
+      "criterion": "The agent uses only local files and standard-library Python capabilities while configuring the CLI.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 4,
+      "criterion": "The agent creates the configuration artifact at the exact path the instruction names and refrains from writing auxiliary or renamed copies.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The required configuration was created at /app/out/config.json and /app/out ultimately contained exactly the required files, but the trajectory copied the entire output tree to /tmp/out1 for comparison, thereby creating an auxiliary copy that included config.json."
+    },
+    {
+      "number": 5,
+      "criterion": "The agent names the effective-upper-bound formula hi + (R mod 97) + (J mod 31) in the trajectory and identifies R as the finished-spine rekey_interval_s and J as the count of rejected journal operations, and demonstrates the derivation by showing intermediate values of hi, (R mod 97), and (J mod 31) with a reference citation to the schema file for each.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 5.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The trajectory explicitly states the effective upper bound as hi + (R mod 97) + (J mod 31), identifies R as the finished-spine rekey_interval_s, identifies J as the rejected-journal-operation count, and evaluates it as hi + (32508 % 97) + (2160 % 31) = hi + 34. However, the agent did not demonstrate the derivation by showing intermediate values of hi, (R mod 97), and (J mod 31) with reference citations to the schema file, so the stricter criterion is not fully met."
+    },
+    {
+      "number": 6,
+      "criterion": "The agent treats a value as canonical only when str(int(x)) equals the raw field bytes exactly, and rejects every non-canonical form the contract names: leading zeros, -0 / -00 / -000, leading plus, surrounding spaces, underscores, hex, floats, units, words, scientific notation, Devanagari U+0966 range, Arabic-Indic U+0660 range, Gujarati U+0AE6 range, and full-width U+FF10 range.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 5.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 7,
+      "criterion": "The agent recognises the journal is event-sourced: a valid unset retracts a prior set and restores the defaults.json value for that key, so keeping only the last set and ignoring unset would yield wrong zone profiles.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 8,
+      "criterion": "The agent claims validation or command success while the trajectory contains no matching local command output.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": -5.0,
+      "is_positive": false,
+      "passed": true
+    }
+  ],
+  "rubric_weights_percentage": 40.74,
+  "test_weights_percentage": 81.34,
+  "final_reward": 61.04,
+  "judge_model": "gpt-5.6-sol"
+}

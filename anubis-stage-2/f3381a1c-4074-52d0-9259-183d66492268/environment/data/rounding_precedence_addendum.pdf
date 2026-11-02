@@ -1,0 +1,546 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Length 1926 >>
+stream
+BT
+/F1 9 Tf
+12 TL
+1 0 0 1 36 806 Tm
+(RELEASE ENGINEERING ADDENDUM A - ROUNDING, PRECEDENCE AND ADMISSION) Tj
+T*
+(Release R-NEXT. This addendum is normative. Where the handbook and this) Tj
+T*
+(addendum state the same rule, the two agree; where only this addendum) Tj
+T*
+(states a rule, this addendum is the authority.) Tj
+T*
+() Tj
+T*
+(A1. COST SCALING ORDER) Tj
+T*
+(  A unit cost is built in four ordered steps and each step rounds up to a) Tj
+T*
+(  whole tick before the next step reads it.) Tj
+T*
+(    step 1  platform scaling    c1 = ceil\(c0 * num / den\)) Tj
+T*
+(    step 2  regeneration        c2 = ceil\(c1 * rnum / rden\)) Tj
+T*
+(    step 3  cold cache          c3 = ceil\(c2 * knum / kden\)) Tj
+T*
+(    step 4  kind minimum        c4 = max\(c3, minimum_cost_ticks\)) Tj
+T*
+(  c0 is base_cost_ticks from the component register. The step 1 fraction) Tj
+T*
+(  comes from the platform_scaling sheet of the capacity workbook, the step) Tj
+T*
+(  2 and step 3 fractions from its cost_rules sheet, and the step 4 floor) Tj
+T*
+(  from build_cost_rules.jsonl.) Tj
+T*
+(  Step 2 applies when the unit kind takes the regeneration surcharge and) Tj
+T*
+(  the unit carries contract_changed or generated_interface_rebuilt.) Tj
+T*
+(  Step 3 applies when the unit kind takes the cold cache multiplier and) Tj
+T*
+(  the unit carries absent_from_previous_release.) Tj
+T*
+(  Step 4 never lifts a unit whose base_cost_ticks is 0. A zero cost unit) Tj
+T*
+(  stays at cost 0 and is still a build unit.) Tj
+T*
+(  Collapsing the steps into one multiplication with a single final rounding) Tj
+T*
+(  is not the documented arithmetic and does not give the documented result.) Tj
+T*
+() Tj
+T*
+(A2. CEILING DIVISION) Tj
+T*
+(  For integers a >= 0 and b > 0, ceil\(a / b\) = \(a + b - 1\) // b.) Tj
+T*
+(  No stage uses floating point. A fraction with denominator 0 is a row) Tj
+T*
+(  defect: the row is ignored and E_NON_INTEGER is recorded.) Tj
+T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 2667 >>
+stream
+BT
+/F1 9 Tf
+12 TL
+1 0 0 1 36 806 Tm
+(A3. POOL BUDGETS) Tj
+T*
+(  A pool budget is the active pool_budgets row of the capacity workbook) Tj
+T*
+(  with the highest revision_seq. A budget whose scale_unit reads) Tj
+T*
+(  milli_tick is converted with budget_ticks = ceil\(budget_value / 1000\).) Tj
+T*
+(  The net budget of a pool is its budget_ticks less the reservation of) Tj
+T*
+(  every active maintenance window naming that pool, each window converted) Tj
+T*
+(  by its own field name, and never below 0.) Tj
+T*
+() Tj
+T*
+(A4. ADMISSION ORDER AND THE SELECTION OBJECTIVE) Tj
+T*
+(  Pools are admitted in bytewise order of pool_id.) Tj
+T*
+(  Inside one pool the candidate order is the tuple) Tj
+T*
+(    \(priority_class, closure_cost, unit_id\)) Tj
+T*
+(  ascending, compared bytewise on unit_id. closure_cost is the summed cost) Tj
+T*
+(  of the candidate's own prerequisite closure, counting only members not) Tj
+T*
+(  already selected.) Tj
+T*
+(  A candidate is admitted only with its whole prerequisite closure: the) Tj
+T*
+(  candidate plus every dirty unit of the same target reachable from it) Tj
+T*
+(  through required build edges. A closure that does not fit the remaining) Tj
+T*
+(  net budget defers the candidate under E_CAPACITY and leaves the closure) Tj
+T*
+(  members free to be admitted later on their own order position.) Tj
+T*
+(  A closure exactly equal to the remaining net budget fits. A closure one) Tj
+T*
+(  tick larger does not.) Tj
+T*
+(  Ranking units one at a time by priority, without pricing the closure,) Tj
+T*
+(  is not the documented objective.) Tj
+T*
+() Tj
+T*
+(A5. CROSS POOL PREREQUISITES) Tj
+T*
+(  A prerequisite in another pool is judged after every pool has been) Tj
+T*
+(  admitted. A selected unit whose cross pool required prerequisite is not) Tj
+T*
+(  selected is demoted to deferred under E_PREREQ_DEFERRED, and the demotion) Tj
+T*
+(  repeats until no selected unit has an unselected prerequisite. Capacity) Tj
+T*
+(  released by a demotion is not readmitted to the pool.) Tj
+T*
+() Tj
+T*
+(A6. CYCLE BREAKS) Tj
+T*
+(  A live cycle whose members form a breakable group loses one edge: the) Tj
+T*
+(  edge minimising \(break_cost, source, destination\), compared bytewise on) Tj
+T*
+(  the two identifiers. An edge with no declared break cost is not) Tj
+T*
+(  removable. A live cycle in a blocking group blocks every target the) Tj
+T*
+(  cycle is live on, and blocked units leave the schedule and the) Tj
+T*
+(  deployment manifest under E_CYCLE_BLOCKING.) Tj
+T*
+() Tj
+T*
+(A7. SCHEDULE TIE BREAK) Tj
+T*
+(  Among units ready at the same moment the order is \(priority_class,) Tj
+T*
+(  unit_id\) ascending, with unit_id compared bytewise.) Tj
+T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 722 >>
+stream
+BT
+/F1 9 Tf
+12 TL
+1 0 0 1 36 806 Tm
+(A8. PRIORITY CLASS OVERRIDES) Tj
+T*
+(  The table below is the authority for the priority class of the components) Tj
+T*
+(  it names. A component named here takes the priority_class of its active) Tj
+T*
+(  row with the highest revision_seq, and the component register value) Tj
+T*
+(  applies to every component this table does not name.) Tj
+T*
+(  A row whose state reads superseded is not applied. A row naming a) Tj
+T*
+(  component that is absent from the register is ignored under) Tj
+T*
+(  E_UNKNOWN_UNIT. A row whose component_id is not in canonical upper case) Tj
+T*
+(  form is ignored under E_ID_FORM.) Tj
+T*
+() Tj
+T*
+(  component_id  priority_class  state  revision_seq) Tj
+T*
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 2954 >>
+stream
+BT
+/F1 9 Tf
+12 TL
+1 0 0 1 36 806 Tm
+(  C-0001        4               active      2) Tj
+T*
+(  C-0003        3               active      2) Tj
+T*
+(  C-0005        3               active      2) Tj
+T*
+(  C-0007        3               active      2) Tj
+T*
+(  C-0009        2               active      2) Tj
+T*
+(  C-0011        2               active      2) Tj
+T*
+(  C-0013        2               active      2) Tj
+T*
+(  C-0015        1               active      2) Tj
+T*
+(  C-0017        1               active      2) Tj
+T*
+(  C-0019        1               active      2) Tj
+T*
+(  C-0021        5               active      2) Tj
+T*
+(  C-0023        5               active      2) Tj
+T*
+(  C-0025        5               active      2) Tj
+T*
+(  C-0027        4               active      2) Tj
+T*
+(  C-0029        4               active      2) Tj
+T*
+(  C-0031        4               active      2) Tj
+T*
+(  C-0033        3               active      2) Tj
+T*
+(  C-0035        3               active      2) Tj
+T*
+(  C-0037        3               active      2) Tj
+T*
+(  C-0039        2               active      2) Tj
+T*
+(  C-0041        2               active      2) Tj
+T*
+(  C-0043        2               active      2) Tj
+T*
+(  C-0045        1               active      2) Tj
+T*
+(  C-0047        1               active      2) Tj
+T*
+(  C-0049        1               active      2) Tj
+T*
+(  C-0051        5               active      2) Tj
+T*
+(  C-0053        5               active      2) Tj
+T*
+(  C-0055        5               active      2) Tj
+T*
+(  C-0057        4               active      2) Tj
+T*
+(  C-0059        4               active      2) Tj
+T*
+(  C-0061        4               active      2) Tj
+T*
+(  C-0063        3               active      2) Tj
+T*
+(  C-0065        3               active      2) Tj
+T*
+(  C-0067        3               active      2) Tj
+T*
+(  C-0069        2               active      2) Tj
+T*
+(  C-0071        2               active      2) Tj
+T*
+(  C-0073        2               active      2) Tj
+T*
+(  C-0075        1               active      2) Tj
+T*
+(  C-0077        1               active      2) Tj
+T*
+(  C-0079        1               active      2) Tj
+T*
+(  C-0081        5               active      2) Tj
+T*
+(  C-0083        5               active      2) Tj
+T*
+(  C-0085        5               active      2) Tj
+T*
+(  C-0087        4               active      2) Tj
+T*
+(  C-0089        4               active      2) Tj
+T*
+(  C-0091        4               active      2) Tj
+T*
+(  C-0093        3               active      2) Tj
+T*
+(  C-0095        3               active      2) Tj
+T*
+(  C-0097        3               active      2) Tj
+T*
+(  C-0099        2               active      2) Tj
+T*
+(  C-0101        2               active      2) Tj
+T*
+(  C-0103        2               active      2) Tj
+T*
+(  C-0105        1               active      2) Tj
+T*
+(  C-0107        1               active      2) Tj
+T*
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 3014 >>
+stream
+BT
+/F1 9 Tf
+12 TL
+1 0 0 1 36 806 Tm
+(  component_id  priority_class  state  revision_seq) Tj
+T*
+(  C-0109        1               active      2) Tj
+T*
+(  C-0111        5               active      2) Tj
+T*
+(  C-0113        5               active      2) Tj
+T*
+(  C-0115        5               active      2) Tj
+T*
+(  C-0117        4               active      2) Tj
+T*
+(  C-0119        4               active      2) Tj
+T*
+(  C-0121        4               active      2) Tj
+T*
+(  C-0123        3               active      2) Tj
+T*
+(  C-0125        3               active      2) Tj
+T*
+(  C-0127        3               active      2) Tj
+T*
+(  C-0129        2               active      2) Tj
+T*
+(  C-0131        2               active      2) Tj
+T*
+(  C-0133        2               active      2) Tj
+T*
+(  C-0135        1               active      2) Tj
+T*
+(  C-0137        1               active      2) Tj
+T*
+(  C-0139        1               active      2) Tj
+T*
+(  C-0141        5               active      2) Tj
+T*
+(  C-0143        5               active      2) Tj
+T*
+(  C-0145        5               active      2) Tj
+T*
+(  C-0147        4               active      2) Tj
+T*
+(  C-0149        4               active      2) Tj
+T*
+(  C-0151        4               active      2) Tj
+T*
+(  C-0153        3               active      2) Tj
+T*
+(  C-0155        3               active      2) Tj
+T*
+(  C-0157        3               active      2) Tj
+T*
+(  C-0159        2               active      2) Tj
+T*
+(  C-0161        2               active      2) Tj
+T*
+(  C-0163        2               active      2) Tj
+T*
+(  C-0165        1               active      2) Tj
+T*
+(  C-0167        1               active      2) Tj
+T*
+(  C-0169        1               active      2) Tj
+T*
+(  C-0171        5               active      2) Tj
+T*
+(  C-0173        5               active      2) Tj
+T*
+(  C-0175        5               active      2) Tj
+T*
+(  C-0177        4               active      2) Tj
+T*
+(  C-0179        4               active      2) Tj
+T*
+(  C-0181        4               active      2) Tj
+T*
+(  C-0183        3               active      2) Tj
+T*
+(  C-0185        3               active      2) Tj
+T*
+(  C-0187        3               active      2) Tj
+T*
+(  C-0189        2               active      2) Tj
+T*
+(  C-0191        2               active      2) Tj
+T*
+(  C-0193        2               active      2) Tj
+T*
+(  C-0195        1               active      2) Tj
+T*
+(  C-0197        1               active      2) Tj
+T*
+(  C-0199        1               active      2) Tj
+T*
+(  C-0201        5               active      2) Tj
+T*
+(  C-0203        5               active      2) Tj
+T*
+(  C-0205        5               active      2) Tj
+T*
+(  C-0207        4               active      2) Tj
+T*
+(  C-0209        4               active      2) Tj
+T*
+(  C-0211        4               active      2) Tj
+T*
+(  C-0213        3               active      2) Tj
+T*
+(  C-0215        3               active      2) Tj
+T*
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 1286 >>
+stream
+BT
+/F1 9 Tf
+12 TL
+1 0 0 1 36 806 Tm
+(  component_id  priority_class  state  revision_seq) Tj
+T*
+(  C-0217        3               active      2) Tj
+T*
+(  C-0219        2               active      2) Tj
+T*
+(  C-0221        2               active      2) Tj
+T*
+(  C-0223        2               active      2) Tj
+T*
+(  C-0225        1               active      2) Tj
+T*
+(  C-0227        1               active      2) Tj
+T*
+(  C-0229        1               active      2) Tj
+T*
+(  C-0231        5               active      2) Tj
+T*
+(  C-0233        5               active      2) Tj
+T*
+(  C-0235        5               active      2) Tj
+T*
+(  C-0237        4               active      2) Tj
+T*
+(  C-0239        4               active      2) Tj
+T*
+(  C-0001        5               superseded  1) Tj
+T*
+(  C-0015        5               superseded  1) Tj
+T*
+(  C-0029        5               superseded  1) Tj
+T*
+(  C-0043        5               superseded  1) Tj
+T*
+(  C-4000        1               active      3) Tj
+T*
+(  C-4001        1               active      3) Tj
+T*
+(  C-4002        1               active      3) Tj
+T*
+(  c-0003        1               active      4) Tj
+T*
+(  c-0025        1               active      4) Tj
+T*
+(  c-0047        1               active      4) Tj
+T*
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Title (Release Engineering Addendum A) /Producer (release-train authoring kit) >>
+endobj
+xref
+0 17
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000154 00000 n 
+0000000222 00000 n 
+0000002200 00000 n 
+0000002326 00000 n 
+0000005045 00000 n 
+0000005171 00000 n 
+0000005944 00000 n 
+0000006070 00000 n 
+0000009077 00000 n 
+0000009205 00000 n 
+0000012272 00000 n 
+0000012400 00000 n 
+0000013739 00000 n 
+0000013867 00000 n 
+trailer
+<< /Size 17 /Root 1 0 R /Info 16 0 R >>
+startxref
+13969
+%%EOF

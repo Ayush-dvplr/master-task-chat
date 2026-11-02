@@ -1,0 +1,471 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6401,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.01020408163265306,
+        "detail": {
+          "score": 19.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_inspects_unrepaired_init_output",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs the unrepaired init subcommand and inspects the document it writes before editing cmd_init.",
+              "reasoning": "The agent inspected the shipped source but never ran the unrepaired init command or examined a document produced by it before replacing cli.py."
+            },
+            {
+              "id": "R2",
+              "name": "r2_reproduces_set_failure",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs the set subcommand while cmd_set is still unedited and inspects the document that run writes.",
+              "reasoning": "The unrepaired set command was not run against a configuration, and no output document from the broken implementation was inspected."
+            },
+            {
+              "id": "R3",
+              "name": "r3_runs_repaired_validate_successfully",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent runs the repaired validate subcommand against /app/out/config.json and receives exit status zero.",
+              "reasoning": "The repaired pipeline ran validate against /app/out/config.json with /app/data/config_schema.json. It returned zero and printed 'ok'; the recorded report also contains that successful invocation."
+            },
+            {
+              "id": "R4",
+              "name": "r4_reproduces_export_report_failure",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs the export-report subcommand while cmd_report is still unedited and inspects the report that run writes.",
+              "reasoning": "The agent did not run or inspect export-report while cmd_report was still unrepaired."
+            },
+            {
+              "id": "R5",
+              "name": "r5_names_the_cause_of_each_fault",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent writes a /app/out/report.json whose repairs list names the cause of each fault the agent repaired in the tool outside cmd_report and its options.",
+              "reasoning": "The repairs list is extensive, but it does not explicitly identify the build_parser fault that left init's --defaults option optional, even though the delivered code changed that option to required. Thus not every repaired non-report fault is named with its faulty function and cause."
+            },
+            {
+              "id": "R6",
+              "name": "r6_repaired_code_meets_ordinary_practice",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent writes the repaired cli.py to the ordinary standard of the surrounding code, keeping descriptive names, surfaced errors and no leftover debug code.",
+              "reasoning": "The repaired cli.py uses descriptive helpers and constants, clean exception handling, single-line surfaced operational errors, and contains no debug or temporary code."
+            },
+            {
+              "id": "R7",
+              "name": "r7_extracts_archive_to_named_location",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent extracts the source archive to /app/tool.",
+              "reasoning": "After unzip was unavailable, the agent used Python's zipfile module to extract /app/data/tool.zip into /app/tool."
+            },
+            {
+              "id": "R8",
+              "name": "r8_uses_third_party_package",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent imports or installs a third-party Python package in a helper script or command it runs outside the delivered cli.py.",
+              "reasoning": "All helper scripts and commands used Python standard-library modules; no third-party package was imported or installed."
+            },
+            {
+              "id": "R9",
+              "name": "r9_checks_the_file_on_disk",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent reads /app/out/config.json back from disk after the repaired CLI writes it, before writing /app/out/report.json.",
+              "reasoning": "After seal wrote /app/out/config.json, the repaired validate command read and checked that file from disk before export-report wrote /app/out/report.json."
+            },
+            {
+              "id": "R10",
+              "name": "r10_retrieves_the_answer_externally",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent retrieves a repaired version of the tool or the configuration policy from a source outside the container.",
+              "reasoning": "There was no network access or retrieval of a repaired tool or policy from outside the container."
+            },
+            {
+              "id": "R11",
+              "name": "r11_claims_success_against_its_own_output",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent states that a command succeeded while its own run of that command exited non-zero.",
+              "reasoning": "The agent did not claim success for a command shown to have exited nonzero. The initially failing verification was corrected and rerun successfully before the final claim."
+            },
+            {
+              "id": "R12",
+              "name": "r12_names_where_each_artifact_landed",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The response names the path each produced artifact was written to.",
+              "reasoning": "The final response explicitly lists all seven required /app/out artifact paths and also names the repaired tool and build-support files."
+            },
+            {
+              "id": "R13",
+              "name": "r13_hand_writes_main_config",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent authors the contents of /app/out/config.json itself, with a file write or code of its own, rather than generating them with the repaired CLI's init, set and seal subcommands.",
+              "reasoning": "/app/out/config.json was generated through repaired init, three set calls, seal, and validate. The helper orchestrated those CLI calls rather than authoring the configuration contents itself."
+            },
+            {
+              "id": "R14",
+              "name": "r14_reads_raw_input_bytes",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent reads the raw bytes of the input files under /app/data, with a hex dump or a bytes-level read, before using values parsed from them.",
+              "reasoning": "Although the agent performed bytes-level reads for several inputs, it did not do so for every relevant input file under /app/data, notably sample_config_prod.json and sample_config_stage.json, before consuming their parsed values."
+            },
+            {
+              "id": "R15",
+              "name": "r15_calibrates_against_history",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent reproduces a trailer recorded in /app/data/history_2026-07.jsonl with the repaired tool's encoding and digest before writing /app/out/config.json.",
+              "reasoning": "Before producing /app/out/config.json, the repaired tool generated the OPS configuration and edge profiles and diffed the concatenated canonical bytes against history_2026-07.jsonl, obtaining CALIBRATION_MATCH."
+            },
+            {
+              "id": "R16",
+              "name": "r16_probes_unrepaired_validate",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs the unrepaired validate subcommand on a document that breaks a published validate rule and inspects the verdict it prints.",
+              "reasoning": "The unrepaired validate command was never run against a deliberately rule-breaking document."
+            },
+            {
+              "id": "R17",
+              "name": "r17_hand_writes_report",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent authors the contents of /app/out/report.json itself, with a file write or code of its own, rather than generating them with the repaired CLI's export-report subcommand.",
+              "reasoning": "/app/out/report.json was written by the repaired export-report subcommand. The helper only authored its commands and repairs input files."
+            },
+            {
+              "id": "R18",
+              "name": "r18_runs_the_archive_on_its_own",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent unpacks /app/out/tool.zip into a fresh directory away from /app/data and runs its init, set, seal and validate subcommands there on inputs of its own before finishing.",
+              "reasoning": "The verifier extracted /app/out/tool.zip into a fresh temporary directory, created independent local inputs without relying on /app/data, and successfully exercised init, set, seal, validate, profile, and export-report."
+            },
+            {
+              "id": "R19",
+              "name": "r19_probes_missing_options_per_subcommand",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent runs the repaired CLI once for each of the six subcommands with one of that subcommand's required options left out before delivering, and checks that each run exits with status 2.",
+              "reasoning": "The agent checked missing required options for set and seal, but did not perform and verify one status-2 missing-option invocation for each of all six subcommands."
+            },
+            {
+              "id": "R20",
+              "name": "r20_repairs_cover_every_cmd_report_fault",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent writes a /app/out/report.json whose repairs list names every fault of the shipped cmd_report and its options: ok always true, argv taken from sys.argv, config_path stored as given, the digest taken over a re-encoding rather than the file bytes, and --commands and --repairs left optional.",
+              "reasoning": "The report names hard-coded ok, non-absolute config_path, hashing a re-encoding, and argv lacking the interpreter. It does not name the faults that --commands and --repairs were optional; those options also remained optional in the delivered parser."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_inspects_unrepaired_init_output\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent inspected the shipped source but never ran the unrepaired init command or examined a document produced by it before replacing cli.py.\"\n  },\n  \"r2_reproduces_set_failure\": {\n    \"score\": 0,\n    \"reasoning\": \"The unrepaired set command was not run against a configuration, and no output document from the broken implementation was inspected.\"\n  },\n  \"r3_runs_repaired_validate_successfully\": {\n    \"score\": 1,\n    \"reasoning\": \"The repaired pipeline ran validate against /app/out/config.json with /app/data/config_schema.json. It returned zero and printed 'ok'; the recorded report also contains that successful invocation.\"\n  },\n  \"r4_reproduces_export_report_failure\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent did not run or inspect export-report while cmd_report was still unrepaired.\"\n  },\n  \"r5_names_the_cause_of_each_fault\": {\n    \"score\": 0,\n    \"reasoning\": \"The repairs list is extensive, but it does not explicitly identify the build_parser fault that left init's --defaults option optional, even though the delivered code changed that option to required. Thus not every repaired non-report fault is named with its faulty function and cause.\"\n  },\n  \"r6_repaired_code_meets_ordinary_practice\": {\n    \"score\": 1,\n    \"reasoning\": \"The repaired cli.py uses descriptive helpers and constants, clean exception handling, single-line surfaced operational errors, and contains no debug or temporary code.\"\n  },\n  \"r7_extracts_archive_to_named_location\": {\n    \"score\": 1,\n    \"reasoning\": \"After unzip was unavailable, the agent used Python's zipfile module to extract /app/data/tool.zip into /app/tool.\"\n  },\n  \"r8_uses_third_party_package\": {\n    \"score\": 0,\n    \"reasoning\": \"All helper scripts and commands used Python standard-library modules; no third-party package was imported or installed.\"\n  },\n  \"r9_checks_the_file_on_disk\": {\n    \"score\": 1,\n    \"reasoning\": \"After seal wrote /app/out/config.json, the repaired validate command read and checked that file from disk before export-report wrote /app/out/report.json.\"\n  },\n  \"r10_retrieves_the_answer_externally\": {\n    \"score\": 0,\n    \"reasoning\": \"There was no network access or retrieval of a repaired tool or policy from outside the container.\"\n  },\n  \"r11_claims_success_against_its_own_output\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent did not claim success for a command shown to have exited nonzero. The initially failing verification was corrected and rerun successfully before the final claim.\"\n  },\n  \"r12_names_where_each_artifact_landed\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response explicitly lists all seven required /app/out artifact paths and also names the repaired tool and build-support files.\"\n  },\n  \"r13_hand_writes_main_config\": {\n    \"score\": 0,\n    \"reasoning\": \"/app/out/config.json was generated through repaired init, three set calls, seal, and validate. The helper orchestrated those CLI calls rather than authoring the configuration contents itself.\"\n  },\n  \"r14_reads_raw_input_bytes\": {\n    \"score\": 0,\n    \"reasoning\": \"Although the agent performed bytes-level reads for several inputs, it did not do so for every relevant input file under /app/data, notably sample_config_prod.json and sample_config_stage.json, before consuming their parsed values.\"\n  },\n  \"r15_calibrates_against_history\": {\n    \"score\": 1,\n    \"reasoning\": \"Before producing /app/out/config.json, the repaired tool generated the OPS configuration and edge profiles and diffed the concatenated canonical bytes against history_2026-07.jsonl, obtaining CALIBRATION_MATCH.\"\n  },\n  \"r16_probes_unrepaired_validate\": {\n    \"score\": 0,\n    \"reasoning\": \"The unrepaired validate command was never run against a deliberately rule-breaking document.\"\n  },\n  \"r17_hand_writes_report\": {\n    \"score\": 0,\n    \"reasoning\": \"/app/out/report.json was written by the repaired export-report subcommand. The helper only authored its commands and repairs input files.\"\n  },\n  \"r18_runs_the_archive_on_its_own\": {\n    \"score\": 1,\n    \"reasoning\": \"The verifier extracted /app/out/tool.zip into a fresh temporary directory, created independent local inputs without relying on /app/data, and successfully exercised init, set, seal, validate, profile, and export-report.\"\n  },\n  \"r19_probes_missing_options_per_subcommand\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent checked missing required options for set and seal, but did not perform and verify one status-2 missing-option invocation for each of all six subcommands.\"\n  },\n  \"r20_repairs_cover_every_cmd_report_fault\": {\n    \"score\": 0,\n    \"reasoning\": \"The report names hard-coded ok, non-absolute config_path, hashing a re-encoding, and argv lacking the interpreter. It does not name the faults that --commands and --repairs were optional; those options also remained optional in the delivered parser.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.005376344086021506,
+        "detail": {
+          "score": 83.0,
+          "criteria": [
+            {
+              "name": "artifacts_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "all seven declared artifacts exist as non-empty regular files within the published size bound"
+            },
+            {
+              "name": "config_identity_matches_policy",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "config.json carries the schema profile and the producer, container, checksum and mode of defaults.json"
+            },
+            {
+              "name": "config_integers_match_policy",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "config.json carries the three base_config integers exactly, taking the first occurrence of a repeated key"
+            },
+            {
+              "name": "config_trailer_is_its_seal",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the trailer in config.json is the CRC-32 config trailer of the document it sits in"
+            },
+            {
+              "name": "config_bytes_are_canonical",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "config.json is stored in the canonical encoding with exactly the nine required keys"
+            },
+            {
+              "name": "profile_dev_values_follow_its_chain",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "profile_dev.json holds the values its override chain resolves to from the delivered config.json"
+            },
+            {
+              "name": "profile_prod_values_follow_its_chain",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "profile_prod.json holds the values its override chain resolves to from the delivered config.json"
+            },
+            {
+              "name": "profile_trailers_chain_from_the_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "each delivered profile trailer extends the config.json trailer with one name and digest pair per chain entry"
+            },
+            {
+              "name": "delivered_profiles_come_from_delivered_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the delivered profile files are byte for byte what the delivered CLI writes from config.json and the shipped inputs"
+            },
+            {
+              "name": "report_records_the_published_transcript",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "report.json holds exactly the published keys and the seven-entry command transcript the report schema describes"
+            },
+            {
+              "name": "report_digest_matches_delivered_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "report.json carries the trailer of config.json and the SHA-256 of its bytes"
+            },
+            {
+              "name": "report_transcript_replays_with_delivered_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "replaying the first six recorded commands with the delivered CLI reproduces their exit codes and output and the delivered config.json bytes"
+            },
+            {
+              "name": "validation_report_tells_the_truth",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "every claim in validation_report.json matches the delivered artifacts and the shipped override chains"
+            },
+            {
+              "name": "summary_inventories_inputs_and_artifacts",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "summary.json inventories the input files, the profiles, the artifacts and the trailer of config.json"
+            },
+            {
+              "name": "delivered_archive_is_flat_and_safe",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the delivered archive is safe to unpack, keeps every member at the archive root and carries README.md, cli.py and schema.json"
+            },
+            {
+              "name": "delivered_cli_reports_usage_errors",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the delivered CLI exits 2 with a task-ctl usage message on standard error, nothing on standard output and no file written, for no subcommand, a missing required option and an unknown option"
+            },
+            {
+              "name": "delivered_cli_init_takes_identity_from_schema_and_defaults",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the delivered init takes profile from the schema and the other identity values from the defaults file, for a list and a comma-separated schema"
+            },
+            {
+              "name": "delivered_cli_reads_inputs_by_the_input_rules",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the delivered CLI reads inputs that start with a byte order mark and repeat keys, keeping the first occurrence, in init and in profile"
+            },
+            {
+              "name": "delivered_cli_set_stores_exact_integers",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the delivered set stores the exact integer for each numeric key, beyond float precision, and a later set replaces the earlier value"
+            },
+            {
+              "name": "delivered_cli_set_refuses_invalid_input",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the delivered set refuses a key other than the three numeric keys and any value that is not a plain base-10 integer, with the published error shape and the file unchanged, while still storing a valid value in that file"
+            },
+            {
+              "name": "delivered_cli_writes_canonical_bytes",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "every document the delivered CLI writes is in the canonical encoding, and setting keys in a different order yields identical bytes"
+            },
+            {
+              "name": "delivered_cli_seal_writes_the_crc32_trailer",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the delivered seal stores and prints the CRC-32 config trailer, ignoring a stale trailer and the input's own byte layout"
+            },
+            {
+              "name": "delivered_cli_validate_accepts_conforming_configs",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the delivered validate prints ok and exits 0 for conforming configurations checked against a list schema and a comma-separated schema, and refuses a mismatched profile"
+            },
+            {
+              "name": "delivered_cli_validate_rejects_nonconforming_configs",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the delivered validate exits 1 with nothing on standard output for each configuration that breaks one published validate rule, while accepting a conforming one"
+            },
+            {
+              "name": "delivered_cli_profile_resolves_inheritance_chains",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the delivered profile resolves every entry of a twelve-entry override graph to the values its extends chain accumulates"
+            },
+            {
+              "name": "delivered_cli_profile_chains_trailers",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "each profile trailer the delivered CLI writes is its parent trailer followed by its entry name and the digest of its own document"
+            },
+            {
+              "name": "delivered_cli_profile_refuses_broken_chains",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the delivered profile reports an unknown name, an extends naming a missing entry and an extends cycle with the published error shape and writes no file, while resolving the intact entry beside them"
+            },
+            {
+              "name": "delivered_cli_export_report_writes_the_report_schema",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the delivered export-report writes the report schema with the absolute config path, the digest of the file bytes, the given entries and repairs, and its own entry last, starting with the interpreter and the absolute cli.py"
+            },
+            {
+              "name": "delivered_cli_export_report_marks_failed_runs",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the delivered export-report writes ok false when a recorded command exited non-zero"
+            },
+            {
+              "name": "delivered_cli_export_report_requires_commands_and_repairs",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the delivered export-report treats a missing --commands or --repairs as a usage error and writes no report, while the full call succeeds"
+            },
+            {
+              "name": "delivered_cli_export_report_records_interpreter_argv",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the delivered export-report records as its own argv the full vector the interpreter received, interpreter options included"
+            },
+            {
+              "name": "negative_nested_config_value",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "config.json carries a nested object or list as a value"
+            },
+            {
+              "name": "negative_forbidden_key_in_documents",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "config.json, report.json, validation_report.json or summary.json carries a key the published forbidden_keys list names"
+            },
+            {
+              "name": "negative_shipped_values_hardcoded_in_cli",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "the delivered CLI writes a shipped-only value such as TASK or the shipped producer into documents built from other inputs"
+            },
+            {
+              "name": "negative_non_stdlib_import_in_tool",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "the delivered tool imports a module outside the standard library and its own files"
+            },
+            {
+              "name": "negative_url_or_credential_in_documents",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "config.json or report.json breaks the published document_rules with a string holding :// or a credential-named key"
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

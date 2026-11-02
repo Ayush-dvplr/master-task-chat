@@ -1,0 +1,64 @@
+# The shape of the quay ration. The four control values it needs are
+# issued by the berth operations memorandum and the capacity
+# workbook, and are carried in no other paper.
+policy = "quay_ration"
+shift_id = "KP-2042-S23"
+
+[pairing]
+statement = """
+The ration is run once for every pairing of a slot with a berth. The
+vessels in a pairing are the vessels whose applicable berth is that
+berth and which carry a filed demand return for that slot.
+"""
+
+[pool]
+statement = """
+The pool a pairing rations is the smaller of the crane minutes the
+applicable berth window revision declares for that slot and the sum
+of the gang minutes the quay gang roster crews for that pairing.
+"""
+
+[iterate]
+statement = """
+The ration is a damped iterate under a hard pass budget. It is not
+run to convergence and it is not solved in closed form. Every share
+starts at zero. Each pass computes a target from the demands, caps
+the target, redistributes what the caps freed, damps the move from
+the standing share toward the target, and rounds the result to whole
+crane minutes before the next pass begins. The passes stop when the
+budget is spent, and the shares standing at that moment are
+published whether or not they have settled.
+"""
+
+[quantisation]
+statement = """
+The rounding happens at the end of every pass, not once at the end
+of the ration. Each pass therefore begins from whole crane minutes
+and the residues do not accumulate.
+"""
+
+[redistribution]
+statement = """
+What a cap frees is redistributed inside the cross classification of
+berth and service group. A vessel receives a portion of freed
+minutes only from vessels sharing both its berth and its service
+group, in proportion to its own demand. Freed minutes with no
+uncapped vessel in the cell stay unassigned and are published as
+unplaced minutes for that pairing.
+"""
+
+[minimum_step]
+statement = """
+A share that has not reached its target moves by at least the
+minimum step the memorandum issues, in the direction of the target,
+even when the damped move would round to nothing. A share already
+at its target does not move. The step never carries a share past its
+target.
+"""
+
+[order]
+statement = """
+Inside one pass the vessels are worked in ascending vessel_id. The
+pairings are worked in ascending slot_code and then ascending
+berth_id.
+"""

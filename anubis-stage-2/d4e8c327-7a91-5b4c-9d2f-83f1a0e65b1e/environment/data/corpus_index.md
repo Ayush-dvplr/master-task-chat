@@ -1,0 +1,58 @@
+# Corpus index
+
+Every file in this corpus is listed here with its row layout.
+
+- corpus_index.md: this file
+- source_manifest.md: the six record sources with their declared formats
+- output_contract.md: the nine documents to deliver
+- laytime_rules.md: the laytime counting conventions
+- demurrage_rules.md: the demurrage lot survival and clearing rules
+- priority_rules.md: the register order and the shared fill level
+- substitution_rules.md: the pilotage walk with tide gating
+- amendment_rules.md: the port circular supersedes chain
+- errata_2032-04.md: the April 2032 amendment to substitution_rules.md section 2
+- legacy_terminal_handbook.md: WITHDRAWN; records older desk practice
+- derivation_policy.ini: precedence table and admission instant
+- unit_declarations.ini: the one unit, berth-hours
+- source_declarations.properties: declared row counts per source
+- reason_codes.json: closed vocabulary for ledger reasons
+- vessel_master.csv: vessel master
+- charterer_master.csv: charterer master
+- charterer_alias_map.csv: alias prefixes to canonical identity
+- authority_roles.csv: harbour master scope roster
+- retraction_notices.csv: charterer suspensions
+- terminal_capacity_declarations.csv: per terminal per cycle capacity
+- substitution_factors.csv: tide multipliers per cycle
+- tide_tables.csv: spring tide windows
+- pilotage_windows.csv: pilotage edges
+- terminal_clock_marks.csv: cycle boundaries
+- priority_register.csv: register order
+- commitment_agreements.csv: honoured minimums
+- commitment_exceptions.csv: exceptions
+- ceiling_register.csv: ceilings
+- nor_log_H01_H04.csv: NOR logs for cycles H01-H04
+- nor_log_H05_H08.csv: NOR logs for cycles H05-H08
+- nor_log_H09_H12.csv: NOR logs for cycles H09-H12
+- nor_log_H13_H16.csv: NOR logs for cycles H13-H16
+- nor_log_H17_H20.csv: NOR logs for cycles H17-H20
+- nor_log_H21_H24.csv: NOR logs for cycles H21-H24
+- nor_log_H25_H26.csv: NOR logs for cycles H25-H26
+- fixed_width_intake_q1.txt: fixed-width intake first half
+- fixed_width_intake_q2.txt: fixed-width intake second half
+- registry_q1.tsv: registry Q1
+- registry_q2.tsv: registry Q2
+- registry_q3.tsv: registry Q3
+- registry_q4.tsv: registry Q4
+- state_events_p1.jsonl: NOR state events part 1
+- state_events_p2.jsonl: NOR state events part 2
+- state_events_p3.jsonl: NOR state events part 3
+- state_events_p4.jsonl: NOR state events part 4
+- state_events_p5.jsonl: NOR state events part 5
+- port_circulars_p1.jsonl: amendments part 1
+- port_circulars_p2.jsonl: amendments part 2
+- port_circulars_p3.jsonl: amendments part 3
+- approval_audit.log: audit rotation 0
+- approval_audit.log.1: audit rotation 1
+- approval_audit.log.2: audit rotation 2
+- laytime_observations.log: settlement log fixing the weather stoppage convention
+- demurrage_settlement.log: settlement log fixing the carried demurrage survival age

@@ -1,0 +1,107 @@
+{
+  "format_tag": "TASK",
+  "profiles": [
+    "dev",
+    "prod"
+  ],
+  "required_artifacts": [
+    "config.json",
+    "report.json",
+    "tool.zip",
+    "profile_dev.json",
+    "profile_prod.json",
+    "validation_report.json",
+    "summary.json"
+  ],
+  "max_artifact_bytes": 1048576,
+  "forbidden_keys": [
+    "timestamp",
+    "generated_at",
+    "uuid",
+    "random_seed"
+  ],
+  "document_rules": {
+    "forbidden_keys": "no key named in forbidden_keys appears at any depth, in any letter case, in config.json, report.json, validation_report.json or summary.json",
+    "urls_and_credentials": "no string at any depth in config.json or report.json contains ://, and no key at any depth in either is named api_key, apikey, password, secret, token or credential, in any letter case"
+  },
+  "input_rules": {
+    "encoding": "Every input file is UTF-8 JSON. A file may start with a UTF-8 byte order mark (the bytes EF BB BF); the mark is not part of the document.",
+    "duplicate_keys": "An object in an input file may name the same key more than once. The first occurrence is the one that counts and every later occurrence is ignored, at any depth. This holds for the tool and for any other program that reads these files.",
+    "integers": "Integers are exact at any size. No integer may pass through a floating-point type on its way into a document."
+  },
+  "canonical_encoding": "Every document the tool writes is the canonical encoding of a JSON object: object keys sorted by Unicode code point at every depth, no whitespace between tokens (the separators are a bare comma and a bare colon), every non-ASCII character written as raw UTF-8 rather than as a \\u escape, and the whole encoded as UTF-8 with no byte order mark and followed by exactly one newline (0x0A). Equivalent documents therefore encode to identical bytes whatever order their keys were set in.",
+  "seal_rules": {
+    "digest": "The digest of a document is the CRC-32 (the zlib ISO-HDLC CRC that zlib.crc32 computes) of the canonical encoding, final newline included, of that document with its trailer key removed, written as 16 lowercase hexadecimal digits with leading zeros.",
+    "config_trailer": "harbor:cli-config:{profile}:{digest}, where {profile} is the configuration's own profile value and {digest} is the configuration's digest.",
+    "profile_trailer": "{parent trailer}:{name}:{digest}, where {parent trailer} is the trailer of the parent entry's profile document (the configuration's trailer when the entry has no extends), {name} is the override entry name and {digest} is the digest of this profile document. A profile whose chain has three entries therefore carries three name:digest pairs after the configuration trailer.",
+    "calibration": "history_2026-07.jsonl holds, one canonical document per line, what a working build of task-ctl wrote for another configuration: a sealed configuration, then the profile for entry edge (no extends), then the profile for entry edge-eu (extends edge). These rules reproduce every line byte for byte."
+  },
+  "config_policy": {
+    "keys": "config.json holds exactly the nine required_keys of config_schema.json",
+    "profile": "the profile value of the schema given to init",
+    "producer": "the producer value of defaults.json, unchanged",
+    "container": "the container value of defaults.json, unchanged",
+    "checksum": "the checksum value of defaults.json, unchanged",
+    "mode": "the mode value of defaults.json, unchanged",
+    "max_records": "base_config.max_records of defaults.json, unchanged",
+    "retry_limit": "base_config.retry_limit of defaults.json, unchanged",
+    "timeout_ms": "base_config.timeout_ms of defaults.json, unchanged",
+    "trailer": "the config_trailer that seal computes",
+    "production": "config.json is produced in place at /app/out/config.json by one init that reads /app/data/config_schema.json and /app/data/defaults.json, then one set for each of max_records, retry_limit and timeout_ms, then one seal, and is then checked with validate against /app/data/config_schema.json. The producer, container and checksum values a schema carries are never used."
+  },
+  "profile_rules": {
+    "chain": "The chain of a profile is the list of override entries from its root down to the profile itself: start at the entry with the profile's name, follow extends to the entry it names, and stop at an entry with no extends. The root comes first.",
+    "values": "Start from the sealed configuration's max_records, retry_limit, timeout_ms and mode. Then, for each entry of the chain in order from the root: add the entry's retry_limit_delta and timeout_ms_delta (a missing delta counts as 0), add the max_records_delta of sample_config_{entry name}.json in the samples directory (a missing file or a missing key counts as 0), and, if the entry has a mode, replace the mode with it.",
+    "ignored": "An override entry contributes only extends, mode, retry_limit_delta and timeout_ms_delta. Every other key in an entry is ignored, including absolute values such as retry_limit left over from an older format and any max_records_delta. A sample file contributes only max_records_delta; its other keys, such as checksum, are ignored.",
+    "document": "A profile document holds the nine required_keys: profile is the configuration's profile value, a hyphen and the entry name (OPS-edge in the history file); producer, container and checksum are the configuration's values, unchanged; max_records, retry_limit, timeout_ms and mode are the resolved values; trailer is the profile_trailer.",
+    "produced": "Exactly the profiles named in profiles are produced, each written by the profile subcommand as /app/out/profile_{name}.json from /app/out/config.json, /app/data/env_overrides.json and the sample files in /app/data. Other override entries serve only as ancestors or are unused."
+  },
+  "cli_command_contract": {
+    "invocation": "python3 cli.py SUBCOMMAND --option value ...; the program name is task-ctl",
+    "success": "a subcommand that succeeds exits with status 0 and prints only what its entry below says it prints",
+    "errors": "a subcommand that fails prints a single-line message to standard error (never a Python traceback), prints nothing to standard output, exits with status 1 and leaves every file it was asked to write as it was",
+    "usage errors": "with no subcommand, an unknown option or a missing required option, the tool exits with status 2, prints a usage message starting with usage: task-ctl to standard error, and prints nothing to standard output",
+    "init": "init --schema PATH --defaults PATH --out PATH writes a document holding exactly the five identity keys: profile from the schema, and producer, container, checksum and mode from the defaults file. Prints nothing.",
+    "set": "set --config PATH --key KEY --value TEXT stores one numeric base value. KEY must be exactly max_records, retry_limit or timeout_ms. TEXT must be a base-10 integer written as an optional minus sign followed by the digits 0 to 9 with no leading zero (0 itself is allowed) and nothing else: no plus sign, spaces, underscores, decimal point or exponent. The value is stored as that exact integer and replaces any value the key already holds; every other key is kept. Any other key or text is an error. Prints nothing.",
+    "seal": "seal --config PATH removes any existing trailer, computes the config_trailer of what remains, stores it under trailer and prints it on standard output.",
+    "validate": "validate --schema PATH --config PATH prints ok on standard output only when all of these hold, and is an error otherwise: the file's bytes are exactly the canonical encoding of its content; its keys are exactly the schema's required_keys, with the same spelling and case, none missing and none extra; its profile equals the schema's profile; max_records, retry_limit and timeout_ms hold integers (true and false are not integers) and every other key holds a string; and its trailer equals its config_trailer. required_keys may be a JSON list or a single comma-separated string; both name the same keys.",
+    "profile": "profile --config PATH --overrides PATH --samples DIR --name NAME --out PATH writes the profile document for the override entry NAME, following profile_rules. Prints nothing. A NAME with no entry, an extends naming a missing entry and an extends cycle are errors.",
+    "export-report": "export-report --config PATH --commands PATH --repairs PATH --out PATH writes the report_schema document. --commands names a JSON file holding the list of command entries recorded before this call and --repairs a JSON file holding the list of repair strings. The tool appends its own entry last, with argv its own full argument vector as the interpreter received it (the interpreter first), returncode 0 and stdout the empty string. Prints nothing."
+  },
+  "report_schema": {
+    "keys": "report.json holds exactly ok, tool, config_path, config_sha256, trailer, commands and repairs",
+    "ok": "true when every commands entry, the tool's own entry included, has returncode 0, and false otherwise",
+    "tool": "the program name, task-ctl",
+    "config_path": "the absolute path of the --config file",
+    "config_sha256": "the SHA-256 of the --config file's bytes exactly as they are on disk, as lowercase hexadecimal",
+    "trailer": "the trailer value of the --config document",
+    "commands": "for the delivered report, exactly seven entries in the order they ran: init, three set calls (one per numeric key, in any order), seal, validate, and the export-report call that wrote the report. Diagnostic runs and profile runs are not listed. Each entry holds exactly argv, returncode and stdout.",
+    "commands[].argv": "the argument vector as a list of strings: the Python interpreter, the absolute path of cli.py, then the subcommand and its options, with every file path absolute",
+    "commands[].returncode": "the integer exit status",
+    "commands[].stdout": "the captured standard output with leading and trailing whitespace removed",
+    "replay": "running the first six recorded argv entries again, in order, with the delivered tool against the same inputs reproduces every recorded returncode and stdout and ends with the delivered config.json bytes",
+    "repairs": "a list of strings, one per fault repaired in the tool, each naming the faulty function and the cause"
+  },
+  "validation_report_schema": {
+    "written": "validation_report.json is written last, after every other artifact, and each value below describes the artifacts as they then stand",
+    "ok": "true when every boolean check below is true and command_failures is empty",
+    "checks": {
+      "all_artifacts_present": "true when every required artifact exists; validation_report.json counts itself as present",
+      "config_matches_policy": "true when config.json equals the config_policy document",
+      "config_scalar_flat": "true when every value in config.json is a string or an integer",
+      "config_seal_verified": "true when the trailer in config.json equals its config_trailer",
+      "command_failures": "the commands entries of report.json whose returncode is not 0, as a list",
+      "required_artifacts": "the required_artifacts list, in the order given above",
+      "profiles": "an object with one member per name in profiles, each holding trailer (that profile document's trailer) and chain (the entry names of its chain, root first)"
+    }
+  },
+  "summary_schema": {
+    "artifact_count": "the number of required artifacts",
+    "artifacts": "the required_artifacts list, in the order given above",
+    "profiles": "the profiles list, in the order given above",
+    "format_tag": "the format_tag value",
+    "trailer": "the trailer of config.json",
+    "inputs": "the name of every file shipped in /app/data, sorted by code point",
+    "input_count": "the number of entries in inputs"
+  }
+}

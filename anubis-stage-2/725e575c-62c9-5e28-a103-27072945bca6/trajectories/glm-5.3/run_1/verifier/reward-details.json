@@ -1,0 +1,356 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.4463,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.041666666666666664,
+        "detail": {
+          "score": 5.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_confirms_run_control_on_every_output",
+              "value": 0.0,
+              "raw": "no",
+              "weight": 3.0,
+              "description": "The agent confirms that each of the six stage-1 ledger files its package wrote carries a run_control stamp.",
+              "reasoning": "The agent inspected run_control on both CSV files and three report JSON files, but resume_state.json has no run_control field; the final verification only printed its stage and optimizer step. Thus it did not confirm a run_control stamp on all six ledger files."
+            },
+            {
+              "id": "R2",
+              "name": "r2_checks_a_rule_against_a_documented_value",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent compares a value its own code computed with a total or reference value stated in the body text or tables of a shipped specification, governance or errata document, other than a control block record count.",
+              "reasoning": "The agent compared computed output values against documented specification parameters, including checking the step-1 learning rate using schedule_spec.pdf's lr_peak=0.0003 and warmup_steps=194. It also examined token conversion ratios from tokenizer_migration.docx against ledger token calculations."
+            },
+            {
+              "id": "R3",
+              "name": "r3_runs_package_on_a_second_feed_directory",
+              "value": 0.0,
+              "raw": "no",
+              "weight": 3.0,
+              "description": "The agent runs its repaired package with --feed pointing at a directory other than /app/data that holds a copy or variant of the feed.",
+              "reasoning": "Every reconciliation run used --feed /app/data. The stage-2 robustness test changed the resume state but still used /app/data, not a copied or variant feed directory."
+            },
+            {
+              "id": "R4",
+              "name": "r4_reproduces_a_shipped_failure_before_editing",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent reproduces at least one install or import failure of the shipped runledger package before its first edit to the package source.",
+              "reasoning": "Before the first source edit, importing the shipped package failed with ModuleNotFoundError for tomli. The subsequent import attempt also exposed the circular import failure. The first source edit occurred afterward."
+            },
+            {
+              "id": "R5",
+              "name": "r5_claims_dependency_isolation_unchecked",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -3.0,
+              "description": "The agent states in its final response that the repaired package installs with only setuptools and the dependencies its pyproject.toml declares while every install of the package in its trajectory ran in an environment that also exposes the machine's other installed packages.",
+              "reasoning": "Although installations used virtual environments with --system-site-packages and therefore were not dependency-isolated, the final response only said the package was installed from the zip with pip; it did not explicitly claim a verified install in an environment containing only setuptools and declared dependencies."
+            },
+            {
+              "id": "R6",
+              "name": "r6_leaves_unreviewable_repairs",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": -1.0,
+              "description": "The agent leaves dead code, duplicated blocks or leftover debugging output in its repairs to the runledger source.",
+              "reasoning": "The repair process renamed _ceil_int to _ceil through a global replacement while an _ceil function already existed, leaving duplicate function definitions with the latter shadowing the former. This is dead, duplicated code in the delivered source."
+            },
+            {
+              "id": "R7",
+              "name": "r7_claims_reconciliation_without_a_check",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -5.0,
+              "description": "The agent states that the ledger reconciles with the control totals while the trajectory holds zero commands that compared them.",
+              "reasoning": "The trajectory contains numerous explicit comparisons of counted records against declared control values across formats and identified registry_part09.db as the sole mismatch. Therefore the reconciliation claim was supported by checks."
+            },
+            {
+              "id": "R8",
+              "name": "r8_writes_ledger_files_outside_the_package",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -3.0,
+              "description": "The agent writes, copies or edits one of the six stage-1 ledger files under /app/out with a command other than a run of the repaired runledger package with --out /app/out.",
+              "reasoning": "The six final ledger files under /app/out were produced by running the installed repaired package with --out /app/out. Other commands only inspected or compared those files; they did not copy or edit them directly."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_confirms_run_control_on_every_output\": {\n    \"score\": \"no\",\n    \"reasoning\": \"The agent inspected run_control on both CSV files and three report JSON files, but resume_state.json has no run_control field; the final verification only printed its stage and optimizer step. Thus it did not confirm a run_control stamp on all six ledger files.\"\n  },\n  \"r2_checks_a_rule_against_a_documented_value\": {\n    \"score\": \"yes\",\n    \"reasoning\": \"The agent compared computed output values against documented specification parameters, including checking the step-1 learning rate using schedule_spec.pdf's lr_peak=0.0003 and warmup_steps=194. It also examined token conversion ratios from tokenizer_migration.docx against ledger token calculations.\"\n  },\n  \"r3_runs_package_on_a_second_feed_directory\": {\n    \"score\": \"no\",\n    \"reasoning\": \"Every reconciliation run used --feed /app/data. The stage-2 robustness test changed the resume state but still used /app/data, not a copied or variant feed directory.\"\n  },\n  \"r4_reproduces_a_shipped_failure_before_editing\": {\n    \"score\": \"yes\",\n    \"reasoning\": \"Before the first source edit, importing the shipped package failed with ModuleNotFoundError for tomli. The subsequent import attempt also exposed the circular import failure. The first source edit occurred afterward.\"\n  },\n  \"r5_claims_dependency_isolation_unchecked\": {\n    \"score\": \"no\",\n    \"reasoning\": \"Although installations used virtual environments with --system-site-packages and therefore were not dependency-isolated, the final response only said the package was installed from the zip with pip; it did not explicitly claim a verified install in an environment containing only setuptools and declared dependencies.\"\n  },\n  \"r6_leaves_unreviewable_repairs\": {\n    \"score\": \"yes\",\n    \"reasoning\": \"The repair process renamed _ceil_int to _ceil through a global replacement while an _ceil function already existed, leaving duplicate function definitions with the latter shadowing the former. This is dead, duplicated code in the delivered source.\"\n  },\n  \"r7_claims_reconciliation_without_a_check\": {\n    \"score\": \"no\",\n    \"reasoning\": \"The trajectory contains numerous explicit comparisons of counted records against declared control values across formats and identified registry_part09.db as the sole mismatch. Therefore the reconciliation claim was supported by checks.\"\n  },\n  \"r8_writes_ledger_files_outside_the_package\": {\n    \"score\": \"no\",\n    \"reasoning\": \"The six final ledger files under /app/out were produced by running the installed repaired package with --out /app/out. Other commands only inspected or compared those files; they did not copy or edit them directly.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.0034482758620689655,
+        "detail": {
+          "score": 69.0,
+          "criteria": [
+            {
+              "name": "package_installs",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "package.zip installs offline with pip on Python 3.12 and provides the runledger package"
+            },
+            {
+              "name": "package_shipped_tests_pass",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The shipped unittest suite in package.zip is kept unchanged and passes with nothing skipped"
+            },
+            {
+              "name": "run_control_stamps",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every stage-1 output carries the specified run_control stamp"
+            },
+            {
+              "name": "shard_ledger_membership",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "shard_ledger.csv lists exactly the existing shards in key order"
+            },
+            {
+              "name": "shard_ledger_sources_and_tokens",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Shards outside the rule-family groups carry the source and token count the precedence rules give"
+            },
+            {
+              "name": "shard_ledger_status_and_representatives",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Shards outside the rule-family groups carry the exclusion status and representative the pipeline assigns"
+            },
+            {
+              "name": "shard_ledger_consumption",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Shards outside the rule-family groups carry the consumed tokens and epochs of the lineage"
+            },
+            {
+              "name": "shard_ledger_contamination_rows",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rows of contaminated or flagged shards match the contamination rules"
+            },
+            {
+              "name": "shard_ledger_duplicate_rows",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Duplicate, prior-stage duplicate and near-duplicate rows carry the right representatives"
+            },
+            {
+              "name": "shard_ledger_license_approval_rows",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Unapproved and licence-excluded rows match the data card and licence rules"
+            },
+            {
+              "name": "shard_ledger_errata_rows",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rows of shards with field corrections match the errata rules"
+            },
+            {
+              "name": "step_ledger_status_and_steps",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "step_ledger.csv lists every attempt with its documented segment, status and optimizer step"
+            },
+            {
+              "name": "step_ledger_tokens_and_loss",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Every step_ledger attempt has the token-weighted tokens and loss"
+            },
+            {
+              "name": "step_ledger_learning_rate",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every step_ledger attempt has the scheduled learning rate"
+            },
+            {
+              "name": "step_ledger_ema",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Every step_ledger attempt has the smoothed loss"
+            },
+            {
+              "name": "step_ledger_cumulative_tokens",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Every step_ledger attempt has the cumulative consumed tokens"
+            },
+            {
+              "name": "mixture_report_sources",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "The sources of mixture_report.json equal the specified mixture"
+            },
+            {
+              "name": "checkpoint_statuses",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Every checkpoint carries the documented status"
+            },
+            {
+              "name": "checkpoint_aggregates_and_taint",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Checkpoint aggregates and tainted benchmarks match the evaluation protocol"
+            },
+            {
+              "name": "checkpoint_selection",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The selected checkpoint is the one the selection rules choose"
+            },
+            {
+              "name": "reconciliation_chain",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "The reconciliation chain block equals the documented record chain"
+            },
+            {
+              "name": "reconciliation_compute",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Compute accounting reports the specified flops and GPU hours"
+            },
+            {
+              "name": "reconciliation_shard_counts",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Reconciliation shard status counts match the exclusion pipeline"
+            },
+            {
+              "name": "reconciliation_timeline_counts",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Reconciliation timeline counts match the training timeline"
+            },
+            {
+              "name": "resume_state_values",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "The values of resume_state.json equal the specified stage-1 closing state"
+            },
+            {
+              "name": "stage2_shard_ledger",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On the hidden stage-2 feed the package writes the specified shard ledger"
+            },
+            {
+              "name": "stage2_step_ledger",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On the hidden stage-2 feed the package writes the specified step ledger"
+            },
+            {
+              "name": "stage2_mixture_report",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On the hidden stage-2 feed the package writes the specified mixture report"
+            },
+            {
+              "name": "stage2_checkpoint_report",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On the hidden stage-2 feed the package writes the specified checkpoint report"
+            },
+            {
+              "name": "stage2_reconciliation",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On the hidden stage-2 feed the reconciliation, run_control stamp included, is as specified"
+            },
+            {
+              "name": "stage2_resume_state",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On the hidden stage-2 feed the closing resume state is as specified"
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the package code carries stage-1 answers or replays them on stage 2"
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the package output changes when only the feed file names change"
+            },
+            {
+              "name": "negative_corpus_path_literal_in_package",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the package code carries a path under the shipped corpus root as a literal"
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Fires when two runs of the package on the same feed differ"
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

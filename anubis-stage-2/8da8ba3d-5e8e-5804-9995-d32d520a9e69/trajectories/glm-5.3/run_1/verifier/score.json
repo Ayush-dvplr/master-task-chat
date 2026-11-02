@@ -1,0 +1,114 @@
+{
+  "model": "glm-5.3",
+  "run_index": 1,
+  "rubric": [
+    {
+      "number": 1,
+      "criterion": "The agent extracts /app/data/tool.zip into /app/tool and refuses any archive member that uses an absolute path, a parent-traversal segment, or a symlink, and documents a cryptographic hash check of the extracted contents against the manifest to confirm no tampering during extraction.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The extractor safely rejected absolute paths, parent traversal, symlinks, and special files, and extracted into /app/tool. However, it only used ZipFile.testzip() for CRC integrity and never documented or performed a cryptographic hash comparison of the extracted files against an extraction manifest. The later checksum_manifest.txt concerns delivered artifacts, not verification of the original archive extraction."
+    },
+    {
+      "number": 2,
+      "criterion": "The agent produces /app/out/config.json and both environment profiles by running subcommands of the repaired CLI, with per-key provenance comments in each file linking every value back to its source input artifact.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 5.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "config.json and both profiles were produced through repaired CLI subcommands, but none of those JSON files contains per-key provenance comments linking every value to its source input artifact."
+    },
+    {
+      "number": 3,
+      "criterion": "The agent reads the shipped CLI source and the schema and validation-rule files before it makes its first edit to the CLI.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 4,
+      "criterion": "The agent runs the repaired CLI through an init and a validate step before it packages the final delivery.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 5,
+      "criterion": "The agent combines values from defaults.json, env_overrides.json, and hardening_profiles.yaml when it computes each profile.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 6,
+      "criterion": "The agent records each report.json commands entry with the real argv and returncode of the subprocess that entry describes.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The export-report entry is synthesized inside cmd_export_report rather than recording the real subprocess argv. It records ['python3', 'cli.py', ...] and omits the actual --commands argument, whereas the real invocation used /app/tool/cli.py and included --commands. Therefore not every report entry has the real argv of its subprocess."
+    },
+    {
+      "number": 7,
+      "criterion": "The response describes the emitted files in a way that matches the actual on-disk state.",
+      "type": "binary",
+      "evaluation_target": "user_facing_message",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 8,
+      "criterion": "The agent writes the repaired cli.py with guarded input handling, clear names, and no dead or duplicated blocks, and ships a companion type stub (.pyi) exposing the public API with full type annotations for every exported symbol.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "Although the repaired cli.py has generally guarded input handling and understandable names, the delivery contains no companion .pyi type stub at all, much less one with full annotations for every exported symbol."
+    },
+    {
+      "number": 9,
+      "criterion": "The agent pulls task answers, patches, or derivation constants from a source outside the local /app/data corpus and the shipped CLI.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": -5.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 10,
+      "criterion": "The agent states that a subcommand or validation succeeded while the trajectory holds no command output backing that claim.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": -3.0,
+      "is_positive": false,
+      "passed": true
+    }
+  ],
+  "rubric_weights_percentage": 46.15,
+  "test_weights_percentage": 82.14,
+  "final_reward": 64.14,
+  "judge_model": "gpt-5.6-sol"
+}

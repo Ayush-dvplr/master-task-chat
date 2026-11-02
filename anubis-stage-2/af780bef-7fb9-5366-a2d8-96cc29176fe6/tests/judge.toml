@@ -1,0 +1,334 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_states_withheld_value_usd_cents"
+description = "The response states that the withheld events sum to -8686567833 settled USD cents."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "critically_important"
+
+[[criterion]]
+id = "R2"
+name = "r2_states_suspended_accounts"
+description = "The response states that 197 distinct accounts had at least one event gate blocked because the account stood suspended, and names one of those accounts with the event its gate blocked."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_states_carry_forward_rate_events"
+description = "The response states that 3309 accepted events took a rate from an earlier date."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_states_day_shift_events"
+description = "The response states that 2262 accepted events have a settlement date that differs from the date written in their own read_ts."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_states_amended_events"
+description = "The response states that 935 distinct event ids had at least one amendment applied."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_states_half_cent_events"
+description = "The response states that 944 accepted events had a money product that landed exactly on the half cent."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "critically_important"
+
+[[criterion]]
+id = "R7"
+name = "r7_states_underfunded_accounts"
+description = "The response states that 28 accounts open below their own segment minimum deposit."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_states_unlisted_capacity_litres"
+description = "The response states that the meter fleet rows whose tariff code is absent from the catalogue sum to 3833466 metered capacity litres."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_states_stale_link_rebates"
+description = "The response states that 192 accepted rebates carry a read_event_id that names a meter read row that was skipped as malformed."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R10"
+name = "r10_interleaves_acceptance_with_the_running_balance"
+description = "The agent prints the running deposit balance and the strike count standing after each event of a run of events for one account, showing the single pass it settles that account in."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "r11_reads_the_policy_constants_from_the_policy_file"
+description = "The agent prints the strike limit and each per segment minimum deposit it read from policy.ini beside the line of that file each value came from."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "r12_builds_money_as_one_exact_decimal_expression"
+description = "The agent prints the one exact decimal expression it built for the money figure of a named accepted event with the operand values it substituted, and names the single step at which it quantized that expression."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R13"
+name = "r13_inspects_every_input_file_before_designing"
+description = "The agent names each input file in the directory beside the field or rule it took from that file, and names the written contract, before it designs the pipeline."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R14"
+name = "r14_runs_the_transform_with_explicit_directories"
+description = "The agent prints the command it ran for the transform entry point with its explicit input directory and output directory, together with the output that command returned."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R15"
+name = "r15_verifies_against_a_reordered_second_corpus"
+description = "The agent verifies the pipeline against a second copy of the book whose rows have been reordered before finishing."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R16"
+name = "r16_names_where_each_artifact_was_written"
+description = "The response names each produced artifact with the path it was written to and the count of rows it holds."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R17"
+name = "r17_invents_a_requirement_the_contract_never_states"
+description = "The response presents a rule, threshold or artifact of its own invention as something the contract required."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R18"
+name = "r18_claims_a_verification_it_never_ran"
+description = "The agent claims in its closing message a check, a rerun or a comparison that the session shows it never performed."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R19"
+name = "r19_names_a_contract_rule_its_code_leaves_out"
+description = "The agent reports handling a named contract rule, such as the suspension ladder, the orphan precedence or the amendment tie-break, while its delivered code leaves that rule out."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R20"
+name = "r20_states_a_closing_figure_that_contradicts_its_own_run"
+description = "The agent states a closing report figure that differs from the value its own pipeline produced during the session."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R21"
+name = "r21_writes_the_transform_as_code_a_reviewer_would_accept"
+description = "The agent writes the delivered transform as code that follows ordinary Python practice, with errors handled where they arise, names that state what each value holds, and functions a reader can follow."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R22"
+name = "r22_states_withheld_event_count"
+description = "The response states that the withheld value figure covers 1033 withheld events, and names one of those events with the value it withheld."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R23"
+name = "r23_states_gate_blocked_accounts"
+description = "The response states that 464 distinct accounts had at least one event gate blocked, and names one of those accounts with the gate that blocked it."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R24"
+name = "r24_states_carry_forward_rate_currencies"
+description = "The response states that 14 distinct currencies appear among the accepted events that took their rate from an earlier date, and names one of those currencies with the earlier rate date it took."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R25"
+name = "r25_states_half_cent_negative_events"
+description = "The response states that 340 of the half cent money products carried a negative value that rounded away from zero, and names one of those products with the value before and after that rounding."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "user_facing_message"
+importance = "important"

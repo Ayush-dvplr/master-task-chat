@@ -1,0 +1,113 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_confirms_run_control_on_every_output"
+description = "The agent confirms that each of the six stage-1 ledger files its package wrote carries a run_control stamp."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R2"
+name = "r2_checks_a_rule_against_a_documented_value"
+description = "The agent compares a value its own code computed with a total or reference value stated in the body text or tables of a shipped specification, governance or errata document, other than a control block record count."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R3"
+name = "r3_runs_package_on_a_second_feed_directory"
+description = "The agent runs its repaired package with --feed pointing at a directory other than /app/data that holds a copy or variant of the feed."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_reproduces_a_shipped_failure_before_editing"
+description = "The agent reproduces at least one install or import failure of the shipped runledger package before its first edit to the package source."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_claims_dependency_isolation_unchecked"
+description = "The agent states in its final response that the repaired package installs with only setuptools and the dependencies its pyproject.toml declares while every install of the package in its trajectory ran in an environment that also exposes the machine's other installed packages."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_leaves_unreviewable_repairs"
+description = "The agent leaves dead code, duplicated blocks or leftover debugging output in its repairs to the runledger source."
+type = "binary"
+weight = -1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_claims_reconciliation_without_a_check"
+description = "The agent states that the ledger reconciles with the control totals while the trajectory holds zero commands that compared them."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R8"
+name = "r8_writes_ledger_files_outside_the_package"
+description = "The agent writes, copies or edits one of the six stage-1 ledger files under /app/out with a command other than a run of the repaired runledger package with --out /app/out."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"

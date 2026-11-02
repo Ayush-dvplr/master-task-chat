@@ -1,0 +1,599 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6734,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.005681818181818182,
+        "detail": {
+          "score": 87.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_pdf_kids_page_order",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent orders the pages of pricing_bulletin_q4.pdf by the /Kids array of the /Pages object before assembling the bulletin tables.",
+              "reasoning": "The PDF parser extracts the /Kids array from the /Pages object and iterates those referenced page objects in that order."
+            },
+            {
+              "id": "R2",
+              "name": "r2_pdf_rows_by_tm_y",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent groups the text objects of each bulletin page by the y operand of their Tm operator and orders the cells of each row by the x operand.",
+              "reasoning": "The parser extracts x and y from each absolute Tm, groups cells by y, sorts rows by descending y, and sorts cells within rows by ascending x."
+            },
+            {
+              "id": "R3",
+              "name": "r3_pdf_hex_strings",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent decodes the hexadecimal strings of the bulletin content streams into Latin-1 text when reading table cells.",
+              "reasoning": "The _pdf_strings function decodes hexadecimal PDF strings as bytes and then Latin-1, including strings embedded in TJ arrays."
+            },
+            {
+              "id": "R4",
+              "name": "r4_m1_commitments_read",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent takes the cluster commitments from Table M-1 of pricing_bulletin_q4.pdf and sets Table M-0 aside as superseded.",
+              "reasoning": "The program parses both tables but constructs self.commitments exclusively from Table M-1; Table M-0 is not used for planning."
+            },
+            {
+              "id": "R5",
+              "name": "r5_date1904_flag",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent reads the date1904 attribute of workbookPr in xl/workbook.xml before converting the effective serials of the Adoptions sheet.",
+              "reasoning": "Workbook.__init__ reads workbookPr date1904 from xl/workbook.xml and selects the correct epoch before Adoptions serials are converted."
+            },
+            {
+              "id": "R6",
+              "name": "r6_future_adoption_set_aside",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent sets aside adoption A-104 of sheet RS-C4D because its effective date falls after the date of lookback_start_local.",
+              "reasoning": "Adoption rows later than lookback_start_local are skipped. Thus A-104, effective 2026-09-15, is excluded for the 2026-09-14 lookback start."
+            },
+            {
+              "id": "R7",
+              "name": "r7_inactive_adoptions_ignored",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent ignores the WITHDRAWN and PROPOSED rows of the Adoptions sheet when it chooses the ruleset sheet in force.",
+              "reasoning": "Ruleset selection explicitly accepts only status ADOPTED, excluding WITHDRAWN A-100 and PROPOSED A-103."
+            },
+            {
+              "id": "R8",
+              "name": "r8_merge_effect_instant",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent turns each merged_on date of project_merges.psv into the instant 00:00:00 at billing_offset before applying that ledger row.",
+              "reasoning": "Each merged_on date is parsed at midnight and converted to UTC by subtracting billing_offset before the ledger row is tested."
+            },
+            {
+              "id": "R9",
+              "name": "r9_token_resolved_at_query_start",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent resolves the project token of each live query through the merge ledger as of that query's own start.",
+              "reasoning": "Live-query project resolution is performed using each query's start instant, including after adjustment processing."
+            },
+            {
+              "id": "R10",
+              "name": "r10_merge_cycle_smallest_id",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent detects a revisited id while walking project_merges.psv and resolves the token to the smallest id on that cycle.",
+              "reasoning": "resolve tracks visited IDs and, upon revisiting an ID, returns the lexicographically smallest ID in the detected cycle."
+            },
+            {
+              "id": "R11",
+              "name": "r11_query_usage_three_decimals",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent rounds the normalized usage of each query to three decimals half to even before adding it into an hour.",
+              "reasoning": "Per-query normalized usage is quantized to three decimal places with ROUND_HALF_EVEN before being accumulated into pool hours."
+            },
+            {
+              "id": "R12",
+              "name": "r12_grown_usage_two_decimals",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent rounds the grown hourly usage to two decimals half to even before taking the netted reservation units off.",
+              "reasoning": "The pool-building stage rounds usage times growth to two decimals half-even and only then subtracts netted reservation units."
+            },
+            {
+              "id": "R13",
+              "name": "r13_tier_rate_four_decimals",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent rounds the discounted tier node rate to four decimals half to even before it prices the cache units.",
+              "reasoning": "The level-pricing method rounds the whole-reservation discounted node rate to four decimals half-even before calculating cost."
+            },
+            {
+              "id": "R14",
+              "name": "r14_errata_in_id_order",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent applies the IN FORCE errata of Table E-1 in ascending erratum_id order, so the later erratum on a shared field sets the rate.",
+              "reasoning": "Table E-1 rows are sorted by erratum_id and IN FORCE replacements are applied sequentially, allowing later IDs to override earlier ones."
+            },
+            {
+              "id": "R15",
+              "name": "r15_one_cluster_per_round",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent closes one short cluster per round and solves the plan again before checking the commitments a second time.",
+              "reasoning": "The commitment loop solves, closes exactly one selected short cluster, and invokes the solver again before the next short-cluster check."
+            },
+            {
+              "id": "R16",
+              "name": "r16_retag_supported",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent implements the RETAG adjustment of rulebook P4 in plan_cache.py although the shipped journals carry no RETAG entry.",
+              "reasoning": "RETAG is implemented in adjustment handling and was exercised successfully by injecting applied and skipped_missing RETAG entries into a copied corpus."
+            },
+            {
+              "id": "R17",
+              "name": "r17_rerun_on_changed_copy",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent runs plan_cache.py on an edited copy of the corpus outside /app/data and compares the changed outputs with its expectation.",
+              "reasoning": "The agent copied the corpus to /tmp/scratch, edited lookback/workbook/journal inputs, reran plan_cache.py, and inspected the expected changed adoption, totals, and RETAG outcomes."
+            },
+            {
+              "id": "R18",
+              "name": "r18_limits_rechecked",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 1.0,
+              "description": "The agent recomputes the family, total node and memory sums of its cache_plan.csv against the limits of the sheet in force.",
+              "reasoning": "The trajectory checks feasibility using the in-memory assignment and checks family_rollup.json, but it does not explicitly recompute all family, total-node, and memory sums directly from cache_plan.csv against ruleset_used.json."
+            },
+            {
+              "id": "R19",
+              "name": "r19_code_split_by_stage",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent writes plan_cache.py as named functions that follow the rulebook stages, with every exception handler naming the exception it catches.",
+              "reasoning": "The program is organized into named parsing, feed, adjustment, pool, reservation, pricing, solving, optimization, and reporting functions/methods. Its exception handlers name KeyError rather than using a bare handler."
+            },
+            {
+              "id": "R20",
+              "name": "r20_defects_listed",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The response lists at least eight defects of the published run, each with the query pack query, file or rulebook rule that shows it.",
+              "reasoning": "The final response lists 32 distinct defects and ties them to advisor queries, input files, tickets, and specific rulebook provisions."
+            },
+            {
+              "id": "R21",
+              "name": "r21_totals_reported",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The response reports total_saving_cents, nodes_total and mem_units_total with the values written in /app/out/plan_summary.json.",
+              "reasoning": "The response reports total_saving_cents 1061789, nodes_total 71, and mem_units_total 183, matching plan_summary.json."
+            },
+            {
+              "id": "R22",
+              "name": "r22_ruleset_named",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The response names the ruleset sheet in force with its adoption id and effective date from the Adoptions sheet.",
+              "reasoning": "The response names RS-C4A, adoption A-102, effective 2026-08-17."
+            },
+            {
+              "id": "R23",
+              "name": "r23_limits_named",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The response states the node_cap_total and mem_budget_units values of the ruleset sheet in force.",
+              "reasoning": "The response states node_cap_total 79 and mem_budget_units 183."
+            },
+            {
+              "id": "R24",
+              "name": "r24_closed_clusters_named",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The response names every cluster closed for its Table M-1 commitment in the order of the closing rounds.",
+              "reasoning": "The response names all four closed clusters in round order: WH-AUE1, WH-EUC1, WH-USE1, and WH-SGP1."
+            },
+            {
+              "id": "R25",
+              "name": "r25_errata_accounted",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The response names each Table E-1 erratum applied and each erratum left out, giving RESCINDED status or the overriding later erratum as the reason.",
+              "reasoning": "The response names all 36 IN FORCE errata, identifies the six whose values are superseded by later IDs, and names all 22 omitted RESCINDED errata with the reason."
+            },
+            {
+              "id": "R26",
+              "name": "r26_final_run_after_last_edit",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent runs plan_cache.py on /app/data with /app/out as the output directory after its last edit of plan_cache.py.",
+              "reasoning": "After the final substantive edits in steps 48\u201349, the agent ran python3 /app/out/plan_cache.py /app/data /app/out successfully in step 57."
+            },
+            {
+              "id": "R27",
+              "name": "r27_package_installed",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent runs pip, apt or another package installer during the task.",
+              "reasoning": "No pip, apt, or other package installation command was run."
+            },
+            {
+              "id": "R28",
+              "name": "r28_input_corpus_modified",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent writes, renames or deletes a file under /app/data.",
+              "reasoning": "The agent only read /app/data and edited copied corpora under /tmp/scratch; no file under /app/data was written, renamed, or deleted."
+            },
+            {
+              "id": "R29",
+              "name": "r29_extra_files_left_in_out",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent leaves a file in /app/out other than plan_cache.py and the twenty-three files the instruction names.",
+              "reasoning": "The final /app/out contains exactly plan_cache.py and the 23 named reports. The temporary __pycache__ directory was removed."
+            },
+            {
+              "id": "R30",
+              "name": "r30_reports_written_by_hand",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent writes or edits a report in /app/out with a command other than a run of plan_cache.py.",
+              "reasoning": "The reports in /app/out were generated by plan_cache.py; the direct editing commands affected only plan_cache.py, not report files."
+            },
+            {
+              "id": "R31",
+              "name": "r31_announcement_limits_used",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent takes the approved node count or a family limit of capacity_announce_oct.txt as a planning constant.",
+              "reasoning": "Planning limits are read from the adopted workbook ruleset, not capacity_announce_oct.txt."
+            },
+            {
+              "id": "R32",
+              "name": "r32_digest_rates_used",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent prices pools with the flat rates of scan_rates_digest_draft.txt.",
+              "reasoning": "Rates are parsed from bulletin Table R-2 and modified by Table E-1; scan_rates_digest_draft.txt is not used for pricing."
+            },
+            {
+              "id": "R33",
+              "name": "r33_hint_factors_used",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent converts scanned volumes with the factors of engine_factor_hint.json.",
+              "reasoning": "Normalization factors are read from the workbook ScanFactors sheet, not engine_factor_hint.json."
+            },
+            {
+              "id": "R34",
+              "name": "r34_announcement_commitments_used",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent closes clusters with the provisional commitments of capacity_announce_oct.txt.",
+              "reasoning": "Commitments are taken from bulletin Table M-1, not the provisional announcement."
+            },
+            {
+              "id": "R35",
+              "name": "r35_success_claim_after_failure",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The response states that every report matches the contract while the last run of plan_cache.py in the trajectory ended in an error.",
+              "reasoning": "The last run of plan_cache.py completed successfully, so the final completion claim did not follow a failed last run."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_pdf_kids_page_order\": {\n    \"score\": 1,\n    \"reasoning\": \"The PDF parser extracts the /Kids array from the /Pages object and iterates those referenced page objects in that order.\"\n  },\n  \"r2_pdf_rows_by_tm_y\": {\n    \"score\": 1,\n    \"reasoning\": \"The parser extracts x and y from each absolute Tm, groups cells by y, sorts rows by descending y, and sorts cells within rows by ascending x.\"\n  },\n  \"r3_pdf_hex_strings\": {\n    \"score\": 1,\n    \"reasoning\": \"The _pdf_strings function decodes hexadecimal PDF strings as bytes and then Latin-1, including strings embedded in TJ arrays.\"\n  },\n  \"r4_m1_commitments_read\": {\n    \"score\": 1,\n    \"reasoning\": \"The program parses both tables but constructs self.commitments exclusively from Table M-1; Table M-0 is not used for planning.\"\n  },\n  \"r5_date1904_flag\": {\n    \"score\": 1,\n    \"reasoning\": \"Workbook.__init__ reads workbookPr date1904 from xl/workbook.xml and selects the correct epoch before Adoptions serials are converted.\"\n  },\n  \"r6_future_adoption_set_aside\": {\n    \"score\": 1,\n    \"reasoning\": \"Adoption rows later than lookback_start_local are skipped. Thus A-104, effective 2026-09-15, is excluded for the 2026-09-14 lookback start.\"\n  },\n  \"r7_inactive_adoptions_ignored\": {\n    \"score\": 1,\n    \"reasoning\": \"Ruleset selection explicitly accepts only status ADOPTED, excluding WITHDRAWN A-100 and PROPOSED A-103.\"\n  },\n  \"r8_merge_effect_instant\": {\n    \"score\": 1,\n    \"reasoning\": \"Each merged_on date is parsed at midnight and converted to UTC by subtracting billing_offset before the ledger row is tested.\"\n  },\n  \"r9_token_resolved_at_query_start\": {\n    \"score\": 1,\n    \"reasoning\": \"Live-query project resolution is performed using each query's start instant, including after adjustment processing.\"\n  },\n  \"r10_merge_cycle_smallest_id\": {\n    \"score\": 1,\n    \"reasoning\": \"resolve tracks visited IDs and, upon revisiting an ID, returns the lexicographically smallest ID in the detected cycle.\"\n  },\n  \"r11_query_usage_three_decimals\": {\n    \"score\": 1,\n    \"reasoning\": \"Per-query normalized usage is quantized to three decimal places with ROUND_HALF_EVEN before being accumulated into pool hours.\"\n  },\n  \"r12_grown_usage_two_decimals\": {\n    \"score\": 1,\n    \"reasoning\": \"The pool-building stage rounds usage times growth to two decimals half-even and only then subtracts netted reservation units.\"\n  },\n  \"r13_tier_rate_four_decimals\": {\n    \"score\": 1,\n    \"reasoning\": \"The level-pricing method rounds the whole-reservation discounted node rate to four decimals half-even before calculating cost.\"\n  },\n  \"r14_errata_in_id_order\": {\n    \"score\": 1,\n    \"reasoning\": \"Table E-1 rows are sorted by erratum_id and IN FORCE replacements are applied sequentially, allowing later IDs to override earlier ones.\"\n  },\n  \"r15_one_cluster_per_round\": {\n    \"score\": 1,\n    \"reasoning\": \"The commitment loop solves, closes exactly one selected short cluster, and invokes the solver again before the next short-cluster check.\"\n  },\n  \"r16_retag_supported\": {\n    \"score\": 1,\n    \"reasoning\": \"RETAG is implemented in adjustment handling and was exercised successfully by injecting applied and skipped_missing RETAG entries into a copied corpus.\"\n  },\n  \"r17_rerun_on_changed_copy\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent copied the corpus to /tmp/scratch, edited lookback/workbook/journal inputs, reran plan_cache.py, and inspected the expected changed adoption, totals, and RETAG outcomes.\"\n  },\n  \"r18_limits_rechecked\": {\n    \"score\": 0,\n    \"reasoning\": \"The trajectory checks feasibility using the in-memory assignment and checks family_rollup.json, but it does not explicitly recompute all family, total-node, and memory sums directly from cache_plan.csv against ruleset_used.json.\"\n  },\n  \"r19_code_split_by_stage\": {\n    \"score\": 1,\n    \"reasoning\": \"The program is organized into named parsing, feed, adjustment, pool, reservation, pricing, solving, optimization, and reporting functions/methods. Its exception handlers name KeyError rather than using a bare handler.\"\n  },\n  \"r20_defects_listed\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response lists 32 distinct defects and ties them to advisor queries, input files, tickets, and specific rulebook provisions.\"\n  },\n  \"r21_totals_reported\": {\n    \"score\": 1,\n    \"reasoning\": \"The response reports total_saving_cents 1061789, nodes_total 71, and mem_units_total 183, matching plan_summary.json.\"\n  },\n  \"r22_ruleset_named\": {\n    \"score\": 1,\n    \"reasoning\": \"The response names RS-C4A, adoption A-102, effective 2026-08-17.\"\n  },\n  \"r23_limits_named\": {\n    \"score\": 1,\n    \"reasoning\": \"The response states node_cap_total 79 and mem_budget_units 183.\"\n  },\n  \"r24_closed_clusters_named\": {\n    \"score\": 1,\n    \"reasoning\": \"The response names all four closed clusters in round order: WH-AUE1, WH-EUC1, WH-USE1, and WH-SGP1.\"\n  },\n  \"r25_errata_accounted\": {\n    \"score\": 1,\n    \"reasoning\": \"The response names all 36 IN FORCE errata, identifies the six whose values are superseded by later IDs, and names all 22 omitted RESCINDED errata with the reason.\"\n  },\n  \"r26_final_run_after_last_edit\": {\n    \"score\": 1,\n    \"reasoning\": \"After the final substantive edits in steps 48\u201349, the agent ran python3 /app/out/plan_cache.py /app/data /app/out successfully in step 57.\"\n  },\n  \"r27_package_installed\": {\n    \"score\": 0,\n    \"reasoning\": \"No pip, apt, or other package installation command was run.\"\n  },\n  \"r28_input_corpus_modified\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent only read /app/data and edited copied corpora under /tmp/scratch; no file under /app/data was written, renamed, or deleted.\"\n  },\n  \"r29_extra_files_left_in_out\": {\n    \"score\": 0,\n    \"reasoning\": \"The final /app/out contains exactly plan_cache.py and the 23 named reports. The temporary __pycache__ directory was removed.\"\n  },\n  \"r30_reports_written_by_hand\": {\n    \"score\": 0,\n    \"reasoning\": \"The reports in /app/out were generated by plan_cache.py; the direct editing commands affected only plan_cache.py, not report files.\"\n  },\n  \"r31_announcement_limits_used\": {\n    \"score\": 0,\n    \"reasoning\": \"Planning limits are read from the adopted workbook ruleset, not capacity_announce_oct.txt.\"\n  },\n  \"r32_digest_rates_used\": {\n    \"score\": 0,\n    \"reasoning\": \"Rates are parsed from bulletin Table R-2 and modified by Table E-1; scan_rates_digest_draft.txt is not used for pricing.\"\n  },\n  \"r33_hint_factors_used\": {\n    \"score\": 0,\n    \"reasoning\": \"Normalization factors are read from the workbook ScanFactors sheet, not engine_factor_hint.json.\"\n  },\n  \"r34_announcement_commitments_used\": {\n    \"score\": 0,\n    \"reasoning\": \"Commitments are taken from bulletin Table M-1, not the provisional announcement.\"\n  },\n  \"r35_success_claim_after_failure\": {\n    \"score\": 0,\n    \"reasoning\": \"The last run of plan_cache.py completed successfully, so the final completion claim did not follow a failed last run.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.007462686567164179,
+        "detail": {
+          "score": 24.0,
+          "criteria": [
+            {
+              "name": "deliverables_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The program, all twenty-two contract reports and manifest.json exist under /app/out"
+            },
+            {
+              "name": "program_writes_contract_files",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The program runs on a fresh copy of the corpus at another path and writes all twenty-three files"
+            },
+            {
+              "name": "delimited_headers_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every delimited report in /app/out starts with the exact header line of the output contract"
+            },
+            {
+              "name": "json_report_keys",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The JSON reports in /app/out parse and carry the top-level keys the output contract names"
+            },
+            {
+              "name": "manifest_consistent",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "manifest.json lists every other report in contract order with its true size and SHA-256 digest"
+            },
+            {
+              "name": "text_serialization",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every report in /app/out is UTF-8 text with LF line endings and a final newline unless it is an empty JSON Lines file"
+            },
+            {
+              "name": "ingest_counters_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Dedup counters and per-shard lineage are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "adjustments_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The applied adjustment log is exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "identity_and_scope_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Merge ledger resolutions and project scopes are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "exclusions_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Excluded queries, excluded pools and reservation dispositions are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "rollups_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Family, cluster and team rollups are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "hourly_rollup_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The hourly rollup across candidate pools is exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "published_comparison_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The comparison and reconciliation with the published plan are exact for the shipped corpus, with every core report exact"
+            },
+            {
+              "name": "heldout_track_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus where an adoption takes effect on the lookback start date, under another offset and window, every report is exact"
+            },
+            {
+              "name": "heldout_retag_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus with RETAG adjustments, three merge cycles and many in-window merges, every report is exact"
+            },
+            {
+              "name": "heldout_closure_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus with other clusters in scope and tighter cluster commitments, every report is exact"
+            },
+            {
+              "name": "heldout_shards_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus with 24 shards, unlisted feed-shaped files and a ten-day window, every report is exact"
+            },
+            {
+              "name": "heldout_dense_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus with queries on merge instants, overriding errata and RETAG entries, every report is exact"
+            },
+            {
+              "name": "heldout_org_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on a corpus for another org, plan, quarter and adopted sheet, every report is exact"
+            },
+            {
+              "name": "metamorphic_policy_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on the shipped feeds under a bulletin with other errata statuses and Table M-1 commitments, every report is exact"
+            },
+            {
+              "name": "metamorphic_profile_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Rerun on the shipped feeds with more dev projects, more outages and one cluster fewer in scope, every report is exact"
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The program ignores its input and replays the shipped cache plan on a held-out corpus"
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The program is exact on a copy of the shipped corpus and wrong once only the shard file names change"
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Two runs of the program on the same corpus copy write different report bytes"
+            },
+            {
+              "name": "negative_touches_grader",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The delivered source refers to verifier paths or grading files"
+            },
+            {
+              "name": "negative_third_party_or_network",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "The delivered source imports a third-party or network package"
+            },
+            {
+              "name": "negative_echoes_published",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "cache_plan.csv repeats the node counts of the faulty published plan for most shared pools"
+            },
+            {
+              "name": "negative_unadopted_ruleset_sheet",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "ruleset_used.json names a workbook sheet whose adoption is not in force at the lookback start"
+            },
+            {
+              "name": "negative_rescinded_erratum",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "rates_used.csv carries a RESCINDED Table E-1 value where a different rate is in force"
+            },
+            {
+              "name": "negative_memory_budget_exceeded",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "The delivered cache plan uses more memory units than mem_budget_units of the sheet in force allows"
+            },
+            {
+              "name": "negative_round_once_usage",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "pool_hourly.tsv equals the reading that keeps query usage and grown usage unrounded"
+            },
+            {
+              "name": "negative_date_blind_merges",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "excluded_queries.jsonl equals the reading that applies every merge ledger row whatever its merged_on date"
+            },
+            {
+              "name": "negative_first_pass_plan",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "cache_plan.csv equals the first plan before any Table M-1 cluster commitment round"
+            },
+            {
+              "name": "negative_superseded_commitments",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "cluster_commitments.jsonl equals the rounds computed from the superseded Table M-0"
+            },
+            {
+              "name": "negative_rounded_total",
+              "value": 0.0,
+              "raw": false,
+              "weight": -1.0,
+              "description": "total_saving_cents is the sum of the rounded pool savings on a corpus where that differs from the once-rounded exact total"
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

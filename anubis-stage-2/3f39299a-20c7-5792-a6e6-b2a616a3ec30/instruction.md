@@ -1,0 +1,20 @@
+The allocation office of a highway materials cooperative has handed over its 2025-26 road-salt season as a flat extract in `/app/data`. Salt ran short that winter, and whenever a depot could not cover what its customers had open, the office rationed it. The documents shipped with the data govern this work.
+
+Write a reusable program at `/app/out/derive_report.py`, a single self-contained file (no helper module beside it is collected), run as `python3 /app/out/derive_report.py DATA_DIR OUT_DIR`. It reads an extract from DATA_DIR and writes the reports into OUT_DIR, creating OUT_DIR if it does not exist yet; when OUT_DIR already exists it may hold other files, which the program leaves exactly as they are while it overwrites the nine reports. It will also be run on other extracts in the same layout, so nothing in it may depend on this particular season, and each run must finish within 240 seconds. Its output must be byte-identical when it is run twice, from different working directories, on the extract at different paths and into different output directories. The program must leave DATA_DIR untouched, read nothing outside DATA_DIR and its own directory, write nothing outside OUT_DIR, import no networking module and open no network connection. Run it on the shipped extract with `/app/out` as OUT_DIR.
+
+The reports are `/app/out/summary.json`, `/app/out/policy_audit.json` and `/app/out/data_quality.json`, the regional reports `/app/out/region_North.json`, `/app/out/region_South.json`, `/app/out/region_West.json` and `/app/out/region_East.json`, and the segment reports `/app/out/segment_commercial.json` and `/app/out/segment_public.json`. All nine are written for every extract; a regional or segment report that is out of scope for an extract carries only its out-of-scope marker. Every report must match exactly, byte for byte.
+
+Use only the Python standard library. Leave the shipped extract exactly as you found it. Do not look for this season or its answers online; it exists only in this extract.
+
+When you are done, state these in your final message. Each one that names a change is worked out for the shipped extract by rerunning the whole season with exactly the change named, everything else as shipped.
+
+- the season's total quantity delivered to public customers in kg, as the public segment report would give it, if journal entry `JR-0068` had recorded `tie_break` `highest_weight` in its `parameters`, every other entry and field of the journal as shipped, with everything the documents make depend on the journal following from the journal so changed;
+- the season's total closing stock in kg, summed over all depots, if from the instant `2026-01-27T00:49:00Z` on, Coldspring Freight's weighbridge had been set to `long_ton`, moisture deduction 9, `down` and Lakeshore Bulk's to `metric_tonne`, moisture deduction 5, `down`, every other carrier and every earlier instant as shipped;
+- the customer ids, in increasing order, whose season true-up credit (a customer the true-up does not list counting as 0 kg) would differ from the shipped season's if the `tie_break` in force at every week's allocation were `oldest_open_lot`;
+- how many entries of the two segment reports' rationed allocations, taken together, would be marked as reviewed if the `review_round_limit` in force at every week's allocation were 3;
+- the season's total true-up credit in kg under that same weighbridge change;
+- the season's total lapsed quantity in kg if every load whose row in force names Redfern Haul as its carrier had arrived exactly 168 hours later than stamped;
+- the season's total true-up credit in kg if, together, merge event IE-015 took effect exactly at the closing cutoff of the week after the week that holds its stamped instant and the `deficit_threshold` in force at every week's allocation were 0.05 higher;
+- how many loads arriving within the season window, each load counted once by its row in force, would be credited with different settings under that same weighbridge change.
+
+You have 7200 seconds to complete this task.

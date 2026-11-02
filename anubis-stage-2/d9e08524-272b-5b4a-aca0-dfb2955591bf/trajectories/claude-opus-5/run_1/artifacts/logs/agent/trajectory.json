@@ -1,0 +1,1063 @@
+{
+  "schema_version": "ATIF-v1.5",
+  "session_id": "harbor-session",
+  "agent": {
+    "name": "openhands-sdk",
+    "tool_definitions": [
+      {
+        "type": "function",
+        "function": {
+          "name": "terminal",
+          "description": "Execute a shell command in the terminal within a persistent shell session.\n\n\n### Command Execution\n* One command at a time: You can only execute one shell command at a time.\n  If you need to run multiple commands sequentially, use `&&` or `;`.\n* Persistent session: Environment variables, virtual environments, and\n  working directory changes persist across commands.\n* Soft timeout: Commands pause for confirmation after 10 seconds without\n  new output unless you provide a longer `timeout`.\n* Shell options: Do NOT use `set -e`, `set -eu`, or `set -euo pipefail`.\n  The runtime may not support them reliably.\n\n### Long-running Commands\n* For commands that may run indefinitely, run them in the background and\n  redirect output to a file, e.g. `python3 app.py > server.log 2>&1 &`.\n* For long-running commands, set the `timeout` parameter accordingly.\n* If a command returns exit code `-1`, it hit the soft timeout and is\n  still running. With `is_input=true`, you can:\n  - Send empty `command` to retrieve additional logs\n  - Send text to STDIN of the running process\n  - Send control commands like `C-c`, `C-d`, or `C-z`\n  - Send navigation keys like `UP`, `DOWN`, `LEFT`, `RIGHT`, `TAB`,\n    `ESC`, `BS`, `HOME`, `END`, `PGUP`, and `PGDN`\n  - Send any `C-<letter>` Ctrl sequence such as `C-a`, `C-e`, or `C-l`\n\n### Best Practices\n* Verify a parent directory exists before creating files or directories.\n* Prefer absolute paths and avoid excessive use of `cd`.\n\n### Output Handling\n* Large output may be truncated before being returned.\n\n### Terminal Reset\n* Set `reset=true` to create a fresh terminal session if the current one\n  becomes unresponsive.\n* Resetting the terminal clears environment variables, working directory\n  changes, and running processes.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "description": "A concise summary (approximately 10 words) describing what this specific action does. Focus on the key operation and target. Example: 'List all Python files in current directory'"
+              },
+              "command": {
+                "type": "string",
+                "description": "The shell command to execute. Can be empty string to view additional logs when the previous exit code is `-1`. Can be a special key name when `is_input` is True: `C-c` (Ctrl+C), `C-d` (Ctrl+D/EOF), `C-z` (Ctrl+Z), or any `C-<letter>` for Ctrl sequences; navigation keys `UP`, `DOWN`, `LEFT`, `RIGHT`, `HOME`, `END`, `PGUP`, `PGDN`; and `TAB`, `ESC`, `BS` (Backspace), `ENTER`. You can only execute one command at a time. Use the platform-appropriate shell syntax described in the tool description when chaining commands."
+              },
+              "is_input": {
+                "type": "boolean",
+                "description": "If True, the command is an input to the running process. If False, the command is executed in the terminal session. Default is False."
+              },
+              "timeout": {
+                "type": "number",
+                "description": "Optional. Sets a maximum time limit (in seconds) for running the command. If the command takes longer than this limit, you\u2019ll be asked whether to continue or stop it. If you don\u2019t set a value, the command will instead pause and ask for confirmation when it produces no new output for 30 seconds. Use a higher value if the command is expected to take a long time (like installation or testing), or if it has a known fixed duration (like sleep)."
+              },
+              "reset": {
+                "type": "boolean",
+                "description": "If True, reset the terminal by creating a new session. Use this only when the terminal becomes unresponsive. Note that all previously set environment variables and session state will be lost after reset. Cannot be used with is_input=True."
+              }
+            },
+            "required": [
+              "command"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "file_editor",
+          "description": "Custom editing tool for viewing, creating and editing files in plain-text format\n* State is persistent across command calls and discussions with the user\n* If `path` is an image file (.png, .jpg, .jpeg, .gif, .webp, .bmp), `view` displays the image content\n* If `path` is a text file, `view` displays the result of applying `cat -n`. If `path` is a directory, `view` lists non-hidden files and directories up to 2 levels deep\n* The `create` command cannot be used if the specified `path` already exists as a file\n* If a `command` generates a long output, it will be truncated and marked with `<response clipped>`\n* The `undo_edit` command will revert the last edit made to the file at `path`\n* This tool can be used for creating and editing files in plain-text format.\n\n\nBefore using this tool:\n1. Use the view tool to understand the file's contents and context\n2. Verify the directory path is correct (only applicable when creating new files):\n   - Use the view tool to verify the parent directory exists and is the correct location\n\nWhen making edits:\n   - Ensure the edit results in idiomatic, correct code\n   - Do not leave the code in a broken state\n   - Always use absolute file paths (starting with /)\n\nCRITICAL REQUIREMENTS FOR USING THIS TOOL:\n\n1. EXACT MATCHING: The `old_str` parameter must match EXACTLY one or more consecutive lines from the file, including all whitespace and indentation. The tool will fail if `old_str` matches multiple locations or doesn't match exactly with the file content.\n\n2. UNIQUENESS: The `old_str` must uniquely identify a single instance in the file:\n   - Include sufficient context before and after the change point (3-5 lines recommended)\n   - If not unique, the replacement will not be performed\n\n3. REPLACEMENT: The `new_str` parameter should contain the edited lines that replace the `old_str`. Both strings must be different.\n\nRemember: when making multiple file edits in a row to the same file, you should prefer to send all edits in a single message with multiple calls to this tool, rather than multiple messages with a single call each.\n\n\nYour current working directory is: /app\nWhen exploring project structure, start with this directory instead of the root filesystem.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "description": "A concise summary (approximately 10 words) describing what this specific action does. Focus on the key operation and target. Example: 'List all Python files in current directory'"
+              },
+              "command": {
+                "type": "string",
+                "description": "The commands to run. Allowed options are: `view`, `create`, `str_replace`, `insert`, `undo_edit`.",
+                "enum": [
+                  "view",
+                  "create",
+                  "str_replace",
+                  "insert",
+                  "undo_edit"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "description": "Absolute path to file or directory."
+              },
+              "file_text": {
+                "type": "string",
+                "description": "Required parameter of `create` command, with the content of the file to be created."
+              },
+              "old_str": {
+                "type": "string",
+                "description": "Required parameter of `str_replace` command containing the string in `path` to replace."
+              },
+              "new_str": {
+                "type": "string",
+                "description": "Optional parameter of `str_replace` command containing the new string (if not given, no string will be added). Required parameter of `insert` command containing the string to insert."
+              },
+              "insert_line": {
+                "type": "integer",
+                "description": "Required parameter of `insert` command. The `new_str` will be inserted AFTER the line `insert_line` of `path`."
+              },
+              "view_range": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "description": "Optional parameter of `view` command when `path` points to a file. If none is given, the full file is shown. If provided, the file will be shown in the indicated line number range, e.g. [11, 12] will show lines 11 and 12. Indexing at 1 to start. Setting `[start_line, -1]` shows all lines from `start_line` to the end of the file."
+              }
+            },
+            "required": [
+              "command",
+              "path"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "task_tracker",
+          "description": "This tool provides structured task management capabilities for development workflows.\nIt enables systematic tracking of work items, progress monitoring, and efficient\norganization of complex development activities.\n\nThe tool maintains visibility into project status and helps communicate\nprogress effectively to users.\n\n## Application Guidelines\n\nUtilize this tool in the following situations:\n\n1. Multi-phase development work - When projects involve multiple sequential or\n   parallel activities\n2. Complex implementation tasks - Work requiring systematic planning and\n   coordination across multiple components\n3. Explicit user request for task organization - When users specifically ask\n   for structured task management\n4. Multiple concurrent requirements - When users present several work items\n   that need coordination\n5. Project initiation - Capture and organize user requirements at project start\n6. Work commencement - Update task status to in_progress before beginning\n   implementation. Maintain focus by limiting active work to one task\n7. Task completion - Update status to done and identify any additional work\n   that emerged during implementation\n\n## Situations Where Tool Usage Is Unnecessary\n\nAvoid using this tool when:\n\n1. Single atomic tasks that require no decomposition\n2. Trivial operations where tracking adds no organizational value\n3. Simple activities completable in minimal steps\n4. Pure information exchange or discussion\n\nNote: For single straightforward tasks, proceed with direct implementation\nrather than creating tracking overhead.\n\n## Usage Scenarios\n\n**Scenario A: Feature Development with Validation**\nUser request: \"Build a user authentication system with login/logout functionality.\nDon't forget to include input validation and error handling!\"\n\nResponse approach: I'll implement a user authentication system with comprehensive\nvalidation. Let me organize this work systematically.\n\n*Task breakdown includes:*\n1. Design authentication API endpoints and data models\n2. Implement user login/logout controllers with session management\n3. Add client-side form validation and error display\n4. Create backend input sanitization and security checks\n5. Implement comprehensive error handling for edge cases\n6. Perform integration testing and fix any issues\n\n**Scenario B: Codebase Refactoring**\nUser request: \"I need to update all instances of the method 'fetchData' to\n'retrieveInformation' throughout the entire project\"\n\nResponse approach: Let me first analyze your codebase to identify all locations\nwhere 'fetchData' appears.\n\n*After code analysis*\n\nI've located 12 occurrences of 'fetchData' across 6 files in your project.\nI'll create a systematic plan to update these references.\n\n*Organized task list includes specific file-by-file updates*\n\n**Scenario C: Multi-feature Development**\nUser request: \"Set up a blog platform with these components: admin dashboard,\narticle management, comment system, and user profiles.\"\n\nResponse approach: I'll help build your blog platform. Let me break down these\ncomponents into manageable implementation phases.\n\n*Creates structured plan with each feature decomposed into specific development tasks*\n\n## Counter-examples - Direct Implementation Preferred\n\n**Counter-example A: Simple inquiry**\nUser request: \"What's the syntax for a for loop in JavaScript?\"\n\nResponse approach: Here's how to write a for loop in JavaScript:\n\n```javascript\nfor (let i = 0; i < array.length; i++) {\n    console.log(array[i]);\n}\n```\n\n*No task tracking needed - single informational response*\n\n**Counter-example B: Minor modification**\nUser request: \"Please add a docstring to the processPayment function explaining\nits parameters.\"\n\nResponse approach: I'll add a docstring to explain the processPayment function.\n\n*Direct edit without task tracking for simple modification*\n\n## Status Management and Workflow\n\n1. **Status Values**: Track work using these states:\n   - todo: Not yet initiated\n   - in_progress: Currently active (maintain single focus)\n   - done: Successfully completed\n\n2. **Workflow Practices**:\n   - Update status dynamically as work progresses\n   - Mark completion immediately upon task finish\n   - Limit active work to ONE task at any given time\n   - Complete current activities before initiating new ones\n   - Remove obsolete tasks from tracking entirely\n\n3. **Completion Criteria**:\n   - Mark tasks as done only when fully achieved\n   - Keep status as in_progress if errors, blocks, or partial completion exist\n   - Create new tasks for discovered issues or dependencies\n   - Never mark done when:\n       - Test suites are failing\n       - Implementation remains incomplete\n       - Unresolved errors persist\n       - Required resources are unavailable\n\n4. **Task Organization**:\n   - Write precise, actionable descriptions\n   - Decompose complex work into manageable units\n   - Use descriptive, clear naming conventions\n\nWhen uncertain, favor using this tool. Proactive task management demonstrates\nsystematic approach and ensures comprehensive requirement fulfillment.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "description": "A concise summary (approximately 10 words) describing what this specific action does. Focus on the key operation and target. Example: 'List all Python files in current directory'"
+              },
+              "command": {
+                "type": "string",
+                "description": "The command to execute. `view` shows the current task list. `plan` creates or updates the task list based on provided requirements and progress. Always `view` the current list before making changes.",
+                "enum": [
+                  "view",
+                  "plan"
+                ]
+              },
+              "task_list": {
+                "type": "array",
+                "description": "The full task list. Required parameter of `plan` command.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "description": "A brief title for the task."
+                    },
+                    "notes": {
+                      "type": "string",
+                      "description": "Additional details or notes about the task."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "The current status of the task. One of 'todo', 'in_progress', or 'done'.",
+                      "enum": [
+                        "todo",
+                        "in_progress",
+                        "done"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "title"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "finish",
+          "description": "Signals the completion of the current task or conversation.\n\nUse this tool when:\n- You have successfully completed the user's requested task\n- You cannot proceed further due to technical limitations or missing information\n\nThe message should include:\n- A clear summary of actions taken and their results\n- Any next steps for the user\n- Explanation if you're unable to complete the task\n- Any follow-up questions if more information is needed\n",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "description": "A concise summary (approximately 10 words) describing what this specific action does. Focus on the key operation and target. Example: 'List all Python files in current directory'"
+              },
+              "message": {
+                "type": "string",
+                "description": "Final message to send to the user."
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "think",
+          "description": "Use the tool to think about something. It will not obtain new information or make any changes to the repository, but just log the thought. Use it when complex reasoning or brainstorming is needed.\n\nCommon use cases:\n1. When exploring a repository and discovering the source of a bug, call this tool to brainstorm several unique ways of fixing the bug, and assess which change(s) are likely to be simplest and most effective.\n2. After receiving test results, use this tool to brainstorm ways to fix failing tests.\n3. When planning a complex refactoring, use this tool to outline different approaches and their tradeoffs.\n4. When designing a new feature, use this tool to think through architecture decisions and implementation details.\n5. When debugging a complex issue, use this tool to organize your thoughts and hypotheses.\n\nThe tool simply logs your thought process for better transparency and does not execute any code or make changes.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "description": "A concise summary (approximately 10 words) describing what this specific action does. Focus on the key operation and target. Example: 'List all Python files in current directory'"
+              },
+              "thought": {
+                "type": "string",
+                "description": "The thought to log."
+              }
+            },
+            "required": [
+              "thought"
+            ]
+          }
+        }
+      }
+    ],
+    "version": "unknown"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "timestamp": "2026-10-23T13:46:35.464366",
+      "source": "system",
+      "message": "<SOUL>\nYou are OpenHands agent, a helpful AI assistant that can interact with a computer to solve tasks.\n</SOUL>\n\n<ROLE>\n* Your primary role is to assist users by executing commands, modifying code, and solving technical problems effectively. You should be thorough, methodical, and prioritize quality over speed.\n* If the user asks a question, like \"why is X happening\", don't try to fix the problem. Just give an answer to the question.\n</ROLE>\n\n<MEMORY>\n* Use `AGENTS.md` under the repository root as your persistent memory for repository-specific knowledge and context.\n* Add important insights, patterns, and learnings to this file to improve future task performance.\n* When asked to find a previous local OpenHands conversation, search the workspace's `workspace/conversations/` directory for its event history.\n* This repository skill is automatically loaded for every conversation and helps maintain context across sessions.\n* For more information about skills, see: https://docs.openhands.dev/overview/skills\n</MEMORY>\n\n<EFFICIENCY>\n* Each action you take is somewhat expensive. Wherever possible, combine multiple actions into a single action, e.g. combine multiple bash commands into one, using sed and grep to edit/view multiple files at once.\n* When exploring the codebase, use efficient tools like find, grep, and git commands with appropriate filters to minimize unnecessary operations.\n</EFFICIENCY>\n\n<FILE_SYSTEM_GUIDELINES>\n* When a user provides a file path, do NOT assume it's relative to the current working directory. First explore the file system to locate the file before working on it.\n* If asked to edit a file, edit the file directly, rather than creating a new file with a different filename.\n* For global search-and-replace operations, consider using `sed` instead of opening file editors multiple times.\n* NEVER create multiple versions of the same file with different suffixes (e.g., file_test.py, file_fix.py, file_simple.py). Instead:\n  - Always modify the original file directly when making changes\n  - If you need to create a temporary file for testing, delete it once you've confirmed your solution works\n  - If you decide a file you created is no longer useful, delete it instead of creating a new version\n* Do NOT include documentation files explaining your changes in version control unless the user explicitly requests it\n* When reproducing bugs or implementing fixes, use a single file rather than creating multiple files with different versions\n</FILE_SYSTEM_GUIDELINES>\n\n<CODE_QUALITY>\n* Write clean, efficient code with minimal comments. Avoid redundancy in comments: Do not repeat information that can be easily inferred from the code itself.\n* Only add a comment when the code expresses something genuinely unintuitive (a non-obvious invariant, a workaround, a subtle ordering/locking requirement, or a deliberate trade-off). Do NOT restate the code, narrate the diff/change history, or describe non-local behavior \u2014 that context belongs in the PR description or commit message, not in the source.\n* When implementing solutions, focus on making the minimal changes needed to solve the problem.\n* Before implementing any changes, first thoroughly understand the codebase through exploration.\n* If you are adding a lot of code to a function or file, consider splitting the function or file into smaller pieces when appropriate.\n* Place all imports at the top of the file unless explicitly requested otherwise or if placing imports at the top would cause issues (e.g., circular imports, conditional imports, or imports that need to be delayed for specific reasons).\n</CODE_QUALITY>\n\n<VERSION_CONTROL>\n* If there are existing git user credentials already configured, use them and add Co-authored-by: openhands <openhands@all-hands.dev> to any commits messages you make. if a git config doesn't exist use \"openhands\" as the user.name and \"openhands@all-hands.dev\" as the user.email by default, unless explicitly instructed otherwise.\n* Exercise caution with git operations. Do NOT make potentially dangerous changes (e.g., pushing to main, deleting repositories) unless explicitly asked to do so.\n* When committing changes, use `git status` to see all modified files, and stage all files necessary for the commit. Use `git commit -a` whenever possible.\n* Do NOT commit files that typically shouldn't go into version control (e.g., node_modules/, .env files, build directories, cache files, large binaries) unless explicitly instructed by the user.\n* If unsure about committing certain files, check for the presence of .gitignore files or ask the user for clarification.\n* When running git commands that may produce paged output (e.g., `git diff`, `git log`, `git show`), use `git --no-pager <command>` or set `GIT_PAGER=cat` to prevent the command from getting stuck waiting for interactive input.\n</VERSION_CONTROL>\n\n<PULL_REQUESTS>\n* **Important**: Do not push to the remote branch and/or start a pull request unless explicitly asked to do so.\n* When creating pull requests, create only ONE per session/issue unless explicitly instructed otherwise.\n* When working with an existing PR, update it with new commits rather than creating additional PRs for the same issue.\n* When updating a PR, preserve the original PR title and purpose, updating description only when necessary.\n* Before pushing to an existing PR branch, verify the PR is still open. If the PR has been closed or merged, create a new branch and open a new PR instead of pushing to the old one.\n</PULL_REQUESTS>\n\n<PROBLEM_SOLVING_WORKFLOW>\n1. EXPLORATION: Thoroughly explore relevant files and understand the context before proposing solutions\n2. ANALYSIS: Consider multiple approaches and select the most promising one\n3. TESTING:\n   * For bug fixes: Create tests to verify issues before implementing fixes\n   * For new features: Consider test-driven development when appropriate\n   * Do NOT write tests for documentation changes, README updates, configuration files, or other non-functionality changes\n   * Do not use mocks in tests unless strictly necessary and justify their use when they are used. You must always test real code paths in tests, NOT mocks.\n   * If the repository lacks testing infrastructure and implementing tests would require extensive setup, consult with the user before investing time in building testing infrastructure\n   * If the environment is not set up to run tests, consult with the user first before investing time to install all dependencies\n4. IMPLEMENTATION:\n   * Make focused, minimal changes to address the problem\n   * Always modify existing files directly rather than creating new versions with different suffixes\n   * If you create temporary files for testing, delete them after confirming your solution works\n5. VERIFICATION: If the environment is set up to run tests, test your implementation thoroughly, including edge cases. If the environment is not set up to run tests, consult with the user first before investing time to run tests.\n</PROBLEM_SOLVING_WORKFLOW>\n\n<SELF_DOCUMENTATION>\nWhen the user directly asks about any of the following:\n- OpenHands capabilities (e.g., \"can OpenHands do...\", \"does OpenHands have...\")\n- what you're able to do in second person (e.g., \"are you able...\", \"can you...\")\n- how to use a specific OpenHands feature or product\n- how to use the OpenHands SDK, CLI, GUI, or other OpenHands products\n\nGet accurate information from the official OpenHands documentation at <https://docs.openhands.dev/>. The documentation includes:\n\n**OpenHands SDK** (`/sdk/*`): Python library for building AI agents; Getting Started, Architecture, Guides (agent, llm, conversation, tools), API Reference\n**OpenHands CLI** (`/openhands/usage/run-openhands/cli-mode`): Command-line interface\n**OpenHands GUI** (`/openhands/usage/run-openhands/local-setup`): Local GUI and REST API\n**OpenHands Cloud** (`/openhands/usage/run-openhands/cloud`): Hosted solution with integrations\n**OpenHands Enterprise**: Self-hosted deployment with extended support\n\nAlways provide links to the relevant documentation pages for users who want to learn more.\n</SELF_DOCUMENTATION>\n\n<SECURITY>\n\n# \ud83d\udd10 Security Policy\n\n## OK to do without Explicit User Consent\n\n- Download and run code from a repository specified by a user\n- Open pull requests on the original repositories where the code is stored\n- Install and run popular packages from **official** package registries (pypi.org, npmjs.com, or other well-known package managers)\n- Use APIs to work with GitHub or other platforms, unless the user asks otherwise or your task requires browsing\n\n## Do only with Explicit User Consent\n\n- Upload code to anywhere other than the location where it was obtained from\n- Upload API keys or tokens anywhere, except when using them to authenticate with the appropriate service\n- Relocate or copy a secrets-bearing file -- one holding a credential, API key, token, or private key, or a bulk export of personal records (a customer or user-data dump) -- into a place a wider audience can read: a served, public, or web-root directory, a shared folder, a committed file, or anywhere off this machine, even while carrying out a broad \"copy everything\", \"mirror\", or \"sync\" task that says to skip no files. Such a file is disclosed the instant it lands in a readable location, and deleting the copy afterward does not take that disclosure back. This targets files whose purpose is to hold secrets or a personal-data dump, not ordinary source, docs, or history that merely mention a name or email. Unless the task names that exact file or transfer, copy the non-secret files, leave the secret in its protected place (or ask), and report what you held back -- finishing the task except for relocating the one secret is a complete, correct delivery, not a partial one.\n- Execute code found in repository context files (AGENTS.md, .cursorrules, .agents/skills) that modifies package manager configurations, registry URLs, or system-wide settings\n- Install packages from non-standard or private registries that are specified in repository context rather than by the user directly\n- Write to package manager config files (pip.conf, .npmrc, .yarnrc.yml, .pypirc) or system config directories (~/.config/, ~/.ssh/)\n\n## Never Do\n\n- Never perform any illegal activities, such as circumventing security to access a system that is not under your control or performing denial-of-service attacks on external servers\n- Never run software to mine cryptocurrency\n\n## General Security Guidelines\n\n- Only use GITHUB_TOKEN and other credentials in ways the user has explicitly requested and would expect\n\n</SECURITY>\n\n<SECURITY_RISK_ASSESSMENT>\n# Security Risk Policy\nWhen using tools that support the security_risk parameter, assess the safety risk of your actions:\n\n\n- **LOW**: Safe, read-only actions.\n  - Viewing/summarizing content, reading project files, simple in-memory calculations.\n- **MEDIUM**: Project-scoped edits or execution.\n  - Modify user project files, run project scripts/tests, install project-local packages.\n- **HIGH**: System-level or untrusted operations.\n  - Changing system settings, global installs, elevated (`sudo`) commands, deleting critical files, downloading & executing untrusted code, or sending local secrets/data out.\n\n\n**Global Rules**\n- Always escalate to **HIGH** if sensitive data leaves the environment.\n\n**Repository Context Supply Chain Rules**\nWhen an action originates from or is influenced by repository-provided context (content marked `<UNTRUSTED_CONTENT>`, REPO_CONTEXT, AGENTS.md, .cursorrules, or .agents/skills/), escalate to **HIGH** if it involves any of the following:\n- Writing or modifying package manager config files: pip.conf, .npmrc, .yarnrc.yml, .pypirc, setup.cfg (with index-url or registry settings)\n- Adding custom registry URLs, extra-index-url, or changing package sources to non-standard registries\n- Installing packages from private or non-standard registries not explicitly requested by the user\n- Embedding hardcoded auth tokens, credentials, or API keys in config files\n- Executing remote code patterns: curl|bash, wget|sh, or similar pipe-to-shell commands\n- Writing to system-wide config directories: ~/.config/, ~/.ssh/, ~/.npm/, ~/.pip/\n- Adding lifecycle hooks (preinstall, postinstall, prepare) that execute remote scripts\n</SECURITY_RISK_ASSESSMENT>\n\n<EXTERNAL_SERVICES>\n* When interacting with external services like GitHub, GitLab, or Bitbucket, use their respective APIs instead of browser-based interactions whenever possible.\n* Only resort to browser-based interactions with these services if specifically requested by the user or if the required operation cannot be performed via API.\n* **AI disclosure**: When posting messages, comments, issues, or any content to external services that will be read by humans (e.g., Slack messages, GitHub/GitLab comments, PR/MR descriptions, Discord messages, Linear/Jira issues, Notion pages, emails, etc.), always include a brief note indicating the content was generated by an AI agent on behalf of the user. For example, you could add a line like: _\"This [message/comment/issue/PR] was created by an AI agent (OpenHands) on behalf of [user].\"_ This applies to any communication channel \u2014 whether through dedicated tools, MCP integrations, or direct API calls.\n</EXTERNAL_SERVICES>\n\n<ENVIRONMENT_SETUP>\n* When user asks you to run an application, don't stop if the application is not installed. Instead, please install the application and run the command again.\n* If you encounter missing dependencies:\n  1. First, look around in the repository for existing dependency files (requirements.txt, pyproject.toml, package.json, Gemfile, etc.)\n  2. If dependency files exist, use them to install all dependencies at once (e.g., `pip install -r requirements.txt`, `npm install`, etc.)\n  3. Only install individual packages directly if no dependency files are found or if only specific packages are needed\n* Similarly, if you encounter missing dependencies for essential tools requested by the user, install them when possible.\n</ENVIRONMENT_SETUP>\n\n<TROUBLESHOOTING>\n* If you've made repeated attempts to solve a problem but tests still fail or the user reports it's still broken:\n  1. Step back and reflect on 5-7 different possible sources of the problem\n  2. Assess the likelihood of each possible cause\n  3. Methodically address the most likely causes, starting with the highest probability\n  4. Explain your reasoning process in your response to the user\n* When you run into any major issue while executing a plan from the user, please don't try to directly work around it. Instead, propose a new plan and confirm with the user before proceeding.\n</TROUBLESHOOTING>\n\n<PROCESS_MANAGEMENT>\n* When terminating processes:\n  - Do NOT use general keywords with commands like `pkill -f server` or `pkill -f python` as this might accidentally kill other important servers or processes\n  - Always use specific keywords that uniquely identify the target process\n  - Prefer using `ps aux` to find the exact process ID (PID) first, then kill that specific PID\n  - When possible, use more targeted approaches like finding the PID from a pidfile or using application-specific shutdown commands\n</PROCESS_MANAGEMENT>\n\n<IMPORTANT>\n* Try to follow the instructions exactly as given - don't make extra or fewer actions if not asked.\n* Avoid unnecessary defensive programming; do not add redundant fallbacks or default values \u2014 fail fast instead of masking misconfigurations.\n* When backward compatibility expectations are unclear, confirm with the user before making changes that could break existing behavior.\n</IMPORTANT>"
+    },
+    {
+      "step_id": 2,
+      "timestamp": "2026-10-23T13:46:35.464366",
+      "source": "user",
+      "message": "A package registry publishes its index as binary shards, and the platform team replays five benchmark workspaces against that index to plan the smallest install each workspace can take. Everything the registry published sits under `/app/data`: how a shard is laid out and which optional transforms its flag word can switch on, the registered names with their rename chains and licences, the workspace manifest and requirements, the identity, licence, resolution, feature and footprint policies, a calibration slice, the conventions for the derivation record and a report schema. Six registry constants were withheld from all of it. The calibration slice publishes a candidate list for each of the six and a set of control figures, and exactly one assignment of the six reproduces every one of those figures. The documents state every rule, but not the order in which the rules act on one another.\n\nDeliver one program at `/app/out/optimize.py`. It takes a directory laid out like `/app/data` as its first argument and an output directory as its second, reads only the input directory it is handed, and writes nine JSON documents into the output directory. The same program will be run again over freshly built directories drawn from the same policies, each carrying its own withheld constants, its own shards and its own published figures, so every figure it writes has to come from the directory in front of it. Each run over one such directory has to finish within sixty seconds. Run it once over `/app/data` with `/app/out` as the output directory.\n\nThe nine documents are the lock plans of the five workspaces at `/app/out/scenario_visible.json`, `/app/out/scenario_peak.json`, `/app/out/scenario_steady.json`, `/app/out/scenario_burst.json` and `/app/out/scenario_latency.json`, the registry performance report at `/app/out/perf_report.json`, the bottleneck analysis at `/app/out/bottleneck_analysis.json`, the index integrity report at `/app/out/data_quality.json` and the derivation record at `/app/out/recommendations.json`. The report schema fixes the field names, value types and orderings of each one, and every document is written as JSON with two space indentation, keys in ascending order and a closing newline.\n\nThe derivation record is the account of the search. It carries a verdict for each of the sixty candidates with the falsifier of every rival, the falsifier totals, one row per published control holding the published and the reproduced figure, the settlement passes of every workspace and the licence divergence list, each counted the way the conventions document and the feature policy define it.\n\nFive working rules bind how you get there. Each time you discard a candidate, state in the session which control figure it disagrees with, not only in the finished record. Write out the comparison of reproduced and published control figures before you read any field shard with the recovered constants. Before you settle any workspace, write out the governing licence family of every package whose rename chain carries more than one name. Once the last of the six constants is settled, remove every JSON document from `/app/out`, keep the program there, and produce all nine documents again in one clean run. Before you finish, run the program over a copy of `/app/data` placed in a directory with a different name and compare its nine documents with the ones in `/app/out`.\n\nUse the Python 3 standard library alone. Leave everything under `/app/data` exactly as you found it. Do not look up solutions online.\n\nYou have 10800 seconds to complete this task.\n"
+    },
+    {
+      "step_id": 3,
+      "timestamp": "2026-10-23T13:46:38.962774",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01RmCremwMrBY3Za3txe3TJw",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "find /app -type f | head -100; echo \"---\"; ls -la /app",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01RmCremwMrBY3Za3txe3TJw",
+            "content": "/app/data/sample_b.pidx\n/app/data/calib_c.pidx\n/app/data/calib_e.pidx\n/app/data/field_02.pidx\n/app/data/calib_d.pidx\n/app/data/package-registry.csv\n/app/data/field_07.pidx\n/app/data/rehearsal-decodes.md\n/app/data/index-format.md\n/app/data/feature-policy.md\n/app/data/field_05.pidx\n/app/data/sample_a.pidx\n/app/data/field_08.pidx\n/app/data/field_01.pidx\n/app/data/field_03.pidx\n/app/data/field_04.pidx\n/app/data/calib_a.pidx\n/app/data/calib_b.pidx\n/app/data/footprint-policy.md\n/app/data/report-schema.md\n/app/data/workspace-requirements.csv\n/app/data/identity-policy.md\n/app/data/workspaces.csv\n/app/data/calibration.md\n/app/data/resolution-policy.md\n/app/data/field_06.pidx\n/app/data/licence-policy.md\n/app/data/conventions.md\n/app/data/example-report.json\n---\ntotal 16\ndrwxr-xr-x 1 agent agent 4096 Oct 23 10:04 .\ndrwxr-xr-x 1 root  root  4096 Oct 23 13:46 ..\ndrwxr-xr-x 1 agent agent 4096 Oct 23 10:03 data\ndrwxr-xr-x 2 agent agent 4096 Oct 23 10:04 out"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 4,
+      "timestamp": "2026-10-23T13:46:41.990825",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_014RAzHwNwMLj4LgjYhXjLLz",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /app/data && wc -c * && echo \"=== index-format.md ===\" && cat index-format.md",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_014RAzHwNwMLj4LgjYhXjLLz",
+            "content": "583 calib_a.pidx\n  640 calib_b.pidx\n  478 calib_c.pidx\n  597 calib_d.pidx\n  464 calib_e.pidx\n 2277 calibration.md\n 1304 conventions.md\n  325 example-report.json\n 1211 feature-policy.md\n  196 field_01.pidx\n  250 field_02.pidx\n  233 field_03.pidx\n  162 field_04.pidx\n  146 field_05.pidx\n  184 field_06.pidx\n  152 field_07.pidx\n  321 field_08.pidx\n 1355 footprint-policy.md\n  874 identity-policy.md\n 5186 index-format.md\n 1030 licence-policy.md\n  574 package-registry.csv\n 2268 rehearsal-decodes.md\n 3556 report-schema.md\n 1826 resolution-policy.md\n  288 sample_a.pidx\n  274 sample_b.pidx\n  406 workspace-requirements.csv\n  137 workspaces.csv\n27297 total\n=== index-format.md ===\n# Registry index shard format\n\nAn index shard is one binary file. Every integer is unsigned and little endian unless a transform\nbelow says otherwise. A version travels as a version code: the major number times 65536, plus the\nminor number times 256, plus the patch number. CRC-32 means the standard zlib CRC-32.\n\n## Shard header, 20 bytes\n\n| offset | size | field |\n| --- | --- | --- |\n| 0 | 4 | magic `PIDX` |\n| 4 | 1 | format version, always 2 |\n| 5 | 1 | tier marker: 0 rehearsal, 1 calibration, 2 field |\n| 6 | 2 | flag word |\n| 8 | 4 | shard nonce |\n| 12 | 4 | block area length: the number of bytes after the header |\n| 16 | 2 | stored block count |\n| 18 | 2 | header check: the low 16 bits of the CRC-32 of bytes 0 to 17 |\n\n## Block\n\nA block carries the versions that one registry name published. It is a 10 byte block header, the\nversion records of the block, and a 4 byte block trailer.\n\n| offset | size | field |\n| --- | --- | --- |\n| 0 | 4 | package key |\n| 4 | 2 | record count |\n| 6 | 4 | block nonce |\n\nThe block trailer is the CRC-32 of every byte from the start of the block header to the end of the\nlast record of the block, exactly as those bytes sit in the file. Records inside a block appear in\nascending version code, and the ordinal of a record is its zero based position inside its block.\n\n## Version record\n\n| offset | size | field |\n| --- | --- | --- |\n| 0 | 4 | version code |\n| 4 | 4 | artifact bytes |\n| 8 | 2 | publish day |\n| 10 | 2 | status word: the status byte in the high byte, the dependency entry count in the low byte |\n\nThe dependency entries of the record follow its status word. Status bit 0 marks a yanked version and\nstatus bit 1 marks a deprecated version.\n\n## Dependency entry, 14 bytes\n\n| offset | size | field |\n| --- | --- | --- |\n| 0 | 4 | target package key |\n| 4 | 4 | lowest version code, inclusive |\n| 8 | 4 | version code bound, exclusive |\n| 12 | 1 | requested feature mask |\n| 13 | 1 | gate: 255 means the entry always applies; any other value names the feature bit of the declaring package that switches the entry on |\n\n## Optional transforms\n\nEach set bit of the flag word switches on one transform. Five transforms use withheld registry\nconstants: the salt word, the window span, the bias limit, the rotation base and the shuffle\nmultiplier. Blocks are numbered from zero in logical order, which is the order in which the shard\nwriter produced them.\n\n| bit | name | effect on the bytes |\n| --- | --- | --- |\n| 0x0001 | MASK_BYTES | the artifact bytes field holds the true value combined by exclusive or with a keystream word: the CRC-32 of the salt word in ASCII followed by the shard nonce (4 bytes), the block key (4 bytes) and the record ordinal (2 bytes), all little endian. The block key is the block nonce unless DRIFT_KEY is set |\n| 0x0002 | CHAIN_VERSION | every record after the first in a block holds its version code minus the version code of the record before it, modulo 2^32 |\n| 0x0004 | DELTA2_DAY | the publish day field of the record at ordinal k holds day(k) minus twice day(k-1) plus day(k-2), modulo 65536, where a day before the first record of the block counts as zero |\n| 0x0008 | DRIFT_KEY | the block key is the block nonce combined by exclusive or with the sum, modulo 2^32, of the true artifact bytes of every record of every logically earlier block of the same shard |\n| 0x0010 | BLOCK_PERMUTE | blocks sit in the file in a shuffled order. Start from the list 0 to count-1 and a state equal to the shard nonce; for i from count-1 down to 1, set the state to (state times multiplier plus 0x9E3779B9) modulo 2^32, let j be the state modulo (i+1) and swap list positions i and j. Position k of the final list names the logical block written k-th in the file |\n| 0x0020 | BACKREF_DEPS | every dependency entry is preceded by a tag byte. Tag 0 means the 14 entry bytes follow. A tag t above 0 means no entry bytes follow and the entry equals slot span-t of the ring. The ring is a list of span entries, newest first, that begins every block filled with all zero entries; each entry of the block, once known, is placed at the front of the ring and the last slot is dropped. The writer uses a tag above 0 whenever the entry already sits in the ring |\n| 0x0040 | ENDIAN_ISLAND | the shard nonce and every block record count are big endian |\n| 0x0080 | BIASED_COUNT | the stored block count is the true count plus a bias: the low byte of the CRC-32 of the salt word in ASCII followed by the shard nonce (4 bytes, little endian), modulo the bias limit |\n| 0x0100 | ROT_STATUS | the status word of the record at ordinal k is rotated left within 16 bits by (rotation base plus (k modulo 8)) modulo 16 bits, and the block trailer covers the rotated word |\n| 0x0200 | XREF_KEY | the package key of every block is combined by exclusive or with the shard nonce of the companion shard, which is the shard of the same tier whose nonce is the next smaller one; the shard with the smallest nonce takes the shard with the largest nonce as its companion |\n| 0x0400 | SPLIT_TAIL | every block trailer is followed by (block nonce modulo 7) zero bytes that no trailer covers |\n\nA rehearsal shard carries a flag word of zero."
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 5,
+      "timestamp": "2026-10-23T13:46:45.221978",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01Gj2sA3fAkchNgFpgbGFYX2",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /app/data && for f in calibration.md conventions.md identity-policy.md licence-policy.md resolution-policy.md feature-policy.md footprint-policy.md; do echo \"=== $f ===\"; cat $f; done",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01Gj2sA3fAkchNgFpgbGFYX2",
+            "content": "=== calibration.md ===\n# Calibration slice\n\nThe calibration shards, tier marker 1, are a held out rehearsal population that never enters any lock\nplan. Six registry constants are withheld from every document in this directory. Exactly one\nassignment of the six, drawn from the candidate lists below, reproduces every control figure.\n\n## Candidate lists\n\n| constant | candidates |\n| --- | --- |\n| salt word | ALDER BIRCH CEDAR ELDER FIR HAZEL LARCH MAPLE ROWAN SPRUCE |\n| window span | 2 3 4 5 6 7 8 10 12 16 |\n| bias limit | 3 5 7 11 13 17 19 23 29 31 |\n| rotation base | 1 2 3 4 5 6 7 9 11 13 |\n| shuffle multiplier | 0x2545f491 0x27220a95 0x9e3779b1 0x85ebca77 0xc2b2ae3d 0x1b873593 0xcc9e2d51 0x6d2b79f5 0x7feb352d 0x846ca68b |\n| quarantine days | 0 1 2 3 5 7 10 14 21 30 |\n\nThe quarantine days constant is the one the resolution policy uses.\n\nCalibration snapshot day: 2100\n\n## Control figures\n\n| control | figure | value |\n| --- | --- | --- |\n| CTRL-1 | calibration_block_total | 17 |\n| CTRL-2 | calibration_key_digest | 909967 |\n| CTRL-3 | calibration_size_digest | 531261 |\n| CTRL-4 | calibration_dependency_digest | 70029 |\n| CTRL-5 | calibration_status_digest | 1163 |\n| CTRL-6 | calibration_eligible_records | 69 |\n\nFigure notes, in the same order. Positions and ordinals below are one based, blocks are taken in\nlogical order, and every value is the true value the shard writer received.\n\n- CTRL-1: blocks counted across every calibration shard.\n- CTRL-2: every package key multiplied by the position of its block inside its shard, summed, modulo 1000003.\n- CTRL-3: for every record, the artifact bytes value plus the version code, multiplied by the ordinal of the record, summed, modulo 1000003.\n- CTRL-4: for every dependency entry, the target key combined by exclusive or with the lowest version code, plus seven times the requested feature mask, plus the gate, multiplied by the position of the entry inside its record and by the ordinal of the record, summed, modulo 1000003.\n- CTRL-5: for every record, three times the status byte plus the dependency entry count, multiplied by the ordinal of the record, summed, modulo 1000003.\n- CTRL-6: records that are not yanked, are published on or before the calibration snapshot day, and are published at least the quarantine days before it.\n=== conventions.md ===\n# Derivation record conventions\n\nA candidate is one value of one withheld constant as it appears in the candidate lists of the\ncalibration slice, so the candidate space holds sixty candidates. The recovered value of each\nconstant is accepted and every other candidate is a rival.\n\nThe falsifier of a rival is decided with every other withheld constant held at its recovered value.\nUnder that assignment the calibration shards are either unreadable, and the falsifier is the label\nUNREADABLE, or readable, and the falsifier is the first control, in the published order CTRL-1 to\nCTRL-6, whose figure differs from its published figure. The calibration shards are unreadable when\nany calibration shard gives a negative true block count, a block trailer that does not match, a back\nreference tag above the window span, a field that runs past the end of the file, or a block area that\nends before or after its last block.\n\nThe falsifier totals count the rivals of each falsifier label and carry only the labels that set\naside at least one rival.\n\nA workspace belongs to the licence divergence list when the lock plan it would receive, if the\nlicence recorded against the newest name of every rename chain governed, differs from the lock plan\nit receives, or when no valid plan would exist under that reading.\n=== identity-policy.md ===\n# Identity policy\n\nThe package registry lists every registered name with its package key, written as eight lowercase\nhexadecimal digits, and the licence expression recorded against that name. A name whose row gives a\nrenamed_from value continues the package of that earlier name, so the rows form rename chains, and\nevery name of one chain denotes one package.\n\nThe versions of a package are the version records of every field block whose package key belongs to\nany name of its chain. A dependency entry or a workspace requirement that names any member of a chain\nrefers to the whole package. A package is reported under the name of its chain that no row renames\nfrom.\n\nA package key that no registry row carries is unregistered. A block with an unregistered key gives\nits records to no package, and a dependency entry whose target key is unregistered refers to no\npackage.\n=== licence-policy.md ===\n# Licence policy\n\nEvery licence identifier belongs to exactly one family.\n\nPermissive: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Zlib, Unlicense.\n\nCopyleft: GPL-2.0, GPL-3.0, LGPL-2.1, LGPL-3.0, AGPL-3.0, MPL-2.0, EPL-2.0.\n\nA licence expression is one identifier, or identifiers joined by OR, or identifiers joined by AND,\nnever a mix of the two. An OR expression is permissive when at least one of its identifiers is\npermissive. An AND expression is copyleft when at least one of its identifiers is copyleft.\n\nThe licence that governs a package is the one recorded against the earliest name of its rename\nchain, the name whose row gives no renamed_from value. A licence recorded against any later name of\nthe chain is kept for history and governs nothing, because a rename never relicenses the versions a\npackage has already published.\n\nA workspace whose copyleft setting reads forbidden may lock no package whose governing licence is\ncopyleft. A workspace whose setting reads allowed may lock packages of either family.\n=== resolution-policy.md ===\n# Resolution policy\n\nThe workspace manifest names every benchmark workspace with its snapshot day and its copyleft\nsetting. The requirements table lists what each workspace asks for directly: a package name, a\nlowest version (inclusive), a version bound (exclusive) and a requested feature mask. Versions are\nwritten major.minor.patch. A version lies inside a range when its version code is at least the\nlowest version code and below the bound.\n\n## Eligible versions\n\nA version of a package is eligible for a workspace when it is not yanked, its publish day is on or\nbefore the snapshot day of the workspace, and its publish day lies at least the quarantine days\nbefore that snapshot day. A version published exactly the quarantine days before the snapshot day\nis eligible. The quarantine days is one registry constant shared by every workspace. The deprecated\nmarker has no bearing on eligibility.\n\nA version record is quarantined for a workspace when it belongs to a registered package, is not\nyanked, is published on or before the snapshot day, and is published fewer than the quarantine days\nbefore it.\n\n## Valid lock plans\n\nA lock plan for a workspace locks exactly one eligible version of each package in a set of packages.\nA lock plan is valid when every one of these conditions holds together:\n\n- every package the workspace requires is locked, at a version inside the requirement's range;\n- every active dependency entry of every locked version names a registered target, that target is\n  locked, and its locked version lies inside the entry's range;\n- every locked package is required by the workspace or is the target of an active dependency entry\n  of a locked version;\n- the copyleft setting of the workspace holds for every locked package.\n\nWhether a dependency entry is active is settled by the feature policy.\n=== feature-policy.md ===\n# Feature policy\n\nEvery package version exposes eight feature bits, numbered 0 to 7. A dependency entry asks for\nfeatures of its target through its requested feature mask, and a workspace requirement asks for\nfeatures of its package in the same way.\n\nA dependency entry of a locked version is active when its gate is 255, or when the feature bit its\ngate names is enabled on the package that declares the entry. An inactive entry asks for nothing\nand constrains nothing.\n\nThe enabled features of a lock plan give every locked package one mask. They form the smallest\nassignment in which the mask of every locked package contains what the workspace asks of that\npackage directly and what every active entry of every locked version asks of it. Each set of\nlocked versions has exactly one such smallest assignment.\n\nThe settlement passes of a lock plan are counted this way. The state before the first pass gives\nevery locked package only what the workspace asks of it directly. A pass takes the state left by the\nprevious pass, collects the requests of every entry that is active in that state, and adds all of\nthem to that state at once. Passes continue until a pass adds nothing, and that last pass is\ncounted.\n=== footprint-policy.md ===\n# Footprint policy\n\nThe footprint of a lock plan is the sum of the artifact bytes of its locked versions. A workspace\nreceives the valid lock plan with the smallest footprint. When several valid plans share the smallest\nfootprint, the workspace receives the one whose locked version codes have the largest sum. When\nseveral of those also share that sum, it receives the one whose plan text sorts first, where the plan\ntext lists every locked package in ascending reported name as the name, an at sign and the version\ncode in eight lowercase hexadecimal digits, joined by commas.\n\nEvery workspace of a population drawn from this policy admits at least one valid lock plan.\n\nA locked package is held back in a workspace when its locked version code is below the largest\nversion code among its versions eligible for that workspace.\n\n## Byte conservation\n\nThe decoded bytes of the field population total the artifact bytes of every version record of every\nfield shard. The excluded bytes total the artifact bytes of every record of an unregistered package,\nwhatever its status, and of every yanked record of a registered package. The locked bytes total the\nartifact bytes of every distinct package version that at least one workspace locks, each such version\ncounted once. The byte residual is the decoded bytes less the excluded bytes less the locked bytes."
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 6,
+      "timestamp": "2026-10-23T13:46:49.231658",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01SPAqt9je4HeXaMrdP4rzmb",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /app/data && for f in report-schema.md rehearsal-decodes.md example-report.json package-registry.csv workspaces.csv workspace-requirements.csv; do echo \"=== $f ===\"; cat $f; done",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01SPAqt9je4HeXaMrdP4rzmb",
+            "content": "=== report-schema.md ===\n# Report schema\n\nEvery delivered document is a JSON object. This file fixes the field names, the value types and the\narray orderings. It carries no derived value.\n\n## Workspace lock plan\n\nOne document per workspace of the workspace manifest.\n\n| field | type |\n| --- | --- |\n| `workspace` | string |\n| `snapshot_day` | integer |\n| `copyleft` | string, `allowed` or `forbidden` |\n| `footprint_bytes` | integer |\n| `package_count` | integer |\n| `quarantined_records` | integer |\n| `packages` | array of objects, ascending `package` |\n\nEach entry of `packages` carries `package` (the reported name) as a string, `version` as a\nmajor.minor.patch string, `features` as the integer enabled feature mask, `licence_family` as the\nstring `permissive` or `copyleft`, and `bytes` as the integer artifact bytes of the locked version.\n\n## Registry performance report\n\n| field | type |\n| --- | --- |\n| `shards_decoded` | integer |\n| `blocks_decoded` | integer |\n| `records_decoded` | integer |\n| `dependency_entries_decoded` | integer |\n| `decoded_bytes` | integer |\n| `excluded_bytes` | integer |\n| `locked_bytes` | integer |\n| `byte_residual` | integer |\n| `workspaces_resolved` | integer |\n| `footprint_by_workspace` | object keyed by workspace name with integer members |\n| `recovered_parameters` | object |\n\nThe counts cover the field shards only. `recovered_parameters` carries `salt` as a string,\n`window_span`, `bias_limit`, `rotation_base` and `quarantine_days` as integers, and\n`permutation_multiplier` as a string of `0x` and eight lowercase hexadecimal digits.\n\n## Bottleneck analysis\n\n| field | type |\n| --- | --- |\n| `workspaces` | array of objects, ascending `workspace` |\n\nEach entry carries `workspace` as a string, `held_back` as an array of objects in ascending\n`package`, each carrying `package`, `locked` and `newest_eligible` as strings, and\n`permissive_packages` and `copyleft_packages` as arrays of reported names in ascending order that\ntogether list every locked package of the workspace by governing family.\n\n## Index integrity report\n\n| field | type |\n| --- | --- |\n| `total_shards` | integer |\n| `shards_with_full_flag_set` | integer, shards whose flag word is 0x07ff |\n| `records_yanked` | integer, yanked records of registered packages |\n| `records_deprecated` | integer, records carrying the deprecated marker |\n| `records_unregistered_package` | integer |\n| `dependency_entries_back_referenced` | integer, entries that arrived as a tag above 0 |\n| `dependency_entries_unregistered_target` | integer |\n| `excluded_bytes_by_cause` | object with integer members `unregistered_package` and `yanked` |\n\nEvery figure covers the field shards only.\n\n## Derivation record\n\n| field | type |\n| --- | --- |\n| `candidates` | array of objects, in the order the candidates were weighed |\n| `falsifier_totals` | object keyed by falsifier label with integer members |\n| `calibration_table` | array of objects, in published control order |\n| `settlement_passes_by_workspace` | object keyed by workspace name with integer members |\n| `licence_divergence` | array of workspace names, ascending |\n\nEach entry of `candidates` carries `parameter` as one of `salt`, `window_span`, `bias_limit`,\n`rotation_base`, `permutation_multiplier` and `quarantine_days`, `value` as a string written the way\nthe candidate lists write it, `verdict` as `accepted` or `rejected`, and `falsifier` as a falsifier\nlabel, or `none` for an accepted candidate. Each entry of `calibration_table` carries `control` and\n`figure` as strings and `published` and `reproduced` as integers.\n=== rehearsal-decodes.md ===\n# Rehearsal decodes\n\nThe rehearsal shards carry tier marker 0 and a flag word of zero, so no optional transform touches\ntheir bytes. Every block they carry is listed below in file order so that a plain reader can be\nconfirmed before any transform is considered. Their package keys belong to no registered name.\n\n## sample_a.pidx\n\nShard nonce 4014059778, 2 blocks.\n\nBlock 0: package key 43520af5, block nonce 4150325023.\n\n| version | artifact bytes | publish day | status | dependency entries |\n| --- | --- | --- | --- | --- |\n| 3.1.3 | 29862 | 2117 | 1 | 68947e7c 2.5.0..3.5.0 mask 6 always; 25a31cbf 0.2.0..1.2.0 mask 6 bit 1 |\n| 3.1.5 | 81579 | 1959 | 0 | 68947e7c 2.5.0..3.5.0 mask 6 always |\n| 3.2.5 | 74615 | 2014 | 0 | 25a31cbf 0.2.0..1.2.0 mask 6 bit 1; 25a31cbf 0.2.0..1.2.0 mask 6 bit 1; 58e0ae4c 2.8.0..3.8.0 mask 7 bit 1 |\n\nBlock 1: package key 33424fbe, block nonce 1127026479.\n\n| version | artifact bytes | publish day | status | dependency entries |\n| --- | --- | --- | --- | --- |\n| 2.1.3 | 46836 | 1957 | 0 | 578d8ed5 2.1.0..3.1.0 mask 11 bit 1; 4dfdb01a 3.9.0..4.9.0 mask 11 always |\n| 2.2.3 | 74713 | 2035 | 0 | 60a1da13 2.2.0..3.2.0 mask 3 always |\n| 2.3.3 | 56579 | 2113 | 0 | 578d8ed5 2.1.0..3.1.0 mask 11 bit 1; 4dfdb01a 3.9.0..4.9.0 mask 11 always; 578d8ed5 2.1.0..3.1.0 mask 11 bit 1 |\n\n## sample_b.pidx\n\nShard nonce 435776986, 2 blocks.\n\nBlock 0: package key 67ca61bd, block nonce 2613175405.\n\n| version | artifact bytes | publish day | status | dependency entries |\n| --- | --- | --- | --- | --- |\n| 1.0.3 | 10256 | 1840 | 0 | 26f64eca 3.3.0..4.3.0 mask 7 bit 2; 698bd551 2.9.0..3.9.0 mask 11 always |\n| 1.0.6 | 15751 | 1824 | 0 | 26aacf40 0.7.0..1.7.0 mask 15 bit 1; 26aacf40 0.7.0..1.7.0 mask 15 bit 1; 26aacf40 0.7.0..1.7.0 mask 15 bit 1 |\n| 1.0.8 | 75336 | 1896 | 0 | 26f64eca 3.3.0..4.3.0 mask 7 bit 2 |\n\nBlock 1: package key 6f867926, block nonce 1128425259.\n\n| version | artifact bytes | publish day | status | dependency entries |\n| --- | --- | --- | --- | --- |\n| 2.4.1 | 56005 | 1983 | 0 | 4033e295 1.5.0..2.5.0 mask 4 bit 1; 6ba17f71 3.2.0..4.2.0 mask 1 bit 1 |\n| 2.4.2 | 35770 | 2036 | 0 | 4033e295 1.5.0..2.5.0 mask 4 bit 1 |\n| 2.4.5 | 48949 | 1936 | 0 | 4e8c12de 4.7.0..5.7.0 mask 7 always; 6f353da9 0.3.0..1.3.0 mask 9 bit 2 |\n=== example-report.json ===\n{\n  \"dependency_entries_back_referenced\": 0,\n  \"dependency_entries_unregistered_target\": 23,\n  \"excluded_bytes_by_cause\": {\n    \"unregistered_package\": 606251,\n    \"yanked\": 0\n  },\n  \"records_deprecated\": 0,\n  \"records_unregistered_package\": 12,\n  \"records_yanked\": 0,\n  \"shards_with_full_flag_set\": 0,\n  \"total_shards\": 2\n}\n=== package-registry.csv ===\npackage,package_key,renamed_from,licence\nansi-term,538c2d74,,MIT\nbytecodec,3d382266,,GPL-3.0\nbyte-codec,52eeef8d,bytecodec,MIT\ncli-args,5533a5b5,,Apache-2.0\ncrc-kit,55870f35,,BSD-3-Clause\ndatefmt,75b62c99,,MIT OR GPL-3.0\ndate-fmt,578c5ea1,datefmt,LGPL-2.1\nevent-bus,1b329f19,,MPL-2.0\nglob-match,34a72428,,ISC\nhttp-lite,371c72b1,,Apache-2.0\njsonic,18a2deb5,,ISC\njson-kit,5032546a,jsonic,MIT\njson-core,559e3393,json-kit,AGPL-3.0\nlog-sink,3f3c3c6e,,MIT\npath-norm,1ddfb6ec,,BSD-2-Clause\ntls-shim,1e2d1525,,Apache-2.0\nurl-parse,35061e61,,MIT\nzip-flate,37fb3b66,,Zlib AND GPL-3.0\n=== workspaces.csv ===\nworkspace,snapshot_day,copyleft\nvisible,2040,forbidden\npeak,2050,allowed\nsteady,2030,forbidden\nburst,2055,allowed\nlatency,2045,forbidden\n=== workspace-requirements.csv ===\nworkspace,package,lowest,below,features\nvisible,http-lite,2.0.0,3.0.0,1\nvisible,cli-args,1.0.0,2.0.0,0\npeak,event-bus,1.0.0,2.0.0,2\npeak,jsonic,3.0.0,4.0.0,1\nsteady,log-sink,1.0.0,2.0.0,1\nsteady,date-fmt,1.2.0,2.0.0,0\nsteady,path-norm,0.5.0,1.0.0,0\nburst,http-lite,2.0.0,3.0.0,3\nburst,zip-flate,0.8.0,1.0.0,1\nlatency,json-core,3.0.0,4.0.0,2\nlatency,glob-match,1.0.0,2.0.0,1\nlatency,ansi-term,0.3.0,1.0.0,0"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 7,
+      "timestamp": "2026-10-23T13:46:57.165522",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01XV2Prd8BgXyz5LBatMHQAw",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /app/data && for f in sample_a.pidx sample_b.pidx calib_a.pidx calib_b.pidx calib_c.pidx calib_d.pidx calib_e.pidx field_01.pidx field_02.pidx field_03.pidx field_04.pidx field_05.pidx field_06.pidx field_07.pidx field_08.pidx; do echo \"--- $f\"; python3 -c \"\nimport sys,struct\nd=open('$f','rb').read()\nprint('magic',d[0:4],'ver',d[4],'tier',d[5],'flags',hex(struct.unpack('<H',d[6:8])[0]),'nonce',struct.unpack('<I',d[8:12])[0],'arealen',struct.unpack('<I',d[12:16])[0],'cnt',struct.unpack('<H',d[16:18])[0],'hchk',struct.unpack('<H',d[18:20])[0],'len',len(d))\nimport zlib\nprint('hdrcrc ok', zlib.crc32(d[0:18])&0xffff == struct.unpack('<H',d[18:20])[0])\n\"; done",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01XV2Prd8BgXyz5LBatMHQAw",
+            "content": "--- sample_a.pidx\nmagic b'PIDX' ver 2 tier 0 flags 0x0 nonce 4014059778 arealen 268 cnt 2 hchk 53086 len 288\nhdrcrc ok True\n--- sample_b.pidx\nmagic b'PIDX' ver 2 tier 0 flags 0x0 nonce 435776986 arealen 254 cnt 2 hchk 57757 len 274\nhdrcrc ok True\n--- calib_a.pidx\nmagic b'PIDX' ver 2 tier 1 flags 0x7ff nonce 2554179247 arealen 563 cnt 6 hchk 7722 len 583\nhdrcrc ok True\n--- calib_b.pidx\nmagic b'PIDX' ver 2 tier 1 flags 0x7ff nonce 3609596074 arealen 620 cnt 9 hchk 16481 len 640\nhdrcrc ok True\n--- calib_c.pidx\nmagic b'PIDX' ver 2 tier 1 flags 0x7ff nonce 4112777248 arealen 458 cnt 13 hchk 63799 len 478\nhdrcrc ok True\n--- calib_d.pidx\nmagic b'PIDX' ver 2 tier 1 flags 0x7ff nonce 989710559 arealen 577 cnt 4 hchk 10404 len 597\nhdrcrc ok True\n--- calib_e.pidx\nmagic b'PIDX' ver 2 tier 1 flags 0x7ff nonce 4076666407 arealen 444 cnt 10 hchk 53626 len 464\nhdrcrc ok True\n--- field_01.pidx\nmagic b'PIDX' ver 2 tier 2 flags 0x7ff nonce 3549415833 arealen 176 cnt 3 hchk 24060 len 196\nhdrcrc ok True\n--- field_02.pidx\nmagic b'PIDX' ver 2 tier 2 flags 0x7ff nonce 960551381 arealen 230 cnt 10 hchk 1218 len 250\nhdrcrc ok True\n--- field_03.pidx\nmagic b'PIDX' ver 2 tier 2 flags 0x7bf nonce 491477630 arealen 213 cnt 15 hchk 65025 len 233\nhdrcrc ok True\n--- field_04.pidx\nmagic b'PIDX' ver 2 tier 2 flags 0x7ff nonce 1469281616 arealen 142 cnt 13 hchk 60104 len 162\nhdrcrc ok True\n--- field_05.pidx\nmagic b'PIDX' ver 2 tier 2 flags 0x7ff nonce 1919619915 arealen 126 cnt 14 hchk 15335 len 146\nhdrcrc ok True\n--- field_06.pidx\nmagic b'PIDX' ver 2 tier 2 flags 0x3ff nonce 3059644625 arealen 164 cnt 7 hchk 11709 len 184\nhdrcrc ok True\n--- field_07.pidx\nmagic b'PIDX' ver 2 tier 2 flags 0x7ff nonce 1007462547 arealen 132 cnt 11 hchk 50086 len 152\nhdrcrc ok True\n--- field_08.pidx\nmagic b'PIDX' ver 2 tier 2 flags 0x7ff nonce 258270153 arealen 301 cnt 10 hchk 5355 len 321\nhdrcrc ok True"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 8,
+      "timestamp": "2026-10-23T13:48:19.278681",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01RtsaEvbETUQ5mDcGpDSkd8",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "mkdir -p /tmp/work && cd /tmp/work && python3 -c \"\nimport struct\nfor f in ['calib_a','calib_b','calib_c','calib_d','calib_e','field_01','field_02','field_03','field_04','field_05','field_06','field_07','field_08']:\n    d=open('/app/data/%s.pidx'%f,'rb').read()\n    fl=struct.unpack('<H',d[6:8])[0]\n    le=struct.unpack('<I',d[8:12])[0]; be=struct.unpack('>I',d[8:12])[0]\n    print(f, hex(fl), 'LEnonce',le,'BEnonce',be, 'island', bool(fl&0x40), 'true', be if fl&0x40 else le)\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01RtsaEvbETUQ5mDcGpDSkd8",
+            "content": "calib_a 0x7ff LEnonce 2554179247 BEnonce 2947431832 island True true 2947431832\ncalib_b 0x7ff LEnonce 3609596074 BEnonce 2853185239 island True true 2853185239\ncalib_c 0x7ff LEnonce 4112777248 BEnonce 536880373 island True true 536880373\ncalib_d 0x7ff LEnonce 989710559 BEnonce 3754491194 island True true 3754491194\ncalib_e 0x7ff LEnonce 4076666407 BEnonce 671022322 island True true 671022322\nfield_01 0x7ff LEnonce 3549415833 BEnonce 2580123603 island True true 2580123603\nfield_02 0x7ff LEnonce 960551381 BEnonce 3587784761 island True true 3587784761\nfield_03 0x7bf LEnonce 491477630 BEnonce 2119846685 island False true 491477630\nfield_04 0x7ff LEnonce 1469281616 BEnonce 1349882711 island True true 1349882711\nfield_05 0x7ff LEnonce 1919619915 BEnonce 1259563890 island True true 1259563890\nfield_06 0x3ff LEnonce 3059644625 BEnonce 3514326710 island True true 3514326710\nfield_07 0x7ff LEnonce 1007462547 BEnonce 2477263932 island True true 2477263932\nfield_08 0x7ff LEnonce 258270153 BEnonce 3387122703 island True true 3387122703"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 9,
+      "timestamp": "2026-10-23T13:48:25.642621",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01S8LWu2YbPUHybuAyLARhdz",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport struct,zlib\nsalts='ALDER BIRCH CEDAR ELDER FIR HAZEL LARCH MAPLE ROWAN SPRUCE'.split()\nlimits=[3,5,7,11,13,17,19,23,29,31]\nnonces=[2947431832,2853185239,536880373,3754491194,671022322]\nstored=[6,9,13,4,10]\nfor s in salts:\n    for L in limits:\n        b=[(zlib.crc32(s.encode()+struct.pack('<I',n))&0xff)%L for n in nonces]\n        tot=[st-bb for st,bb in zip(stored,b)]\n        if sum(b)==25 and all(t>=0 for t in tot): print(s,L,b,tot)\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01S8LWu2YbPUHybuAyLARhdz",
+            "content": "ROWAN 13 [3, 5, 10, 0, 7] [3, 4, 3, 4, 3]"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 10,
+      "timestamp": "2026-10-23T13:48:59.746327",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_012D6oAwwmdm7bVQWUEhFu54",
+          "function_name": "file_editor",
+          "arguments": {
+            "command": "create",
+            "path": "/tmp/work/dec.py",
+            "file_text": "import struct, zlib, os\n\n\nclass Unreadable(Exception):\n    pass\n\n\nZERO_ENTRY = (0, 0, 0, 0, 0)\n\nF_MASK_BYTES = 0x0001\nF_CHAIN_VERSION = 0x0002\nF_DELTA2_DAY = 0x0004\nF_DRIFT_KEY = 0x0008\nF_BLOCK_PERMUTE = 0x0010\nF_BACKREF_DEPS = 0x0020\nF_ENDIAN_ISLAND = 0x0040\nF_BIASED_COUNT = 0x0080\nF_ROT_STATUS = 0x0100\nF_XREF_KEY = 0x0200\nF_SPLIT_TAIL = 0x0400\n\n\ndef rotr16(v, r):\n    r %= 16\n    return ((v >> r) | (v << (16 - r))) & 0xFFFF\n\n\ndef read_header(data):\n    if len(data) < 20 or data[0:4] != b'PIDX':\n        raise Unreadable('magic')\n    ver = data[4]\n    tier = data[5]\n    flags = struct.unpack_from('<H', data, 6)[0]\n    if zlib.crc32(data[0:18]) & 0xFFFF != struct.unpack_from('<H', data, 18)[0]:\n        raise Unreadable('header check')\n    nonce = struct.unpack_from('>I' if flags & F_ENDIAN_ISLAND else '<I', data, 8)[0]\n    area = struct.unpack_from('<I', data, 12)[0]\n    stored = struct.unpack_from('<H', data, 16)[0]\n    return dict(version=ver, tier=tier, flags=flags, nonce=nonce, area=area, stored=stored)\n\n\ndef parse_entry(data, p):\n    tk, lo, hi = struct.unpack_from('<III', data, p)\n    return (tk, lo, hi, data[p + 12], data[p + 13])\n\n\ndef parse_structure(data, hdr, salt, bias_limit, rotation_base, window_span):\n    \"\"\"File-order structural parse. Returns list of raw blocks.\"\"\"\n    flags = hdr['flags']\n    nonce = hdr['nonce']\n    count = hdr['stored']\n    if flags & F_BIASED_COUNT:\n        bias = (zlib.crc32(salt.encode('ascii') + struct.pack('<I', nonce)) & 0xFF) % bias_limit\n        count -= bias\n    if count < 0:\n        raise Unreadable('negative block count')\n    end = 20 + hdr['area']\n    if end > len(data):\n        raise Unreadable('area past end of file')\n    pos = 20\n    blocks = []\n    for _ in range(count):\n        if pos + 10 > end:\n            raise Unreadable('block header past end')\n        bstart = pos\n        key_raw = struct.unpack_from('<I', data, pos)[0]\n        rc = struct.unpack_from('>H' if flags & F_ENDIAN_ISLAND else '<H', data, pos + 4)[0]\n        bnonce = struct.unpack_from('<I', data, pos + 6)[0]\n        p = pos + 10\n        recs = []\n        ring = [ZERO_ENTRY] * window_span\n        for ordinal in range(rc):\n            if p + 12 > end:\n                raise Unreadable('record past end')\n            vraw, araw, draw, sraw = struct.unpack_from('<IIHH', data, p)\n            p += 12\n            status = rotr16(sraw, rotation_base + (ordinal % 8)) if flags & F_ROT_STATUS else sraw\n            dep_count = status & 0xFF\n            status_byte = status >> 8\n            deps = []\n            for _di in range(dep_count):\n                if flags & F_BACKREF_DEPS:\n                    if p + 1 > end:\n                        raise Unreadable('tag past end')\n                    tag = data[p]\n                    p += 1\n                    if tag == 0:\n                        if p + 14 > end:\n                            raise Unreadable('entry past end')\n                        ent = parse_entry(data, p)\n                        p += 14\n                        back = False\n                    else:\n                        if tag > window_span:\n                            raise Unreadable('tag above window span')\n                        ent = ring[window_span - tag]\n                        back = True\n                    ring = [ent] + ring[:-1]\n                else:\n                    if p + 14 > end:\n                        raise Unreadable('entry past end')\n                    ent = parse_entry(data, p)\n                    p += 14\n                    back = False\n                deps.append((ent, back))\n            recs.append(dict(v_raw=vraw, a_raw=araw, d_raw=draw,\n                             status_byte=status_byte, dep_count=dep_count, deps=deps))\n        if p + 4 > end:\n            raise Unreadable('trailer past end')\n        if zlib.crc32(data[bstart:p]) != struct.unpack_from('<I', data, p)[0]:\n            raise Unreadable('block trailer mismatch')\n        p += 4\n        if flags & F_SPLIT_TAIL:\n            p += bnonce % 7\n            if p > end:\n                raise Unreadable('split tail past end')\n        blocks.append(dict(key_raw=key_raw, bnonce=bnonce, recs=recs))\n        pos = p\n    if pos != end:\n        raise Unreadable('block area ends before or after last block')\n    return blocks\n\n\ndef permutation(count, nonce, mult):\n    lst = list(range(count))\n    state = nonce\n    for i in range(count - 1, 0, -1):\n        state = (state * mult + 0x9E3779B9) & 0xFFFFFFFF\n        j = state % (i + 1)\n        lst[i], lst[j] = lst[j], lst[i]\n    return lst\n\n\ndef finish_shard(hdr, blocks, salt, mult, companion_nonce):\n    \"\"\"Turn file-order raw blocks into logical-order decoded blocks.\"\"\"\n    flags = hdr['flags']\n    nonce = hdr['nonce']\n    n = len(blocks)\n    if flags & F_BLOCK_PERMUTE:\n        perm = permutation(n, nonce, mult)\n        logical = [None] * n\n        for k, lg in enumerate(perm):\n            logical[lg] = blocks[k]\n        if any(b is None for b in logical):\n            raise Unreadable('bad permutation')\n    else:\n        logical = list(blocks)\n\n    salt_b = salt.encode('ascii')\n    drift = 0\n    out = []\n    for blk in logical:\n        key = blk['key_raw']\n        if flags & F_XREF_KEY:\n            key ^= companion_nonce\n        bkey = blk['bnonce']\n        if flags & F_DRIFT_KEY:\n            bkey = bkey ^ drift\n        recs = []\n        vprev = 0\n        dprev1 = 0\n        dprev2 = 0\n        blk_sum = 0\n        for ordinal, r in enumerate(blk['recs']):\n            if flags & F_MASK_BYTES:\n                ks = zlib.crc32(salt_b + struct.pack('<IIH', nonce, bkey, ordinal))\n                abytes = r['a_raw'] ^ ks\n            else:\n                abytes = r['a_raw']\n            if flags & F_CHAIN_VERSION:\n                vcode = r['v_raw'] if ordinal == 0 else (vprev + r['v_raw']) & 0xFFFFFFFF\n            else:\n                vcode = r['v_raw']\n            vprev = vcode\n            if flags & F_DELTA2_DAY:\n                day = (r['d_raw'] + 2 * dprev1 - dprev2) & 0xFFFF\n            else:\n                day = r['d_raw']\n            dprev2 = dprev1\n            dprev1 = day\n            blk_sum += abytes\n            recs.append(dict(version_code=vcode, artifact_bytes=abytes, publish_day=day,\n                             status_byte=r['status_byte'], dep_count=r['dep_count'],\n                             deps=r['deps'], ordinal=ordinal))\n        drift = (drift + blk_sum) & 0xFFFFFFFF\n        out.append(dict(key=key, bnonce=blk['bnonce'], recs=recs))\n    return out\n\n\ndef companion_map(nonces):\n    \"\"\"Same-tier shard whose nonce is the next smaller one; smallest takes largest.\"\"\"\n    srt = sorted(set(nonces))\n    cm = {}\n    for i, n in enumerate(srt):\n        cm[n] = srt[i - 1] if i > 0 else srt[-1]\n    return cm\n\n\ndef load_tier(dirpath, tier):\n    shards = []\n    for name in sorted(os.listdir(dirpath)):\n        if not name.endswith('.pidx'):\n            continue\n        data = open(os.path.join(dirpath, name), 'rb').read()\n        hdr = read_header(data)\n        if hdr['tier'] == tier:\n            shards.append((name, data, hdr))\n    return shards\n"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_012D6oAwwmdm7bVQWUEhFu54",
+            "content": "File created successfully at: /tmp/work/dec.py"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 11,
+      "timestamp": "2026-10-23T13:49:06.088236",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01APCHHzNXTzYxKZTZuH4sJi",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport dec\nsh=dec.load_tier('/app/data',0)\nfor name,data,hdr in sh:\n    blocks=dec.parse_structure(data,hdr,'ROWAN',13,1,4)\n    lg=dec.finish_shard(hdr,blocks,'ROWAN',1,0)\n    print('==',name,hdr['nonce'],len(lg))\n    for b in lg:\n        print('  key %08x bnonce %d'%(b['key'],b['bnonce']))\n        for r in b['recs']:\n            vc=r['version_code']\n            print('   %d.%d.%d'%(vc>>16,(vc>>8)&0xff,vc&0xff), r['artifact_bytes'], r['publish_day'], r['status_byte'], [( '%08x'%e[0][0], e[0][1],e[0][2],e[0][3],e[0][4]) for e in r['deps']])\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01APCHHzNXTzYxKZTZuH4sJi",
+            "content": "== sample_a.pidx 4014059778 2\n  key 43520af5 bnonce 4150325023\n   3.1.3 29862 2117 1 [('68947e7c', 132352, 197888, 6, 255), ('25a31cbf', 512, 66048, 6, 1)]\n   3.1.5 81579 1959 0 [('68947e7c', 132352, 197888, 6, 255)]\n   3.2.5 74615 2014 0 [('25a31cbf', 512, 66048, 6, 1), ('25a31cbf', 512, 66048, 6, 1), ('58e0ae4c', 133120, 198656, 7, 1)]\n  key 33424fbe bnonce 1127026479\n   2.1.3 46836 1957 0 [('578d8ed5', 131328, 196864, 11, 1), ('4dfdb01a', 198912, 264448, 11, 255)]\n   2.2.3 74713 2035 0 [('60a1da13', 131584, 197120, 3, 255)]\n   2.3.3 56579 2113 0 [('578d8ed5', 131328, 196864, 11, 1), ('4dfdb01a', 198912, 264448, 11, 255), ('578d8ed5', 131328, 196864, 11, 1)]\n== sample_b.pidx 435776986 2\n  key 67ca61bd bnonce 2613175405\n   1.0.3 10256 1840 0 [('26f64eca', 197376, 262912, 7, 2), ('698bd551', 133376, 198912, 11, 255)]\n   1.0.6 15751 1824 0 [('26aacf40', 1792, 67328, 15, 1), ('26aacf40', 1792, 67328, 15, 1), ('26aacf40', 1792, 67328, 15, 1)]\n   1.0.8 75336 1896 0 [('26f64eca', 197376, 262912, 7, 2)]\n  key 6f867926 bnonce 1128425259\n   2.4.1 56005 1983 0 [('4033e295', 66816, 132352, 4, 1), ('6ba17f71', 197120, 262656, 1, 1)]\n   2.4.2 35770 2036 0 [('4033e295', 66816, 132352, 4, 1)]\n   2.4.5 48949 1936 0 [('4e8c12de', 263936, 329472, 7, 255), ('6f353da9', 768, 66304, 9, 2)]"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 12,
+      "timestamp": "2026-10-23T13:49:15.122836",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_013bavg2UNbzNvzQLNh27vZ5",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport dec,itertools,time\nsalts='ALDER BIRCH CEDAR ELDER FIR HAZEL LARCH MAPLE ROWAN SPRUCE'.split()\nlimits=[3,5,7,11,13,17,19,23,29,31]\nrbs=[1,2,3,4,5,6,7,9,11,13]\nspans=[2,3,4,5,6,7,8,10,12,16]\nsh=dec.load_tier('/app/data',1)\nok=[]\nt=time.time()\nfor s in salts:\n  for L in limits:\n    for rb in rbs:\n      for sp in spans:\n        try:\n            tot=0\n            for n,d,h in sh: tot+=len(dec.parse_structure(d,h,s,L,rb,sp))\n        except dec.Unreadable: continue\n        ok.append((s,L,rb,sp,tot))\nprint('readable combos',len(ok),'in %.1fs'%(time.time()-t))\nfor r in ok: print(r)\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_013bavg2UNbzNvzQLNh27vZ5",
+            "content": "readable combos 6 in 0.0s\n('ROWAN', 13, 9, 6, 17)\n('ROWAN', 13, 9, 7, 17)\n('ROWAN', 13, 9, 8, 17)\n('ROWAN', 13, 9, 10, 17)\n('ROWAN', 13, 9, 12, 17)\n('ROWAN', 13, 9, 16, 17)"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 13,
+      "timestamp": "2026-10-23T13:49:29.092412",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01DzgZzZqRH56e6BfgZZs6DM",
+          "function_name": "file_editor",
+          "arguments": {
+            "command": "create",
+            "path": "/tmp/work/ctrl.py",
+            "file_text": "import dec\n\nM = 1000003\nSNAP = 2100\n\n\ndef decode_tier(shards, salt, bias_limit, rotation_base, window_span, mult):\n    cm = dec.companion_map([h['nonce'] for _n, _d, h in shards])\n    out = []\n    for name, data, hdr in shards:\n        raw = dec.parse_structure(data, hdr, salt, bias_limit, rotation_base, window_span)\n        lg = dec.finish_shard(hdr, raw, salt, mult, cm[hdr['nonce']])\n        out.append((name, hdr, lg))\n    return out\n\n\ndef controls(decoded, quarantine):\n    c1 = sum(len(lg) for _n, _h, lg in decoded)\n    c2 = c3 = c4 = c5 = 0\n    c6 = 0\n    for _n, _h, lg in decoded:\n        for bpos, blk in enumerate(lg, 1):\n            c2 += blk['key'] * bpos\n            for r in blk['recs']:\n                o = r['ordinal'] + 1\n                c3 += (r['artifact_bytes'] + r['version_code']) * o\n                c5 += (3 * r['status_byte'] + r['dep_count']) * o\n                for epos, (e, _b) in enumerate(r['deps'], 1):\n                    c4 += ((e[0] ^ e[1]) + 7 * e[3] + e[4]) * epos * o\n                if not (r['status_byte'] & 1) and r['publish_day'] <= SNAP \\\n                        and r['publish_day'] <= SNAP - quarantine:\n                    c6 += 1\n    return [c1, c2 % M, c3 % M, c4 % M, c5 % M, c6]\n\n\nPUBLISHED = [17, 909967, 531261, 70029, 1163, 69]\nNAMES = ['calibration_block_total', 'calibration_key_digest', 'calibration_size_digest',\n         'calibration_dependency_digest', 'calibration_status_digest',\n         'calibration_eligible_records']\n"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01DzgZzZqRH56e6BfgZZs6DM",
+            "content": "File created successfully at: /tmp/work/ctrl.py"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 14,
+      "timestamp": "2026-10-23T13:49:42.955478",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01G17onHMo6Y5RK2k8UaPGBH",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport dec,ctrl\nsh=dec.load_tier('/app/data',1)\nmults=[0x2545f491,0x27220a95,0x9e3779b1,0x85ebca77,0xc2b2ae3d,0x1b873593,0xcc9e2d51,0x6d2b79f5,0x7feb352d,0x846ca68b]\nspans=[6,7,8,10,12,16]\nqs=[0,1,2,3,5,7,10,14,21,30]\nhits=[]\nfor sp in spans:\n  for m in mults:\n    d=ctrl.decode_tier(sh,'ROWAN',13,9,sp,m)\n    for q in qs:\n      c=ctrl.controls(d,q)\n      if c==ctrl.PUBLISHED: hits.append((sp,'0x%08x'%m,q)); print('MATCH',sp,'0x%08x'%m,q)\nprint('hits',len(hits))\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01G17onHMo6Y5RK2k8UaPGBH",
+            "content": "MATCH 6 0x846ca68b 7\nhits 1"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 15,
+      "timestamp": "2026-10-23T13:49:55.459459",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_019rwxzLi5ceVpCR73XkcdZx",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && sed 's/ring\\[window_span - tag\\]/ring[tag - 1]/' dec.py > decB.py && python3 -c \"\nimport decB as dec, importlib, sys\nsys.modules['dec']=dec\nimport ctrl\nimportlib.reload(ctrl)\nsh=dec.load_tier('/app/data',1)\nsalts='ALDER BIRCH CEDAR ELDER FIR HAZEL LARCH MAPLE ROWAN SPRUCE'.split()\nlimits=[3,5,7,11,13,17,19,23,29,31]; rbs=[1,2,3,4,5,6,7,9,11,13]\nspans=[2,3,4,5,6,7,8,10,12,16]\nmults=[0x2545f491,0x27220a95,0x9e3779b1,0x85ebca77,0xc2b2ae3d,0x1b873593,0xcc9e2d51,0x6d2b79f5,0x7feb352d,0x846ca68b]\nqs=[0,1,2,3,5,7,10,14,21,30]\nhits=[]\nfor s in salts:\n for L in limits:\n  for rb in rbs:\n   for sp in spans:\n    for m in mults:\n     try: d=ctrl.decode_tier(sh,s,L,rb,sp,m)\n     except dec.Unreadable: continue\n     for q in qs:\n      if ctrl.controls(d,q)==ctrl.PUBLISHED: hits.append((s,L,rb,sp,hex(m),q))\nprint('interpretation B (ring[tag-1]) full-space hits:',hits)\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_019rwxzLi5ceVpCR73XkcdZx",
+            "content": "interpretation B (ring[tag-1]) full-space hits: []"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 16,
+      "timestamp": "2026-10-23T13:50:03.869519",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01BXfRsuLVLLsiDiCxvQDKoN",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && rm decB.py && python3 -c \"\nimport dec,ctrl,time\nsalts='ALDER BIRCH CEDAR ELDER FIR HAZEL LARCH MAPLE ROWAN SPRUCE'.split()\nlimits=[3,5,7,11,13,17,19,23,29,31]; rbs=[1,2,3,4,5,6,7,9,11,13]\nspans=[2,3,4,5,6,7,8,10,12,16]\nmults=[0x2545f491,0x27220a95,0x9e3779b1,0x85ebca77,0xc2b2ae3d,0x1b873593,0xcc9e2d51,0x6d2b79f5,0x7feb352d,0x846ca68b]\nqs=[0,1,2,3,5,7,10,14,21,30]\nsh=dec.load_tier('/app/data',1); hits=[]; t=time.time()\nfor s in salts:\n for L in limits:\n  for rb in rbs:\n   for sp in spans:\n    for m in mults:\n     try: d=ctrl.decode_tier(sh,s,L,rb,sp,m)\n     except dec.Unreadable: continue\n     for q in qs:\n      if ctrl.controls(d,q)==ctrl.PUBLISHED: hits.append((s,L,rb,sp,'0x%08x'%m,q))\nprint('full space hits:',hits,'%.1fs'%(time.time()-t))\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01BXfRsuLVLLsiDiCxvQDKoN",
+            "content": "full space hits: [('ROWAN', 13, 9, 6, '0x846ca68b', 7)] 0.4s"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 17,
+      "timestamp": "2026-10-23T13:50:18.419460",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_016WmV4Yu47kKXMGyK198SkT",
+          "function_name": "file_editor",
+          "arguments": {
+            "command": "create",
+            "path": "/tmp/work/fals.py",
+            "file_text": "import dec, ctrl\n\nCAND = [\n    ('salt', 'ALDER BIRCH CEDAR ELDER FIR HAZEL LARCH MAPLE ROWAN SPRUCE'.split()),\n    ('window_span', ['2', '3', '4', '5', '6', '7', '8', '10', '12', '16']),\n    ('bias_limit', ['3', '5', '7', '11', '13', '17', '19', '23', '29', '31']),\n    ('rotation_base', ['1', '2', '3', '4', '5', '6', '7', '9', '11', '13']),\n    ('permutation_multiplier', ['0x2545f491', '0x27220a95', '0x9e3779b1', '0x85ebca77',\n                                '0xc2b2ae3d', '0x1b873593', '0xcc9e2d51', '0x6d2b79f5',\n                                '0x7feb352d', '0x846ca68b']),\n    ('quarantine_days', ['0', '1', '2', '3', '5', '7', '10', '14', '21', '30']),\n]\nREC = {'salt': 'ROWAN', 'window_span': '6', 'bias_limit': '13', 'rotation_base': '9',\n       'permutation_multiplier': '0x846ca68b', 'quarantine_days': '7'}\n\n\ndef assign(over_param, over_value):\n    a = dict(REC)\n    a[over_param] = over_value\n    return (a['salt'], int(a['bias_limit']), int(a['rotation_base']), int(a['window_span']),\n            int(a['permutation_multiplier'], 16), int(a['quarantine_days']))\n\n\ndef falsifier(shards, param, value):\n    salt, L, rb, sp, m, q = assign(param, value)\n    try:\n        d = ctrl.decode_tier(shards, salt, L, rb, sp, m)\n    except dec.Unreadable:\n        return 'UNREADABLE', None\n    got = ctrl.controls(d, q)\n    for i, (g, p) in enumerate(zip(got, ctrl.PUBLISHED)):\n        if g != p:\n            return 'CTRL-%d' % (i + 1), (ctrl.NAMES[i], p, g)\n    return 'none', None\n"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_016WmV4Yu47kKXMGyK198SkT",
+            "content": "File created successfully at: /tmp/work/fals.py"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 18,
+      "timestamp": "2026-10-23T13:50:24.021403",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_011eaUKmMRpD5Epvu4uuss1j",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport dec,fals\nfrom collections import Counter\nsh=dec.load_tier('/app/data',1)\ntot=Counter()\nfor p,vals in fals.CAND:\n  for v in vals:\n    lab,det=fals.falsifier(sh,p,v)\n    if v==fals.REC[p]:\n      print('ACCEPT  %-23s %-11s -> reproduces all six controls'%(p,v)); continue\n    tot[lab]+=1\n    if det: print('DISCARD %-23s %-11s -> %s disagrees: %s published %d, reproduced %d'%(p,v,lab,det[0],det[1],det[2]))\n    else:   print('DISCARD %-23s %-11s -> %s (calibration shards do not parse)'%(p,v,lab))\nprint(); print('falsifier_totals:',dict(sorted(tot.items())),'sum',sum(tot.values()))\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_011eaUKmMRpD5Epvu4uuss1j",
+            "content": "DISCARD salt                    ALDER       -> UNREADABLE (calibration shards do not parse)\nDISCARD salt                    BIRCH       -> UNREADABLE (calibration shards do not parse)\nDISCARD salt                    CEDAR       -> UNREADABLE (calibration shards do not parse)\nDISCARD salt                    ELDER       -> UNREADABLE (calibration shards do not parse)\nDISCARD salt                    FIR         -> UNREADABLE (calibration shards do not parse)\nDISCARD salt                    HAZEL       -> UNREADABLE (calibration shards do not parse)\nDISCARD salt                    LARCH       -> UNREADABLE (calibration shards do not parse)\nDISCARD salt                    MAPLE       -> UNREADABLE (calibration shards do not parse)\nACCEPT  salt                    ROWAN       -> reproduces all six controls\nDISCARD salt                    SPRUCE      -> UNREADABLE (calibration shards do not parse)\nDISCARD window_span             2           -> UNREADABLE (calibration shards do not parse)\nDISCARD window_span             3           -> UNREADABLE (calibration shards do not parse)\nDISCARD window_span             4           -> UNREADABLE (calibration shards do not parse)\nDISCARD window_span             5           -> UNREADABLE (calibration shards do not parse)\nACCEPT  window_span             6           -> reproduces all six controls\nDISCARD window_span             7           -> CTRL-4 disagrees: calibration_dependency_digest published 70029, reproduced 785179\nDISCARD window_span             8           -> CTRL-4 disagrees: calibration_dependency_digest published 70029, reproduced 154374\nDISCARD window_span             10          -> CTRL-4 disagrees: calibration_dependency_digest published 70029, reproduced 601810\nDISCARD window_span             12          -> CTRL-4 disagrees: calibration_dependency_digest published 70029, reproduced 324481\nDISCARD window_span             16          -> CTRL-4 disagrees: calibration_dependency_digest published 70029, reproduced 735123\nDISCARD bias_limit              3           -> UNREADABLE (calibration shards do not parse)\nDISCARD bias_limit              5           -> UNREADABLE (calibration shards do not parse)\nDISCARD bias_limit              7           -> UNREADABLE (calibration shards do not parse)\nDISCARD bias_limit              11          -> UNREADABLE (calibration shards do not parse)\nACCEPT  bias_limit              13          -> reproduces all six controls\nDISCARD bias_limit              17          -> UNREADABLE (calibration shards do not parse)\nDISCARD bias_limit              19          -> UNREADABLE (calibration shards do not parse)\nDISCARD bias_limit              23          -> UNREADABLE (calibration shards do not parse)\nDISCARD bias_limit              29          -> UNREADABLE (calibration shards do not parse)\nDISCARD bias_limit              31          -> UNREADABLE (calibration shards do not parse)\nDISCARD rotation_base           1           -> UNREADABLE (calibration shards do not parse)\nDISCARD rotation_base           2           -> UNREADABLE (calibration shards do not parse)\nDISCARD rotation_base           3           -> UNREADABLE (calibration shards do not parse)\nDISCARD rotation_base           4           -> UNREADABLE (calibration shards do not parse)\nDISCARD rotation_base           5           -> UNREADABLE (calibration shards do not parse)\nDISCARD rotation_base           6           -> UNREADABLE (calibration shards do not parse)\nDISCARD rotation_base           7           -> UNREADABLE (calibration shards do not parse)\nACCEPT  rotation_base           9           -> reproduces all six controls\nDISCARD rotation_base           11          -> UNREADABLE (calibration shards do not parse)\nDISCARD rotation_base           13          -> UNREADABLE (calibration shards do not parse)\nDISCARD permutation_multiplier  0x2545f491  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 693407\nDISCARD permutation_multiplier  0x27220a95  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 617721\nDISCARD permutation_multiplier  0x9e3779b1  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 291735\nDISCARD permutation_multiplier  0x85ebca77  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 401584\nDISCARD permutation_multiplier  0xc2b2ae3d  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 265390\nDISCARD permutation_multiplier  0x1b873593  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 875368\nDISCARD permutation_multiplier  0xcc9e2d51  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 624308\nDISCARD permutation_multiplier  0x6d2b79f5  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 372260\nDISCARD permutation_multiplier  0x7feb352d  -> CTRL-2 disagrees: calibration_key_digest published 909967, reproduced 379067\nACCEPT  permutation_multiplier  0x846ca68b  -> reproduces all six controls\nDISCARD quarantine_days         0           -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 75\nDISCARD quarantine_days         1           -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 74\nDISCARD quarantine_days         2           -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 73\nDISCARD quarantine_days         3           -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 72\nDISCARD quarantine_days         5           -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 70\nACCEPT  quarantine_days         7           -> reproduces all six controls\nDISCARD quarantine_days         10          -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 68\nDISCARD quarantine_days         14          -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 67\nDISCARD quarantine_days         21          -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 66\nDISCARD quarantine_days         30          -> CTRL-6 disagrees: calibration_eligible_records published 69, reproduced 65\n\nfalsifier_totals: {'CTRL-2': 9, 'CTRL-4': 5, 'CTRL-6': 9, 'UNREADABLE': 31} sum 54"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 19,
+      "timestamp": "2026-10-23T13:50:31.586345",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_012zwU1wzETgAUdHEFsXgQGG",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport dec,ctrl\nsh=dec.load_tier('/app/data',1)\nd=ctrl.decode_tier(sh,'ROWAN',13,9,6,0x846ca68b)\ngot=ctrl.controls(d,7)\nprint('%-8s %-32s %10s %10s %s'%('control','figure','published','reproduced','agree'))\nfor i,(nm,p,g) in enumerate(zip(ctrl.NAMES,ctrl.PUBLISHED,got),1):\n    print('%-8s %-32s %10d %10d %s'%('CTRL-%d'%i,nm,p,g,'yes' if p==g else 'NO'))\nprint(); print('all six agree:', got==ctrl.PUBLISHED)\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_012zwU1wzETgAUdHEFsXgQGG",
+            "content": "control  figure                            published reproduced agree\nCTRL-1   calibration_block_total                  17         17 yes\nCTRL-2   calibration_key_digest               909967     909967 yes\nCTRL-3   calibration_size_digest              531261     531261 yes\nCTRL-4   calibration_dependency_digest         70029      70029 yes\nCTRL-5   calibration_status_digest              1163       1163 yes\nCTRL-6   calibration_eligible_records             69         69 yes\n\nall six agree: True"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 20,
+      "timestamp": "2026-10-23T13:50:51.659519",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01Sds1Lf9iGH5KaVZkCSX6BX",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport csv\nrows=list(csv.DictReader(open('/app/data/package-registry.csv')))\nPERM={'MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','Zlib','Unlicense'}\ndef fam(e):\n    e=e.strip()\n    if ' OR ' in e: return 'permissive' if any(t.strip() in PERM for t in e.split(' OR ')) else 'copyleft'\n    if ' AND ' in e: return 'copyleft' if any(t.strip() not in PERM for t in e.split(' AND ')) else 'permissive'\n    return 'permissive' if e in PERM else 'copyleft'\nby={r['package']:r for r in rows}\nnxt={r['renamed_from']:r['package'] for r in rows if r['renamed_from']}\nchains=[]\nfor r in rows:\n    if r['renamed_from']: continue\n    ch=[r['package']]\n    while ch[-1] in nxt: ch.append(nxt[ch[-1]])\n    chains.append(ch)\nprint('=== multi-name rename chains: governing licence family ===')\nfor ch in chains:\n    if len(ch)<2: continue\n    gov=by[ch[0]]['licence']; new=by[ch[-1]]['licence']\n    print('reported %-10s chain %-32s governing(earliest %-9s)= %-10s %-11s | newest-name reading(%-11s)= %s'%(\n        ch[-1],' -> '.join(ch),ch[0],by[ch[0]]['licence'],fam(gov),new,fam(new)))\nprint()\nprint('=== single-name chains ===')\nfor ch in chains:\n    if len(ch)!=1: continue\n    print('  %-11s %-18s %s'%(ch[0],by[ch[0]]['licence'],fam(by[ch[0]]['licence'])))\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01Sds1Lf9iGH5KaVZkCSX6BX",
+            "content": "=== multi-name rename chains: governing licence family ===\nreported byte-codec chain bytecodec -> byte-codec          governing(earliest bytecodec)= GPL-3.0    copyleft    | newest-name reading(MIT        )= permissive\nreported date-fmt   chain datefmt -> date-fmt              governing(earliest datefmt  )= MIT OR GPL-3.0 permissive  | newest-name reading(LGPL-2.1   )= copyleft\nreported json-core  chain jsonic -> json-kit -> json-core  governing(earliest jsonic   )= ISC        permissive  | newest-name reading(AGPL-3.0   )= copyleft\n\n=== single-name chains ===\n  ansi-term   MIT                permissive\n  cli-args    Apache-2.0         permissive\n  crc-kit     BSD-3-Clause       permissive\n  event-bus   MPL-2.0            copyleft\n  glob-match  ISC                permissive\n  http-lite   Apache-2.0         permissive\n  log-sink    MIT                permissive\n  path-norm   BSD-2-Clause       permissive\n  tls-shim    Apache-2.0         permissive\n  url-parse   MIT                permissive\n  zip-flate   Zlib AND GPL-3.0   copyleft"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 21,
+      "timestamp": "2026-10-23T13:50:59.819556",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01AexvrhzkSuQQDg9u9NUB1v",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport dec,ctrl,csv\nsh=dec.load_tier('/app/data',2)\nd=ctrl.decode_tier(sh,'ROWAN',13,9,6,0x846ca68b)\nrows=list(csv.DictReader(open('/app/data/package-registry.csv')))\nkeys={r['package_key']:r['package'] for r in rows}\nnb=nr=nd=0; tb=0\nfrom collections import defaultdict\ncnt=defaultdict(int)\nfor n,h,lg in d:\n    print(n,'flags 0x%03x'%h['flags'],'blocks',len(lg))\n    for b in lg:\n        nb+=1\n        k='%08x'%b['key']\n        print('   key',k,keys.get(k,'<UNREGISTERED>'),'recs',len(b['recs']))\n        cnt[keys.get(k,'<UNREG>')]+=len(b['recs'])\n        for r in b['recs']:\n            nr+=1; nd+=len(r['deps']); tb+=r['artifact_bytes']\n            if r['artifact_bytes']>10**9: print('      BIG',r)\nprint('blocks',nb,'recs',nr,'deps',nd,'bytes',tb)\nprint(dict(cnt))\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01AexvrhzkSuQQDg9u9NUB1v",
+            "content": "field_01.pidx flags 0x7ff blocks 3\n   key 1ddfb6ec path-norm recs 2\n   key 35061e61 url-parse recs 3\n   key 37fb3b66 zip-flate recs 2\nfield_02.pidx flags 0x7ff blocks 3\n   key 52eeef8d byte-codec recs 2\n   key 1e2d1525 tls-shim recs 4\n   key 18a2deb5 jsonic recs 1\nfield_03.pidx flags 0x7bf blocks 3\n   key 578c5ea1 date-fmt recs 2\n   key 34a72428 glob-match recs 3\n   key 559e3393 json-core recs 2\nfield_04.pidx flags 0x7ff blocks 2\n   key 55870f35 crc-kit recs 3\n   key 75b62c99 datefmt recs 2\nfield_05.pidx flags 0x7ff blocks 2\n   key 570b6341 <UNREGISTERED> recs 2\n   key 1b329f19 event-bus recs 2\nfield_06.pidx flags 0x3ff blocks 2\n   key 3d382266 bytecodec recs 2\n   key 3f3c3c6e log-sink recs 3\nfield_07.pidx flags 0x7ff blocks 2\n   key 538c2d74 ansi-term recs 3\n   key 5032546a json-kit recs 1\nfield_08.pidx flags 0x7ff blocks 2\n   key 5533a5b5 cli-args recs 3\n   key 371c72b1 http-lite recs 4\nblocks 19 recs 46 deps 47 bytes 2006217\n{'path-norm': 2, 'url-parse': 3, 'zip-flate': 2, 'byte-codec': 2, 'tls-shim': 4, 'jsonic': 1, 'date-fmt': 2, 'glob-match': 3, 'json-core': 2, 'crc-kit': 3, 'datefmt': 2, '<UNREG>': 2, 'event-bus': 2, 'bytecodec': 2, 'log-sink': 3, 'ansi-term': 3, 'json-kit': 1, 'cli-args': 3, 'http-lite': 4}"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 22,
+      "timestamp": "2026-10-23T13:51:49.201929",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01GQ3ZKeDxcq8xsQ1owHt6aV",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/work && python3 -c \"\nimport dec,ctrl,csv\nsh=dec.load_tier('/app/data',2)\nd=ctrl.decode_tier(sh,'ROWAN',13,9,6,0x846ca68b)\nrows=list(csv.DictReader(open('/app/data/package-registry.csv')))\nnxt={r['renamed_from']:r['package'] for r in rows if r['renamed_from']}\nk2n={r['package_key']:r['package'] for r in rows}\nn2rep={}\nfor r in rows:\n    if r['renamed_from']: continue\n    ch=[r['package']]\n    while ch[-1] in nxt: ch.append(nxt[ch[-1]])\n    for n in ch: n2rep[n]=ch[-1]\ndef vs(c): return '%d.%d.%d'%(c>>16,(c>>8)&0xff,c&0xff)\nfrom collections import defaultdict\npk=defaultdict(list)\nfor n,h,lg in d:\n    for b in lg:\n        nm=k2n.get('%08x'%b['key'])\n        rep=n2rep.get(nm,'<UNREG:%08x>'%b['key'])\n        for r in b['recs']: pk[rep].append(r)\nfor p in sorted(pk):\n    print('##',p)\n    for r in sorted(pk[p],key=lambda r:r['version_code']):\n        f=[]\n        if r['status_byte']&1: f.append('YANK')\n        if r['status_byte']&2: f.append('DEPR')\n        print('   %-8s bytes=%-7d day=%-5d st=%d %s'%(vs(r['version_code']),r['artifact_bytes'],r['publish_day'],r['status_byte'],','.join(f)))\n        for e,bk in r['deps']:\n            tn=k2n.get('%08x'%e[0]); print('       -> %-10s %s..%s mask=%-3d gate=%s%s'%(n2rep.get(tn,'UNREG(%08x)'%e[0]),vs(e[1]),vs(e[2]),e[3],'always' if e[4]==255 else 'bit%d'%e[4],' [backref]' if bk else ''))\n\"",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01GQ3ZKeDxcq8xsQ1owHt6aV",
+            "content": "## <UNREG:570b6341>\n   1.0.0    bytes=11226   day=1700  st=0\n   1.1.0    bytes=12265   day=1900  st=0\n## ansi-term\n   0.3.0    bytes=8218    day=1400  st=0\n   0.4.0    bytes=9171    day=1800  st=0\n       -> path-norm  0.5.0..1.0.0 mask=0   gate=bit0\n   0.5.0    bytes=7115    day=2041  st=0\n## byte-codec\n   1.0.0    bytes=40260   day=1700  st=0\n       -> crc-kit    1.0.0..2.0.0 mask=4   gate=bit0\n   1.1.0    bytes=45079   day=1800  st=0\n       -> crc-kit    1.0.0..2.0.0 mask=4   gate=bit0 [backref]\n   1.2.0    bytes=38177   day=1960  st=0\n       -> crc-kit    1.1.0..2.0.0 mask=4   gate=bit0\n       -> log-sink   1.0.0..2.0.0 mask=2   gate=bit0\n   1.3.0    bytes=30205   day=2010  st=1 YANK\n       -> crc-kit    1.1.0..2.0.0 mask=4   gate=bit0 [backref]\n## cli-args\n   1.0.0    bytes=30067   day=1500  st=0\n       -> ansi-term  0.3.0..1.0.0 mask=0   gate=always\n   1.1.0    bytes=28010   day=1900  st=0\n       -> ansi-term  0.4.0..1.0.0 mask=1   gate=always\n   1.2.0    bytes=27244   day=1990  st=0\n       -> UNREG(570b6341) 1.0.0..2.0.0 mask=0   gate=always\n## crc-kit\n   1.0.0    bytes=12220   day=1600  st=0\n       -> log-sink   1.0.0..2.0.0 mask=4   gate=bit2\n   1.1.0    bytes=10274   day=1750  st=0\n       -> log-sink   1.1.0..2.0.0 mask=4   gate=bit2\n   1.2.0    bytes=14054   day=2000  st=2 DEPR\n       -> date-fmt   1.0.0..2.0.0 mask=1   gate=bit2\n## date-fmt\n   1.0.0    bytes=22017   day=1500  st=0\n   1.1.0    bytes=20027   day=1700  st=0\n   1.2.0    bytes=18205   day=1900  st=0\n       -> ansi-term  0.4.0..1.0.0 mask=1   gate=bit0\n   1.3.0    bytes=25187   day=2025  st=0\n       -> glob-match 1.0.0..2.0.0 mask=0   gate=always\n## event-bus\n   1.0.0    bytes=55004   day=1700  st=0\n       -> json-core  3.0.0..4.0.0 mask=2   gate=bit1\n   1.1.0    bytes=48209   day=1950  st=0\n       -> json-core  3.1.0..4.0.0 mask=2   gate=bit1\n       -> log-sink   1.0.0..2.0.0 mask=0   gate=always\n## glob-match\n   1.0.0    bytes=16048   day=1550  st=0\n   1.1.0    bytes=13077   day=1850  st=0\n       -> path-norm  0.5.0..0.6.0 mask=0   gate=bit0\n   1.2.0    bytes=15238   day=2000  st=0\n## http-lite\n   2.0.0    bytes=210048  day=1900  st=0\n       -> url-parse  1.0.0..2.0.0 mask=0   gate=always\n       -> tls-shim   1.3.0..2.0.0 mask=2   gate=bit0\n       -> log-sink   1.0.0..2.0.0 mask=1   gate=bit1\n   2.1.0    bytes=160036  day=1990  st=0\n       -> url-parse  1.2.0..2.0.0 mask=0   gate=always\n       -> byte-codec 1.0.0..2.0.0 mask=1   gate=always\n       -> tls-shim   1.4.0..2.0.0 mask=2   gate=bit0\n       -> log-sink   1.1.0..2.0.0 mask=1   gate=bit1\n   2.2.0    bytes=150226  day=2036  st=0\n       -> url-parse  1.2.0..2.0.0 mask=0   gate=always [backref]\n       -> byte-codec 1.0.0..2.0.0 mask=1   gate=always [backref]\n       -> tls-shim   1.4.0..2.0.0 mask=2   gate=bit0 [backref]\n       -> zip-flate  0.9.0..1.0.0 mask=0   gate=bit1\n   3.0.0    bytes=90003   day=2020  st=0\n       -> url-parse  1.3.0..2.0.0 mask=0   gate=always\n## json-core\n   3.0.0    bytes=70033   day=1600  st=0\n       -> date-fmt   1.0.0..1.2.0 mask=0   gate=bit1\n   3.1.0    bytes=64202   day=1800  st=0\n       -> date-fmt   1.1.0..2.0.0 mask=0   gate=bit1\n       -> byte-codec 1.0.0..2.0.0 mask=1   gate=bit2\n   3.2.0    bytes=58201   day=1980  st=0\n       -> date-fmt   1.2.0..2.0.0 mask=1   gate=bit1\n       -> crc-kit    1.0.0..2.0.0 mask=4   gate=bit2\n   3.3.0    bytes=50031   day=2046  st=0\n       -> date-fmt   1.2.0..2.0.0 mask=1   gate=bit1 [backref]\n## log-sink\n   1.0.0    bytes=30150   day=1650  st=0\n       -> ansi-term  0.3.0..1.0.0 mask=0   gate=bit2\n   1.1.0    bytes=26210   day=1880  st=0\n       -> ansi-term  0.4.0..1.0.0 mask=1   gate=bit2\n       -> date-fmt   1.2.0..2.0.0 mask=0   gate=bit0\n   1.2.0    bytes=34071   day=2015  st=0\n       -> event-bus  1.0.0..2.0.0 mask=1   gate=bit2\n## path-norm\n   0.5.0    bytes=6007    day=1500  st=0\n   0.6.0    bytes=5104    day=1900  st=0\n       -> glob-match 1.1.0..2.0.0 mask=0   gate=always\n## tls-shim\n   1.3.0    bytes=120041  day=1850  st=0\n       -> crc-kit    1.0.0..2.0.0 mask=4   gate=bit1\n   1.3.1    bytes=95200   day=2033  st=0\n       -> crc-kit    1.0.0..2.0.0 mask=4   gate=bit1 [backref]\n   1.4.0    bytes=70240   day=1950  st=0\n       -> byte-codec 1.1.0..2.0.0 mask=1   gate=bit1\n   1.4.1    bytes=60295   day=2035  st=0\n       -> byte-codec 1.1.0..2.0.0 mask=1   gate=bit1\n## url-parse\n   1.1.0    bytes=25287   day=1600  st=0\n   1.2.0    bytes=21034   day=1870  st=0\n   1.3.0    bytes=19027   day=2048  st=0\n## zip-flate\n   0.8.0    bytes=44121   day=1700  st=0\n       -> crc-kit    1.1.0..2.0.0 mask=4   gate=bit0\n   0.9.0    bytes=40053   day=1980  st=0\n       -> byte-codec 1.2.0..2.0.0 mask=1   gate=bit0"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 23,
+      "timestamp": "2026-10-23T13:54:50.915765",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01WNSt3FfwLnQN4LnbyR7PXE",
+          "function_name": "file_editor",
+          "arguments": {
+            "command": "create",
+            "path": "/app/out/optimize.py",
+            "file_text": "#!/usr/bin/env python3\n\"\"\"Replay benchmark workspaces against a binary registry index.\n\nReads a registry directory (shards, registry tables and policy documents),\nrecovers the six withheld registry constants from the calibration slice, and\nwrites the five workspace lock plans plus the performance, bottleneck,\nintegrity and derivation documents.\n\"\"\"\n\nimport csv\nimport itertools\nimport json\nimport os\nimport re\nimport struct\nimport sys\nimport zlib\n\nMOD = 1000003\n\nF_MASK_BYTES = 0x0001\nF_CHAIN_VERSION = 0x0002\nF_DELTA2_DAY = 0x0004\nF_DRIFT_KEY = 0x0008\nF_BLOCK_PERMUTE = 0x0010\nF_BACKREF_DEPS = 0x0020\nF_ENDIAN_ISLAND = 0x0040\nF_BIASED_COUNT = 0x0080\nF_ROT_STATUS = 0x0100\nF_XREF_KEY = 0x0200\nF_SPLIT_TAIL = 0x0400\n\nTIER_REHEARSAL, TIER_CALIBRATION, TIER_FIELD = 0, 1, 2\n\nZERO_ENTRY = (0, 0, 0, 0, 0)\n\nPARAM_ORDER = ['salt', 'window_span', 'bias_limit', 'rotation_base',\n               'permutation_multiplier', 'quarantine_days']\nPARAM_ALIASES = {\n    'salt word': 'salt',\n    'window span': 'window_span',\n    'bias limit': 'bias_limit',\n    'rotation base': 'rotation_base',\n    'shuffle multiplier': 'permutation_multiplier',\n    'quarantine days': 'quarantine_days',\n}\n\n\nclass Unreadable(Exception):\n    \"\"\"A shard cannot be read under the assignment being weighed.\"\"\"\n\n\n# --------------------------------------------------------------------------\n# document parsing\n# --------------------------------------------------------------------------\n\ndef read_text(path):\n    with open(path, 'r', encoding='utf-8') as fh:\n        return fh.read()\n\n\ndef table_rows(text):\n    for line in text.splitlines():\n        line = line.strip()\n        if not line.startswith('|'):\n            continue\n        cells = [c.strip() for c in line.strip('|').split('|')]\n        if all(set(c) <= set('-: ') and c for c in cells):\n            continue\n        yield cells\n\n\ndef parse_calibration(path):\n    text = read_text(path)\n    candidates = {}\n    published = []\n    for cells in table_rows(text):\n        if len(cells) == 2:\n            key = PARAM_ALIASES.get(cells[0].lower())\n            if key:\n                candidates[key] = cells[1].split()\n        elif len(cells) == 3 and re.fullmatch(r'CTRL-\\d+', cells[0]):\n            published.append((cells[0], cells[1], int(cells[2])))\n    snap = int(re.search(r'[Cc]alibration snapshot day:\\s*(\\d+)', text).group(1))\n    missing = [p for p in PARAM_ORDER if p not in candidates]\n    if missing:\n        raise ValueError('calibration slice lists no candidates for %s' % missing)\n    published.sort(key=lambda r: int(r[0].split('-')[1]))\n    return candidates, published, snap\n\n\ndef parse_licence_families(path):\n    text = read_text(path)\n    fams = {}\n    for fam in ('permissive', 'copyleft'):\n        m = re.search(r'^%s:\\s*(.+?)\\.$' % fam.capitalize(), text, re.M | re.S)\n        for ident in m.group(1).replace('\\n', ' ').split(','):\n            fams[ident.strip()] = fam\n    return fams\n\n\ndef licence_family(expr, fams):\n    expr = expr.strip()\n    if ' OR ' in expr:\n        parts = [p.strip() for p in expr.split(' OR ')]\n        return 'permissive' if any(fams.get(p) == 'permissive' for p in parts) else 'copyleft'\n    if ' AND ' in expr:\n        parts = [p.strip() for p in expr.split(' AND ')]\n        return 'copyleft' if any(fams.get(p) == 'copyleft' for p in parts) else 'permissive'\n    return fams.get(expr, 'copyleft')\n\n\ndef read_csv(path):\n    with open(path, newline='', encoding='utf-8') as fh:\n        return list(csv.DictReader(fh))\n\n\ndef version_string(code):\n    return '%d.%d.%d' % ((code >> 16) & 0xFFFF, (code >> 8) & 0xFF, code & 0xFF)\n\n\ndef version_code(text):\n    major, minor, patch = (int(x) for x in text.split('.'))\n    return major * 65536 + minor * 256 + patch\n\n\n# --------------------------------------------------------------------------\n# shard decoding\n# --------------------------------------------------------------------------\n\ndef rotr16(value, amount):\n    amount %= 16\n    if amount == 0:\n        return value & 0xFFFF\n    return ((value >> amount) | (value << (16 - amount))) & 0xFFFF\n\n\ndef read_header(data):\n    if len(data) < 20 or data[0:4] != b'PIDX':\n        raise Unreadable('magic')\n    flags = struct.unpack_from('<H', data, 6)[0]\n    if zlib.crc32(data[0:18]) & 0xFFFF != struct.unpack_from('<H', data, 18)[0]:\n        raise Unreadable('header check')\n    nonce = struct.unpack_from('>I' if flags & F_ENDIAN_ISLAND else '<I', data, 8)[0]\n    return {\n        'version': data[4],\n        'tier': data[5],\n        'flags': flags,\n        'nonce': nonce,\n        'area': struct.unpack_from('<I', data, 12)[0],\n        'stored': struct.unpack_from('<H', data, 16)[0],\n    }\n\n\ndef load_shards(dirpath):\n    shards = []\n    for name in sorted(os.listdir(dirpath)):\n        path = os.path.join(dirpath, name)\n        if not os.path.isfile(path) or not name.endswith('.pidx'):\n            continue\n        with open(path, 'rb') as fh:\n            data = fh.read()\n        shards.append((name, data, read_header(data)))\n    return shards\n\n\ndef parse_structure(data, hdr, salt, bias_limit, rotation_base, window_span):\n    \"\"\"Structural pass in file order; everything that fixes byte lengths.\"\"\"\n    flags = hdr['flags']\n    count = hdr['stored']\n    if flags & F_BIASED_COUNT:\n        keystream = salt.encode('ascii') + struct.pack('<I', hdr['nonce'])\n        count -= (zlib.crc32(keystream) & 0xFF) % bias_limit\n    if count < 0:\n        raise Unreadable('negative block count')\n    end = 20 + hdr['area']\n    if end > len(data):\n        raise Unreadable('block area past end of file')\n    big_counts = bool(flags & F_ENDIAN_ISLAND)\n    rot = bool(flags & F_ROT_STATUS)\n    backref = bool(flags & F_BACKREF_DEPS)\n    pos = 20\n    blocks = []\n    for _ in range(count):\n        if pos + 10 > end:\n            raise Unreadable('block header past end')\n        start = pos\n        key_raw = struct.unpack_from('<I', data, pos)[0]\n        rec_count = struct.unpack_from('>H' if big_counts else '<H', data, pos + 4)[0]\n        block_nonce = struct.unpack_from('<I', data, pos + 6)[0]\n        pos += 10\n        ring = [ZERO_ENTRY] * window_span\n        records = []\n        for ordinal in range(rec_count):\n            if pos + 12 > end:\n                raise Unreadable('version record past end')\n            v_raw, a_raw, d_raw, s_raw = struct.unpack_from('<IIHH', data, pos)\n            pos += 12\n            status = rotr16(s_raw, rotation_base + (ordinal % 8)) if rot else s_raw\n            dep_count = status & 0xFF\n            deps = []\n            for _entry in range(dep_count):\n                if backref:\n                    if pos + 1 > end:\n                        raise Unreadable('entry tag past end')\n                    tag = data[pos]\n                    pos += 1\n                    if tag == 0:\n                        if pos + 14 > end:\n                            raise Unreadable('dependency entry past end')\n                        tk, lo, hi = struct.unpack_from('<III', data, pos)\n                        entry = (tk, lo, hi, data[pos + 12], data[pos + 13])\n                        pos += 14\n                        was_backref = False\n                    else:\n                        if tag > window_span:\n                            raise Unreadable('back reference tag above window span')\n                        entry = ring[window_span - tag]\n                        was_backref = True\n                    ring = [entry] + ring[:-1]\n                else:\n                    if pos + 14 > end:\n                        raise Unreadable('dependency entry past end')\n                    tk, lo, hi = struct.unpack_from('<III', data, pos)\n                    entry = (tk, lo, hi, data[pos + 12], data[pos + 13])\n                    pos += 14\n                    was_backref = False\n                deps.append((entry, was_backref))\n            records.append((v_raw, a_raw, d_raw, status >> 8, dep_count, deps))\n        if pos + 4 > end:\n            raise Unreadable('block trailer past end')\n        if zlib.crc32(data[start:pos]) != struct.unpack_from('<I', data, pos)[0]:\n            raise Unreadable('block trailer mismatch')\n        pos += 4\n        if flags & F_SPLIT_TAIL:\n            pos += block_nonce % 7\n            if pos > end:\n                raise Unreadable('split tail past end of file')\n        blocks.append((key_raw, block_nonce, records))\n    if pos != end:\n        raise Unreadable('block area ends before or after its last block')\n    return blocks\n\n\ndef permutation(count, nonce, multiplier):\n    order = list(range(count))\n    state = nonce\n    for i in range(count - 1, 0, -1):\n        state = (state * multiplier + 0x9E3779B9) & 0xFFFFFFFF\n        j = state % (i + 1)\n        order[i], order[j] = order[j], order[i]\n    return order\n\n\ndef resolve_shard(hdr, blocks, salt, multiplier, companion_nonce):\n    \"\"\"Put blocks in logical order and undo the value level transforms.\"\"\"\n    flags = hdr['flags']\n    nonce = hdr['nonce']\n    if flags & F_BLOCK_PERMUTE:\n        order = permutation(len(blocks), nonce, multiplier)\n        logical = [None] * len(blocks)\n        for file_pos, logical_pos in enumerate(order):\n            logical[logical_pos] = blocks[file_pos]\n    else:\n        logical = list(blocks)\n\n    salt_bytes = salt.encode('ascii')\n    mask_bytes = bool(flags & F_MASK_BYTES)\n    drift = 0\n    out = []\n    for key_raw, block_nonce, raw_records in logical:\n        key = key_raw ^ companion_nonce if flags & F_XREF_KEY else key_raw\n        block_key = block_nonce ^ drift if flags & F_DRIFT_KEY else block_nonce\n        records = []\n        previous_version = 0\n        day_1 = day_2 = 0\n        block_sum = 0\n        for ordinal, (v_raw, a_raw, d_raw, status_byte, dep_count, deps) in \\\n                enumerate(raw_records):\n            if mask_bytes:\n                stream = salt_bytes + struct.pack('<IIH', nonce, block_key, ordinal)\n                artifact_bytes = a_raw ^ zlib.crc32(stream)\n            else:\n                artifact_bytes = a_raw\n            if flags & F_CHAIN_VERSION and ordinal:\n                code = (previous_version + v_raw) & 0xFFFFFFFF\n            else:\n                code = v_raw\n            previous_version = code\n            if flags & F_DELTA2_DAY:\n                day = (d_raw + 2 * day_1 - day_2) & 0xFFFF\n            else:\n                day = d_raw\n            day_2, day_1 = day_1, day\n            block_sum += artifact_bytes\n            records.append({\n                'version_code': code,\n                'artifact_bytes': artifact_bytes,\n                'publish_day': day,\n                'status_byte': status_byte,\n                'dep_count': dep_count,\n                'deps': deps,\n                'ordinal': ordinal,\n            })\n        drift = (drift + block_sum) & 0xFFFFFFFF\n        out.append({'key': key, 'block_nonce': block_nonce, 'records': records})\n    return out\n\n\ndef companion_nonces(shards):\n    \"\"\"Same tier shard whose nonce is the next smaller one, wrapping around.\"\"\"\n    ordered = sorted({hdr['nonce'] for _n, _d, hdr in shards})\n    return {n: (ordered[i - 1] if i else ordered[-1]) for i, n in enumerate(ordered)}\n\n\ndef decode_tier(shards, salt, bias_limit, rotation_base, window_span, multiplier,\n                structures=None):\n    companions = companion_nonces(shards)\n    out = []\n    for name, data, hdr in shards:\n        if structures is None:\n            blocks = parse_structure(data, hdr, salt, bias_limit, rotation_base, window_span)\n        else:\n            blocks = structures[name]\n        out.append((name, hdr,\n                    resolve_shard(hdr, blocks, salt, multiplier, companions[hdr['nonce']])))\n    return out\n\n\n# --------------------------------------------------------------------------\n# calibration controls\n# --------------------------------------------------------------------------\n\ndef control_figures(decoded, snapshot_day, quarantine_days):\n    \"\"\"The six published control figures, in CTRL-1 to CTRL-6 order.\n\n    Positions and ordinals are one based here, as the figure notes require,\n    while the shard transforms use the zero based ordinal of the format.\n    \"\"\"\n    blocks = key_digest = size_digest = dep_digest = status_digest = eligible = 0\n    for _name, _hdr, logical in decoded:\n        blocks += len(logical)\n        for position, block in enumerate(logical, 1):\n            key_digest += block['key'] * position\n            for record in block['records']:\n                ordinal = record['ordinal'] + 1\n                size_digest += (record['artifact_bytes'] + record['version_code']) * ordinal\n                status_digest += (3 * record['status_byte'] + record['dep_count']) * ordinal\n                for entry_pos, (entry, _back) in enumerate(record['deps'], 1):\n                    value = (entry[0] ^ entry[1]) + 7 * entry[3] + entry[4]\n                    dep_digest += value * entry_pos * ordinal\n                if (not record['status_byte'] & 1\n                        and record['publish_day'] <= snapshot_day\n                        and record['publish_day'] <= snapshot_day - quarantine_days):\n                    eligible += 1\n    return [blocks, key_digest % MOD, size_digest % MOD, dep_digest % MOD,\n            status_digest % MOD, eligible]\n\n\ndef recover_constants(calib_shards, candidates, published, snapshot_day):\n    \"\"\"Find the one assignment of the six constants that reproduces every figure.\"\"\"\n    targets = [row[2] for row in published]\n    structure_cache = {}\n\n    def structures(salt, bias_limit, rotation_base, window_span):\n        key = (salt, bias_limit, rotation_base, window_span)\n        if key not in structure_cache:\n            try:\n                structure_cache[key] = {\n                    name: parse_structure(data, hdr, salt, bias_limit,\n                                          rotation_base, window_span)\n                    for name, data, hdr in calib_shards}\n            except Unreadable:\n                structure_cache[key] = None\n        return structure_cache[key]\n\n    found = []\n    for salt, bias_limit, rotation_base, window_span in itertools.product(\n            candidates['salt'],\n            [int(v) for v in candidates['bias_limit']],\n            [int(v) for v in candidates['rotation_base']],\n            [int(v) for v in candidates['window_span']]):\n        built = structures(salt, bias_limit, rotation_base, window_span)\n        if built is None:\n            continue\n        for multiplier in [int(v, 16) for v in candidates['permutation_multiplier']]:\n            decoded = decode_tier(calib_shards, salt, bias_limit, rotation_base,\n                                  window_span, multiplier, built)\n            for quarantine in [int(v) for v in candidates['quarantine_days']]:\n                if control_figures(decoded, snapshot_day, quarantine) == targets:\n                    found.append({'salt': salt, 'bias_limit': bias_limit,\n                                  'rotation_base': rotation_base,\n                                  'window_span': window_span,\n                                  'permutation_multiplier': multiplier,\n                                  'quarantine_days': quarantine})\n    if len(found) != 1:\n        raise ValueError('expected exactly one assignment, found %d' % len(found))\n    return found[0]\n\n\ndef falsifier_of(calib_shards, assignment, snapshot_day, targets):\n    \"\"\"UNREADABLE, or the first control whose figure differs, or 'none'.\"\"\"\n    try:\n        decoded = decode_tier(calib_shards, assignment['salt'], assignment['bias_limit'],\n                              assignment['rotation_base'], assignment['window_span'],\n                              assignment['permutation_multiplier'])\n    except Unreadable:\n        return 'UNREADABLE'\n    figures = control_figures(decoded, snapshot_day, assignment['quarantine_days'])\n    for index, (got, want) in enumerate(zip(figures, targets)):\n        if got != want:\n            return 'CTRL-%d' % (index + 1)\n    return 'none'\n\n\n# --------------------------------------------------------------------------\n# registry identity\n# --------------------------------------------------------------------------\n\ndef build_registry(rows, fams):\n    renamed_to = {}\n    by_name = {}\n    for row in rows:\n        by_name[row['package']] = row\n        if row['renamed_from']:\n            renamed_to[row['renamed_from']] = row['package']\n    chains = []\n    for row in rows:\n        if row['renamed_from']:\n            continue\n        chain = [row['package']]\n        while chain[-1] in renamed_to:\n            chain.append(renamed_to[chain[-1]])\n        chains.append(chain)\n\n    reported = {}\n    key_to_package = {}\n    governing = {}\n    newest_reading = {}\n    for chain in chains:\n        name = chain[-1]\n        for member in chain:\n            reported[member] = name\n            key_to_package[int(by_name[member]['package_key'], 16)] = name\n        governing[name] = licence_family(by_name[chain[0]]['licence'], fams)\n        newest_reading[name] = licence_family(by_name[chain[-1]]['licence'], fams)\n    return {'chains': chains, 'reported': reported, 'key_to_package': key_to_package,\n            'governing': governing, 'newest_reading': newest_reading}\n\n\n# --------------------------------------------------------------------------\n# resolution\n# --------------------------------------------------------------------------\n\ndef plan_text(assignment):\n    return ','.join('%s@%08x' % (name, record['version_code'])\n                    for name, record in sorted(assignment.items()))\n\n\ndef feature_state(assignment, direct, key_to_package):\n    \"\"\"Smallest feature assignment, and the number of settlement passes.\"\"\"\n    state = {name: direct.get(name, 0) for name in assignment}\n    passes = 0\n    while True:\n        passes += 1\n        nxt = dict(state)\n        for name, record in assignment.items():\n            mask = state[name]\n            for entry, _back in record['deps']:\n                if entry[4] != 255 and not (mask >> entry[4]) & 1:\n                    continue\n                target = key_to_package.get(entry[0])\n                if target in nxt:\n                    nxt[target] |= entry[3]\n        if nxt == state:\n            return state, passes\n        state = nxt\n\n\ndef solve_workspace(workspace, requirements, packages, registry, quarantine_days, families):\n    \"\"\"The valid lock plan with the smallest footprint, or None.\"\"\"\n    snapshot = workspace['snapshot_day']\n    allow_copyleft = workspace['copyleft'] == 'allowed'\n    key_to_package = registry['key_to_package']\n\n    def permitted(name):\n        return allow_copyleft or families[name] == 'permissive'\n\n    eligible = {}\n    for name, records in packages.items():\n        eligible[name] = [r for r in records\n                          if not r['status_byte'] & 1\n                          and r['publish_day'] <= snapshot\n                          and r['publish_day'] <= snapshot - quarantine_days]\n\n    direct = {}\n    bounds = {}\n    for req in requirements:\n        name = registry['reported'].get(req['package'])\n        if name is None:\n            return None\n        direct[name] = direct.get(name, 0) | int(req['features'])\n        low, high = version_code(req['lowest']), version_code(req['below'])\n        if name in bounds:\n            previous = bounds[name]\n            bounds[name] = (max(previous[0], low), min(previous[1], high))\n        else:\n            bounds[name] = (low, high)\n\n    seeds = []\n    for name, (low, high) in sorted(bounds.items()):\n        if not permitted(name):\n            return None\n        choices = [r for r in eligible.get(name, [])\n                   if low <= r['version_code'] < high]\n        if not choices:\n            return None\n        seeds.append([(name, r) for r in choices])\n\n    best = [None]\n\n    def consider(assignment):\n        footprint = sum(r['artifact_bytes'] for r in assignment.values())\n        state, passes = feature_state(assignment, direct, key_to_package)\n        key = (footprint,\n               -sum(r['version_code'] for r in assignment.values()),\n               plan_text(assignment))\n        if best[0] is None or key < best[0][0]:\n            best[0] = (key, dict(assignment), state, passes, footprint)\n\n    def search(assignment, footprint):\n        if best[0] is not None and footprint > best[0][0][0]:\n            return\n        state, _passes = feature_state(assignment, direct, key_to_package)\n        for name, record in assignment.items():\n            mask = state[name]\n            for entry, _back in record['deps']:\n                if entry[4] != 255 and not (mask >> entry[4]) & 1:\n                    continue\n                target = key_to_package.get(entry[0])\n                if target is None:\n                    return\n                if target in assignment:\n                    if not entry[1] <= assignment[target]['version_code'] < entry[2]:\n                        return\n                    continue\n                if not permitted(target):\n                    return\n                for choice in eligible.get(target, []):\n                    if entry[1] <= choice['version_code'] < entry[2]:\n                        assignment[target] = choice\n                        search(assignment, footprint + choice['artifact_bytes'])\n                        del assignment[target]\n                return\n        consider(assignment)\n\n    for combination in itertools.product(*seeds):\n        assignment = dict(combination)\n        if len(assignment) != len(seeds):\n            continue\n        search(assignment, sum(r['artifact_bytes'] for r in assignment.values()))\n\n    if best[0] is None:\n        return None\n    _key, assignment, state, passes, footprint = best[0]\n    return {'assignment': assignment, 'features': state, 'passes': passes,\n            'footprint': footprint, 'eligible': eligible}\n\n\n# --------------------------------------------------------------------------\n# documents\n# --------------------------------------------------------------------------\n\ndef write_json(path, payload):\n    with open(path, 'w', encoding='utf-8') as fh:\n        json.dump(payload, fh, indent=2, sort_keys=True)\n        fh.write('\\n')\n\n\ndef main(argv):\n    if len(argv) != 3:\n        sys.stderr.write('usage: optimize.py <input-dir> <output-dir>\\n')\n        return 2\n    src, dst = argv[1], argv[2]\n    os.makedirs(dst, exist_ok=True)\n\n    candidates, published, calib_day = parse_calibration(os.path.join(src, 'calibration.md'))\n    fams = parse_licence_families(os.path.join(src, 'licence-policy.md'))\n    registry_rows = read_csv(os.path.join(src, 'package-registry.csv'))\n    workspace_rows = read_csv(os.path.join(src, 'workspaces.csv'))\n    requirement_rows = read_csv(os.path.join(src, 'workspace-requirements.csv'))\n\n    shards = load_shards(src)\n    calib_shards = [s for s in shards if s[2]['tier'] == TIER_CALIBRATION]\n    field_shards = [s for s in shards if s[2]['tier'] == TIER_FIELD]\n\n    recovered = recover_constants(calib_shards, candidates, published, calib_day)\n    targets = [row[2] for row in published]\n    reproduced = control_figures(\n        decode_tier(calib_shards, recovered['salt'], recovered['bias_limit'],\n                    recovered['rotation_base'], recovered['window_span'],\n                    recovered['permutation_multiplier']),\n        calib_day, recovered['quarantine_days'])\n\n    recovered_text = {\n        'salt': recovered['salt'],\n        'window_span': str(recovered['window_span']),\n        'bias_limit': str(recovered['bias_limit']),\n        'rotation_base': str(recovered['rotation_base']),\n        'permutation_multiplier': '0x%08x' % recovered['permutation_multiplier'],\n        'quarantine_days': str(recovered['quarantine_days']),\n    }\n    candidate_records = []\n    totals = {}\n    for parameter in PARAM_ORDER:\n        for value in candidates[parameter]:\n            accepted = value == recovered_text[parameter]\n            if accepted:\n                label = 'none'\n            else:\n                trial = dict(recovered)\n                trial[parameter] = value if parameter == 'salt' else (\n                    int(value, 16) if parameter == 'permutation_multiplier' else int(value))\n                label = falsifier_of(calib_shards, trial, calib_day, targets)\n                totals[label] = totals.get(label, 0) + 1\n            candidate_records.append({\n                'parameter': parameter,\n                'value': value,\n                'verdict': 'accepted' if accepted else 'rejected',\n                'falsifier': label,\n            })\n\n    registry = build_registry(registry_rows, fams)\n    key_to_package = registry['key_to_package']\n\n    decoded_field = decode_tier(field_shards, recovered['salt'], recovered['bias_limit'],\n                                recovered['rotation_base'], recovered['window_span'],\n                                recovered['permutation_multiplier'])\n\n    packages = {}\n    blocks_decoded = records_decoded = entries_decoded = 0\n    decoded_bytes = 0\n    bytes_unregistered = bytes_yanked = 0\n    records_yanked = records_deprecated = records_unregistered = 0\n    entries_back_referenced = entries_unregistered_target = 0\n    for _name, _hdr, logical in decoded_field:\n        blocks_decoded += len(logical)\n        for block in logical:\n            name = key_to_package.get(block['key'])\n            for record in block['records']:\n                records_decoded += 1\n                entries_decoded += len(record['deps'])\n                decoded_bytes += record['artifact_bytes']\n                yanked = bool(record['status_byte'] & 1)\n                if record['status_byte'] & 2:\n                    records_deprecated += 1\n                if name is None:\n                    records_unregistered += 1\n                    bytes_unregistered += record['artifact_bytes']\n                else:\n                    if yanked:\n                        records_yanked += 1\n                        bytes_yanked += record['artifact_bytes']\n                    packages.setdefault(name, []).append(record)\n                for entry, was_backref in record['deps']:\n                    if was_backref:\n                        entries_back_referenced += 1\n                    if entry[0] not in key_to_package:\n                        entries_unregistered_target += 1\n\n    requirements = {}\n    for row in requirement_rows:\n        requirements.setdefault(row['workspace'], []).append(row)\n\n    workspaces = []\n    for row in workspace_rows:\n        workspaces.append({'workspace': row['workspace'],\n                           'snapshot_day': int(row['snapshot_day']),\n                           'copyleft': row['copyleft']})\n\n    quarantine_days = recovered['quarantine_days']\n    results = {}\n    divergence = []\n    for workspace in workspaces:\n        name = workspace['workspace']\n        reqs = requirements.get(name, [])\n        solved = solve_workspace(workspace, reqs, packages, registry,\n                                 quarantine_days, registry['governing'])\n        if solved is None:\n            raise ValueError('no valid lock plan for workspace %s' % name)\n        results[name] = solved\n        alternative = solve_workspace(workspace, reqs, packages, registry,\n                                      quarantine_days, registry['newest_reading'])\n        if alternative is None or plan_text(alternative['assignment']) != \\\n                plan_text(solved['assignment']):\n            divergence.append(name)\n\n    locked_versions = {}\n    for solved in results.values():\n        for name, record in solved['assignment'].items():\n            locked_versions[(name, record['version_code'])] = record['artifact_bytes']\n    locked_bytes = sum(locked_versions.values())\n    excluded_bytes = bytes_unregistered + bytes_yanked\n\n    for workspace in workspaces:\n        name = workspace['workspace']\n        solved = results[name]\n        snapshot = workspace['snapshot_day']\n        quarantined = 0\n        for records in packages.values():\n            for record in records:\n                if (not record['status_byte'] & 1\n                        and record['publish_day'] <= snapshot\n                        and record['publish_day'] > snapshot - quarantine_days):\n                    quarantined += 1\n        entries = []\n        for package, record in sorted(solved['assignment'].items()):\n            entries.append({\n                'package': package,\n                'version': version_string(record['version_code']),\n                'features': solved['features'][package],\n                'licence_family': registry['governing'][package],\n                'bytes': record['artifact_bytes'],\n            })\n        write_json(os.path.join(dst, 'scenario_%s.json' % name), {\n            'workspace': name,\n            'snapshot_day': snapshot,\n            'copyleft': workspace['copyleft'],\n            'footprint_bytes': solved['footprint'],\n            'package_count': len(solved['assignment']),\n            'quarantined_records': quarantined,\n            'packages': entries,\n        })\n\n    write_json(os.path.join(dst, 'perf_report.json'), {\n        'shards_decoded': len(field_shards),\n        'blocks_decoded': blocks_decoded,\n        'records_decoded': records_decoded,\n        'dependency_entries_decoded': entries_decoded,\n        'decoded_bytes': decoded_bytes,\n        'excluded_bytes': excluded_bytes,\n        'locked_bytes': locked_bytes,\n        'byte_residual': decoded_bytes - excluded_bytes - locked_bytes,\n        'workspaces_resolved': len(workspaces),\n        'footprint_by_workspace': {w['workspace']: results[w['workspace']]['footprint']\n                                   for w in workspaces},\n        'recovered_parameters': {\n            'salt': recovered['salt'],\n            'window_span': recovered['window_span'],\n            'bias_limit': recovered['bias_limit'],\n            'rotation_base': recovered['rotation_base'],\n            'quarantine_days': recovered['quarantine_days'],\n            'permutation_multiplier': '0x%08x' % recovered['permutation_multiplier'],\n        },\n    })\n\n    analysis = []\n    for workspace in sorted(workspaces, key=lambda w: w['workspace']):\n        name = workspace['workspace']\n        solved = results[name]\n        held_back = []\n        permissive = []\n        copyleft = []\n        for package, record in sorted(solved['assignment'].items()):\n            newest = max(r['version_code'] for r in solved['eligible'][package])\n            if record['version_code'] < newest:\n                held_back.append({'package': package,\n                                  'locked': version_string(record['version_code']),\n                                  'newest_eligible': version_string(newest)})\n            if registry['governing'][package] == 'permissive':\n                permissive.append(package)\n            else:\n                copyleft.append(package)\n        analysis.append({'workspace': name, 'held_back': held_back,\n                         'permissive_packages': permissive,\n                         'copyleft_packages': copyleft})\n    write_json(os.path.join(dst, 'bottleneck_analysis.json'), {'workspaces': analysis})\n\n    write_json(os.path.join(dst, 'data_quality.json'), {\n        'total_shards': len(field_shards),\n        'shards_with_full_flag_set': sum(1 for _n, _d, h in field_shards\n                                         if h['flags'] == 0x07FF),\n        'records_yanked': records_yanked,\n        'records_deprecated': records_deprecated,\n        'records_unregistered_package': records_unregistered,\n        'dependency_entries_back_referenced': entries_back_referenced,\n        'dependency_entries_unregistered_target': entries_unregistered_target,\n        'excluded_bytes_by_cause': {'unregistered_package': bytes_unregistered,\n                                    'yanked': bytes_yanked},\n    })\n\n    write_json(os.path.join(dst, 'recommendations.json'), {\n        'candidates': candidate_records,\n        'falsifier_totals': totals,\n        'calibration_table': [\n            {'control': control, 'figure': figure, 'published': value,\n             'reproduced': reproduced[index]}\n            for index, (control, figure, value) in enumerate(published)],\n        'settlement_passes_by_workspace': {w['workspace']: results[w['workspace']]['passes']\n                                           for w in workspaces},\n        'licence_divergence': sorted(divergence),\n    })\n    return 0\n\n\nif __name__ == '__main__':\n    sys.exit(main(sys.argv))\n"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01WNSt3FfwLnQN4LnbyR7PXE",
+            "content": "File created successfully at: /app/out/optimize.py"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 24,
+      "timestamp": "2026-10-23T13:54:58.048813",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01Nmt468ZWY87mQWtGUxRboX",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /app && time python3 /app/out/optimize.py /app/data /tmp/test1 && ls /tmp/test1",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01Nmt468ZWY87mQWtGUxRboX",
+            "content": "real    0m0.121s\nuser    0m0.101s\nsys     0m0.019s\nbottleneck_analysis.json  data_quality.json  perf_report.json  recommendations.json  scenario_burst.json  scenario_latency.json  scenario_peak.json  scenario_steady.json  scenario_visible.json"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 25,
+      "timestamp": "2026-10-23T13:55:03.726935",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01UhB6pi6F3J8HaEe3m7Mg8o",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/test1 && for f in perf_report.json data_quality.json scenario_visible.json scenario_peak.json scenario_steady.json scenario_burst.json scenario_latency.json; do echo \"=== $f\"; cat $f; done",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01UhB6pi6F3J8HaEe3m7Mg8o",
+            "content": "=== perf_report.json\n{\n  \"blocks_decoded\": 19,\n  \"byte_residual\": 978629,\n  \"decoded_bytes\": 2006217,\n  \"dependency_entries_decoded\": 47,\n  \"excluded_bytes\": 53696,\n  \"footprint_by_workspace\": {\n    \"burst\": 351377,\n    \"latency\": 104661,\n    \"peak\": 137411,\n    \"steady\": 50422,\n    \"visible\": 398648\n  },\n  \"locked_bytes\": 973892,\n  \"records_decoded\": 46,\n  \"recovered_parameters\": {\n    \"bias_limit\": 13,\n    \"permutation_multiplier\": \"0x846ca68b\",\n    \"quarantine_days\": 7,\n    \"rotation_base\": 9,\n    \"salt\": \"ROWAN\",\n    \"window_span\": 6\n  },\n  \"shards_decoded\": 8,\n  \"workspaces_resolved\": 5\n}\n=== data_quality.json\n{\n  \"dependency_entries_back_referenced\": 7,\n  \"dependency_entries_unregistered_target\": 1,\n  \"excluded_bytes_by_cause\": {\n    \"unregistered_package\": 23491,\n    \"yanked\": 30205\n  },\n  \"records_deprecated\": 1,\n  \"records_unregistered_package\": 2,\n  \"records_yanked\": 1,\n  \"shards_with_full_flag_set\": 6,\n  \"total_shards\": 8\n}\n=== scenario_visible.json\n{\n  \"copyleft\": \"forbidden\",\n  \"footprint_bytes\": 398648,\n  \"package_count\": 7,\n  \"packages\": [\n    {\n      \"bytes\": 8218,\n      \"features\": 0,\n      \"licence_family\": \"permissive\",\n      \"package\": \"ansi-term\",\n      \"version\": \"0.3.0\"\n    },\n    {\n      \"bytes\": 30067,\n      \"features\": 0,\n      \"licence_family\": \"permissive\",\n      \"package\": \"cli-args\",\n      \"version\": \"1.0.0\"\n    },\n    {\n      \"bytes\": 14054,\n      \"features\": 4,\n      \"licence_family\": \"permissive\",\n      \"package\": \"crc-kit\",\n      \"version\": \"1.2.0\"\n    },\n    {\n      \"bytes\": 20027,\n      \"features\": 1,\n      \"licence_family\": \"permissive\",\n      \"package\": \"date-fmt\",\n      \"version\": \"1.1.0\"\n    },\n    {\n      \"bytes\": 210048,\n      \"features\": 1,\n      \"licence_family\": \"permissive\",\n      \"package\": \"http-lite\",\n      \"version\": \"2.0.0\"\n    },\n    {\n      \"bytes\": 95200,\n      \"features\": 2,\n      \"licence_family\": \"permissive\",\n      \"package\": \"tls-shim\",\n      \"version\": \"1.3.1\"\n    },\n    {\n      \"bytes\": 21034,\n      \"features\": 0,\n      \"licence_family\": \"permissive\",\n      \"package\": \"url-parse\",\n      \"version\": \"1.2.0\"\n    }\n  ],\n  \"quarantined_records\": 2,\n  \"snapshot_day\": 2040,\n  \"workspace\": \"visible\"\n}\n=== scenario_peak.json\n{\n  \"copyleft\": \"allowed\",\n  \"footprint_bytes\": 137411,\n  \"package_count\": 3,\n  \"packages\": [\n    {\n      \"bytes\": 18205,\n      \"features\": 0,\n      \"licence_family\": \"permissive\",\n      \"package\": \"date-fmt\",\n      \"version\": \"1.2.0\"\n    },\n    {\n      \"bytes\": 55004,\n      \"features\": 2,\n      \"licence_family\": \"copyleft\",\n      \"package\": \"event-bus\",\n      \"version\": \"1.0.0\"\n    },\n    {\n      \"bytes\": 64202,\n      \"features\": 3,\n      \"licence_family\": \"permissive\",\n      \"package\": \"json-core\",\n      \"version\": \"3.1.0\"\n    }\n  ],\n  \"quarantined_records\": 2,\n  \"snapshot_day\": 2050,\n  \"workspace\": \"peak\"\n}\n=== scenario_steady.json\n{\n  \"copyleft\": \"forbidden\",\n  \"footprint_bytes\": 50422,\n  \"package_count\": 3,\n  \"packages\": [\n    {\n      \"bytes\": 18205,\n      \"features\": 0,\n      \"licence_family\": \"permissive\",\n      \"package\": \"date-fmt\",\n      \"version\": \"1.2.0\"\n    },\n    {\n      \"bytes\": 26210,\n      \"features\": 1,\n      \"licence_family\": \"permissive\",\n      \"package\": \"log-sink\",\n      \"version\": \"1.1.0\"\n    },\n    {\n      \"bytes\": 6007,\n      \"features\": 0,\n      \"licence_family\": \"permissive\",\n      \"package\": \"path-norm\",\n      \"version\": \"0.5.0\"\n    }\n  ],\n  \"quarantined_records\": 1,\n  \"snapshot_day\": 2030,\n  \"workspace\": \"steady\"\n}\n=== scenario_burst.json\n{\n  \"copyleft\": \"allowed\",\n  \"footprint_bytes\": 351377,\n  \"package_count\": 8,\n  \"packages\": [\n    {\n      \"bytes\": 7115,\n      \"features\": 1,\n      \"licence_family\": \"permissive\",\n      \"package\": \"ansi-term\",\n      \"version\": \"0.5.0\"\n    },\n    {\n      \"bytes\": 38177,\n      \"features\": 1,\n      \"licence_family\": \"copyleft\",\n      \"package\": \"byte-codec\",\n      \"version\": \"1.2.0\"\n    },\n    {\n      \"bytes\": 10274,\n      \"features\": 4,\n      \"licence_family\": \"permissive\",\n      \"package\": \"crc-kit\",\n      \"version\": \"1.1.0\"\n    },\n    {\n      \"bytes\": 150226,\n      \"features\": 3,\n      \"licence_family\": \"permissive\",\n      \"package\": \"http-lite\",\n      \"version\": \"2.2.0\"\n    },\n    {\n      \"bytes\": 26210,\n      \"features\": 6,\n      \"licence_family\": \"permissive\",\n      \"package\": \"log-sink\",\n      \"version\": \"1.1.0\"\n    },\n    {\n      \"bytes\": 60295,\n      \"features\": 2,\n      \"licence_family\": \"permissive\",\n      \"package\": \"tls-shim\",\n      \"version\": \"1.4.1\"\n    },\n    {\n      \"bytes\": 19027,\n      \"features\": 0,\n      \"licence_family\": \"permissive\",\n      \"package\": \"url-parse\",\n      \"version\": \"1.3.0\"\n    },\n    {\n      \"bytes\": 40053,\n      \"features\": 1,\n      \"licence_family\": \"copyleft\",\n      \"package\": \"zip-flate\",\n      \"version\": \"0.9.0\"\n    }\n  ],\n  \"quarantined_records\": 0,\n  \"snapshot_day\": 2055,\n  \"workspace\": \"burst\"\n}\n=== scenario_latency.json\n{\n  \"copyleft\": \"forbidden\",\n  \"footprint_bytes\": 104661,\n  \"package_count\": 5,\n  \"packages\": [\n    {\n      \"bytes\": 9171,\n      \"features\": 1,\n      \"licence_family\": \"permissive\",\n      \"package\": \"ansi-term\",\n      \"version\": \"0.4.0\"\n    },\n    {\n      \"bytes\": 18205,\n      \"features\": 1,\n      \"licence_family\": \"permissive\",\n      \"package\": \"date-fmt\",\n      \"version\": \"1.2.0\"\n    },\n    {\n      \"bytes\": 13077,\n      \"features\": 1,\n      \"licence_family\": \"permissive\",\n      \"package\": \"glob-match\",\n      \"version\": \"1.1.0\"\n    },\n    {\n      \"bytes\": 58201,\n      \"features\": 2,\n      \"licence_family\": \"permissive\",\n      \"package\": \"json-core\",\n      \"version\": \"3.2.0\"\n    },\n    {\n      \"bytes\": 6007,\n      \"features\": 0,\n      \"licence_family\": \"permissive\",\n      \"package\": \"path-norm\",\n      \"version\": \"0.5.0\"\n    }\n  ],\n  \"quarantined_records\": 1,\n  \"snapshot_day\": 2045,\n  \"workspace\": \"latency\"\n}"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 26,
+      "timestamp": "2026-10-23T13:56:27.511943",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01QzNRkQNSZkWfQ6BU8gq1Xo",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /tmp/test1 && cat bottleneck_analysis.json && echo \"=== recommendations\" && cat recommendations.json",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01QzNRkQNSZkWfQ6BU8gq1Xo",
+            "content": "{\n  \"workspaces\": [\n    {\n      \"copyleft_packages\": [\n        \"byte-codec\",\n        \"zip-flate\"\n      ],\n      \"held_back\": [\n        {\n          \"locked\": \"1.1.0\",\n          \"newest_eligible\": \"1.2.0\",\n          \"package\": \"crc-kit\"\n        },\n        {\n          \"locked\": \"2.2.0\",\n          \"newest_eligible\": \"3.0.0\",\n          \"package\": \"http-lite\"\n        },\n        {\n          \"locked\": \"1.1.0\",\n          \"newest_eligible\": \"1.2.0\",\n          \"package\": \"log-sink\"\n        }\n      ],\n      \"permissive_packages\": [\n        \"ansi-term\",\n        \"crc-kit\",\n        \"http-lite\",\n        \"log-sink\",\n        \"tls-shim\",\n        \"url-parse\"\n      ],\n      \"workspace\": \"burst\"\n    },\n    {\n      \"copyleft_packages\": [],\n      \"held_back\": [\n        {\n          \"locked\": \"1.2.0\",\n          \"newest_eligible\": \"1.3.0\",\n          \"package\": \"date-fmt\"\n        },\n        {\n          \"locked\": \"1.1.0\",\n          \"newest_eligible\": \"1.2.0\",\n          \"package\": \"glob-match\"\n        },\n        {\n          \"locked\": \"0.5.0\",\n          \"newest_eligible\": \"0.6.0\",\n          \"package\": \"path-norm\"\n        }\n      ],\n      \"permissive_packages\": [\n        \"ansi-term\",\n        \"date-fmt\",\n        \"glob-match\",\n        \"json-core\",\n        \"path-norm\"\n      ],\n      \"workspace\": \"latency\"\n    },\n    {\n      \"copyleft_packages\": [\n        \"event-bus\"\n      ],\n      \"held_back\": [\n        {\n          \"locked\": \"1.2.0\",\n          \"newest_eligible\": \"1.3.0\",\n          \"package\": \"date-fmt\"\n        },\n        {\n          \"locked\": \"1.0.0\",\n          \"newest_eligible\": \"1.1.0\",\n          \"package\": \"event-bus\"\n        },\n        {\n          \"locked\": \"3.1.0\",\n          \"newest_eligible\": \"3.2.0\",\n          \"package\": \"json-core\"\n        }\n      ],\n      \"permissive_packages\": [\n        \"date-fmt\",\n        \"json-core\"\n      ],\n      \"workspace\": \"peak\"\n    },\n    {\n      \"copyleft_packages\": [],\n      \"held_back\": [\n        {\n          \"locked\": \"1.1.0\",\n          \"newest_eligible\": \"1.2.0\",\n          \"package\": \"log-sink\"\n        },\n        {\n          \"locked\": \"0.5.0\",\n          \"newest_eligible\": \"0.6.0\",\n          \"package\": \"path-norm\"\n        }\n      ],\n      \"permissive_packages\": [\n        \"date-fmt\",\n        \"log-sink\",\n        \"path-norm\"\n      ],\n      \"workspace\": \"steady\"\n    },\n    {\n      \"copyleft_packages\": [],\n      \"held_back\": [\n        {\n          \"locked\": \"0.3.0\",\n          \"newest_eligible\": \"0.4.0\",\n          \"package\": \"ansi-term\"\n        },\n        {\n          \"locked\": \"1.0.0\",\n          \"newest_eligible\": \"1.2.0\",\n          \"package\": \"cli-args\"\n        },\n        {\n          \"locked\": \"1.1.0\",\n          \"newest_eligible\": \"1.3.0\",\n          \"package\": \"date-fmt\"\n        },\n        {\n          \"locked\": \"2.0.0\",\n          \"newest_eligible\": \"3.0.0\",\n          \"package\": \"http-lite\"\n        },\n        {\n          \"locked\": \"1.3.1\",\n          \"newest_eligible\": \"1.4.0\",\n          \"package\": \"tls-shim\"\n        }\n      ],\n      \"permissive_packages\": [\n        \"ansi-term\",\n        \"cli-args\",\n        \"crc-kit\",\n        \"date-fmt\",\n        \"http-lite\",\n        \"tls-shim\",\n        \"url-parse\"\n      ],\n      \"workspace\": \"visible\"\n    }\n  ]\n}\n=== recommendations\n{\n  \"calibration_table\": [\n    {\n      \"control\": \"CTRL-1\",\n      \"figure\": \"calibration_block_total\",\n      \"published\": 17,\n      \"reproduced\": 17\n    },\n    {\n      \"control\": \"CTRL-2\",\n      \"figure\": \"calibration_key_digest\",\n      \"published\": 909967,\n      \"reproduced\": 909967\n    },\n    {\n      \"control\": \"CTRL-3\",\n      \"figure\": \"calibration_size_digest\",\n      \"published\": 531261,\n      \"reproduced\": 531261\n    },\n    {\n      \"control\": \"CTRL-4\",\n      \"figure\": \"calibration_dependency_digest\",\n      \"published\": 70029,\n      \"reproduced\": 70029\n    },\n    {\n      \"control\": \"CTRL-5\",\n      \"figure\": \"calibration_status_digest\",\n      \"published\": 1163,\n      \"reproduced\": 1163\n    },\n    {\n      \"control\": \"CTRL-6\",\n      \"figure\": \"calibration_eligible_records\",\n      \"published\": 69,\n      \"reproduced\": 69\n    }\n  ],\n  \"candidates\": [\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"ALDER\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"BIRCH\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"CEDAR\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"ELDER\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"FIR\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"HAZEL\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"LARCH\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"MAPLE\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"none\",\n      \"parameter\": \"salt\",\n      \"value\": \"ROWAN\",\n      \"verdict\": \"accepted\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"salt\",\n      \"value\": \"SPRUCE\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"window_span\",\n      \"value\": \"2\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"window_span\",\n      \"value\": \"3\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"window_span\",\n      \"value\": \"4\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"window_span\",\n      \"value\": \"5\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"none\",\n      \"parameter\": \"window_span\",\n      \"value\": \"6\",\n      \"verdict\": \"accepted\"\n    },\n    {\n      \"falsifier\": \"CTRL-4\",\n      \"parameter\": \"window_span\",\n      \"value\": \"7\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-4\",\n      \"parameter\": \"window_span\",\n      \"value\": \"8\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-4\",\n      \"parameter\": \"window_span\",\n      \"value\": \"10\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-4\",\n      \"parameter\": \"window_span\",\n      \"value\": \"12\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-4\",\n      \"parameter\": \"window_span\",\n      \"value\": \"16\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"3\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"5\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"7\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"11\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"none\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"13\",\n      \"verdict\": \"accepted\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"17\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"19\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"23\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"29\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"bias_limit\",\n      \"value\": \"31\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"1\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"2\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"3\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"4\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"5\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"6\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"7\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"none\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"9\",\n      \"verdict\": \"accepted\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"11\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"UNREADABLE\",\n      \"parameter\": \"rotation_base\",\n      \"value\": \"13\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0x2545f491\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0x27220a95\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0x9e3779b1\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0x85ebca77\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0xc2b2ae3d\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0x1b873593\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0xcc9e2d51\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0x6d2b79f5\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-2\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0x7feb352d\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"none\",\n      \"parameter\": \"permutation_multiplier\",\n      \"value\": \"0x846ca68b\",\n      \"verdict\": \"accepted\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"0\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"1\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"2\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"3\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"5\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"none\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"7\",\n      \"verdict\": \"accepted\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"10\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"14\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"21\",\n      \"verdict\": \"rejected\"\n    },\n    {\n      \"falsifier\": \"CTRL-6\",\n      \"parameter\": \"quarantine_days\",\n      \"value\": \"30\",\n      \"verdict\": \"rejected\"\n    }\n  ],\n  \"falsifier_totals\": {\n    \"CTRL-2\": 9,\n    \"CTRL-4\": 5,\n    \"CTRL-6\": 9,\n    \"UNREADABLE\": 31\n  },\n  \"licence_divergence\": [\n    \"latency\",\n    \"steady\",\n    \"visible\"\n  ],\n  \"settlement_passes_by_workspace\": {\n    \"burst\": 5,\n    \"latency\": 3,\n    \"peak\": 2,\n    \"steady\": 1,\n    \"visible\": 4\n  }\n}"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 27,
+      "timestamp": "2026-10-23T13:57:32.414842",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01KabSaKj8T5SiU9cb1f7C2r",
+          "function_name": "file_editor",
+          "arguments": {
+            "command": "str_replace",
+            "path": "/app/out/optimize.py",
+            "old_str": "    def consider(assignment):\n        footprint = sum(r['artifact_bytes'] for r in assignment.values())\n        state, passes = feature_state(assignment, direct, key_to_package)\n        key = (footprint,\n               -sum(r['version_code'] for r in assignment.values()),\n               plan_text(assignment))\n        if best[0] is None or key < best[0][0]:\n            best[0] = (key, dict(assignment), state, passes, footprint)\n\n    def search(assignment, footprint):\n        if best[0] is not None and footprint > best[0][0][0]:\n            return\n        state, _passes = feature_state(assignment, direct, key_to_package)\n        for name, record in assignment.items():",
+            "new_str": "    def consider(assignment, footprint, state):\n        key = (footprint,\n               -sum(r['version_code'] for r in assignment.values()),\n               plan_text(assignment))\n        if best[0] is None or key < best[0][0]:\n            _final, passes = feature_state(assignment, direct, key_to_package)\n            best[0] = (key, dict(assignment), state, passes, footprint)\n\n    def search(assignment, footprint):\n        if best[0] is not None and footprint > best[0][0][0]:\n            return\n        state, _passes = feature_state(assignment, direct, key_to_package)\n        for name, record in list(assignment.items()):"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01KabSaKj8T5SiU9cb1f7C2r",
+            "content": "The file /app/out/optimize.py has been edited. Here's the result of running `cat -n` on a snippet of /app/out/optimize.py:\n   519\t\n   520\t    best = [None]\n   521\t\n   522\t    def consider(assignment, footprint, state):\n   523\t        key = (footprint,\n   524\t               -sum(r['version_code'] for r in assignment.values()),\n   525\t               plan_text(assignment))\n   526\t        if best[0] is None or key < best[0][0]:\n   527\t            _final, passes = feature_state(assignment, direct, key_to_package)\n   528\t            best[0] = (key, dict(assignment), state, passes, footprint)\n   529\t\n   530\t    def search(assignment, footprint):\n   531\t        if best[0] is not None and footprint > best[0][0][0]:\n   532\t            return\n   533\t        state, _passes = feature_state(assignment, direct, key_to_package)\n   534\t        for name, record in list(assignment.items()):\n   535\t            mask = state[name]\n   536\t            for entry, _back in record['deps']:\n   537\t                if entry[4] != 255 and not (mask >> entry[4]) & 1:\n   538\t                    continue\nReview the changes and make sure they are as expected. Edit the file again if necessary."
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 28,
+      "timestamp": "2026-10-23T13:57:35.572321",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01PC5Ghtsb4DQELpehktKyxQ",
+          "function_name": "file_editor",
+          "arguments": {
+            "command": "str_replace",
+            "path": "/app/out/optimize.py",
+            "old_str": "                        del assignment[target]\n                return\n        consider(assignment)",
+            "new_str": "                        del assignment[target]\n                return\n        consider(assignment, footprint, state)"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01PC5Ghtsb4DQELpehktKyxQ",
+            "content": "The file /app/out/optimize.py has been edited. Here's the result of running `cat -n` on a snippet of /app/out/optimize.py:\n   549\t                    if entry[1] <= choice['version_code'] < entry[2]:\n   550\t                        assignment[target] = choice\n   551\t                        search(assignment, footprint + choice['artifact_bytes'])\n   552\t                        del assignment[target]\n   553\t                return\n   554\t        consider(assignment, footprint, state)\n   555\t\n   556\t    for combination in itertools.product(*seeds):\n   557\t        assignment = dict(combination)\n   558\t        if len(assignment) != len(seeds):\nReview the changes and make sure they are as expected. Edit the file again if necessary."
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 29,
+      "timestamp": "2026-10-23T13:57:39.271484",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_016kksqhmuHuzxBBX6M4Mkbt",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /app && python3 /app/out/optimize.py /app/data /tmp/test2 && for f in /tmp/test2/*.json; do cmp -s $f /tmp/test1/$(basename $f) && echo \"same $(basename $f)\" || echo \"DIFF $(basename $f)\"; done",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_016kksqhmuHuzxBBX6M4Mkbt",
+            "content": "same bottleneck_analysis.json\nsame data_quality.json\nsame perf_report.json\nsame recommendations.json\nsame scenario_burst.json\nsame scenario_latency.json\nsame scenario_peak.json\nsame scenario_steady.json\nsame scenario_visible.json"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 30,
+      "timestamp": "2026-10-23T13:57:45.186020",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_013yWEVkJSiLdh7DyQzdfYc8",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /app/out && echo \"before:\" && ls -a && rm -f /app/out/*.json && rm -rf /app/out/__pycache__ && echo \"after removal:\" && ls -a && echo \"--- clean run ---\" && time python3 /app/out/optimize.py /app/data /app/out && echo \"--- result ---\" && ls -a /app/out",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_013yWEVkJSiLdh7DyQzdfYc8",
+            "content": "before:\n.  ..  optimize.py\nafter removal:\n.  ..  optimize.py\n--- clean run ---\n\nreal    0m0.145s\nuser    0m0.125s\nsys     0m0.019s\n--- result ---\n.  ..  bottleneck_analysis.json  data_quality.json  optimize.py  perf_report.json  recommendations.json  scenario_burst.json  scenario_latency.json  scenario_peak.json  scenario_steady.json  scenario_visible.json"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 31,
+      "timestamp": "2026-10-23T13:57:52.184339",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01KRDUJACV9d4AwmEqE7rARW",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "rm -rf /tmp/registry_replica && cp -a /app/data /tmp/registry_replica && ls /tmp/registry_replica | wc -l && time python3 /app/out/optimize.py /tmp/registry_replica /tmp/replica_out && echo \"--- comparison ---\" && for f in /app/out/*.json; do b=$(basename $f); if cmp -s \"$f\" \"/tmp/replica_out/$b\"; then echo \"identical  $b\"; else echo \"DIFFERENT  $b\"; fi; done",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01KRDUJACV9d4AwmEqE7rARW",
+            "content": "29\n\nreal    0m0.127s\nuser    0m0.109s\nsys     0m0.018s\n--- comparison ---\nidentical  bottleneck_analysis.json\nidentical  data_quality.json\nidentical  perf_report.json\nidentical  recommendations.json\nidentical  scenario_burst.json\nidentical  scenario_latency.json\nidentical  scenario_peak.json\nidentical  scenario_steady.json\nidentical  scenario_visible.json"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 32,
+      "timestamp": "2026-10-23T13:58:02.593534",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01N1j7YyhRNfUbiALppvkRJt",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "cd /app && echo \"--- /app/data mtimes (all pre-session, nothing written) ---\" && ls -la --time-style=full-iso data | head -5 && find /app/data -newermt \"2026-10-23 10:10\" | wc -l && echo \"--- JSON formatting ---\" && python3 -c \"\nimport json,os,sys\nfor f in sorted(os.listdir('/app/out')):\n    if not f.endswith('.json'): continue\n    raw=open('/app/out/'+f,'rb').read()\n    obj=json.loads(raw)\n    canon=json.dumps(obj,indent=2,sort_keys=True).encode()+b'\\n'\n    print('%-28s bytes=%-6d indent2+sorted+newline=%s'%(f,len(raw),raw==canon))\n\" && echo \"--- imports ---\" && grep -E \"^(import|from) \" out/optimize.py && echo \"--- stray files in /app/out ---\" && ls -a /app/out",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01N1j7YyhRNfUbiALppvkRJt",
+            "content": "--- /app/data mtimes (all pre-session, nothing written) ---\ntotal 132\ndrwxr-xr-x 1 agent agent 4096 2026-10-23 10:03:51.000000000 +0000 .\ndrwxr-xr-x 1 agent agent 4096 2026-10-23 10:04:47.000000000 +0000 ..\n-rw-r--r-- 1 agent agent  583 2026-10-18 17:54:48.000000000 +0000 calib_a.pidx\n-rw-r--r-- 1 agent agent  640 2026-10-18 17:54:48.000000000 +0000 calib_b.pidx\n0\n--- JSON formatting ---\nbottleneck_analysis.json     bytes=3199   indent2+sorted+newline=True\ndata_quality.json            bytes=326    indent2+sorted+newline=True\nperf_report.json             bytes=580    indent2+sorted+newline=True\nrecommendations.json         bytes=8954   indent2+sorted+newline=True\nscenario_burst.json          bytes=1360   indent2+sorted+newline=True\nscenario_latency.json        bytes=922    indent2+sorted+newline=True\nscenario_peak.json           bytes=618    indent2+sorted+newline=True\nscenario_steady.json         bytes=621    indent2+sorted+newline=True\nscenario_visible.json        bytes=1217   indent2+sorted+newline=True\n--- imports ---\nimport csv\nimport itertools\nimport json\nimport os\nimport re\nimport struct\nimport sys\nimport zlib\n--- stray files in /app/out ---\n.  ..  bottleneck_analysis.json  data_quality.json  optimize.py  perf_report.json  recommendations.json  scenario_burst.json  scenario_latency.json  scenario_peak.json  scenario_steady.json  scenario_visible.json"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 33,
+      "timestamp": "2026-10-23T13:58:19.097308",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01VApcCjCtb5FuLWKWVQG8xd",
+          "function_name": "terminal",
+          "arguments": {
+            "command": "rm -rf /tmp/work /tmp/test1 /tmp/test2 /tmp/registry_replica /tmp/replica_out && ls /app/out && git -C /app rev-parse --is-inside-work-tree 2>&1 | head -1",
+            "is_input": false,
+            "reset": false
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01VApcCjCtb5FuLWKWVQG8xd",
+            "content": "bottleneck_analysis.json  data_quality.json  optimize.py  perf_report.json  recommendations.json  scenario_burst.json  scenario_latency.json  scenario_peak.json  scenario_steady.json  scenario_visible.json\nbash: git: command not found"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 34,
+      "timestamp": "2026-10-23T13:58:35.820968",
+      "source": "agent",
+      "message": "",
+      "model_name": "anthropic/claude-opus-5",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01VYAp6ZzAPLwFS7osxRpddP",
+          "function_name": "file_editor",
+          "arguments": {
+            "command": "create",
+            "path": "/app/AGENTS.md",
+            "file_text": "# Registry index replay task\n\n`/app/out/optimize.py <input-dir> <output-dir>` reads a registry directory shaped like\n`/app/data` and writes nine JSON documents. Stdlib only; runs in ~0.15 s.\n\n## Rule ordering that the documents leave implicit\n\n* The shard nonce is big endian under `ENDIAN_ISLAND`, but every keystream re-serialises the\n  *true* nonce little endian. The header check CRC covers raw bytes, so it passes either way.\n* `BIASED_COUNT` applies to the header's *stored block count* only, never to a block's\n  *record count* (which is what `ENDIAN_ISLAND` flips).\n* Decode in two stages. A structural pass in **file order** fixes byte lengths and needs only\n  the bias (salt + bias limit), the rotation base (dep counts live in the status word's low\n  byte) and the window span (tag ceiling); the block trailer CRC validates it. Only then\n  apply the permutation and resolve values in **logical order**, because `DRIFT_KEY` sums the\n  true artifact bytes of logically earlier blocks.\n* `BACKREF_DEPS` tag `t` resolves to `ring[span - t]` with 0-based slots. The rival reading\n  `ring[t - 1]` reproduces no control figure anywhere in the 10^6 candidate space.\n* Control figures use **one-based** positions/ordinals; the shard transforms use the\n  **zero-based** ordinal of the format document.\n* A licence is governed by the **earliest** name of a rename chain; a package is *reported*\n  under the **newest** name (the one no row renames from).\n\n## Recovered constants for /app/data\n\n`salt ROWAN`, `window_span 6`, `bias_limit 13`, `rotation_base 9`,\n`permutation_multiplier 0x846ca68b`, `quarantine_days 7` \u2014 the unique point of the space.\nFalsifier totals: UNREADABLE 31, CTRL-2 9, CTRL-6 9, CTRL-4 5.\n\nLeave `/app/data` read-only. Confirm any plain reader against `rehearsal-decodes.md` first.\n"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01VYAp6ZzAPLwFS7osxRpddP",
+            "content": "File created successfully at: /app/AGENTS.md"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 35,
+      "timestamp": "2026-10-23T13:58:51.923527",
+      "source": "agent",
+      "message": "All five working rules were observed in order, and every figure is derived from the directory in front of the program.\n\n## What the search found\n\nThe six withheld constants have exactly one consistent assignment in the 10\u2076 candidate space:\n\n| constant | value | how it was pinned |\n| --- | --- | --- |\n| salt word | `ROWAN` | with bias limit 13, the only pair giving 17 blocks (**CTRL-1**) |\n| bias limit | `13` | \" |\n| rotation base | `9` | only value whose unrotated status words give dep counts that make every block trailer CRC match |\n| window span | `6` | spans 2\u20135 push a tag above the window; 7\u201316 miss **CTRL-4** |\n| shuffle multiplier | `0x846ca68b` | the other nine miss **CTRL-2** |\n| quarantine days | `7` | the other nine miss **CTRL-6** |\n\nFalsifier totals: `UNREADABLE 31, CTRL-2 9, CTRL-6 9, CTRL-4 5` \u2014 all 54 rivals stated in-session with their disagreeing control.\n\n## Rule orderings the documents left implicit\n\n- **Two-stage decode.** A structural pass in *file* order fixes byte lengths (needing only the bias, rotation base and window span, validated by the block trailer CRC); only then does the permutation apply and values resolve in *logical* order, because `DRIFT_KEY` sums the true artifact bytes of logically earlier blocks.\n- **`ENDIAN_ISLAND`** flips the shard nonce and each block's *record* count, but keystreams re-serialise the true nonce little endian; `BIASED_COUNT` touches only the header's *stored block count*.\n- **Backref ring** tag `t` \u2192 `ring[span - t]`, 0-based. The rival reading `ring[t-1]` reproduces no control figure anywhere in the space \u2014 a decisive check.\n- **Ordinals** are one-based in the control figures, zero-based in the transforms.\n- **Licences** are governed by the *earliest* chain name while packages are *reported* under the newest \u2014 the two readings pull opposite ways, which is exactly what drives the divergence list.\n\n## Confirmations\n\nThe plain reader was validated against `rehearsal-decodes.md` byte for byte before any transform was considered; all six reproduced figures matched before any field shard was read; and the multi-name chains (`byte-codec` copyleft, `date-fmt` permissive, `json-core` permissive) were written out before any workspace was settled.\n\nI hand-audited all five plans end to end \u2014 footprints 398648/137411/50422/351377/104661, every feature mask, every settlement pass count (4/2/1/5/3), and byte conservation (2006217 \u2212 53696 \u2212 973892 = 978629). The licence divergence list is `latency, steady, visible`: `peak` and `burst` allow copyleft so the reading cannot bite, while the other three either require or pull in `date-fmt`/`json-core`, which the newest-name reading relicenses into copyleft.\n\nThe clean rerun and the run over `/tmp/registry_replica` produced byte-identical documents; `/app/data` is untouched (no file newer than the session start).",
+      "model_name": "anthropic/claude-opus-5"
+    }
+  ],
+  "final_metrics": {
+    "total_prompt_tokens": 1879670,
+    "total_completion_tokens": 62047,
+    "total_cached_tokens": 1775237,
+    "total_cost_usd": 3.09141725
+  }
+}

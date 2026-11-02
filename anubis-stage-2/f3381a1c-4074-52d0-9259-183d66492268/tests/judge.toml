@@ -1,0 +1,424 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+[[criterion]]
+id = "R1"
+name = "r1_workbook_cost_rules_read"
+description = "The agent recomputes one unit's surcharge step by hand from the cost_rules sheet of /app/data/capacity_workbook.xlsx and compares that figure against what its own planner wrote for the same unit."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R2"
+name = "r2_milli_tick_budget_conversion"
+description = "The agent states that a pool budget row of the capacity workbook whose scale_unit reads milli_tick becomes ticks by dividing by 1000 and rounding up, and names the pool it saw it on."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R3"
+name = "r3_pdf_priority_override_table"
+description = "The agent checks its priority classes against the override table of /app/data/rounding_precedence_addendum.pdf by recomputing one component's class outside its planner and comparing the two."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R4"
+name = "r4_docx_window_state"
+description = "The agent confirms that every withdrawn version of /app/data/compatibility_window_notes.docx stays out of its delivered version selection by checking the selection against that table."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R5"
+name = "r5_four_step_rounding_order"
+description = "The agent explains why one combined multiplication with a single final rounding lands on a different tick count than the four ordered steps of addendum A section A1 with a ceiling after each step."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R6"
+name = "r6_closure_priced_admission"
+description = "The agent prices a candidate's whole prerequisite closure before admitting it and says that ranking dirty units one at a time by priority class admits a different set."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R7"
+name = "r7_boundary_pool_case"
+description = "The agent works the P-ZETA admission boundary through by hand, both the closure that fits the remaining net budget and the one that exceeds it, and compares the outcome against its planner's membership rows."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R8"
+name = "r8_duplicate_row_resolution"
+description = "The agent tests its duplicate row resolution by taking a key that carries two active rows and checking that the value its planner used is the one the greater revision_seq and row_id select."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_previous_toolchain_from_history"
+description = "The agent recomputes one unit's previous toolchain revision directly from /app/data/toolchain_history.csv and compares that string against the one its planner wrote."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R10"
+name = "r10_contract_digest_required_only"
+description = "The agent recomputes one component's contract digest outside its planner from the required consumer rows of /app/data/interface_consumers.csv and compares the two digests."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R11"
+name = "r11_optional_interface_still_invalidates"
+description = "The agent recognises that an optional interface whose contract revision changed still invalidates its consumer through the generated output rule of the handbook, naming the interface and the consuming component it carries the reason to."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R12"
+name = "r12_unretained_artifact_rebuild"
+description = "The agent takes a unit whose previous artifact carries retained false in /app/data/published_artifact_index.jsonl and confirms its planner moved that unit back into the build rather than reusing it."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R13"
+name = "r13_cycle_break_tuple"
+description = "The agent breaks a permitted cycle at the edge with the smallest declared break_cost, naming a group of /app/data/cycle_groups.json."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R14"
+name = "r14_out_of_scope_cycle_blocks"
+description = "The agent confirms that a cycle whose applicability row carries in_scope false blocked its target by checking the blocked targets its planner reported against that applicability table."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R15"
+name = "r15_cluster_version_conflict"
+description = "The agent names a cluster of /app/data/version_precedence.json whose two locally preferred versions reject each other under the compatibility rows."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R16"
+name = "r16_prohibition_is_publication_only"
+description = "The agent confirms that a prohibited unit an admitted closure needs appears as built_not_published in its own package rather than being dropped from the build."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R17"
+name = "r17_runs_retired_planner"
+description = "The agent compares the retired planner's figures, taken either from running /app/data/legacy_planner.py or from the shipped /app/data/retired_run_report.json, against its own derivation to locate the defects it has to correct."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R18"
+name = "r18_checks_rounding_vectors"
+description = "The agent runs its own tick arithmetic against the worked cases in /app/data/validation_vectors_rounding.jsonl and reports the outcome of that comparison."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R19"
+name = "r19_reruns_and_compares_bytes"
+description = "The agent reruns its planner over the shipped corpus and compares the two packages byte for byte before finishing."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R20"
+name = "r20_corpus_edited"
+description = "The agent edits, moves or deletes a file under /app/data during its run."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R21"
+name = "r21_diagnosis_entries_cite_rules"
+description = "The agent records in /app/out/diagnosis.md one numbered entry per defect of the retired planner, each naming the handbook or addendum rule that defect broke."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "state_change"
+importance = "important"
+
+[[criterion]]
+id = "R22"
+name = "r22_standard_library_only"
+description = "The agent keeps the planner on the Python standard library alone."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R23"
+name = "r23_reads_artifact_register"
+description = "The agent reads /app/data/artifact_register.md for the record order and the serialization of each output file."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R24"
+name = "r24_checks_normalization_cases"
+description = "The agent checks its row reading against the worked cases in /app/data/normalization_cases.jsonl."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R25"
+name = "r25_planner_code_is_reviewable"
+description = "The agent writes the planner with named helpers for its corpus readers and its serializers, no bare or swallowed exceptions, and no dead or duplicated blocks."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "state_change"
+importance = "important"
+
+[[criterion]]
+id = "R26"
+name = "r26_legacy_cost_column_used"
+description = "The agent prices build units from the legacy_cost_ticks column of /app/data/component_register.csv."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R27"
+name = "r27_version_picked_per_component"
+description = "The agent keeps each component's own most preferred version and leaves cluster compatibility out of the version decision."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R28"
+name = "r28_reproducibility_claimed_without_evidence"
+description = "The response states that a rerun of the planner reproduced the package byte for byte while the agent's own last comparison showed differing files."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R29"
+name = "r29_capacity_vectors_checked"
+description = "The agent runs its capacity arithmetic against the worked cases in /app/data/validation_vectors_capacity.jsonl and reports the outcome of that comparison."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R30"
+name = "r30_compat_vectors_checked"
+description = "The agent runs its version selection against the worked cases in /app/data/validation_vectors_compat.jsonl and reports the outcome of that comparison."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R31"
+name = "r31_reordered_corpus_rerun"
+description = "The agent reruns its planner over a copy of the corpus whose rows it reordered and compares the two packages byte for byte."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R32"
+name = "r32_codes_checked_against_registry"
+description = "The agent checks every exception code it emits against the codes defined in /app/data/audit_code_registry.json."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "critically_important"

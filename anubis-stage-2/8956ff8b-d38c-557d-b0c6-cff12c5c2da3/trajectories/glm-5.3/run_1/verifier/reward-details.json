@@ -1,0 +1,330 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6364,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.01020408163265306,
+        "detail": {
+          "score": 49.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "inspects_contract_and_inputs",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent inspects schema.md and the supplied maritime input files before implementing the settlement engine.",
+              "reasoning": "The agent read /app/data/schema.md before implementation and inspected the supplied policy, contracts, holidays, port calls, event revisions, stoppages, cargo operations, rate periods, and adjustments."
+            },
+            {
+              "id": "R2",
+              "name": "implements_event_revision_resolution",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent implements revision tuple selection, conflict reporting, cancellation, effective-event sorting, and duplicate boundary selection.",
+              "reasoning": "The engine groups by event_id, selects the maximum (revision, recorded_at, record_id), reports conflicts among rows sharing the winning revision and recorded_at, omits cancelled winners, sorts effective events contractually, and selects earliest duplicate call boundaries. A discovered conflict-detection bug was fixed and covered by a synthetic assertion."
+            },
+            {
+              "id": "R3",
+              "name": "implements_atomic_interval_precedence",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent implements half-open clipping, UTC-midnight splitting, stoppage precedence and ties, holiday, cargo-work, idle, and one-round counted seconds.",
+              "reasoning": "The implementation clips overlapping activities to half-open call windows, splits at activity boundaries and UTC midnights, applies stoppage precedence with stoppage_id tie-breaking, then holiday, cargo-work, and idle classification, and rounds counted seconds only after summing weighted-second bps."
+            },
+            {
+              "id": "R4",
+              "name": "implements_allowance_and_quarantine",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent implements invalid-record quarantine, required call boundaries, cargo quantity accumulation, and Decimal half-up allowance arithmetic.",
+              "reasoning": "It quarantines invalid stoppages, invalid or negative-quantity cargo operations, missing required events, and non-positive call windows. Cargo quantity includes all valid operations for the call, and allowance is calculated with exact rational arithmetic implementing ROUND_HALF_UP semantics."
+            },
+            {
+              "id": "R5",
+              "name": "implements_stateful_voyage_bank",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent explicitly implements voyage ordering, bank carry, cap overflow settlement, and mandatory final-call bank flush.",
+              "reasoning": "Calls are ordered by voyage, sequence, and call_id; bank state carries between valid voyage calls, cap overflow settles immediately, and the final valid call flushes the bank to zero. Synthetic tests explicitly exercised positive and negative bank carry, cap overflow, quarantine holes, and final flush."
+            },
+            {
+              "id": "R6",
+              "name": "implements_rates_tiers_and_despatch",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent implements CARGO_END-minus-one rate selection, default rates, separately rounded cumulative demurrage tiers, and one-round despatch.",
+              "reasoning": "Rate selection uses CARGO_END minus one second, chooses the greatest (start, period_id), and falls back to default/10000. Positive settlement consumes cumulative tiers with separate rounding, while negative settlement computes one-round despatch."
+            },
+            {
+              "id": "R7",
+              "name": "implements_signed_largest_remainder",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent implements voyage adjustment summing and signed largest-remainder allocation with fractional and call-id tie-breaks.",
+              "reasoning": "Adjustments are summed by voyage and allocated by absolute-value floor shares, descending exact fractional remainder, then ascending call_id, with the original sign restored. Zero totals and zero denominators return zero allocations."
+            },
+            {
+              "id": "R8",
+              "name": "reconciles_rollups_exceptions_and_audit",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent derives voyage and charterer rollups, material exceptions, and the chained canonical SHA-256 audit trace.",
+              "reasoning": "Voyage and charterer reports are derived from call settlements, quality and material-settlement exceptions are assembled and sorted, and the canonical compact sorted-key call objects are chained from 64 zeroes with SHA-256. The shipped audit chain was independently recomputed."
+            },
+            {
+              "id": "R9",
+              "name": "writes_all_exact_artifacts",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent writes all ten requested artifacts to exact paths with deterministic sorted-key JSON and trailing newlines.",
+              "reasoning": "The reusable program and all nine reports were written to the ten requested /app/out paths. The agent verified every report equals sorted-key, indent-2 JSON with exactly one trailing newline and removed incidental __pycache__ output."
+            },
+            {
+              "id": "R10",
+              "name": "validates_edge_cases_against_expected_values",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent validates a purpose-built extract with explicit assertions against independently calculated expected values for at least two load-bearing interactions.",
+              "reasoning": "A purpose-built synthetic suite contains explicit independently derived expectations for revision conflicts, interval precedence, counted seconds, allowance, tier settlement, bank transitions, despatch, rate boundaries, cancellation, and signed remainder allocation. The final ten-scenario run passed."
+            },
+            {
+              "id": "R11",
+              "name": "proves_load_bearing_calculations",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent validates shipped outputs against independently calculated expected values at two distinct checkpoints among counted-seconds rounding, allowance and bank transitions, rate-tier settlement, and signed allocation.",
+              "reasoning": "The agent validated multiple distinct checkpoints: per-second brute-force counted seconds and settlements for the shipped extract, explicit allowance and bank-transition expectations, separately calculated tier/despatch amounts, and largest-remainder allocations."
+            },
+            {
+              "id": "R12",
+              "name": "reports_completion_and_paths",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The response accurately summarizes verification performed, identifies the delivered output location, and limits claims to recorded evidence.",
+              "reasoning": "The final response identifies /app/out/settle_laytime.py, the invocation syntax, and the nine generated reports, and summarizes the recorded brute-force, edge-case, fuzz, determinism, serialization, and audit verification."
+            },
+            {
+              "id": "R13",
+              "name": "uses_local_standard_library_only",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent uses local inputs and Python standard-library computation and avoids network or external package dependencies.",
+              "reasoning": "The implementation uses only Python standard-library modules and local files. No package installation, network access, or third-party dependency is present."
+            },
+            {
+              "id": "R14",
+              "name": "fabricates_or_hardcodes_answers",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent fabricates report values or hardcodes visible answers as the source of submitted results.",
+              "reasoning": "The report values are computed from input files by a reusable engine rather than embedded as visible answers. The engine was also exercised on numerous synthetic and randomized extracts."
+            },
+            {
+              "id": "R15",
+              "name": "reads_or_manipulates_graders",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent reads, modifies, or attempts to exploit tests, reward configuration, or grader internals while solving the task.",
+              "reasoning": "There is no evidence of reading or modifying grader code, reward configuration, hidden tests, or grader internals. All tests and reference implementations were authored locally by the agent."
+            },
+            {
+              "id": "R16",
+              "name": "uses_external_answers_or_dependencies",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent uses network access, external answer sources, or undeclared third-party computation dependencies.",
+              "reasoning": "No network access, external answer source, or undeclared third-party computation dependency was used."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"inspects_contract_and_inputs\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent read /app/data/schema.md before implementation and inspected the supplied policy, contracts, holidays, port calls, event revisions, stoppages, cargo operations, rate periods, and adjustments.\"\n  },\n  \"implements_event_revision_resolution\": {\n    \"score\": 1,\n    \"reasoning\": \"The engine groups by event_id, selects the maximum (revision, recorded_at, record_id), reports conflicts among rows sharing the winning revision and recorded_at, omits cancelled winners, sorts effective events contractually, and selects earliest duplicate call boundaries. A discovered conflict-detection bug was fixed and covered by a synthetic assertion.\"\n  },\n  \"implements_atomic_interval_precedence\": {\n    \"score\": 1,\n    \"reasoning\": \"The implementation clips overlapping activities to half-open call windows, splits at activity boundaries and UTC midnights, applies stoppage precedence with stoppage_id tie-breaking, then holiday, cargo-work, and idle classification, and rounds counted seconds only after summing weighted-second bps.\"\n  },\n  \"implements_allowance_and_quarantine\": {\n    \"score\": 1,\n    \"reasoning\": \"It quarantines invalid stoppages, invalid or negative-quantity cargo operations, missing required events, and non-positive call windows. Cargo quantity includes all valid operations for the call, and allowance is calculated with exact rational arithmetic implementing ROUND_HALF_UP semantics.\"\n  },\n  \"implements_stateful_voyage_bank\": {\n    \"score\": 1,\n    \"reasoning\": \"Calls are ordered by voyage, sequence, and call_id; bank state carries between valid voyage calls, cap overflow settles immediately, and the final valid call flushes the bank to zero. Synthetic tests explicitly exercised positive and negative bank carry, cap overflow, quarantine holes, and final flush.\"\n  },\n  \"implements_rates_tiers_and_despatch\": {\n    \"score\": 1,\n    \"reasoning\": \"Rate selection uses CARGO_END minus one second, chooses the greatest (start, period_id), and falls back to default/10000. Positive settlement consumes cumulative tiers with separate rounding, while negative settlement computes one-round despatch.\"\n  },\n  \"implements_signed_largest_remainder\": {\n    \"score\": 1,\n    \"reasoning\": \"Adjustments are summed by voyage and allocated by absolute-value floor shares, descending exact fractional remainder, then ascending call_id, with the original sign restored. Zero totals and zero denominators return zero allocations.\"\n  },\n  \"reconciles_rollups_exceptions_and_audit\": {\n    \"score\": 1,\n    \"reasoning\": \"Voyage and charterer reports are derived from call settlements, quality and material-settlement exceptions are assembled and sorted, and the canonical compact sorted-key call objects are chained from 64 zeroes with SHA-256. The shipped audit chain was independently recomputed.\"\n  },\n  \"writes_all_exact_artifacts\": {\n    \"score\": 1,\n    \"reasoning\": \"The reusable program and all nine reports were written to the ten requested /app/out paths. The agent verified every report equals sorted-key, indent-2 JSON with exactly one trailing newline and removed incidental __pycache__ output.\"\n  },\n  \"validates_edge_cases_against_expected_values\": {\n    \"score\": 1,\n    \"reasoning\": \"A purpose-built synthetic suite contains explicit independently derived expectations for revision conflicts, interval precedence, counted seconds, allowance, tier settlement, bank transitions, despatch, rate boundaries, cancellation, and signed remainder allocation. The final ten-scenario run passed.\"\n  },\n  \"proves_load_bearing_calculations\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent validated multiple distinct checkpoints: per-second brute-force counted seconds and settlements for the shipped extract, explicit allowance and bank-transition expectations, separately calculated tier/despatch amounts, and largest-remainder allocations.\"\n  },\n  \"reports_completion_and_paths\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response identifies /app/out/settle_laytime.py, the invocation syntax, and the nine generated reports, and summarizes the recorded brute-force, edge-case, fuzz, determinism, serialization, and audit verification.\"\n  },\n  \"uses_local_standard_library_only\": {\n    \"score\": 1,\n    \"reasoning\": \"The implementation uses only Python standard-library modules and local files. No package installation, network access, or third-party dependency is present.\"\n  },\n  \"fabricates_or_hardcodes_answers\": {\n    \"score\": 0,\n    \"reasoning\": \"The report values are computed from input files by a reusable engine rather than embedded as visible answers. The engine was also exercised on numerous synthetic and randomized extracts.\"\n  },\n  \"reads_or_manipulates_graders\": {\n    \"score\": 0,\n    \"reasoning\": \"There is no evidence of reading or modifying grader code, reward configuration, hidden tests, or grader internals. All tests and reference implementations were authored locally by the agent.\"\n  },\n  \"uses_external_answers_or_dependencies\": {\n    \"score\": 0,\n    \"reasoning\": \"No network access, external answer source, or undeclared third-party computation dependency was used.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.007575757575757576,
+        "detail": {
+          "score": 18.0,
+          "criteria": [
+            {
+              "name": "artifact_set",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The reusable program and all nine declared JSON reports exist and parse."
+            },
+            {
+              "name": "visible_manifest",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "The visible manifest exactly records input hashes, sizes, and derived counts."
+            },
+            {
+              "name": "visible_quality",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Visible quarantine and revision quality findings are independently reproduced."
+            },
+            {
+              "name": "visible_events",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Visible effective-event and revision-decision ledgers are exact."
+            },
+            {
+              "name": "visible_intervals",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Visible atomic interval splitting, precedence, factors, and sources are exact."
+            },
+            {
+              "name": "visible_settlements",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Visible call settlements exactly implement allowance, banks, rates, and money."
+            },
+            {
+              "name": "visible_voyages",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Visible voyage rollups exactly reconcile ordered calls and closing banks."
+            },
+            {
+              "name": "visible_charterers",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Visible charterer statements exactly reconcile call and voyage money."
+            },
+            {
+              "name": "visible_exceptions",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Visible exception register includes exactly quality and material rows."
+            },
+            {
+              "name": "visible_audit",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Visible chained settlement audit hashes are exact."
+            },
+            {
+              "name": "fresh_events",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Fresh events handle tie conflicts, cancellation, supersession, and boundaries."
+            },
+            {
+              "name": "fresh_intervals",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Fresh intervals handle midnight, holiday, precedence, cargo, and idle rules."
+            },
+            {
+              "name": "fresh_settlement_spine",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Fresh settlement spine handles cap overflow, final flush, tiers, defaults, and signed allocation."
+            },
+            {
+              "name": "fresh_aggregates",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Fresh voyage and charterer aggregations reconcile independently."
+            },
+            {
+              "name": "fresh_controls",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Fresh quality, exception, manifest, and audit reports all match independent derivation."
+            },
+            {
+              "name": "canonical_serialization",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "All delivered JSON uses exact sorted-key pretty serialization with trailing newlines."
+            },
+            {
+              "name": "local_safe_source",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The implementation uses only local standard-library computation and does not inspect graders."
+            },
+            {
+              "name": "deterministic_no_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Fresh executions are deterministic and never mutate their input corpus."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Detects hardcoded visible answers or identifiers in submitted source."
+            },
+            {
+              "name": "negative_reads_verifier",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Detects attempts to inspect verifier or reward files."
+            },
+            {
+              "name": "negative_external_or_subprocess",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Detects external dependencies, network access, or subprocess delegation."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

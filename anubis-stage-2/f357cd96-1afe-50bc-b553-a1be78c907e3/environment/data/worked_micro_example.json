@@ -1,0 +1,200 @@
+{
+  "description": "Fully-traced 3-node/6-stream/2-epoch instance illustrating phases 1-11 of README-input-schema.md. The displayed values are unchanged across all candidate settlements. Use this to confirm the non-withheld phases of a base implementation before attempting sealed cases.",
+  "inputs": {
+    "nodes": [
+      {
+        "node_id": "M01",
+        "capacity": 2,
+        "mtu_class": "small",
+        "region": "re",
+        "priority_lanes": 2,
+        "bucket_capacity": 4,
+        "refill_num": 3,
+        "refill_den": 2,
+        "refill_offset": 0
+      },
+      {
+        "node_id": "M02",
+        "capacity": 2,
+        "mtu_class": "medium",
+        "region": "rw",
+        "priority_lanes": 2,
+        "bucket_capacity": 4,
+        "refill_num": 3,
+        "refill_den": 2,
+        "refill_offset": 0
+      },
+      {
+        "node_id": "M03",
+        "capacity": 2,
+        "mtu_class": "jumbo",
+        "region": "rn",
+        "priority_lanes": 1,
+        "bucket_capacity": 3,
+        "refill_num": 2,
+        "refill_den": 2,
+        "refill_offset": 0
+      }
+    ],
+    "streams": [
+      {
+        "stream_id": "X001",
+        "tenant": "U1",
+        "class": "K01",
+        "arrival": 0,
+        "deadline": 1,
+        "rate": 4
+      },
+      {
+        "stream_id": "X002",
+        "tenant": "U1",
+        "class": "K02",
+        "arrival": 0,
+        "deadline": 1,
+        "rate": 3
+      },
+      {
+        "stream_id": "X003",
+        "tenant": "U2",
+        "class": "K01",
+        "arrival": 0,
+        "deadline": 1,
+        "rate": 4
+      },
+      {
+        "stream_id": "X004",
+        "tenant": "U2",
+        "class": "K03",
+        "arrival": 0,
+        "deadline": 1,
+        "rate": 2
+      },
+      {
+        "stream_id": "X005",
+        "tenant": "U3",
+        "class": "K02",
+        "arrival": 0,
+        "deadline": 1,
+        "rate": 3
+      },
+      {
+        "stream_id": "X006",
+        "tenant": "U3",
+        "class": "K03",
+        "arrival": 1,
+        "deadline": 1,
+        "rate": 2
+      }
+    ],
+    "tenants": [
+      {
+        "tenant_id": "U1",
+        "floor": 1,
+        "ceiling": 3,
+        "migration_mult": 2,
+        "region": "re"
+      },
+      {
+        "tenant_id": "U2",
+        "floor": 1,
+        "ceiling": 3,
+        "migration_mult": 2,
+        "region": "rw"
+      },
+      {
+        "tenant_id": "U3",
+        "floor": 0,
+        "ceiling": 3,
+        "migration_mult": 2,
+        "region": "rn"
+      }
+    ],
+    "epoch_durations": [
+      {
+        "epoch": 0,
+        "num": 2,
+        "den": 1
+      },
+      {
+        "epoch": 1,
+        "num": 2,
+        "den": 1
+      }
+    ]
+  },
+  "trace": {
+    "epoch_0": {
+      "active": [
+        "X001",
+        "X002",
+        "X003",
+        "X004",
+        "X005"
+      ],
+      "demand": {
+        "U1": 2,
+        "U2": 2,
+        "U3": 1
+      },
+      "total_cap": 6,
+      "phase_4": "Every floor-order candidate gives initial={U1:2,U2:2,U3:1}; sum=5<=cap=6 => quota={U1:2,U2:2,U3:1}",
+      "phase_5_selected": [
+        "X001",
+        "X002",
+        "X003",
+        "X004",
+        "X005"
+      ],
+      "phase_6_assignments": {
+        "X001": "M01",
+        "X002": "M01",
+        "X003": "M02",
+        "X004": "M03",
+        "X005": "M02"
+      },
+      "phase_6b_cascade": "none",
+      "phase_7": {
+        "latency_cost": "1*4+1*3+1*4+1*2+2*3=19",
+        "migration_cost": "warm_start=null; all placed for first time => 0",
+        "fairness_deviation": "|2-2|+|2-2|+|1-1|=0"
+      },
+      "phase_8_refill": "All rounding candidates are exact here: M01 refill=3; M02 refill=3; M03 refill=2",
+      "fixed_point": "delta=0 after iteration 1 => converged"
+    },
+    "epoch_1": {
+      "active": [
+        "X001",
+        "X002",
+        "X003",
+        "X004",
+        "X005",
+        "X006"
+      ],
+      "demand": {
+        "U1": 2,
+        "U2": 2,
+        "U3": 2
+      },
+      "total_cap": 6,
+      "phase_4": "quota={U1:2,U2:2,U3:2}",
+      "phase_6_assignments": {
+        "X001": "M01",
+        "X002": "M01",
+        "X003": "M02",
+        "X004": "M03",
+        "X005": "M02",
+        "X006": "M03"
+      },
+      "phase_7": {
+        "latency_cost": "1*4+1*3+1*4+1*2+2*3+1*2=21",
+        "migration_cost": "no changes vs epoch 0 for X001..X005; X006 first placement => 0"
+      }
+    },
+    "totals": {
+      "latency_cost": 40,
+      "migration_cost": 0,
+      "fairness_deviation": 0,
+      "total_cost": "5*40+3*0+2*0=200"
+    }
+  }
+}

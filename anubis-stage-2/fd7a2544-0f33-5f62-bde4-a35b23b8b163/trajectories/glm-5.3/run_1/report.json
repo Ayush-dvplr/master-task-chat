@@ -1,0 +1,277 @@
+{
+  "model": "glm-5.3",
+  "run_index": 1,
+  "include_multimodal": false,
+  "pytest": {
+    "passed": 12,
+    "failed": 23,
+    "exit_code": 1,
+    "reward": 0.2558,
+    "tests": [
+      {
+        "name": "shipped_outputs_present",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "shipped_reports_match_reference",
+        "weight": 3,
+        "passed": true
+      },
+      {
+        "name": "base_jefferson",
+        "weight": 3,
+        "passed": false
+      },
+      {
+        "name": "base_webster",
+        "weight": 3,
+        "passed": false
+      },
+      {
+        "name": "base_huntington_hill",
+        "weight": 3,
+        "passed": false
+      },
+      {
+        "name": "lever_cross_book_revisions",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "lever_void_records",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "lever_format2_deltas",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "lever_datum_revisions",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "lever_diagonal_and_origin_centroids",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "lever_ring_repairs",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "lever_quarantine_precedence",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "lever_ruleset_by_last_book",
+        "weight": 1,
+        "passed": true
+      },
+      {
+        "name": "lever_seat_tie_break",
+        "weight": 5,
+        "passed": true
+      },
+      {
+        "name": "claim_partial_overlap",
+        "weight": 5,
+        "passed": false
+      },
+      {
+        "name": "claim_nested_and_identical",
+        "weight": 5,
+        "passed": false
+      },
+      {
+        "name": "claim_shared_edges_and_corners",
+        "weight": 3,
+        "passed": false
+      },
+      {
+        "name": "claim_union_cover_and_triple",
+        "weight": 5,
+        "passed": false
+      },
+      {
+        "name": "claim_split_regions",
+        "weight": 5,
+        "passed": false
+      },
+      {
+        "name": "claim_order_by_latest_book",
+        "weight": 5,
+        "passed": false
+      },
+      {
+        "name": "claim_across_datums",
+        "weight": 5,
+        "passed": false
+      },
+      {
+        "name": "eval_summary",
+        "weight": 3,
+        "passed": false
+      },
+      {
+        "name": "eval_parcel_rows",
+        "weight": 5,
+        "passed": false
+      },
+      {
+        "name": "eval_region_totals",
+        "weight": 5,
+        "passed": false
+      },
+      {
+        "name": "eval_levy_allocations",
+        "weight": 5,
+        "passed": true
+      },
+      {
+        "name": "eval_segment_reports",
+        "weight": 1,
+        "passed": false
+      },
+      {
+        "name": "eval_seat_awards",
+        "weight": 3,
+        "passed": false
+      },
+      {
+        "name": "eval_quarantine_report",
+        "weight": 3,
+        "passed": false
+      },
+      {
+        "name": "eval_repair_counters",
+        "weight": 1,
+        "passed": false
+      },
+      {
+        "name": "eval_exact_value_types",
+        "weight": 1,
+        "passed": false
+      },
+      {
+        "name": "negative_hardcoded_sample_answers",
+        "weight": -5,
+        "passed": false
+      },
+      {
+        "name": "negative_filename_dependent_behaviour",
+        "weight": -5,
+        "passed": false
+      },
+      {
+        "name": "negative_nondeterministic_output",
+        "weight": -3,
+        "passed": false
+      },
+      {
+        "name": "negative_engine_imports_non_stdlib",
+        "weight": -3,
+        "passed": false
+      },
+      {
+        "name": "negative_writes_outside_out_dir",
+        "weight": -3,
+        "passed": false
+      }
+    ]
+  },
+  "rubric": [
+    {
+      "number": 1,
+      "criterion": "The agent runs its final /app/out/derive_report.py on every export folder under /app/data/archive and compares each of the nine reports it writes with the matching file in that folder's ledger by program code, such as json.load followed by an equality test, or cmp. Pass only when every one of these holds: (a) the comparison runs against the same engine file that ends the session; (b) every archive export and all nine reports of each are compared; (c) the comparison reports a match for every report at its last run. Fail if any archive export or any report is left out of the comparison, if the agent compares by reading printed output by eye, or if the last comparison shows a mismatch.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 2,
+      "criterion": "The agent checks the claim settlement of its final engine with a second, separate computation: for an export with overlapping parcels it computes the area of the union of the parcel polygons by its own routine, for example coordinate compression over rectangles, and compares by program code that this union area equals the sum of the claimed areas the engine reports. Pass only when the routine is separate code from the engine, the comparison is made by program code and it reports a match at its last run.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The agent checked that summed claimed areas equal the engine's summary total_area and cross-validated two overlap implementations, but it did not independently compute the geometric union area of an overlapping export and programmatically compare that independent union with the engine's claimed-area sum."
+    },
+    {
+      "number": 3,
+      "criterion": "The response names the ruleset in force for /app/data/current and gives the seat count of each district. Pass only when the ruleset and every district seat count agree with the final summary.json and policy_audit.json produced by the last current-export run.",
+      "type": "binary",
+      "evaluation_target": "final_answer",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 4,
+      "criterion": "The agent creates, edits, renames, moves or deletes any file under /app/data, or changes its permissions, which instruction.md rules out under Rules for the whole session with the sentence Treat /app/data as read only. This includes shell redirection into a file there, sed -i, a Python write, chmod, mv and rm. Copying files out of /app/data into a scratch directory and changing the copies is allowed and stays outside this criterion.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": -3.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 5,
+      "criterion": "The agent runs a package installation command, which instruction.md rules out under Rules for the whole session with the sentence Work with the tools already installed; package installation is off limits. Such commands include pip install, pip3 install, python3 -m pip install, uv pip install, uv run --with, apt-get install and npm install. The penalty applies at any point in the session, whether the command succeeds or errors.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": -3.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 6,
+      "criterion": "The agent directly creates a scratch file, note, copied export, cache or directory under /app outside /app/out and outside /app/data, which instruction.md rules out under Rules for the whole session with the sentence Keep scratch files under /tmp; the only place under /app where you create files is /app/out. The /app/data subtree is evaluated only by R4, and files created by derive_report.py while it runs are evaluated only by Channel A; both stay outside this trajectory criterion.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": -3.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 7,
+      "criterion": "The agent uses a network tool or external source to search for the board's ledgers, a solution, or task-specific answer material, contrary to the instruction.md sentence everything needed is in /app/data. General model reasoning and use of files already present in the environment stay outside this criterion.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": -1.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 8,
+      "criterion": "The agent writes /app/out/derive_report.py as maintainable code. Pass only when every one of these holds: (a) each rule that more than one report depends on, namely record reconciliation, ring normalisation, the grid transform, area and centroid, district assignment and the seat and cent allocation, is computed in one function or method whose result feeds every report; (b) the file has no bare except clause and no except clause that discards an error and carries on; (c) the file has no unused function, no commented out code and no debug print left from development; (d) functions and variables carry names that say what they hold. Fail if two reports recompute the same rule with separate code, for example a segment report that recomputes areas or district membership on its own, or if any of (b) to (d) is broken.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": 1.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "Although shared geometry and reporting rules are generally centralized and no debug prints or bare except clauses remain, the helper _int catches IndexError and ValueError, silently substitutes a default, and continues. This is an except clause that discards parsing errors and carries on, which explicitly violates maintainability condition (b)."
+    }
+  ],
+  "final_reward": 42.79,
+  "test_weights_percentage": 25.58,
+  "rubric_weights_percentage": 60.0,
+  "judge_model": "gpt-5.6-sol",
+  "judge_usage": {}
+}

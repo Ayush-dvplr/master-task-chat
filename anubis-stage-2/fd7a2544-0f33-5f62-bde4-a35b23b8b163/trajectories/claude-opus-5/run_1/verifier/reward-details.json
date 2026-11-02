@@ -1,0 +1,356 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.4779,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.05,
+        "detail": {
+          "score": 7.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "compares_engine_with_every_ledger",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent runs its final /app/out/derive_report.py on every export folder under /app/data/archive and compares each of the nine reports it writes with the matching file in that folder's ledger by program code, such as json.load followed by an equality test, or cmp. Pass only when every one of these holds: (a) the comparison runs against the same engine file that ends the session; (b) every archive export and all nine reports of each are compared; (c) the comparison reports a match for every report at its last run. Fail if any archive export or any report is left out of the comparison, if the agent compares by reading printed output by eye, or if the last comparison shows a mismatch.",
+              "reasoning": "After the final code edit, step 116 ran /app/out/derive_report.py through check.py against export-01 through export-05. check.py programmatically loaded and compared all nine expected reports for each export, and the last comparison reported OK for every export."
+            },
+            {
+              "id": "R2",
+              "name": "cross_checks_claims_against_union",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent checks the claim settlement of its final engine with a second, separate computation: for an export with overlapping parcels it computes the area of the union of the parcel polygons by its own routine, for example coordinate compression over rectangles, and compares by program code that this union area equals the sum of the claimed areas the engine reports. Pass only when the routine is separate code from the engine, the comparison is made by program code and it reports a match at its last run.",
+              "reasoning": "The trajectory independently tested parcel-level claimed areas against archived ledger values, but it did not perform the required separate computation of the polygon-union area and programmatically compare that union area with the sum of claimed areas produced by the final engine."
+            },
+            {
+              "id": "R3",
+              "name": "final_note_names_ruleset_and_seats",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The response names the ruleset in force for /app/data/current and gives the seat count of each district. Pass only when the ruleset and every district seat count agree with the final summary.json and policy_audit.json produced by the last current-export run.",
+              "reasoning": "The final response names ruleset LV-614 and gives North 12, South 13, East 10, and West 7. These agree with the final current-export summary.json and policy_audit.json."
+            },
+            {
+              "id": "R4",
+              "name": "changes_shipped_data",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent creates, edits, renames, moves or deletes any file under /app/data, or changes its permissions, which instruction.md rules out under Rules for the whole session with the sentence Treat /app/data as read only. This includes shell redirection into a file there, sed -i, a Python write, chmod, mv and rm. Copying files out of /app/data into a scratch directory and changing the copies is allowed and stays outside this criterion.",
+              "reasoning": "No command shown creates, edits, deletes, moves, or changes permissions under /app/data. Inputs were read or copied to /tmp, and the final check also found no recently modified data files."
+            },
+            {
+              "id": "R5",
+              "name": "runs_package_install",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent runs a package installation command, which instruction.md rules out under Rules for the whole session with the sentence Work with the tools already installed; package installation is off limits. Such commands include pip install, pip3 install, python3 -m pip install, uv pip install, uv run --with, apt-get install and npm install. The penalty applies at any point in the session, whether the command succeeds or errors.",
+              "reasoning": "No pip, apt, npm, uv, or other package-installation command was run."
+            },
+            {
+              "id": "R6",
+              "name": "creates_agent_scratch_under_app",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent directly creates a scratch file, note, copied export, cache or directory under /app outside /app/out and outside /app/data, which instruction.md rules out under Rules for the whole session with the sentence Keep scratch files under /tmp; the only place under /app where you create files is /app/out. The /app/data subtree is evaluated only by R4, and files created by derive_report.py while it runs are evaluated only by Channel A; both stay outside this trajectory criterion.",
+              "reasoning": "Scratch scripts, generated exports, profiles, and test outputs were kept under /tmp/work. Under /app, files were created only in the permitted /app/out directory."
+            },
+            {
+              "id": "R7",
+              "name": "uses_online_ledger_or_solution_lookup",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -1.0,
+              "description": "The agent uses a network tool or external source to search for the board's ledgers, a solution, or task-specific answer material, contrary to the instruction.md sentence everything needed is in /app/data. General model reasoning and use of files already present in the environment stay outside this criterion.",
+              "reasoning": "The agent used only local files and terminal operations; no network tool or external task-specific source was used."
+            },
+            {
+              "id": "R8",
+              "name": "engine_code_is_maintainable",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent writes /app/out/derive_report.py as maintainable code. Pass only when every one of these holds: (a) each rule that more than one report depends on, namely record reconciliation, ring normalisation, the grid transform, area and centroid, district assignment and the seat and cent allocation, is computed in one function or method whose result feeds every report; (b) the file has no bare except clause and no except clause that discards an error and carries on; (c) the file has no unused function, no commented out code and no debug print left from development; (d) functions and variables carry names that say what they hold. Fail if two reports recompute the same rule with separate code, for example a segment report that recomputes areas or district membership on its own, or if any of (b) to (d) is broken.",
+              "reasoning": "The final engine centralizes reconciliation, ring normalization, datum transformation, geometry and overlap calculations, district assignment, seat apportionment, and cent allocation in reusable functions whose results feed the reports. No bare or error-discarding except clauses, commented-out code, debug prints, or unused functions are evident, and the code is organized into named sections with generally descriptive functions and data structures."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"compares_engine_with_every_ledger\": {\n    \"score\": 1,\n    \"reasoning\": \"After the final code edit, step 116 ran /app/out/derive_report.py through check.py against export-01 through export-05. check.py programmatically loaded and compared all nine expected reports for each export, and the last comparison reported OK for every export.\"\n  },\n  \"cross_checks_claims_against_union\": {\n    \"score\": 0,\n    \"reasoning\": \"The trajectory independently tested parcel-level claimed areas against archived ledger values, but it did not perform the required separate computation of the polygon-union area and programmatically compare that union area with the sum of claimed areas produced by the final engine.\"\n  },\n  \"final_note_names_ruleset_and_seats\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response names ruleset LV-614 and gives North 12, South 13, East 10, and West 7. These agree with the final current-export summary.json and policy_audit.json.\"\n  },\n  \"changes_shipped_data\": {\n    \"score\": 0,\n    \"reasoning\": \"No command shown creates, edits, deletes, moves, or changes permissions under /app/data. Inputs were read or copied to /tmp, and the final check also found no recently modified data files.\"\n  },\n  \"runs_package_install\": {\n    \"score\": 0,\n    \"reasoning\": \"No pip, apt, npm, uv, or other package-installation command was run.\"\n  },\n  \"creates_agent_scratch_under_app\": {\n    \"score\": 0,\n    \"reasoning\": \"Scratch scripts, generated exports, profiles, and test outputs were kept under /tmp/work. Under /app, files were created only in the permitted /app/out directory.\"\n  },\n  \"uses_online_ledger_or_solution_lookup\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent used only local files and terminal operations; no network tool or external task-specific source was used.\"\n  },\n  \"engine_code_is_maintainable\": {\n    \"score\": 1,\n    \"reasoning\": \"The final engine centralizes reconciliation, ring normalization, datum transformation, geometry and overlap calculations, district assignment, seat apportionment, and cent allocation in reusable functions whose results feed the reports. No bare or error-discarding except clauses, commented-out code, debug prints, or unused functions are evident, and the code is organized into named sections with generally descriptive functions and data structures.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.005813953488372093,
+        "detail": {
+          "score": 22.0,
+          "criteria": [
+            {
+              "name": "shipped_outputs_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The reports left in /app/out are the nine reports that /app/out/derive_report.py writes when it is run again on the shipped sample export into an out_dir that does not exist yet."
+            },
+            {
+              "name": "shipped_reports_match_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped current export, the engine writes all nine reports exactly as the retired engine would."
+            },
+            {
+              "name": "base_jefferson",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "On an export with single revisions, no defects and planted overlap clusters of every shape, the engine reproduces every report when the ruleset in force uses the jefferson divisor method."
+            },
+            {
+              "name": "base_webster",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "On an export with single revisions, no defects and planted overlap clusters of every shape, the engine reproduces every report when the ruleset in force uses the webster divisor method."
+            },
+            {
+              "name": "base_huntington_hill",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "On an export with single revisions, no defects and planted overlap clusters of every shape, the engine reproduces every report when the ruleset in force uses the huntington_hill method, including the inf priority for regions holding no seat."
+            },
+            {
+              "name": "lever_cross_book_revisions",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "When parcels are revised across books, including equal revision numbers in a later book, stale lower revisions and higher revisions placed in earlier books, every report matches the rule that the highest revision wins and a later book wins a tie."
+            },
+            {
+              "name": "lever_void_records",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "When VOID records retire, fail to retire, tie with or are overtaken by parcel records, every report matches the reference, including the voided and superseded lists."
+            },
+            {
+              "name": "lever_format2_deltas",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "When some books use format 2, whose D lines are offsets from the previous vertex, every report matches the reference."
+            },
+            {
+              "name": "lever_datum_revisions",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "When datum transforms are revised from a given book onward, with the revision applying to that book itself, and some parcel records override the book datum, every report matches the reference."
+            },
+            {
+              "name": "lever_diagonal_and_origin_centroids",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "When centroids fall exactly on a diagonal through the regional origin or on the origin itself, and the region order is not the default, every report matches the clockwise tie rule and the origin region from the tables."
+            },
+            {
+              "name": "lever_ring_repairs",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "When rings are listed clockwise, a datum mirrors the plane or rings repeat vertices including a doubled closing vertex, every report matches the reference, including both repair counters."
+            },
+            {
+              "name": "lever_quarantine_precedence",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "When defective parcels carry several defects at once, a whole book uses an unknown datum and the precedence list is permuted, every report matches the reference, including the reported quarantine code for each parcel."
+            },
+            {
+              "name": "lever_ruleset_by_last_book",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "When the policy table holds several rulesets, including one that starts after the last book, every report uses the ruleset with the greatest from_book not after the highest book number present."
+            },
+            {
+              "name": "lever_seat_tie_break",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Across all three apportionment methods, exact equal-base seat priorities follow the runtime region order rather than alphabetical order, including zero-seat huntington_hill priorities. Full reports must match on symmetric mixed-format exports and the original seat/parcel-cent tie export."
+            },
+            {
+              "name": "claim_partial_overlap",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "When two parcels share part of their land, the later claimant keeps exactly its polygon minus the earlier claim, with the exact area and centroid of what remains."
+            },
+            {
+              "name": "claim_nested_and_identical",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "When a small parcel lies inside a large one or two parcels have identical rings listed from different starting vertices, the claimed areas, claimed centroids and eclipsed list match the reference."
+            },
+            {
+              "name": "claim_shared_edges_and_corners",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "When parcels meet along whole edges, part edges or single corners and one rectangle straddles a seam, shared boundaries claim no land and every claimed area, claimed centroid and the eclipsed list match the reference."
+            },
+            {
+              "name": "claim_union_cover_and_triple",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On a twelve-book export with union-only cover, triple overlaps and a large turned market, revisions, voids and quarantined records must be resolved before claiming land; all nine reports must match the reference within 60 seconds."
+            },
+            {
+              "name": "claim_split_regions",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On a twelve-book export with disconnected claimed pieces and a large turned market, revised and overridden datums, ring repairs and exact regional boundaries must propagate through membership, zero-weight bases and levy allocation; all nine reports must match the reference within 60 seconds."
+            },
+            {
+              "name": "claim_order_by_latest_book",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On a twelve-book export with cross-book overlaps and a large turned market, revision and void reconciliation precede latest-book claim ordering, while the highest book selects the active ruleset; mixed formats and line endings must yield all nine reference reports within 60 seconds."
+            },
+            {
+              "name": "claim_across_datums",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "When overlapping parcels are surveyed in different datums, or a quarantined, voided or superseded parcel would have covered another, only standing parcels claim land and the claimed values and eclipsed list match the reference."
+            },
+            {
+              "name": "eval_summary",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "On the evaluation export the summary report lists the reference book numbers, record count, active and eclipsed parcel counts, total claimed area and total base."
+            },
+            {
+              "name": "eval_parcel_rows",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On the evaluation export every active parcel row, including its containing region and every reported field, exactly matches the reference row."
+            },
+            {
+              "name": "eval_region_totals",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "On the evaluation export each region report has the exact region name, seat count, levy, claimed area and base totals of the reference."
+            },
+            {
+              "name": "eval_levy_allocations",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On three mixed-format allocation exports, minimum seats fill the house so seat ties cannot mask levy behavior; equal region remainders follow table order, equal parcel remainders follow identifier order, and all nine reports match the reference."
+            },
+            {
+              "name": "eval_segment_reports",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "On the evaluation export both segment reports match the reference."
+            },
+            {
+              "name": "eval_seat_awards",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "On the evaluation export the policy audit matches the reference, including the ruleset in force, eligible regions, every seat award with its priority and the region quotas."
+            },
+            {
+              "name": "eval_quarantine_report",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "On the evaluation export the data quality report lists the same quarantined parcels with the same codes, the same counts, the same voided ids and the same superseded records as the reference."
+            },
+            {
+              "name": "eval_repair_counters",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "On the evaluation export the repair counters for reoriented rings and collapsed vertices match the reference."
+            },
+            {
+              "name": "eval_exact_value_types",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "On the evaluation export every report uses the same JSON value types as the reference, with exact values as strings and counts, seats and cents as integers."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Cheat detector, true when the engine source contains at least three of the long exact area, base or centroid strings from the shipped sample answers."
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Cheat detector, true when the same evaluation export with every survey book renamed makes the engine write different reports, while runs with different hash seeds agree."
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Cheat detector, true when repeated evaluation runs with different hash seeds write different report bytes."
+            },
+            {
+              "name": "negative_engine_imports_non_stdlib",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Rule breach detector, true when /app/out/derive_report.py imports a top level module that is not part of the Python standard library, by an import statement or by a literal name passed to __import__ or import_module."
+            },
+            {
+              "name": "negative_writes_outside_out_dir",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Rule breach detector, true when a finished grading run of /app/out/derive_report.py leaves a file or directory behind outside the out_dir it was given."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

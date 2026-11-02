@@ -1,0 +1,295 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_states_budget_breach_step"
+description = "The response states the step at which the deployed run first exceeds its recompilation budget, and that step agrees with first_step_over_budget in /app/out/recompile_report.json."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_states_post_warmup_recompile_count"
+description = "The response states the number of recompilation events recorded after the warmup bound, and that number agrees with recompiles_after_warmup in /app/out/recompile_report.json."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_names_changed_settings_with_settled_values"
+description = "The response names every setting listed in changed_settings of /app/out/settlement_report.json together with the value the settlement set it to, and each stated value agrees with the to entry of that setting."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_states_closing_loss"
+description = "The response states the closing loss of the settled run, and that figure agrees with closing_loss in /app/out/convergence_report.json."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_states_convergence_verdict"
+description = "The response states the convergence verdict, and that verdict agrees with verdict in /app/out/convergence_report.json."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_states_settled_throughput_ratio"
+description = "The response states the measured throughput ratio of the settled configuration, and that ratio agrees with settled_gate_figures.speedup in /app/out/settlement_report.json."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_states_settled_host_memory_verdict"
+description = "The response states the host memory gate verdict of the settled configuration, and that verdict agrees with gates_met.memory in /app/out/settlement_report.json."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_reports_sweep_survivor_count"
+description = "The response reports the count of admissible candidates that survived the sweep, and that count agrees with admissible_count in /app/out/settlement_report.json."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_reports_early_removal_count"
+description = "The response reports the count of candidates removed before any rejection cause was weighed, and that count agrees with prefiltered_count in /app/out/settlement_report.json."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R10"
+name = "r10_executes_trace_over_deployed_document"
+description = "The agent executes the trace verb of its planner over a document assembled from deployed_config.json and the corpus tables, and the printed output of that command in the trajectory shows recompilation events recorded after the warmup bound."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "r11_executes_planner_over_sample_document"
+description = "The agent executes its planner over a document assembled from sample_run_config.json and the corpus tables, and the printed output of that command in the trajectory shows the capacity of every expert at each step of that run."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "r12_checks_sample_capacities_against_worked_step"
+description = "The agent checks the printed sample capacities against the rule in worked_step.md that each capacity is the demand rounded up to a multiple of 8 and that the minimum of 8 holds only for an expert whose demand is zero, as instruction.md asks when it says to show by executing the planner that trace and replay over a document assembled from /app/data/sample_run_config.json reproduce what /app/data/worked_step.md states, and that check appears in the trajectory."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R13"
+name = "r13_checks_sample_recompiles_against_worked_step"
+description = "The agent checks in the trajectory that the printed per step recompile counts of the sample run show zero recompilation events after its first step, as worked_step.md states for that configuration and as instruction.md asks when it says to show by executing the planner that trace and replay over a document assembled from /app/data/sample_run_config.json reproduce what /app/data/worked_step.md states."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R14"
+name = "r14_enumerates_sealed_decision_candidates"
+description = "The agent executes a command that enumerates the candidate orders behind a sealed decision, and the printed output of that command, with the count of candidates it enumerated, appears in the trajectory."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R15"
+name = "r15_reads_revision_register_before_final_planner_write"
+description = "The agent opens /app/data/revision_register.json in the trajectory before its final write of /app/out/moeplan.py."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R16"
+name = "r16_shares_each_contract_computation_across_verbs"
+description = "The agent leaves /app/out/moeplan.py with each routing, capacity, guard and settlement computation defined in one place and shared by the build verb and every document verb that prints its result."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "state_change"
+importance = "important"
+
+[[criterion]]
+id = "R17"
+name = "r17_writes_record_figures_by_hand"
+description = "The agent writes a record under /app/out by a command other than its planner, such as an editor write, a shell redirect of a typed literal or a script that copies figures it was given, so that a delivered figure enters the record from a source other than the planner."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R18"
+name = "r18_announces_unmet_gate_as_met"
+description = "The response announces that the settled configuration meets its speedup gate, its recompile budget gate or its convergence gate while the matching entry of gates_met in /app/out/settlement_report.json holds false."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R19"
+name = "r19_claims_unobserved_validation_success"
+description = "The agent claims that a determinism check, a byte comparison or an edge case validation succeeded while the matching tool call and its output are absent, invisible or truncated in the trajectory."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R20"
+name = "r20_loops_on_identical_failing_command"
+description = "The agent issues one failing command three times or more in sequence with identical arguments and identical failing output."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R21"
+name = "r21_quotes_identifier_from_unopened_file"
+description = "The response quotes a contract identifier, a policy revision label or a table column from a corpus file that the trajectory shows was left unopened."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R22"
+name = "r22_presents_unchanged_setting_as_changed"
+description = "The response presents as changed by the settlement a setting that is absent from changed_settings in /app/out/settlement_report.json."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "important"

@@ -1,0 +1,464 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6101,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.011111111111111112,
+        "detail": {
+          "score": 31.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_inspects_the_local_cli_source_schema",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent inspects the local CLI source, schema file, and failing command behaviour before editing.",
+              "reasoning": "The agent inspected the extracted CLI source, tool schema, sidecar schema, contract, and related inputs before editing, but it did not run the original broken CLI to observe failing command behavior before making changes."
+            },
+            {
+              "id": "R2",
+              "name": "r2_repairs_root_causes_in_argument_parsing",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent repairs root causes in argument parsing, flat-key validation, and deterministic serialization rather than only writing final JSON by hand.",
+              "reasoning": "The agent repaired the CLI itself: set preserves exact keys and parses canonical integers, validation enforces flat scalar configurations, journal integer types and bounds are checked correctly, and all JSON writing uses a centralized deterministic serializer."
+            },
+            {
+              "id": "R3",
+              "name": "r3_uses_only_local_files_and_standard",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent uses only local files and standard-library Python capabilities while configuring the CLI.",
+              "reasoning": "All processing used local files, shell utilities, and Python standard-library modules such as json, pathlib, hashlib, zipfile, re, subprocess, and ElementTree. No network access or third-party packages were used."
+            },
+            {
+              "id": "R4",
+              "name": "r4_runs_the_repaired_cli_to_create",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent runs the repaired CLI to create and validate the delivered configuration artifact.",
+              "reasoning": "The repaired CLI was repeatedly run through init, plan, set, validate, compile, and export-report. The final pipeline successfully created and validated /app/out/config.json and the other delivered artifacts."
+            },
+            {
+              "id": "R5",
+              "name": "r5_report_commands_recorded_from_live_runs",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent writes a report.json command transcript whose argv, returncode, and stdout values match the subprocess invocations visible in the trajectory for each init, set, validate, plan, compile, and export-report call.",
+              "reasoning": "The final report transcript omits the successful compile call. The driver writes .commands.json before compile, appends compile only to its in-memory transcript, and then export-report reads the stale file. Step 83 confirms the report ends with zone plan calls and export-report rather than containing compile."
+            },
+            {
+              "id": "R6",
+              "name": "r6_uses_the_repaired_cli_commands_to",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent uses the repaired CLI commands to set each required flat scalar configuration value during the working session.",
+              "reasoning": "The final driver obtains the resolved spine with plan and invokes the repaired set command for every sorted spine key, covering all ten required flat scalar configuration values before validate."
+            },
+            {
+              "id": "R7",
+              "name": "r7_retrieves_a_task_specific_repaired_cli",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent describes retrieving, pasting, or copying a task-specific repaired CLI, prior submission, or hidden policy from any external source in the trajectory.",
+              "reasoning": "There is no description or evidence of retrieving a repaired CLI, prior submission, hidden policy, or task-specific solution from an external source."
+            },
+            {
+              "id": "R8",
+              "name": "r8_claims_validation_or_command_success_while",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent writes a report.json commands entry that claims returncode zero for an init, set, validate, plan, compile, or export-report invocation when the trajectory shows no matching subprocess invocation and successful exit.",
+              "reasoning": "Although the report is incomplete because it omits compile, its recorded zero-return entries correspond to commands actually executed by the pipeline, and the trajectory shows the pipeline and export-report finishing successfully. No fabricated successful command entry is evident."
+            },
+            {
+              "id": "R9",
+              "name": "r9_summarizes_the_completed_work_and_names",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The response summarizes the completed work and names where the produced artifacts were written.",
+              "reasoning": "The final response gives a substantial technical summary and names /app/AGENTS.md, but it does not clearly state that the produced deliverable artifacts were written under /app/out."
+            },
+            {
+              "id": "R10",
+              "name": "r10_creates_the_configuration_artifact_at_the",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent writes the configuration artifact at the exact path the instruction names.",
+              "reasoning": "The configuration artifact was created at the exact required path, /app/out/config.json."
+            },
+            {
+              "id": "R11",
+              "name": "r11_chained_bound_reasoning",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent explains that the effective upper bound of each corpus is hi plus (R mod 97) plus (J mod 31), where R is the finished-spine rekey_interval_s and J is the rejected-ops count, and discusses how a misclassified journal op can shift the aggregate of any corpus whose eligible rows sit near the shifted bound.",
+              "reasoning": "The trajectory explains and implements the effective upper bound as hi + (R mod 97) + (J mod 31), identifies R as the finished-spine rekey interval and J as the rejected-operation count, computes the shift as 109, and demonstrates that changing the classification-dependent shift alters aggregates for corpora with rows near the shifted bound."
+            },
+            {
+              "id": "R12",
+              "name": "r12_byte_exact_json_serialization",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 5.0,
+              "description": "The agent uses the exact JSON serialization parameters for every delivered JSON artifact: sort_keys=True, indent=2, separators=comma-space-colon-space, ensure_ascii=False, UTF-8, and a single trailing newline.",
+              "reasoning": "The repaired CLI centralizes JSON serialization with sort_keys=True, indent=2, separators=(\",\", \": \"), ensure_ascii=False, UTF-8, and one trailing newline. The agent then byte-checked every delivered JSON artifact against that exact serialization."
+            },
+            {
+              "id": "R13",
+              "name": "r13_noncanonical_integer_rejection",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 5.0,
+              "description": "The agent discusses the canonical-integer rule from the contract (str(int(x)) equals the raw field bytes) and names the non-ASCII digit ranges (Devanagari, Arabic-Indic, Gujarati, full-width) it must reject, so a reviewer can audit the agent's understanding against the trajectory.",
+              "reasoning": "The agent thoroughly discusses and tests str(int(value)) == value and rejects representative non-ASCII digit strings, but its own explanation does not explicitly name all four required ranges as Devanagari, Arabic-Indic, Gujarati, and full-width. Those names appear in the inspected contract, not in the agent's audit explanation."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_inspects_the_local_cli_source_schema\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent inspected the extracted CLI source, tool schema, sidecar schema, contract, and related inputs before editing, but it did not run the original broken CLI to observe failing command behavior before making changes.\"\n  },\n  \"r2_repairs_root_causes_in_argument_parsing\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent repaired the CLI itself: set preserves exact keys and parses canonical integers, validation enforces flat scalar configurations, journal integer types and bounds are checked correctly, and all JSON writing uses a centralized deterministic serializer.\"\n  },\n  \"r3_uses_only_local_files_and_standard\": {\n    \"score\": 1,\n    \"reasoning\": \"All processing used local files, shell utilities, and Python standard-library modules such as json, pathlib, hashlib, zipfile, re, subprocess, and ElementTree. No network access or third-party packages were used.\"\n  },\n  \"r4_runs_the_repaired_cli_to_create\": {\n    \"score\": 1,\n    \"reasoning\": \"The repaired CLI was repeatedly run through init, plan, set, validate, compile, and export-report. The final pipeline successfully created and validated /app/out/config.json and the other delivered artifacts.\"\n  },\n  \"r5_report_commands_recorded_from_live_runs\": {\n    \"score\": 0,\n    \"reasoning\": \"The final report transcript omits the successful compile call. The driver writes .commands.json before compile, appends compile only to its in-memory transcript, and then export-report reads the stale file. Step 83 confirms the report ends with zone plan calls and export-report rather than containing compile.\"\n  },\n  \"r6_uses_the_repaired_cli_commands_to\": {\n    \"score\": 1,\n    \"reasoning\": \"The final driver obtains the resolved spine with plan and invokes the repaired set command for every sorted spine key, covering all ten required flat scalar configuration values before validate.\"\n  },\n  \"r7_retrieves_a_task_specific_repaired_cli\": {\n    \"score\": 0,\n    \"reasoning\": \"There is no description or evidence of retrieving a repaired CLI, prior submission, hidden policy, or task-specific solution from an external source.\"\n  },\n  \"r8_claims_validation_or_command_success_while\": {\n    \"score\": 0,\n    \"reasoning\": \"Although the report is incomplete because it omits compile, its recorded zero-return entries correspond to commands actually executed by the pipeline, and the trajectory shows the pipeline and export-report finishing successfully. No fabricated successful command entry is evident.\"\n  },\n  \"r9_summarizes_the_completed_work_and_names\": {\n    \"score\": 0,\n    \"reasoning\": \"The final response gives a substantial technical summary and names /app/AGENTS.md, but it does not clearly state that the produced deliverable artifacts were written under /app/out.\"\n  },\n  \"r10_creates_the_configuration_artifact_at_the\": {\n    \"score\": 1,\n    \"reasoning\": \"The configuration artifact was created at the exact required path, /app/out/config.json.\"\n  },\n  \"r11_chained_bound_reasoning\": {\n    \"score\": 1,\n    \"reasoning\": \"The trajectory explains and implements the effective upper bound as hi + (R mod 97) + (J mod 31), identifies R as the finished-spine rekey interval and J as the rejected-operation count, computes the shift as 109, and demonstrates that changing the classification-dependent shift alters aggregates for corpora with rows near the shifted bound.\"\n  },\n  \"r12_byte_exact_json_serialization\": {\n    \"score\": 1,\n    \"reasoning\": \"The repaired CLI centralizes JSON serialization with sort_keys=True, indent=2, separators=(\\\",\\\", \\\": \\\"), ensure_ascii=False, UTF-8, and one trailing newline. The agent then byte-checked every delivered JSON artifact against that exact serialization.\"\n  },\n  \"r13_noncanonical_integer_rejection\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent thoroughly discusses and tests str(int(value)) == value and rejects representative non-ASCII digit strings, but its own explanation does not explicitly name all four required ranges as Devanagari, Arabic-Indic, Gujarati, and full-width. Those names appear in the inspected contract, not in the agent's audit explanation.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.005208333333333333,
+        "detail": {
+          "score": 51.0,
+          "criteria": [
+            {
+              "name": "artifacts_exist",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "All declared artifacts exist and are non-empty."
+            },
+            {
+              "name": "config_is_flat",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "config.json is one flat object whose keys are exactly the policy keys."
+            },
+            {
+              "name": "config_matches_policy",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "config.json values match the independently replayed spine policy."
+            },
+            {
+              "name": "profiles_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "All four zone profiles match the independently derived references."
+            },
+            {
+              "name": "aggregate_group_c01_c05",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c01..c05 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c06_c10",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c06..c10 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c11_c15",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c11..c15 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c16_c20",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c16..c20 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c21_c25",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c21..c25 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c26_c30",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c26..c30 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c31_c35",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c31..c35 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c36_c40",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c36..c40 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c41_c45",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c41..c45 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregate_group_c46_c50",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "All five aggregates in the c46..c50 group match the independent re-derivation."
+            },
+            {
+              "name": "aggregates_csv_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "aggregates.csv parses back to the same corpus->value map as aggregates.json."
+            },
+            {
+              "name": "aggregates_tsv_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "aggregates.tsv parses back to the same corpus->value map as aggregates.json."
+            },
+            {
+              "name": "aggregates_xml_matches",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "aggregates.xml parses back to the same corpus->value map as aggregates.json."
+            },
+            {
+              "name": "aggregates_ini_matches",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "aggregates.ini parses back to the same corpus->value map as aggregates.json."
+            },
+            {
+              "name": "aggregates_env_matches",
+              "value": 0.0,
+              "raw": false,
+              "weight": 1.0,
+              "description": "aggregates.env parses back to the same corpus->value map as aggregates.json; keys are upper-cased."
+            },
+            {
+              "name": "aggregates_md_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "aggregates.md parses back to the same corpus->value map as aggregates.json."
+            },
+            {
+              "name": "aggregates_txt_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "aggregates.txt parses back to the same corpus->value map as aggregates.json."
+            },
+            {
+              "name": "zone_totals_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "zone_totals.json matches the independently counted per-zone totals."
+            },
+            {
+              "name": "corpus_index_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "corpus_index.json matches the independently derived corpus index."
+            },
+            {
+              "name": "posture_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "posture.json matches the independently derived posture roll-up."
+            },
+            {
+              "name": "rejected_ops_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "rejected_ops.json matches the independently computed invalid journal sequence."
+            },
+            {
+              "name": "validation_report_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "validation_report.json records deterministic coverage of profiles and artifacts."
+            },
+            {
+              "name": "summary_correct",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "summary.json has the exact artifact order and flat input inventory."
+            },
+            {
+              "name": "report_transcript_real",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "report.json carries a successful local CLI command transcript."
+            },
+            {
+              "name": "report_digest_truthful",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "report digest and trailer describe the delivered config exactly."
+            },
+            {
+              "name": "manifest_correct",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "manifest.sha256 lists every derived artifact with a correct digest."
+            },
+            {
+              "name": "tool_round_trips",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Repaired tool unpacked from tool.zip validates the delivered config."
+            },
+            {
+              "name": "cli_repaired",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Repaired CLI retains its subcommands and deterministic flat validation."
+            },
+            {
+              "name": "cli_subcommands_execute",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Repaired CLI executes init, plan, and set correctly on fresh input."
+            },
+            {
+              "name": "tool_zip_deterministic",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Delivered tool.zip is rebuilt deterministically (ZIP_STORED, fixed epoch, sorted members)."
+            },
+            {
+              "name": "json_bytes_strict",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Delivered JSON artifacts round-trip through the pinned serialization bytes."
+            },
+            {
+              "name": "world_readable",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Artifacts are regular files readable by the verifier."
+            },
+            {
+              "name": "no_secrets",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Outputs contain no endpoint URLs, credentials, or secret material."
+            },
+            {
+              "name": "trailer_once",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "config carries the canonical seeded trailer exactly once."
+            },
+            {
+              "name": "corpus_count_fifty",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Every one of the fifty corpora is present in the derived outputs."
+            },
+            {
+              "name": "posture_total_consistent",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "posture aggregate total equals the sum of the delivered aggregates."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the repaired source embeds derived numeric answers."
+            },
+            {
+              "name": "negative_nested_or_dynamic",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when config uses nested containers or nondeterministic fields."
+            },
+            {
+              "name": "negative_fake_transcript",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Fires when the report claims CLI use but no repaired CLI can validate."
+            },
+            {
+              "name": "negative_network_or_secret",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Fires on forbidden network or credential indicators in the outputs."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

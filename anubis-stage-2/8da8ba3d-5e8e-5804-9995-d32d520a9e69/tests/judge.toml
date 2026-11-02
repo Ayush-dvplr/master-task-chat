@@ -1,0 +1,139 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_safe_extract_to_app_tool"
+description = "The agent extracts /app/data/tool.zip into /app/tool and refuses any archive member that uses an absolute path, a parent-traversal segment, or a symlink, and documents a cryptographic hash check of the extracted contents against the manifest to confirm no tampering during extraction."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_deliverables_via_repaired_cli"
+description = "The agent produces /app/out/config.json and both environment profiles by running subcommands of the repaired CLI, with per-key provenance comments in each file linking every value back to its source input artifact."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R3"
+name = "r3_reads_contract_before_editing"
+description = "The agent reads the shipped CLI source and the schema and validation-rule files before it makes its first edit to the CLI."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_verifies_by_running"
+description = "The agent runs the repaired CLI through an init and a validate step before it packages the final delivery."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_cross_references_inputs"
+description = "The agent combines values from defaults.json, env_overrides.json, and hardening_profiles.yaml when it computes each profile."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_truthful_transcript"
+description = "The agent records each report.json commands entry with the real argv and returncode of the subprocess that entry describes."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_honest_summary"
+description = "The response describes the emitted files in a way that matches the actual on-disk state."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_repaired_cli_quality"
+description = "The agent writes the repaired cli.py with guarded input handling, clear names, and no dead or duplicated blocks, and ships a companion type stub (.pyi) exposing the public API with full type annotations for every exported symbol."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "state_change"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "negative_external_answer_source"
+description = "The agent pulls task answers, patches, or derivation constants from a source outside the local /app/data corpus and the shipped CLI."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R10"
+name = "negative_unbacked_success_claim"
+description = "The agent states that a subcommand or validation succeeded while the trajectory holds no command output backing that claim."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "important"

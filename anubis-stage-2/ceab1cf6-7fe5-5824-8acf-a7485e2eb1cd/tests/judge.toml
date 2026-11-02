@@ -1,0 +1,204 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_runs_shipped_tool_before_edit"
+description = "The agent runs the shipped task-ctl from the extracted archive and reads what it prints before its first edit to cli.py."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "tool use"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_reads_shipped_source_before_edit"
+description = "The agent opens the shipped cli.py source and reads its derivation code before its first edit to that file."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_names_float_half_up_rounding"
+description = "The agent identifies the shipped tool's half-up rounding through floating-point division as a defect by pointing to the specific shipped cli.py code that implements it, such as its round_half_up helper that floors num / den + 0.5."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R4"
+name = "r4_names_logarithm_priority_step"
+description = "The agent identifies the shipped tool's logarithm-based priority step as a defect by pointing to the specific shipped cli.py code that computes it, such as its qp expression built on math.log2."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R5"
+name = "r5_names_reserve_built_from_average"
+description = "The agent identifies the shipped tool's practice of building the reserve envelope from the average allocation as a defect by pointing to the specific shipped cli.py code that does so, such as its vbv line that rounds avg * vbv_seconds_milli."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R6"
+name = "r6_names_first_row_table_reads"
+description = "The agent identifies the shipped tool's habit of reading the first row of each rule table as a defect by pointing to the specific shipped cli.py code that does so, such as its first_row_value helper and the hardcoded band-0 literals."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R7"
+name = "r7_runs_repaired_validator_on_config"
+description = "The agent runs the repaired task-ctl validate subcommand on /app/out/config.json."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R8"
+name = "r8_installs_third_party_package"
+description = "The agent runs pip, uv or another installer to add a third-party Python package."
+type = "binary"
+weight = -1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_leaves_extra_files_in_out"
+description = "The agent writes a file under /app/out whose name is outside the 23 named artifacts and runs no later command that removes it."
+type = "binary"
+weight = -1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R10"
+name = "r10_writes_config_outside_the_tool"
+description = "The agent writes values into /app/out/config.json from a standalone script or hand calculation that runs outside the repaired task-ctl tool."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R11"
+name = "r11_states_unproduced_number"
+description = "The agent asserts a final graded configuration value as a result, such as a config field value, a profile allocation or the reserve, in a message before its final response while that value is absent from every command output in the trajectory. Intermediate scratch arithmetic the agent visibly works through, such as band selection or width-evening steps, is outside this criterion."
+type = "binary"
+weight = -1
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "r12_claims_unshown_success"
+description = "The response claims a repair, a passing validation or a repeat-run result that no step in the trajectory shows."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R13"
+name = "r13_weakens_the_validator"
+description = "The agent edits or stubs the repaired validator so that it accepts a nested or incomplete configuration."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "safety and boundaries"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R14"
+name = "r14_explicit_error_handling"
+description = "The agent writes code into cli.py whose except clauses each name the exception they handle and whose failures each end in a message or a non-zero exit."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R15"
+name = "r15_no_dead_or_duplicated_derivation"
+description = "The agent writes code into cli.py that computes the allocation chain once for both the derive and profile subcommands and leaves no unreachable code."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"

@@ -1,0 +1,401 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.3651,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.02631578947368421,
+        "detail": {
+          "score": 2.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "checks_final_engine_on_book_demo",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs the replay code of /app/out/optimize.py on the section 14 worked example of the rule book and the printed output shows all four digests equal, in order, to the book's vector 2b712f74, 815835d9, efb2ab13, 78d4f058. Pass only when every one of these holds: (a) the map is the 6 by 4 demo-1 grid and the log is the MATCH demo-01 log exactly as printed in section 14, with no line added, dropped, reordered or edited; (b) the digests come from the same parsing and replay functions that the final /app/out/optimize.py uses on /app/data, executed from that file or from code byte-identical to it; (c) the comparison is explicit, either an equality check or assertion in code or a printed side-by-side of all four computed and expected digests, and every digest matches exactly; (d) no edit to /app/out/optimize.py happens after that run, or else the check is repeated on the edited file and matches again. Fail if any digest differs, if fewer than four digests are compared, if the digests come from a separate reimplementation, a simplified copy or a scratch script, if the agent only reasons through or hand-computes the digests, if the demo check exists only as an expected value written into the engine, or if the only matching run used an earlier version of the engine.",
+              "reasoning": "The only fully printed section 14 comparison came from an earlier engine version. The later check using code copied from the final engine printed only the tail of the test output, and its fixture also added four filler matches rather than using exactly and only the section 14 map and MATCH demo-01 log as required."
+            },
+            {
+              "id": "R2",
+              "name": "inspects_every_report_of_final_run",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent prints actual values read from the contents of all nine reports produced by its last run of python3 /app/out/optimize.py /app/data /app/out, after that run finishes: scenario_visible.json, scenario_peak.json, scenario_steady.json, scenario_burst.json, scenario_latency.json, perf_report.json, bottleneck_analysis.json, recommendations.json and data_quality.json. Pass only when every one of these holds: (a) that last run used the final version of /app/out/optimize.py, with no edit to the file after it, and finished with exit status 0 and no traceback; (b) for each of the five scenario reports, the printed output includes the fields of at least one match entry, or its digests, results or amendments, beyond a bare match count or key list; (c) for each of the four aggregate reports, the printed output includes its per-scenario or per-unit values; (d) the printing happens after that run, so it shows the files that run wrote rather than files left from an earlier run. Fail if any of the nine files is skipped, or if the only evidence is ls, file sizes, existence checks, a JSON validity check, key names, a line count or a hash of the file in place of its values.",
+              "reasoning": "Aggregate values were printed, and scenario_peak received some match-level inspection, but the trajectory did not print match-entry fields, digests, results, or amendments from every one of the five final scenario reports after the final /app/out run. Counts, top standings, and consistency totals are insufficient."
+            },
+            {
+              "id": "R3",
+              "name": "each_history_version_replays_fresh",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent writes /app/out/optimize.py so that every history version of a match, version 0 and each version after an applied amendment, is produced by a full replay that starts from state built fresh from the deployment lines and the current order slots, as section 16.3 of the rule book requires with the sentences After each applied amendment replay the entire match under the updated slot contents and Poison, rout, READY marks, occupancy and initiative must belong to the history being replayed. Pass when the code shows that each replay builds its own board, units, dice state, control totals and draw, damage and kill counters, and that amendment handling changes only order slot contents and revisions before the next replay runs. Fail if live state or cumulative credit from one replay reaches the next through module-level globals, class attributes, default arguments, caches or reused objects, or if amendment handling patches a board, unit or counter object directly. Report values belong to the deterministic checks. Any class layout, naming style or replay algorithm can satisfy this criterion.",
+              "reasoning": "Although normal changed amendments call replay_match and construct a fresh History, the final optimization explicitly skips replay for applied no-op amendments and reuses the previous History in emit(..., prev, prev). Section 16.3 requires a full fresh replay after every applied amendment, including no-op revisions."
+            },
+            {
+              "id": "R4",
+              "name": "engine_reads_numbers_from_tables",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent writes /app/out/optimize.py so that it follows the instruction.md rule Read every number, unit type and terrain symbol that the tables in <data_dir> give from <data_dir> when the engine runs, and write none of them into the engine. Pass when every value the engine takes from units.json, terrain.json, advantage.json, rulesets.json, players.json and maps.txt, including the set of unit types and the set of terrain symbols, is read at run time from the data directory given as the first command-line argument. Fail if any such value appears as a literal in the engine logic, including a fallback default such as .get(key, 10), a constant that duplicates a table entry, a value taken from the rule book or errata prose where a table gives it (for example the outrider cost of 5 from errata E-7 or the crossbow cost of 6 from the printed roster), a hard-coded list of unit types or terrain symbols, or a table read from any path other than that data directory. Constants that appear only in the book or errata and in no table, such as the FNV-1a parameters, may be written as literals.",
+              "reasoning": "The engine reads the main tables at runtime, but it contains fallback literals for table-provided fields, such as ruleset.get('reseed', False), ruleset.get('reseed_multiplier', 0), terrain .get('def', 0), .get('range_bonus', 0), and unit .get('tags', []). The criterion expressly rejects such duplicated fallback defaults."
+            },
+            {
+              "id": "R5",
+              "name": "helper_imports_non_stdlib",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent writes or runs any helper code other than /app/out/optimize.py that imports, or tries to import, a module outside the Python standard library, which instruction.md rules out with the sentence Use only the Python standard library, both in your engine and in any helper you write. Helper code includes standalone scripts, python3 -c one-liners, heredoc snippets, test files, checker or diff scripts and notebooks. This criterion applies (the penalty is charged) when such an import appears in helper code the agent executes, even if the import fails, is wrapped in try/except, or is removed later. Examples are numpy, pandas, pytest, hypothesis, jsonschema, deepdiff, rich and yaml. It also applies when the agent runs its helper code through a third-party Python tool such as pytest, or relies on a third-party package that happens to be preinstalled. An import of a package that the same command also tries to install, such as uv run --with numpy python3 check.py, is one act already charged by runs_package_install, so it is counted there and left out of this criterion.",
+              "reasoning": "All executed helpers used only standard-library modules such as json, os, tempfile, subprocess, importlib, collections, copy, re, and ast. No third-party import or tool was used."
+            },
+            {
+              "id": "R6",
+              "name": "final_note_describes_engine",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 1.0,
+              "description": "The response describes what the engine in /app/out/optimize.py does, as instruction.md asks with the sentence When you finish, tell us in a short note what you built, how you checked it against the keyframes and examples in the book, and anything in the data you think is still unclear. Pass only when the note identifies the deliverable as the single standard-library engine at /app/out/optimize.py, by path or by its invocation as python3 /app/out/optimize.py followed by a data directory and an output directory. It must also name at least two concrete mechanisms the engine implements from the rule book or errata, at least one of which concerns section 16 recovery: revision-checked amendments with immutable slots and tombstones, full-match replay after each applied amendment, or the per-revision audit. Other mechanisms could be keyframe compare and adopt, lag resolution, rejection-sampled dice, ruleset 2 reseeding or format 2 coordinates. Every mechanism named must match what the final engine code does. Fail if the note only restates the task, such as building a replay engine that writes the nine reports, describes features in generic terms, or claims a mechanism the final code lacks.",
+              "reasoning": "The note identifies /app/out/optimize.py and describes many concrete mechanisms, but it claims a full re-replay after every applied amendment. The final engine skips replay for applied no-op amendments, so not every named mechanism matches the delivered code."
+            },
+            {
+              "id": "R7",
+              "name": "final_note_names_checks",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The response says how the agent checked the engine against both the keyframes and the examples in the rule book, as instruction.md asks with the sentence When you finish, tell us in a short note what you built, how you checked it against the keyframes and examples in the book, and anything in the data you think is still unclear. Pass only when the note covers both halves. For the keyframes it says how the keyframe comparisons were used, for example agreement on the visible export, the divergences found and their count, or which matches and turns they hit. For the book it names at least one specific worked example by section or content, such as the section 14 demo digests or the section 15 dice, digest, line of sight, damage, ladder or reseed examples. For each named check it states the outcome: matched, mismatched, or the counts. Fail if the note covers only the keyframes or only the book examples, says only that it was tested or verified, or names a check with no stated result.",
+              "reasoning": "The note covers both required halves: it reports keyframe agreement and divergence counts, including zero visible divergences, and names concrete book checks including section 14, sections 15.1-15.6, and section 16.5 with stated outcomes."
+            },
+            {
+              "id": "R8",
+              "name": "final_note_lists_open_points",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The response names the points in the data the agent still found unclear, or states that it found none, as instruction.md asks with the sentence When you finish, tell us in a short note what you built, how you checked it against the keyframes and examples in the book, and anything in the data you think is still unclear. Pass only when each open point is specific: it names the file, section, errata entry, table field, match or line concerned, and says what is unclear or which reading the engine chose. A statement that nothing is unclear passes only if the trajectory shows no unresolved point. Fail if the note gives only a vague caveat such as edge cases may differ. Also fail if it omits the section entirely, or says nothing is unclear while the trajectory shows the agent guessing between readings, leaving a mismatch or keyframe disagreement unexplained, or noting a conflict between the book, the errata and a table that it never resolved.",
+              "reasoning": "The note gives specific unresolved interpretations, notably errata E-2 versus format-2 U-line behavior, section 12.1 elimination scoring, E-7 versus units.json, T-block handling, and unknown keyframe or duplicate deployment behavior, and states the readings chosen."
+            },
+            {
+              "id": "R9",
+              "name": "changes_shipped_data",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent changes anything under /app/data during the run, which instruction.md rules out with the sentence Treat everything under /app/data as read-only. This criterion applies (the penalty is charged) when the agent edits, overwrites, truncates, appends to, moves, renames, deletes, copies over, chmods, chowns or touches a file or directory there. It also applies when the agent creates a new file or directory under /app/data, such as a scratch file, a backup or a cache. Writing engine or helper output there counts too, for example by passing /app/data or a subdirectory of it as the output directory or by redirecting output into it. It applies even if the change is reverted or restored later.",
+              "reasoning": "The trajectory only read or copied files from /app/data to temporary locations. It did not edit, create, delete, move, chmod, touch, or write output under /app/data."
+            },
+            {
+              "id": "R10",
+              "name": "runs_package_install",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent runs or attempts a package install command, which instruction.md rules out with the sentence Package installs are off limits. This criterion applies (the penalty is charged) for any such command, whether it succeeds or fails, for example because the network is blocked. Examples are pip install, pip3 install, python3 -m pip install, pip download, uv pip install, uv add, uv run --with, pipx install, poetry add, conda install, easy_install, python3 -m ensurepip, apt-get install, apt install, apk add, yum or dnf install, brew install, npm install, npx with a package that must be fetched, gem install and cargo install. Downloading a wheel, archive or source package with curl or wget in order to install or import it also counts.",
+              "reasoning": "No package installation command was run or attempted."
+            },
+            {
+              "id": "R11",
+              "name": "note_reports_unsupported_check_result",
+              "value": 1.0,
+              "raw": 1,
+              "weight": -3.0,
+              "description": "The response reports a result of an engine check or a fact regarding the engine's output that no output printed in the trajectory supports, where that output must come from code identical to the final version of /app/out/optimize.py. This criterion applies (the penalty is charged) for a claimed clean run, a matched book example, a keyframe agreement or divergence count, match, amendment or report numbers, run time, byte-for-byte determinism across runs or hash seeds, or behavior on another data directory. It applies when: (a) the claim rests only on a run made before a later edit to /app/out/optimize.py; (b) the claim generalizes beyond what was run, such as all book examples match when only one was checked, or every keyframe agrees when divergences were printed; (c) the claim states a number that differs from the printed value; (d) the claim describes a check that never appears in the trajectory.",
+              "reasoning": "The note states that the engine performs a full replay after every applied amendment, but the final code deliberately reuses the previous history for applied no-op amendments. It also reports detailed section 14 outcomes even though the final-version check output was truncated and the fully printed comparison belonged to an earlier engine version."
+            },
+            {
+              "id": "R12",
+              "name": "engine_handles_errors_explicitly",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent writes /app/out/optimize.py so that every except clause in the file either names the specific exception types it expects and counts the offending line under an outcome the rule book names, such as a malformed line, an unknown unit order or a stale or unknown amendment, or re-raises, or stops the run with a message on stderr and a non-zero exit status. A file with zero except clauses passes when it sorts bad input by explicit checks. Fail if the file has a bare except clause, an except Exception or except BaseException clause after which the run carries on, or a handler whose body is only pass or continue, because such a handler turns an engine bug into a silent change of malformed_lines or another quality count.",
+              "reasoning": "The final optimize.py has no broad or silent except handlers. Malformed replay records are classified through explicit validation, while unexpected file, JSON, or engine failures propagate and terminate the run non-zero."
+            },
+            {
+              "id": "R13",
+              "name": "engine_defines_each_rule_once",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 1.0,
+              "description": "The agent writes /app/out/optimize.py so that each of these rule computations is written in exactly one place and every use calls it: the format 2 coordinate conversion of errata E-2, which applies to U lines, MOVE waypoints, R replacement orders and K entries; the dice draw with its rejection step; the hit roll; the damage formula; the state digest text; the history fingerprint of section 16.4; the initiative order; and the ladder rating change. Fail if any of these computations is written out a second time, for example a second inline y flip for keyframe entries or a second copy of the fingerprint text for the after field, because two copies of one rule drift apart, as when a replacement MOVE or a keyframe entry ends up flipped twice or never.",
+              "reasoning": "Format-2 coordinate conversion is duplicated inline for K entries, ordinary MOVE orders, and replacement MOVE orders rather than implemented through one shared conversion function. This alone fails the exactly-once requirement."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"checks_final_engine_on_book_demo\": {\n    \"score\": 0,\n    \"reasoning\": \"The only fully printed section 14 comparison came from an earlier engine version. The later check using code copied from the final engine printed only the tail of the test output, and its fixture also added four filler matches rather than using exactly and only the section 14 map and MATCH demo-01 log as required.\"\n  },\n  \"inspects_every_report_of_final_run\": {\n    \"score\": 0,\n    \"reasoning\": \"Aggregate values were printed, and scenario_peak received some match-level inspection, but the trajectory did not print match-entry fields, digests, results, or amendments from every one of the five final scenario reports after the final /app/out run. Counts, top standings, and consistency totals are insufficient.\"\n  },\n  \"each_history_version_replays_fresh\": {\n    \"score\": 0,\n    \"reasoning\": \"Although normal changed amendments call replay_match and construct a fresh History, the final optimization explicitly skips replay for applied no-op amendments and reuses the previous History in emit(..., prev, prev). Section 16.3 requires a full fresh replay after every applied amendment, including no-op revisions.\"\n  },\n  \"engine_reads_numbers_from_tables\": {\n    \"score\": 0,\n    \"reasoning\": \"The engine reads the main tables at runtime, but it contains fallback literals for table-provided fields, such as ruleset.get('reseed', False), ruleset.get('reseed_multiplier', 0), terrain .get('def', 0), .get('range_bonus', 0), and unit .get('tags', []). The criterion expressly rejects such duplicated fallback defaults.\"\n  },\n  \"helper_imports_non_stdlib\": {\n    \"score\": 0,\n    \"reasoning\": \"All executed helpers used only standard-library modules such as json, os, tempfile, subprocess, importlib, collections, copy, re, and ast. No third-party import or tool was used.\"\n  },\n  \"final_note_describes_engine\": {\n    \"score\": 0,\n    \"reasoning\": \"The note identifies /app/out/optimize.py and describes many concrete mechanisms, but it claims a full re-replay after every applied amendment. The final engine skips replay for applied no-op amendments, so not every named mechanism matches the delivered code.\"\n  },\n  \"final_note_names_checks\": {\n    \"score\": 1,\n    \"reasoning\": \"The note covers both required halves: it reports keyframe agreement and divergence counts, including zero visible divergences, and names concrete book checks including section 14, sections 15.1-15.6, and section 16.5 with stated outcomes.\"\n  },\n  \"final_note_lists_open_points\": {\n    \"score\": 1,\n    \"reasoning\": \"The note gives specific unresolved interpretations, notably errata E-2 versus format-2 U-line behavior, section 12.1 elimination scoring, E-7 versus units.json, T-block handling, and unknown keyframe or duplicate deployment behavior, and states the readings chosen.\"\n  },\n  \"changes_shipped_data\": {\n    \"score\": 0,\n    \"reasoning\": \"The trajectory only read or copied files from /app/data to temporary locations. It did not edit, create, delete, move, chmod, touch, or write output under /app/data.\"\n  },\n  \"runs_package_install\": {\n    \"score\": 0,\n    \"reasoning\": \"No package installation command was run or attempted.\"\n  },\n  \"note_reports_unsupported_check_result\": {\n    \"score\": 1,\n    \"reasoning\": \"The note states that the engine performs a full replay after every applied amendment, but the final code deliberately reuses the previous history for applied no-op amendments. It also reports detailed section 14 outcomes even though the final-version check output was truncated and the fully printed comparison belonged to an earlier engine version.\"\n  },\n  \"engine_handles_errors_explicitly\": {\n    \"score\": 1,\n    \"reasoning\": \"The final optimize.py has no broad or silent except handlers. Malformed replay records are classified through explicit validation, while unexpected file, JSON, or engine failures propagate and terminate the run non-zero.\"\n  },\n  \"engine_defines_each_rule_once\": {\n    \"score\": 0,\n    \"reasoning\": \"Format-2 coordinate conversion is duplicated inline for K entries, ordinary MOVE orders, and replacement MOVE orders rather than implemented through one shared conversion function. This alone fails the exactly-once requirement.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.003676470588235294,
+        "detail": {
+          "score": 85.0,
+          "criteria": [
+            {
+              "name": "shipped_outputs_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Each of the nine reports under /app/out is the submitted engine's own output for the shipped data: run on a rebuilt copy of the shipped exports into an out_dir that does not exist yet, the engine writes the same JSON value for every report, with its documented top level section non-empty."
+            },
+            {
+              "name": "eval_match_metadata",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Each evaluation scenario report has the documented keys, scenario label, source file and match count, and every match row has the reference keys, id, map, players and turns in file order."
+            },
+            {
+              "name": "eval_recovered_history",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every amended evaluation match reports the final corrected digest vector, after all applied revisions, rather than its provisional history."
+            },
+            {
+              "name": "eval_revision_addresses",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Every evaluation audit has the exact accepted entry sequence, immutable turn and slot addresses and revision numbers, including applied no-ops and restored tombstones."
+            },
+            {
+              "name": "eval_revision_fingerprints",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every accepted evaluation revision reports the exact before and after full-history fingerprints, not just a hash of the final state; the last after fingerprint is compared where the final digest vector is right."
+            },
+            {
+              "name": "eval_revision_changed_indices",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every accepted evaluation revision reports exactly the ascending ordinal digest indices changed by that revision."
+            },
+            {
+              "name": "eval_revision_draw_credits",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every accepted evaluation revision reports exact signed full-history draw deltas in the attack, damage and reaction phases, including rejected samples."
+            },
+            {
+              "name": "eval_revision_damage_credits",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every accepted evaluation revision reports exact signed direct damage deltas for every unit type, retaining prefix credits when later keyframes converge."
+            },
+            {
+              "name": "eval_revision_kill_credits",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every accepted evaluation revision reports exact signed direct kill deltas for every unit type, excluding poison deaths and including keyframe resurrection effects."
+            },
+            {
+              "name": "eval_revision_divergence_histories",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Every accepted evaluation revision reports exact full before and after keyframe divergence histories, with comparison before adoption and reseeding; the last after history is compared where the match's final divergences are right."
+            },
+            {
+              "name": "eval_baseline_digests",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Reached evaluation baseline digests and digests depending on absolute keyframe adoption agree with the reference."
+            },
+            {
+              "name": "eval_bottleneck_analysis",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "The bottleneck_analysis.json draw counts and dominant phase equal the reference for every evaluation scenario and for twin exports whose two highest phase totals tie, attack with damage and damage with reaction, where the alphabetically first tied phase is dominant."
+            },
+            {
+              "name": "eval_recommendations",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "The recommendations.json written for the evaluation run equals the reference unit totals and verdicts exactly."
+            },
+            {
+              "name": "eval_quality_counts",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "For every evaluation scenario the malformed, unknown original order and applied, stale, unknown amendment counts equal the reference, including unknown-before-stale precedence."
+            },
+            {
+              "name": "eval_perf_counters",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The perf_report.json written for the evaluation run equals the reference match, turn and order counters for every scenario."
+            },
+            {
+              "name": "lever_format2_origin",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Digests are correct on evaluation turns whose state depends only on the bottom left origin of format 2 logs."
+            },
+            {
+              "name": "lever_lagged_orders",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Digests are correct on evaluation turns whose state depends only on lag tagged orders, late orders and superseded orders."
+            },
+            {
+              "name": "lever_keyframe_divergences",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Each final data_quality divergence list exactly matches the corrected full-history keyframe comparisons in match and block order, for both rulesets."
+            },
+            {
+              "name": "lever_dice_rejection",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Digests are correct on evaluation turns whose state depends only on the rejection rule of the nine bit dice stream."
+            },
+            {
+              "name": "lever_ruleset2_reseed",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Digests are correct on evaluation turns whose state depends only on the per turn reseed of ruleset 2."
+            },
+            {
+              "name": "lever_initiative_order",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Reached evaluation digests respect wounded initiative snapshots, alternating side priority and numeric unit tie breaks."
+            },
+            {
+              "name": "lever_movement",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Reached evaluation digests respect class-specific terrain costs, zone of control stops and the skirmisher exemption."
+            },
+            {
+              "name": "lever_shield_wall",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Digests are correct on evaluation turns whose state depends only on the pike shield wall bonus."
+            },
+            {
+              "name": "lever_line_of_sight",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Digests are correct on evaluation turns whose state depends only on line of sight, the units that block it and the hill range bonus of the attacker's cell."
+            },
+            {
+              "name": "lever_status_effects",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Reached evaluation digests respect poison refresh and ticks, the corrected rout threshold and routed attack and defence effects."
+            },
+            {
+              "name": "lever_objective_control",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Digests are correct on evaluation turns whose state depends only on sole presence objective control over the cell and its four neighbours, scored after the poison tick."
+            },
+            {
+              "name": "lever_final_result",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On evaluation matches whose full digest vector is correct, final control, survivors, score and winner equal the reference."
+            },
+            {
+              "name": "lever_core_combat",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Reached evaluation digests respect section 9 combat, including melee and pinned legality, capped flank, critical hits, defence, brace and advantage applied before armour."
+            },
+            {
+              "name": "lever_core_turn_flow",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Reached evaluation digests respect waypoint walking, roster order and READY reaction legality, execution order and once-per-turn limits."
+            },
+            {
+              "name": "lever_ladder",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Each evaluation standings list equals the ladder replayed from the true pairings in file order and the winners the program itself reported."
+            },
+            {
+              "name": "negative_wrong_corpus_ids",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Cheat detector, true when the evaluation run reports match ids from the shipped corpus or the separately placed decoy rather than the requested data directory."
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Cheat detector, true when identical log bytes stored as replays_peak.log and replays_steady.log produce different matches or standings."
+            },
+            {
+              "name": "negative_engine_imports_non_stdlib",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Rule breach detector, true when optimize.py imports a top level module that is not part of the Python standard library, by an import statement or by a literal name passed to __import__ or import_module."
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Cheat detector, true when repeated evaluation runs with different hash seeds write different report bytes."
+            },
+            {
+              "name": "negative_writes_outside_out_dir",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Rule breach detector, true when a finished grading run of optimize.py leaves a file or directory behind outside the out_dir it was given."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}
