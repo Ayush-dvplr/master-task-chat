@@ -1,0 +1,85 @@
+{
+  "notes": "Key order inside objects is free; key sets and value types are exact. 'number' accepts integer or decimal JSON numbers. JSON files may use any indentation.",
+  "panel.json": {
+    "panel": "string, always \"CSP-2026\"",
+    "ledger": {
+      "rows_read": "integer",
+      "accepted": "integer",
+      "superseded": "integer",
+      "rejected": "integer"
+    },
+    "rows": [
+      {
+        "depot": "string, declared depot code",
+        "quarter": "string, declared quarter",
+        "samples": "integer",
+        "status": "string, BREACH | COMPLIANT | NO_DATA",
+        "assays": {
+          "<ASSAY> (one key per declared assay)": {
+            "status": "string, MEASURED | NO_SAMPLE",
+            "n": "integer",
+            "mean": "number, or null when NO_SAMPLE",
+            "max": "number, or null when NO_SAMPLE",
+            "exceedances": "integer"
+          }
+        }
+      }
+    ]
+  },
+  "depots/<DEPOT>.json": {
+    "depot": "string",
+    "total_samples": "integer",
+    "breach_quarters": "integer",
+    "status": "string, BREACH | COMPLIANT | NO_DATA",
+    "quarters": [
+      {
+        "quarter": "string",
+        "samples": "integer",
+        "worst_ratio": "number, -1 when the row has no measured cell",
+        "status": "string, BREACH | COMPLIANT | NO_DATA"
+      }
+    ]
+  },
+  "assays/<ASSAY>.json": {
+    "assay": "string",
+    "limit": "number",
+    "n": "integer",
+    "mean": "number, -1 when n is 0",
+    "max": "number, -1 when n is 0",
+    "exceedances": "integer",
+    "status": "string, EXCEEDED | WITHIN | NO_SAMPLE",
+    "by_quarter": [
+      {
+        "quarter": "string",
+        "n": "integer",
+        "mean": "number, -1 when n is 0",
+        "max": "number, -1 when n is 0",
+        "exceedances": "integer",
+        "depots_sampled": "integer"
+      }
+    ]
+  },
+  "quarters.csv": "quarter,depots_reporting,samples,breach_rows,no_data_rows,status",
+  "measurements.csv": "sample_id,depot,quarter,assay,lab,transmission_id,result",
+  "rejected.csv": "transmission_id,reason",
+  "example_quarter_without_measurements": {
+    "comment": "How 2026-Q2 is written when no accepted measurement falls in it (other quarters omitted).",
+    "panel.json rows entry (one per depot, KES shown)": {
+      "depot": "KES",
+      "quarter": "2026-Q2",
+      "samples": 0,
+      "status": "NO_DATA",
+      "assays": {
+        "PB": {"status": "NO_SAMPLE", "n": 0, "mean": null, "max": null, "exceedances": 0},
+        "CD": {"status": "NO_SAMPLE", "n": 0, "mean": null, "max": null, "exceedances": 0},
+        "HG": {"status": "NO_SAMPLE", "n": 0, "mean": null, "max": null, "exceedances": 0},
+        "AS": {"status": "NO_SAMPLE", "n": 0, "mean": null, "max": null, "exceedances": 0},
+        "HIS": {"status": "NO_SAMPLE", "n": 0, "mean": null, "max": null, "exceedances": 0}
+      }
+    },
+    "depots/KES.json quarters entry": {"quarter": "2026-Q2", "samples": 0, "worst_ratio": -1, "status": "NO_DATA"},
+    "assays/PB.json by_quarter entry": {"quarter": "2026-Q2", "n": 0, "mean": -1, "max": -1, "exceedances": 0, "depots_sampled": 0},
+    "quarters.csv line": "2026-Q2,0,0,0,4,NO_DATA"
+  },
+  "example_measured_cell": {"status": "MEASURED", "n": 3, "mean": 0.255, "max": 0.327, "exceedances": 0}
+}

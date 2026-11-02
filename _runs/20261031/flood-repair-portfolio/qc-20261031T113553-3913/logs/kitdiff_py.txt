@@ -1,0 +1,418 @@
+diff --git a/Input_Bundle_QC/exe_copy.py b/Input_Bundle_QC/exe_copy.py
+index 605ce2e4..7d152aa1 100644
+--- a/Input_Bundle_QC/exe_copy.py
++++ b/Input_Bundle_QC/exe_copy.py
+@@ -33,0 +34,4 @@ What the copy changes, and nothing else:
++  7. With --owner-only, appends a trailer to solution/solve.sh that strips group
++     and other access from every file the run wrote under /app (0600, or 0700
++     where the owner could already execute it), the mode an agent editor leaves
++     behind, for the owner-only oracle run.
+@@ -38 +42 @@ Usage:
+-  python3 exe_copy.py <BUNDLE_PATH> <DEST_DIR> [--stub]
++  python3 exe_copy.py <BUNDLE_PATH> <DEST_DIR> [--stub] [--owner-only]
+@@ -225,0 +230,33 @@ def write_stub(dest: Path) -> list[str]:
++def write_owner_only(dest: Path) -> list[str]:
++    """Make the oracle leave its files at mode 0600, the mode an agent editor leaves.
++
++    The OpenHands file_editor writes through a temp file in the same directory
++    and renames it, and temp files are created owner-only, so a program the
++    agent wrote is readable by uid 1000 alone. A verifier that runs that program
++    after dropping to an unprivileged uid cannot open it and fails every check
++    that executes it. solution/solve.sh installs its program with cp, which
++    leaves 0644, so the plain oracle run scores 1.000 and the hole stays
++    invisible until a real trajectory is graded. This variant reproduces the
++    agent's mode, so the same oracle has to score 1.000 against it.
++
++    The owner's own execute bit survives: an agent told to deliver an executable
++    entry point runs chmod +x and lands at 0700, not 0600, so stripping that bit
++    would fail the task for a reason no agent could avoid. Only group and other
++    access, which an editor never grants, is taken away.
++    """
++    solve = dest / "solution" / "solve.sh"
++    trailer = (
++        "\n# Owner-only variant (QC Step 10): leave every file this run wrote readable by its\n"
++        "# owner alone, the mode an agent editor leaves behind, keeping the owner execute bit.\n"
++        "find /app -xdev -type f -user 1000 -perm -u+x -print0 2>/dev/null"
++        " | xargs -0 -r chmod 700 || true\n"
++        "find /app -xdev -type f -user 1000 ! -perm -u+x -print0 2>/dev/null"
++        " | xargs -0 -r chmod 600 || true\n"
++    )
++    solve.write_text(solve.read_text(encoding="utf-8") + trailer, encoding="utf-8")
++    return [
++        "solution/solve.sh: appended a trailer leaving every file the run wrote under /app at"
++        " mode 0600, or 0700 where the owner could already execute it (agent editor mode)"
++    ]
++
++
+@@ -227,3 +264,8 @@ def main(argv: list[str]) -> int:
+-    args = [a for a in argv if a != "--stub"]
+-    stub = len(args) != len(argv)
+-    if len(args) != 2:
++    flags = {a for a in argv if a.startswith("-")}
++    args = [a for a in argv if not a.startswith("-")]
++    stub = "--stub" in flags
++    owner_only = "--owner-only" in flags
++    unknown = sorted(flags - {"--stub", "--owner-only"})
++    if len(args) != 2 or unknown:
++        if unknown:
++            print(f"usage error: unknown flag(s) {' '.join(unknown)}", file=sys.stderr)
+@@ -264,0 +307,3 @@ def main(argv: list[str]) -> int:
++    if owner_only:
++        for change in write_owner_only(dest):
++            log(change)
+diff --git a/Input_Bundle_QC/judge_qc.py b/Input_Bundle_QC/judge_qc.py
+index 19e5f3d8..fe6b10e5 100644
+--- a/Input_Bundle_QC/judge_qc.py
++++ b/Input_Bundle_QC/judge_qc.py
+@@ -53 +53 @@ And whole-file:
+-          "individual", timeout = 300, atif-trajectory =
++          "batched", timeout = 300, atif-trajectory =
+@@ -100 +100,6 @@ JUDGE_HEADER: list[tuple[str, object]] = [
+-    ("mode", "individual"),
++    # rewardkit's own default. "individual" would judge each criterion in its
++    # own concurrent call, which re-sends the whole trajectory once per
++    # criterion; on a 30-criterion file that is 30x the input tokens for the
++    # same verdicts. Its one advantage, per-criterion "files", is already
++    # forbidden by J1, so batched costs this contract nothing.
++    ("mode", "batched"),
+diff --git a/Input_Bundle_QC/structure_qc.py b/Input_Bundle_QC/structure_qc.py
+index c8344f11..a1c9cf28 100644
+--- a/Input_Bundle_QC/structure_qc.py
++++ b/Input_Bundle_QC/structure_qc.py
+@@ -29 +29,2 @@ Every ID:
+-      any other entry outside the tree fails.
++      a trajectories/ directory of recorded runs at the root warns; any other
++      entry outside the tree fails.
+@@ -34 +35,2 @@ Every ID:
+-      __pycache__/, .git/, .pytest_cache/ anywhere.
++      __pycache__/, .git/, .pytest_cache/ anywhere; the four grader-output
++      names warn instead under trajectories/.
+@@ -65,2 +67,3 @@ Every ID:
+-      full name like "Ram Lakhan" (blank or a placeholder like "Task Author"
+-      fails); email ends in @ethara.ai; an email not built from the name warns.
++      name in any capitalisation or script (blank, a placeholder like "Task
++      Author", or digits/symbols fail); email domain is ethara.ai or a
++      subdomain; an email that cannot be related to the name warns.
+@@ -109,0 +113,8 @@ FORBIDDEN_DIRS = {"__pycache__", ".git", ".pytest_cache"}
++# Recorded agent runs. Delivery policy accepts a bundle that ships them, so the
++# directory itself and the grader output inside it warn instead of failing: no
++# Dockerfile copies this directory, so nothing in it reaches either container
++# and nothing in it can influence a score. Everything outside it is unchanged.
++TRAJECTORY_DIR = "trajectories"
++# Grader output that is a genuine record of a past run when it sits under
++# trajectories/. .DS_Store is never a run record, so it stays a fail anywhere.
++RUN_RECORD_NAMES = {"reward.txt", "reward.json", "reward-details.json", "ctrf.json"}
+@@ -120 +131,5 @@ PLACEHOLDER_WORDS = {"task", "tasks", "author", "authors", "name", "names", "you
+-                     "placeholder", "john", "jane", "doe", "foo", "bar", "xxx", "abc"}
++                     "placeholder", "john", "jane", "doe", "foo", "bar", "xxx", "abc",
++                     "ib", "model", "training", "role", "handle", "new", "final", "copy"}
++# Words no person is called, so one of them anywhere marks the whole field a
++# stand-in. The second line is what taskers actually typed instead of a name
++# ("IB Created", "task creation", "QC fixes", "Anubis Harness", "task-generator").
+@@ -122,2 +137,4 @@ STRONG_PLACEHOLDER_WORDS = {"author", "authors", "placeholder", "tbd", "todo", "
+-                            "anonymous", "yourname", "taskauthor", "doe", "example", "sample"}
+-AUTHOR_DOMAIN = "@ethara.ai"
++                            "anonymous", "yourname", "taskauthor", "doe", "example", "sample",
++                            "created", "creation", "creator", "generator", "generated",
++                            "remediation", "fixed", "fixes", "harness", "anubis", "harbor", "qc"}
++AUTHOR_DOMAIN = "ethara.ai"
+@@ -128 +145 @@ def is_placeholder_name(name: str) -> bool:
+-    if not words or "<" in name or "{" in name:
++    if "<" in name or "{" in name:
+@@ -129,0 +147,3 @@ def is_placeholder_name(name: str) -> bool:
++    if not words:
++        # A name in a non-Latin script has no words this vocabulary can judge.
++        return not any(character.isalpha() for character in name)
+@@ -216 +236,4 @@ def check_tree(bundle: Path) -> None:
+-        only and a second file is a second source of truth. Any other entry
++        only and a second file is a second source of truth. A trajectories/
++        directory of recorded agent runs at the bundle root warns instead of
++        failing: no Dockerfile copies it, so it reaches neither container and
++        cannot influence a score. Any other entry
+@@ -229 +252,5 @@ def check_tree(bundle: Path) -> None:
+-        score), .DS_Store, __pycache__/, .git/, .pytest_cache/.
++        score), .DS_Store, __pycache__/, .git/, .pytest_cache/. The four
++        grader-output names warn instead of failing when they sit under
++        trajectories/, where they are the record of a past run rather than a
++        score staged for this bundle's grading; .DS_Store is never a run
++        record, so it fails there too.
+@@ -265,0 +293,5 @@ def check_tree(bundle: Path) -> None:
++            if not folder and p.is_dir() and p.name == TRAJECTORY_DIR:
++                warn("S3", f"{rel}/ holds recorded agent runs and is accepted by delivery "
++                           "policy: no Dockerfile copies it, so it reaches neither container "
++                           "and cannot influence a score. Delete it for a clean root.")
++                continue
+@@ -300,0 +333 @@ def check_tree(bundle: Path) -> None:
++        in_trajectory = rel.parts[:1] == (TRAJECTORY_DIR,)
+@@ -302 +335,6 @@ def check_tree(bundle: Path) -> None:
+-            fail("S5", f"forbidden file: {rel}")
++            if in_trajectory and p.name in RUN_RECORD_NAMES:
++                warn("S5", f"{rel} is grader output from a recorded run, accepted by "
++                           "delivery policy: nothing copies trajectories/ into either "
++                           "container, so it is no pre-baked score for this bundle.")
++            else:
++                fail("S5", f"forbidden file: {rel}")
+@@ -366,2 +404,28 @@ def check_agent_image_scope(bundle: Path) -> None:
+-_NAME_WORD = r"[A-Z](?:[a-z]+|'[A-Z][a-z]+)(?:-[A-Z][a-z]+)*"
+-AUTHOR_NAME_RE = re.compile(rf"^{_NAME_WORD}(?: {_NAME_WORD})+$")
++NAME_PUNCTUATION = " -.'\u2019"
++
++
++def name_words(name: str) -> list[str]:
++    return [w for w in re.split(rf"[{re.escape(NAME_PUNCTUATION)}]+", name.strip()) if w]
++
++
++def is_name_shaped(name: str) -> bool:
++    """A person's name in any script, judged on content rather than style.
++
++    Capitalisation, script and initials are not judged: `Anjali kumari`,
++    `JOSE GARCIA`, `Ram K. Lakhan`, `van der Berg`, `O'Brien` and non-Latin
++    names all qualify. Only digits, `@`, underscores and other symbols
++    disqualify, which is what separates a name from a handle like
++    `task_creator` or an email.
++    """
++    text = name.strip()
++    if not text or any(character.isdigit() for character in text):
++        return False
++    if not all(character.isalpha() or character in NAME_PUNCTUATION for character in text):
++        return False
++    words = name_words(text)
++    return bool(words) and max(len(w) for w in words) >= 2
++
++
++def email_in_domain(email: str) -> bool:
++    host = email.strip().lower().rsplit("@", 1)[-1]
++    return host == AUTHOR_DOMAIN or host.endswith("." + AUTHOR_DOMAIN)
+@@ -371,4 +435,8 @@ def name_matches_email(name: str, email: str) -> bool:
+-    """True when the email's local part, digits and separators dropped, is
+-    built from the name's words in any order, each word used whole, as its
+-    initial, or skipped, with at least one word used whole: ram124, ram.lakhan,
+-    rlakhan and lakhan.ram all relate to Ram Lakhan; r43243 does not."""
++    """True when the address plausibly belongs to the named person.
++
++    Any name word of three letters or more appearing in the local part is
++    enough, so the intern suffixes in real addresses relate fine
++    (`abdus.samadint17` to `Abdus Samad Ali`). Initials count too (`rl`,
++    `r.k.lakhan`). A name with no Latin words cannot be compared, so it is
++    accepted rather than warned about. `r43243` still fails to relate.
++    """
+@@ -377 +445,3 @@ def name_matches_email(name: str, email: str) -> bool:
+-    if not local or not words:
++    if not words:
++        return True
++    if not local:
+@@ -378,0 +449,5 @@ def name_matches_email(name: str, email: str) -> bool:
++    if any(len(w) >= 3 and w in local for w in words):
++        return True
++    initials = "".join(w[0] for w in words)
++    if len(initials) > 1 and (local.startswith(initials) or local.startswith(initials[::-1])):
++        return True
+@@ -398,2 +473,3 @@ def check_authors(authors: object) -> None:
+-    must be a full name like "Ram Lakhan"; an email not built from the name
+-    warns, so the tasker confirms the author.
++    must be a name rather than a handle or a stand-in, in whatever
++    capitalisation and script the author uses; an email that cannot be
++    related to the name warns, so the tasker confirms the author.
+@@ -422,2 +498,7 @@ def check_authors(authors: object) -> None:
+-        elif not AUTHOR_NAME_RE.match(name.strip()):
+-            fail("T14", f"{where} name {name!r} must be the author's full name as capitalised words separated by single spaces, like 'Ram Lakhan'")
++        elif not is_name_shaped(name.strip()):
++            fail("T14", f"{where} name {name!r} is not a name: it holds digits or symbols. "
++                        "Any capitalisation, script, initial or particle is fine, so write your "
++                        "own name as you spell it, like 'Ram Lakhan'.")
++        elif len(name_words(name)) == 1:
++            warn("T14", f"{where} name {name!r} is a single word; give your full name unless "
++                        "that really is how you are credited")
+@@ -427,3 +508,4 @@ def check_authors(authors: object) -> None:
+-        elif not email.strip().lower().endswith(AUTHOR_DOMAIN):
+-            fail("T14", f"{where} email {email!r} must be your ethara.ai address (ending in {AUTHOR_DOMAIN})")
+-        elif (isinstance(name, str) and AUTHOR_NAME_RE.match(name.strip())
++        elif not email_in_domain(email):
++            fail("T14", f"{where} email {email!r} must be your ethara.ai address (the domain is "
++                        f"{AUTHOR_DOMAIN} or a subdomain of it)")
++        elif (isinstance(name, str) and is_name_shaped(name.strip())
+diff --git a/Input_Bundle_QC/tests_qc.py b/Input_Bundle_QC/tests_qc.py
+index 2c4c569c..715cd456 100644
+--- a/Input_Bundle_QC/tests_qc.py
++++ b/Input_Bundle_QC/tests_qc.py
+@@ -29 +29 @@ What this script enforces:
+-  K1-K7  tests/Dockerfile: FROM, COPY . /tests/, mkdir -p /app (warn),
++  K1-K8  tests/Dockerfile: FROM, COPY . /tests/, mkdir -p /app (warn),
+@@ -31 +31,2 @@ What this script enforces:
+-         Python 3.12 or newer, LITELLM_LOCAL_MODEL_COST_MAP=True.
++         Python 3.12 or newer, LITELLM_LOCAL_MODEL_COST_MAP=True, litellm
++         pinned to an exact version.
+@@ -38 +39 @@ What this script enforces:
+-  H1,H3-H5 verifier hardening: util-linux installed when setpriv/runuser is
++  H1,H3-H6 verifier hardening: util-linux installed when setpriv/runuser is
+@@ -40 +41,2 @@ What this script enforces:
+-         locked to root.
++         locked to root, agent-written programs made readable before the
++         uid drop.
+@@ -80,0 +83,3 @@ Every ID:
++  K8  litellm installed with an exact == pin. rewardkit accepts litellm>=1.83
++      with no upper bound, so an unpinned verifier image takes whatever PyPI
++      serves while holding the judge key and the hidden tests.
+@@ -95,0 +101,3 @@ Every ID:
++  H6  when checks drop the uid, the agent-written program they execute is made
++      readable first (chmod, or run a copy the verifier wrote). An agent editor
++      leaves it at mode 0600; solve.sh uses cp, so only a real trajectory feels it.
+@@ -147,0 +156,9 @@ REWARDKIT_PIN = "harbor-rewardkit==0.2.1"
++# rewardkit requires litellm>=1.83 with no upper bound, so an unpinned verifier
++# install takes whatever PyPI serves at build time. On 2026-10-21 that was a
++# litellm 1.107.0 stable (since withdrawn) carrying a .pth plus sitecustomize
++# that fetched and executed remote code and reached the cloud metadata endpoint,
++# inside the one image that holds the judge key and the hidden tests. The pin is
++# the same version the agent image pins (structure_qc S9, DS-29).
++LITELLM_PIN = "litellm==1.105.0"
++# Versions known to carry the payload; never accept them even when pinned.
++LITELLM_QUARANTINE = {"1.107.0"}
+@@ -586,0 +604,2 @@ def check_dockerfile(bundle: Path, imports: set[str]) -> None:
++    K8  litellm carries an exact == pin on a pip install line, is not a
++        withdrawn version, and matches the version the agent image pins.
+@@ -625,0 +645,24 @@ def check_dockerfile(bundle: Path, imports: set[str]) -> None:
++    joined = re.sub(r"\\\s*\n", " ", text)
++    install_text = "\n".join(l for l in joined.splitlines() if "pip install" in l and not l.lstrip().startswith("#"))
++    litellm_specs = re.findall(r"(?<![\w-])litellm(?![\w-])\s*([=<>!~]=?[^\s'\"\\]*)?", install_text)
++    if not litellm_specs:
++        fail("K8", f"tests/Dockerfile installs rewardkit without pinning litellm; add {LITELLM_PIN} "
++             "to the pip line (rewardkit accepts litellm>=1.83 with no upper bound, so the build "
++             "takes whatever PyPI serves)")
++    flagged = not litellm_specs
++    for spec in litellm_specs:
++        version = spec[2:] if spec.startswith("==") else ""
++        if not version:
++            fail("K8", f"litellm installed as 'litellm{spec}'; pin exactly {LITELLM_PIN}")
++        elif version in LITELLM_QUARANTINE:
++            fail("K8", f"litellm=={version} is withdrawn and shipped remote-code-execution "
++                 f"hooks in site-packages; pin {LITELLM_PIN}")
++        elif f"litellm=={version}" != LITELLM_PIN:
++            warn("K8", f"litellm pinned to {version}, not the {LITELLM_PIN} the agent image pins "
++                 "(S9/DS-29); a deliberate bump needs tasker approval")
++        else:
++            continue
++        flagged = True
++    if not flagged:
++        ok("K8", f"{LITELLM_PIN} pinned in the verifier image")
++
+@@ -852,0 +896,118 @@ def check_hardening(bundle: Path) -> None:
++DROPS_PRIVILEGES = re.compile(r"setpriv|runuser|setuid|setresuid|preexec_fn|extra_groups")
++GRANTS_READ = re.compile(r"chmod|grant|readable|share")
++STAGES_FILE = re.compile(r"copyfile|copy2|copytree|shutil\.copy|write_text|write_bytes")
++PY_LITERAL = re.compile(r"""['"][^'"\s]*\.py['"]""")
++
++
++def _names(node: ast.AST) -> set[str]:
++    return {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
++
++
++# Interpreter switches that sit between sys.executable and the program path.
++# -c and -m take code or a module name, so the list holds no program file at
++# all and there is nothing for H6 to look for; -X and -W take a value of their
++# own, so the token after them is not the program either.
++NO_PROGRAM_FLAGS = {"-c", "-m"}
++FLAGS_WITH_VALUE = {"-X", "-W", "-Q", "--check-hash-based-pycs"}
++STRING_LITERAL = re.compile(r"""^['"](.*)['"]$""", re.S)
++
++
++def _executed_programs(tree: ast.AST) -> list[ast.expr]:
++    """The program each `[sys.executable, ...]` list runs, skipping switches.
++
++    `python -I program.py` is the usual hardening form, so the token after
++    sys.executable is frequently `-I` and not the program. Reporting that
++    asks the author to chmod a command-line switch.
++    """
++    programs = []
++    for node in ast.walk(tree):
++        if not isinstance(node, ast.List):
++            continue
++        parts = [ast.unparse(e) for e in node.elts]
++        if "sys.executable" not in parts:
++            continue
++        index = parts.index("sys.executable") + 1
++        while index < len(parts):
++            literal = STRING_LITERAL.match(parts[index])
++            if literal is None or not literal.group(1).startswith("-"):
++                break
++            switch = literal.group(1)
++            if switch in NO_PROGRAM_FLAGS:
++                index = len(parts)
++                break
++            index += 2 if switch in FLAGS_WITH_VALUE else 1
++        if index < len(parts):
++            programs.append(node.elts[index])
++    return programs
++
++
++def _drop_builders(tree: ast.AST) -> list[ast.FunctionDef]:
++    return [n for n in ast.walk(tree)
++            if isinstance(n, ast.FunctionDef)
++            and re.search(r"setpriv|runuser|_SETPRIV", ast.unparse(n))]
++
++
++def check_agent_program_readable(bundle: Path) -> None:
++    """H6: a verifier that drops privileges must make the agent's program readable.
++
++    Agent editors write through a temp file and rename it, so a program the agent
++    wrote lands at mode 0600 (owner-only). Checks that run it as an unprivileged
++    user then cannot open it and fail even on a correct submission. The oracle's
++    solve.sh installs its program with cp, which leaves 0644, so Step 10 reads
++    1.000 and the hole stays invisible until a real trajectory is graded. Passing
++    shapes: the privilege dropper grants read to its arguments, a grant call names
++    the executed program, or the verifier executes a python file it staged itself.
++    """
++    path = bundle / "tests" / "test_output.py"
++    if not path.is_file():
++        return
++    src = read(path)
++    if not DROPS_PRIVILEGES.search(src):
++        return
++    try:
++        tree = ast.parse(src)
++    except SyntaxError:
++        return
++    programs = _executed_programs(tree)
++    if not programs:
++        return
++
++    if any(GRANTS_READ.search(ast.unparse(f)) for f in _drop_builders(tree)):
++        ok("H6", "the privilege dropper grants read on the program it is about to run")
++        return
++
++    staged_py = {t.id for node in ast.walk(tree)
++                 if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None
++                 and PY_LITERAL.search(ast.unparse(node.value))
++                 for t in ([node.target] if isinstance(node, ast.AnnAssign) else node.targets)
++                 if isinstance(t, ast.Name)}
++    calls = [c for c in ast.walk(tree) if isinstance(c, ast.Call)]
++    granted: set[str] = set()
++    staged: set[str] = set()
++    for call in calls:
++        text = ast.unparse(call)
++        if GRANTS_READ.search(text):
++            granted |= _names(call)
++        if STAGES_FILE.search(text) and _names(call) & staged_py:
++            staged |= _names(call) | staged_py
++
++    aliases: dict[str, set[str]] = {}
++    for node in ast.walk(tree):
++        if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None:
++            targets = [node.target] if isinstance(node, ast.AnnAssign) else node.targets
++            bound = {t.id for t in targets if isinstance(t, ast.Name)}
++            aliases.setdefault(ast.unparse(node.value), set()).update(bound)
++
++    unguarded = sorted({ast.unparse(p) for p in programs
++                        if not ((_names(p) | aliases.get(ast.unparse(p), set()))
++                                & (granted | staged))})
++    if unguarded:
++        fail("H6", "grading runs an agent-written program under a dropped uid without making it "
++             f"readable first: {', '.join(unguarded)}. An agent editor leaves that file at mode "
++             "0600, so every check that executes it fails on a correct submission. chmod the "
++             "program and its parents (the verifier is root) or run a copy the verifier staged, "
++             "then prove it with the --owner-only oracle run in Step 10")
++    else:
++        ok("H6", "the agent-written program is made readable before the uid drop")
++
++
+@@ -872,0 +1034 @@ def main() -> int:
++    check_agent_program_readable(bundle)

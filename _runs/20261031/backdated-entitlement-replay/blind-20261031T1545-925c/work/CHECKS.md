@@ -1,0 +1,11 @@
+# CHECKS (1861cfe)
+- `python3 master_chat_tasks/tools/name_session.py 1861cfe` | n/a | codex: no match; opencode: ['ses_e6ec64aacffeXZxiVEZFfXR5uQ'] (the list shows the session ID, not the name)
+- `ls -laR` on BLIND_DIR | BLIND_DIR | instruction.md, environment/data (14 files, no Dockerfile present), empty app/ out/ work/
+- `cat` of rule_register, billing_terms, correction_policy, credit_policy, output_contract, legacy_terms.yaml, price_book.json | environment/data | rules read; credit_expiry_cycles=12; 4 items
+- `head` of the json/jsonl/csv/tsv/log inputs and `wc -l` | environment/data | formats confirmed; 2879 events, 5049 invoices, 20206 lines, 66 corrections, 320 lots, 5317 ledger lines
+- python profiling one-liner (counters) | environment/data | 400 accounts; 4400 paid/400 open/249 void; 249 (account,month) pairs are paid+void; ledger in time order; 193 transfers, no duplicate IDs; 5 duplicate correction IDs; SEAT-ENT is an unknown item; no payments on void or unknown invoices
+- `/usr/bin/time -p perl -e 'alarm 600; exec @ARGV' python3 out/derive_report.py --input environment/data --output out` (cwd /tmp) | environment/data | exit 0, real 3.28 s; 9 documents written
+- python consistency check over out/*.json | out/ | summary totals = sum of region totals = sum of segment totals for all 7 keys; 400 rows = 400 resolved + 0 unresolved = accounts_total; 46 applied + 20 rejected = 66 corrections; closing_credit = sum of open_lots per account; no negative balance_due; transferred_in = transferred_out = sum moved = 1598.88; expiries sum = credits_expired = 353.57; files end with "}\n"
+- `/usr/bin/time -p perl ... python3 out/derive_report.py --input work/no_such_dir --output work/no_out` | missing dir | stderr "missing input: accounts.json", exit 2, real 0.11 s, no output dir created
+- `cmp app/derive_report.py out/derive_report.py` | app/, out/ | identical
+- `ps -axo pid,rss,command | grep python` | n/a | no python process of mine left (only harness/harbor processes)

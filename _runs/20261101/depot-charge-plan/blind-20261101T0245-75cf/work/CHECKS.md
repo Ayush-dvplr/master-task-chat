@@ -1,0 +1,17 @@
+# Checks
+
+- `python3 name_session.py d9d6ab5` / input: board id / showed `opencode: ['ses_e6c307723ffeIUn4B4qjNLdTZt']` (codex: no match).
+- `ls -la; find . -type f` / input: BLIND_DIR / showed instruction.md, environment/docs/charging_rules.md, 13 data files, empty app/ out/ work/.
+- `wc -l docs/charging_rules.md data/*` / input: environment / showed rules 44 lines, roster 2083, fleet_register 2401, published_plan 2378, settlements 2255, trips 2322.
+- `cat grid.ini bus_types.json depots.json service_classes.ini tariff.xml disruption_notice.md` / input: data / showed plan_date 2026-03-14, first_slot 12:00, 96x15min, feeder 1500; cabinet 15 kWh with 35/24/40/32 cabinets; weights public 4 commercial 1; 3 tariff versions; notice = North -2 cabinets 03-15T01:00..02:30, South -2 00:45..01:15, feeder 250 from 03-14T19:30..21:30, 4 extra trips (B1012 20, B1218 55, B1291 45, B1330 15).
+- `head -4` on the 5 csv/jsonl files / input: data / showed column names used by the loader.
+- python probe over settlements.csv / input: data/settlements.csv / showed 2254 rows, every `kwh` divisible by its slot count, dates 02-28..03-13, all four depots present.
+- python probe of 11 candidate meter rules / input: settlements.csv + tariff.xml / showed band-at-slot-start bills all 551/575/572/556 rows of North/South/West/East exactly; a one-slot shift fails 100+ rows per depot. So all four meters are "slot_start" on this data.
+- python probe of roster/need/published / input: data / showed 127 roster rows for the plan date, 4 rejects (lines 757 unknown_vehicle, 981 bad_window, 1266 duplicate_roster_row, 1497 retired_vehicle), 123 buses on the plan (34 public / 89 commercial), total need 16260 kWh, windows 2..52 slots, 422 published rows of the plan date with 1 outside its window.
+- `/usr/bin/time -p perl -e 'alarm 600; exec @ARGV' python3 app/derive_report.py --data environment/data --out out` / input: environment/data / wrote all nine reports, real 0.30 s.
+- python shape check on out/*.json / input: out / showed 9 files parse; summary has 96 feeder slots; policy_audit has 123 buses; region buses 30/31/31/31 sum 123; region energy sums to 16080 = summary total; region cost 254435 = segment cost = summary energy_cost_cents; every region/segment `feeder_kwh` equals the matching summary `feeder_kwh_by_slot` value.
+- python limit check on the emitted plan / input: out/policy_audit.json + model / showed 0 violations of per-slot bus cap, per-slot depot cabinet cap (outages applied), per-slot feeder cap (derated slots carry 225/70/115/135/105/135/0/60 of 250), window and need caps.
+- python check of the 3 short buses / input: out/policy_audit.json / showed B1017 (need 100, 2 slots x 30), B1126 (200, 2 x 60), B1237 (180, 2 x 60) are charged to the cap in every window slot and have no slot with spare bus/depot/feeder room, so the 180 kWh unmet is forced; each is correctly reasoned `window`.
+- `/usr/bin/time -p ... python3` re-solve with the moved-energy term removed / input: environment/data / showed the same minimum: 16080 kWh delivered, 600 weighted unmet, 254435 cents. So the reported cost is the true minimum at the optimal unmet level and moved_kwh=0 is the absolute minimum; real 1.74 s for both solves.
+- `cp app/derive_report.py out/derive_report.py` / input: app / out/ now holds the program plus the nine reports.
+- `ps -axo pid,rss,command | grep -c "[p]ython3 app/derive_report"` / showed 0 processes left.

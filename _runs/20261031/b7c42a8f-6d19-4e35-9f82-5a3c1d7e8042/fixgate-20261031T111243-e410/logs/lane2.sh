@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /tmp; harbor run --path "/Users/mac/Desktop/Terminal Bench/_runs/20261031/b7c42a8f-6d19-4e35-9f82-5a3c1d7e8042/fixgate-20261031T111243-e410/owner/b7c42a8f-6d19-4e35-9f82-5a3c1d7e8042" --agent oracle --env docker -y --no-delete -o "/Users/mac/Desktop/Terminal Bench/_runs/20261031/b7c42a8f-6d19-4e35-9f82-5a3c1d7e8042/fixgate-20261031T111243-e410/jobs" --job-name b7c6r2-owner-20261031T111243-e410; echo EXIT_owner=$?
+echo LANE_DONE; echo ALL_DONE

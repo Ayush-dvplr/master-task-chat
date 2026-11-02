@@ -1,0 +1,12 @@
+start 16:06
+- cat instruction.md, Dockerfile; wc data/* | input: BLIND_DIR | read task
+- read monitoring_standard.md, record_dictionary.md, report_layout.md | data/ | spec
+- cat small data files; head card_readings/receipt_journal; wc -l | data/ | card 19484 rows, journal 16093 rows
+- python3 peek (BOM/CR/units/status/channels) | data/ | BOM only in site_register.csv; no CR; 6 units; status F/S/Z; 79 empty pm25; channels CH1/CH2 shared by 3 units each
+- /usr/bin/time -p perl -e 'alarm 600; exec @ARGV' python3 out/derive_report.py environment/data out | environment/data (1 extract, 19484 card rows) | exit 0, real 0.17 s; 9 stdout lines "name bytes", bytes == file sizes; all 9 named reports exist with layout keys
+- reconciliation check (python json read of out/summary.json, data_quality.json) | out/ | card_rows 19484 = excluded 2223 + valid 17261; rolled_up 17261, residual 0; exclusion counts sum 1786+262+104+74=2226 (multi-reason rows) excl rows 2223; journal_entries 16093
+- shasum before/after run | environment/data (15 files) | DATA_UNCHANGED (read-only respected)
+- /usr/bin/time -p perl -e 'alarm 600; exec @ARGV' python3 .../out/derive_report.py .../environment/data /tmp/pm25_det/o2 (cwd /tmp) + run on copy /tmp/pm25_det/datacopy -> /tmp/pm25_det/o3 (cwd work/) | 1 extract + 1 copy, 9 reports each | real 0.17 s; cmp: all 9 reports byte-identical to out/ (deterministic, cwd-independent)
+- cmp app/derive_report.py out/derive_report.py | program | identical
+- /usr/bin/time -p perl -e 'alarm 600; exec @ARGV' python3 work/whatif.py out/derive_report.py environment/data /tmp/pm25_wi | 1 shipped base run + 10 what-if extract copies (w5 = 201 copies, factor 1.100..1.300 step 0.001) = 210 full-report runs, each on 19484 card rows / 16093 journal rows | real 39.36 s; shipped offsets AQ246 9, AQ363 -9, AQ634 -1, AQ680 -2, AQ785 -13, AQ896 19; journal rows moved w2 1233, w3 961, w4 1202, w6 319, w7 1734, w8 1761, w9 3366; answers 1=7976 2=5544 3=0 4=2839 5=1.187 (S4 flips to nonattainment at 1.188) 6=351 7=5594 8=6095 9=34458 10=4307; base sums all 34454, S2 5544, S3 6095, S6 5590, East 2848, valid_hours 4305
+- ps -axo pid,rss,command | grep python | (system) | no python process of mine running; /tmp/pm25_* removed

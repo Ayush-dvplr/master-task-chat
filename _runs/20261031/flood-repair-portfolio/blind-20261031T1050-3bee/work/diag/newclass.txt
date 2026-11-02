@@ -1,0 +1,118 @@
+class MWIS:
+    """Exact maximum weight independent set; weights are distinct so the optimum is unique.
+
+    Memoised branch and reduce: reductions (isolated vertex, neighbourhood
+    weight, domination), connected-component splitting, and branching on
+    vertices in reverse min-degree elimination order so that the search
+    follows a tree decomposition of the conflict graph.
+    """
+
+    def __init__(self, n, adj, weight):
+        self.n = n
+        self.adj = adj
+        self.w = weight
+        self.memo = {}
+        nbr = [set(bits(a)) for a in adj]
+        alive = set(range(n))
+        self.rank = [0] * n
+        k = 0
+        while alive:
+            v = min(alive, key=lambda x: (len(nbr[x]), x))
+            nb = nbr[v]
+            for a in nb:
+                nbr[a] |= nb
+                nbr[a].discard(a)
+                nbr[a].discard(v)
+            alive.discard(v)
+            self.rank[v] = k
+            k += 1
+
+    def components(self, mask):
+        adj = self.adj
+        comps = []
+        rest = mask
+        while rest:
+            low = rest & -rest
+            reach = low
+            frontier = low
+            while frontier:
+                nb = 0
+                for v in bits(frontier):
+                    nb |= adj[v]
+                nb &= rest & ~reach
+                reach |= nb
+                frontier = nb
+            comps.append(reach)
+            rest &= ~reach
+        return comps
+
+    def reduce(self, mask):
+        adj = self.adj
+        w = self.w
+        taken = 0
+        tw = 0
+        changed = True
+        while changed:
+            changed = False
+            for v in bits(mask):
+                if not (mask >> v) & 1:
+                    continue
+                nv = adj[v] & mask
+                if nv == 0:
+                    taken |= 1 << v
+                    tw += w[v]
+                    mask &= ~(1 << v)
+                    changed = True
+                    continue
+                wv = w[v]
+                sw = 0
+                for u in bits(nv):
+                    sw += w[u]
+                if wv > sw:
+                    # heavier than its whole neighbourhood: v is in the optimum
+                    taken |= 1 << v
+                    tw += wv
+                    mask &= ~(nv | (1 << v))
+                    changed = True
+                    continue
+                cv = nv | (1 << v)
+                for u in bits(nv):
+                    if w[u] > wv and ((adj[u] & mask) | (1 << u)) & ~cv == 0:
+                        # N[u] subset of N[v] and u heavier: v is not in the optimum
+                        mask &= ~(1 << v)
+                        changed = True
+                        break
+        return mask, taken, tw
+
+    def solve(self, mask):
+        """Return (weight, set_mask) of the optimum independent set inside mask."""
+        if mask == 0:
+            return (0, 0)
+        r = self.memo.get(mask)
+        if r is not None:
+            return r
+        m, taken, tw = self.reduce(mask)
+        if m != mask:
+            sub = self.solve(m)
+            r = (sub[0] + tw, sub[1] | taken)
+        else:
+            comps = self.components(m)
+            if len(comps) > 1:
+                tot = 0
+                sel = 0
+                for c in comps:
+                    sub = self.solve(c)
+                    tot += sub[0]
+                    sel |= sub[1]
+                r = (tot, sel)
+            else:
+                rank = self.rank
+                v = max(bits(m), key=lambda x: rank[x])
+                inc = self.solve(m & ~(self.adj[v] | (1 << v)))
+                inc = (inc[0] + self.w[v], inc[1] | (1 << v))
+                exc = self.solve(m & ~(1 << v))
+                r = inc if inc[0] > exc[0] else exc
+        self.memo[mask] = r
+        return r
+
+

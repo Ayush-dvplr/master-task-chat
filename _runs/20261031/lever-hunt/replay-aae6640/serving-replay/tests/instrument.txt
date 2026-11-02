@@ -1,0 +1,145 @@
+import functools
+import json as evidence_json
+import subprocess as evidence_subprocess
+import tempfile as evidence_tempfile
+import time as evidence_time
+import os as evidence_os
+from pathlib import Path as EvidencePath
+
+EVIDENCE = EvidencePath('/logs/verifier/field-evidence.jsonl')
+EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
+_RealPopen = evidence_subprocess.Popen
+_RealWait4 = evidence_os.wait4
+_evidence_processes = {}
+
+
+def evidence_emit(record):
+    with EVIDENCE.open('a') as stream:
+        stream.write(evidence_json.dumps(record, ensure_ascii=True, default=str) + '\n')
+
+
+class EvidencePopen(_RealPopen):
+    def __init__(self, *args, **kwargs):
+        self.evidence_started = evidence_time.monotonic()
+        self.evidence_stderr = None
+        self.evidence_command = str(args[0] if args else kwargs.get('args'))
+        if kwargs.get('stderr') == evidence_subprocess.DEVNULL:
+            self.evidence_stderr = evidence_tempfile.TemporaryFile()
+            kwargs['stderr'] = self.evidence_stderr
+        super().__init__(*args, **kwargs)
+        _evidence_processes[self.pid] = self
+
+    def communicate(self, *args, **kwargs):
+        try:
+            result = super().communicate(*args, **kwargs)
+        except evidence_subprocess.TimeoutExpired as error:
+            evidence_emit({'kind': 'timeout', 'command': self.evidence_command,
+                           'wall': evidence_time.monotonic() - self.evidence_started,
+                           'exception': type(error).__name__, 'message': str(error)})
+            raise
+        stderr = result[1]
+        if self.evidence_stderr is not None:
+            self.evidence_stderr.seek(0)
+            stderr = self.evidence_stderr.read()
+        evidence_emit({'kind': 'process', 'command': self.evidence_command,
+                       'wall': evidence_time.monotonic() - self.evidence_started,
+                       'code': self.returncode,
+                        'stderr': stderr.decode('utf-8', 'replace')[-16000:] if stderr else ''})
+        _evidence_processes.pop(self.pid, None)
+        return result
+
+
+evidence_subprocess.Popen = EvidencePopen
+
+
+def evidence_wait4(pid, options):
+    result = _RealWait4(pid, options)
+    process = _evidence_processes.pop(pid, None)
+    if process is not None:
+        stderr = b''
+        if process.evidence_stderr is not None:
+            process.evidence_stderr.seek(0)
+            stderr = process.evidence_stderr.read()
+        evidence_emit({'kind': 'cpu_process', 'command': process.evidence_command,
+                       'wall': evidence_time.monotonic() - process.evidence_started,
+                       'cpu': result[2].ru_utime + result[2].ru_stime,
+                       'code': evidence_os.waitstatus_to_exitcode(result[1]),
+                       'stderr': stderr.decode('utf-8', 'replace')[-16000:]})
+    return result
+
+
+evidence_os.wait4 = evidence_wait4
+
+
+def evidence_diff(expected, actual, path='$'):
+    if isinstance(expected, bytes):
+        try:
+            expected = evidence_json.loads(expected)
+            actual = evidence_json.loads(actual) if actual is not None else None
+        except (ValueError, TypeError, UnicodeDecodeError):
+            expected = expected.decode('utf-8', 'replace')
+            actual = actual.decode('utf-8', 'replace') if isinstance(actual, bytes) else actual
+    if type(expected) is type(actual) and expected == actual:
+        return 0, []
+    if isinstance(expected, dict) and isinstance(actual, dict):
+        count, sample = 0, []
+        for key in sorted(set(expected) | set(actual)):
+            n, rows = evidence_diff(expected.get(key), actual.get(key), path + '.' + str(key))
+            count += n
+            sample.extend(rows[:max(0, 40-len(sample))])
+        return count, sample
+    if isinstance(expected, list) and isinstance(actual, list):
+        count, sample = 0, []
+        for i in range(max(len(expected), len(actual))):
+            n, rows = evidence_diff(expected[i] if i < len(expected) else None,
+                                    actual[i] if i < len(actual) else None, f'{path}[{i}]')
+            count += n
+            sample.extend(rows[:max(0, 40-len(sample))])
+        return count, sample
+    if isinstance(expected, str) and isinstance(actual, str):
+        left, right = expected.splitlines(), actual.splitlines()
+        if len(left) > 1 or len(right) > 1:
+            return evidence_diff(left, right, path + '.line')
+    return 1, [{'field': path, 'expected': str(expected)[:1200], 'actual': str(actual)[:1200]}]
+
+
+def evidence_reports(label, expected, observed, code, normalize=None):
+    reports = {}
+    if expected:
+        for name, value in expected.items():
+            raw = observed.get(name)
+            if normalize and raw is not None:
+                raw = normalize(name, raw)
+            count, differences = evidence_diff(value, raw)
+            reports[name] = {'fields_wrong': count, 'differences': differences,
+                             'present': name in observed}
+    evidence_emit({'kind': 'reports', 'label': label, 'code': code, 'reports': reports})
+
+
+def evidence_wrap(name, recorder):
+    original = globals()[name]
+    @functools.wraps(original)
+    def wrapped(*args, **kwargs):
+        start = evidence_time.monotonic()
+        try:
+            result = original(*args, **kwargs)
+        except Exception as error:
+            evidence_emit({'kind': 'helper_exception', 'helper': name, 'args': str(args),
+                           'exception': type(error).__name__, 'message': str(error)})
+            raise
+        recorder(args, result)
+        evidence_emit({'kind': 'helper_time', 'helper': name, 'args': str(args),
+                       'wall': evidence_time.monotonic() - start})
+        return result
+    globals()[name] = wrapped
+
+
+if '_case' in globals():
+    evidence_wrap('_case', lambda a, r: evidence_reports(f'corpus_{a[0]:02d}', r[0], r[1]['outputs'], r[1]['returncode']))
+    evidence_wrap('_evidence_fixture', lambda a, r: evidence_emit({'kind': 'fixture', 'label': a[0], 'code': r['returncode'], 'stderr': r['stderr'], 'outputs': list(r['outputs']), 'complete_audit': r['complete_audit']}))
+elif '_hidden' in globals():
+    evidence_wrap('_hidden', lambda a, r: evidence_reports(f'held_out_{a[0]:02d}', r.get('expected'), {n: _read_report(r['out'], n) for n in ALL_REPORTS}, r['run']['code']))
+    evidence_emit({'kind': 'specs', 'specs': _specs(), 'groups': GROUPS})
+else:
+    evidence_wrap('_run_extract', lambda a, r: evidence_reports(f'x{a[0]+1:02d}', _expected(a[0]) if len(a) == 1 else None, r[1], r[0], canon))
+    evidence_emit({'kind': 'specs', 'specs': CORPUS, 'groups': _GROUPS})

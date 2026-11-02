@@ -1,0 +1,20 @@
+# CHECKS — hangar-check-replan (24bff4e)
+
+One line per command: command | input path | what it showed.
+
+1. `python3 master_chat_tasks/tools/name_session.py 24bff4e` | — | `opencode: ['ses_e6cd22f6dffefh9xPBsHhVzWEu']` (codex: no match); session renamed.
+2. `date` | — | Sat Oct 31 23:47:12 IST 2026 (session start).
+3. `find . -type f` + sizes | blind dir | 1 instruction, 5 docs, 8 data files; biggest `base_calendar.jsonl` 421 KB.
+4. `read instruction.md` | instruction.md | program at `/app/out/derive_report.py`, `--data/--out`, stdlib only, 60 s per run, field-by-field comparison on other data folders too.
+5. `read docs/README.md, data_conventions.md, planning_policy.md, overtime_policy.md, deferral_policy.md, output_schema.md` | environment/docs | full rule set: row filter + 8 ordered reject reasons, one line per base, compression/overtime pool, deferral reasons, 5-level plan comparison, 7 output files.
+6. `cat fleet_limits.toml class_rates.yaml check_types.json disruption_notice.md` | environment/data | season 2027A, 2027-03-01..2027-06-28 (120 days), pool 82 shifts, shift_cost 15; 3 classes; A/C/D compress 1/2/3 at 2/3/4 shifts per day; closures East 03-23..03-31 and South 04-13..04-21; 4 revised tails.
+7. `head`/`wc` on the 4 big files | environment/data | register 2621 tails, requests 5453 rows, published plan 5452 rows, calendar 7303 rows.
+8. python scan of the request rows | check_requests.csv | 29 rows are season 2027A + OPEN; bases North 7 / South 8 / West 7 / East 6 + one `north`; one `B` check type; one `ten` duration.
+9. python listing of the 29 rows with register/published joins | data folder | exactly 8 bad rows, one per reason (lines 103, 689, 784, 1207, 2219, 4107, 4494, 4714); in-season NO_START 12 days per base, no CLOSED day from the calendar.
+10. `cp app/derive_report.py out/derive_report.py` | — | program shipped at both paths.
+11. `/usr/bin/time -p perl -e 'alarm 600; exec @ARGV' python3 out/derive_report.py --data environment/data --out out` | environment/data | exit 0, **real 0.12 s** (cap 60 s), no output on stderr.
+12. `ls -R out` | out | `check_plan.json`, `plan_summary.json`, `data_quality.json`, `regions/region_{north,south,west,east}.json`, `segments/segment_{commercial,public}.json` — all 7 present.
+13. `cat plan_summary.json data_quality.json` | out | terms first 130 / second 9670 / third 5; 20 scheduled, 1 deferred, 82 of 82 shifts; the 8 rejected rows and reason counts match step 9 line for line.
+14. `/usr/bin/time -p perl -e 'alarm 600; exec @ARGV' python3 work/selfcheck.py` | out + environment/data | **real 0.04 s**, `ERRORS: none`. Independent re-derivation checked: 21 check objects sorted by request_id and exactly the non-rejected open rows; class/segment/tail/base/check_type from source; finish − start + 1 = duration − compress_days; compress within min(max_compress_days, duration−1); overtime_shifts = compress × shifts_per_day; start ≥ revised available day (clipped to season start); finish ≤ season end; start not closed and not NO_START; no closed day spanned; no two checks sharing a day on one base line; overdue_days; `moved` against published_plan.csv; deferred rows null/zero with `moved` true and reason re-derived on an empty line (`Q87483` → `no_slot`); fleet shifts 82 ≤ pool 82; every field of the 4 region and 2 segment files and of plan_summary.json recomputed from check_plan.json (terms, counts, base order North/South/West/East, segment order commercial/public); data_quality counts cover all 8 reasons and sum to the rejected list length. (First run of this checker aborted on its own duplicate-id bookkeeping — checker bug, fixed in the checker only; the program was not touched.)
+15. `python3 -c` dump of the first 6 checks | out/check_plan.json | e.g. `Q10276 East 2027-03-15..2027-03-16 compress 1 overdue 0 moved false`, `Q37519 South 2027-04-22..2027-04-26 compress 2 overdue 1 moved true`.
+16. `ps -axo pid,rss,command | grep python` | — | only the master's own `auto.py watch`; no python process of mine left running.

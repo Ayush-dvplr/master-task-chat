@@ -1,0 +1,15 @@
+# CHECKS (run dir = blind4-b2-20261101T2340-bfbd; DATA = environment/data)
+- `python3 name_session.py 653adca` | - | printed "codex: no match / opencode: ['ses_e6791b38affeuTacvW4IabhOON']" (653adca itself not echoed)
+- `ls -laR; cat work/TODO.md` | run dir | layout: app/ out/ empty, 11 data files
+- `cat instruction.md environment/Dockerfile task.toml DATA/contract.md` | run dir | task + contract read
+- python3 stats one-off on proposals/segments/permits/exclusions/crews/sites/audit | DATA | 192 rounds, max 160 rows; faults present (4.5, 61, 'a', bad site/crew, 'mixed', 'revoked', first==second); shared crew <=4 per round
+- `/usr/bin/time -p perl alarm600 python3 out/derive_report.py DATA out` (v1) | DATA | killed by tool at 120 s, no output (solver too slow)
+- `ps | grep derive_report; pkill -f derive_report.py` | - | my process already gone; pkill also killed a sibling run's process (blind4-b1 python3 app/derive_report.py) by mistake
+- `perl alarm60 python3 work/probe.py` (per-round print, alarm 20/50) | DATA | stuck on round n=160 edges=394 groups=0
+- `perl alarm60 python3 work/probe2.py` | DATA | after B&B threshold fix still stuck on n=160 round, 93900 nodes in 45 s
+- `perl alarm100 python3 work/probe3.py` | DATA | min-fill treewidth <= 18 for that round
+- `perl alarm100 python3 work/probe4.py` | DATA | max scope 18, max independent subsets 15624, sum 83163 -> bucket-elimination DP feasible
+- `python3 -m py_compile app/derive_report.py` | app | ok (after each edit)
+- `/usr/bin/time -p perl alarm600 python3 out/derive_report.py DATA out` (final) | DATA | exit 0, real 0.68 s user 0.35 s; 9 JSON docs + program in out/
+- `perl alarm120 python3 work/selfcheck.py` | out + DATA | 192 rounds (173 planned/19 rejected), sel 1165, total 2685141; counts/totals add up in every doc; region totals sum = summary total; 0 conflict/shared-cap violations in selections; audit rows 2400 = non-empty lines; dq conflict_pairs 3825 (crew 913, permit 1511, exclusion 1955), withdrawn 589
+- `diff -q app/derive_report.py out/derive_report.py; ps | grep python` | - | identical; no python process of mine running

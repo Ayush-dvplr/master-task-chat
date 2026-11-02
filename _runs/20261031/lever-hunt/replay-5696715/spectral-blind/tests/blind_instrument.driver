@@ -1,0 +1,164 @@
+import ast
+import csv
+import importlib.util
+import io
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+import traceback
+import types
+from pathlib import Path
+
+short, dest = sys.argv[1:3]
+DEST = Path(dest)
+DEST.mkdir(parents=True, exist_ok=True)
+fake = types.ModuleType('rewardkit')
+fake.criterion = lambda *a, **k: lambda f: f
+class Criteria:
+    def __getattr__(self, name):
+        return lambda *a, **k: None
+fake.criteria = Criteria()
+sys.modules['rewardkit'] = fake
+spec = importlib.util.spec_from_file_location('subject', '/tests/test_output.py')
+m = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+events = []
+current = ''
+
+def diff(expected, actual, path='$'):
+    if type(expected) is not type(actual):
+        return [{'path': path, 'expected': str(expected), 'actual': str(actual)}]
+    if isinstance(expected, dict):
+        result = []
+        for key in sorted(set(expected) | set(actual)):
+            if key not in expected or key not in actual:
+                result.append({'path': path + '.' + key, 'expected': str(expected.get(key, '<MISSING>')), 'actual': str(actual.get(key, '<MISSING>'))})
+            else:
+                result.extend(diff(expected[key], actual[key], path + '.' + key))
+        return result
+    if isinstance(expected, (list, tuple)):
+        result = []
+        for i in range(max(len(expected), len(actual))):
+            if i >= len(expected) or i >= len(actual):
+                result.append({'path': f'{path}[{i}]', 'expected': str(expected[i:i+1]), 'actual': str(actual[i:i+1])})
+            else:
+                result.extend(diff(expected[i], actual[i], f'{path}[{i}]'))
+        return result
+    return [] if expected == actual else [{'path': path, 'expected': str(expected), 'actual': str(actual)}]
+
+def parse(name, blob):
+    text = blob.decode()
+    if name.endswith('.json'):
+        return json.loads(text)
+    if name.endswith(('.csv', '.tsv', '.psv')):
+        return list(csv.DictReader(io.StringIO(text), delimiter={'.csv': ',', '.tsv': '\t', '.psv': '|'}[Path(name).suffix]))
+    return text
+
+def compare_artifacts(expected, actual, label):
+    rows = {}
+    for name in sorted(set(expected) | set(actual)):
+        if name not in expected or name not in actual:
+            rows[name] = [{'path': '$', 'expected': 'present' if name in expected else 'absent', 'actual': 'present' if name in actual else 'absent'}]
+        elif expected[name] != actual[name]:
+            rows[name] = diff(parse(name, expected[name]), parse(name, actual[name]))
+            if not rows[name]:
+                rows[name] = [{'path': '$bytes', 'expected': repr(expected[name][:120]), 'actual': repr(actual[name][:120])}]
+    (DEST / (label + '.json')).write_text(json.dumps(rows, indent=2) + '\n')
+    return {name: len(v) for name, v in rows.items()}
+
+original_popen = subprocess.Popen
+class LoggedPopen(original_popen):
+    def __init__(self, *a, **k):
+        self.started = time.monotonic()
+        self.command = a[0] if a else k['args']
+        data_path = Path(self.command[-2])
+        self.corpus_hash = hashlib.sha256(b''.join(p.relative_to(data_path).as_posix().encode() + b'\0' + p.read_bytes() for p in sorted(data_path.rglob('*')) if p.is_file())).hexdigest() if data_path.is_dir() else None
+        self.record = k.get('stderr') == subprocess.DEVNULL
+        if self.record:
+            self.errfile = (DEST / f'child-{len(events)}.stderr').open('w+')
+            k['stderr'] = self.errfile
+        super().__init__(*a, **k)
+    def wait(self, *a, **k):
+        result = super().wait(*a, **k)
+        if self.record:
+            self.errfile.flush()
+            self.errfile.seek(0)
+            events.append({'check': current, 'command': self.command, 'returncode': result, 'seconds': time.monotonic() - self.started, 'stderr': self.errfile.read(), 'corpus_hash': self.corpus_hash})
+            self.record = False
+        return result
+subprocess.Popen = LoggedPopen
+
+def tracer(frame, event, arg):
+    if event == 'return' and frame.f_code.co_filename == '/tests/test_output.py' and frame.f_code.co_name == 'ledger_audit_records_exact':
+        events.append({'check': current, 'ledger_comparison': {k: str(frame.f_locals[k]) for k in ('before', 'after', 'before_exact', 'after_exact') if k in frame.f_locals}})
+    if event == 'exception' and frame.f_code.co_filename == '/tests/test_output.py':
+        kind, value, tb = arg
+        if kind not in (StopIteration, GeneratorExit):
+            record = {'check': current, 'line': frame.f_lineno, 'exception': kind.__name__, 'message': str(value)}
+            if kind is AssertionError and 'got' in frame.f_locals and 'exp' in frame.f_locals:
+                record['comparison'] = diff(frame.f_locals['exp'], frame.f_locals['got'])
+            events.append(record)
+    return tracer
+
+checks = []
+if short == 'ladder':
+    m._bind(Path('/app'))
+    expected = m._expected()
+    actual = {p.name: p.read_bytes() for p in Path('/app/out').iterdir() if p.is_file() and p.name != 'settle.py'}
+    checks.append({'visible_artifact_differences': compare_artifacts(expected, actual, 'visible-diff')})
+    original_hidden = m._run_hidden
+    def logged_hidden(seed):
+        actual = original_hidden(seed)
+        summary = compare_artifacts(m._expected(seed), actual, f'hidden-{seed}-diff')
+        events.append({'check': current, 'seed': seed, 'artifact_differences': summary})
+        return actual
+    m._run_hidden = logged_hidden
+    names = sorted(n for n in vars(m) if n.startswith('_impl_test_'))
+    for name in names:
+        current = name.removeprefix('_impl_')
+        start = time.monotonic()
+        sys.settrace(tracer)
+        try:
+            getattr(m, name)()
+            record = {'check': current, 'passed': True}
+        except Exception as exc:
+            record = {'check': current, 'passed': False, 'exception': type(exc).__name__, 'message': str(exc), 'traceback': traceback.format_exc()}
+        finally:
+            sys.settrace(None)
+        record['seconds'] = time.monotonic() - start
+        checks.append(record)
+else:
+    original_load = m._load
+    def logged_load(out, name):
+        value = original_load(out, name)
+        if current in ('cohort_reports_carry_period_matrices', 'missing_diagonal_fallback_applied', 'edgeless_extract_reports_zero_shift', 'ledger_audit_records_exact'):
+            (DEST / (current + '-' + name)).write_text(json.dumps(value, default=str, indent=2) + '\n')
+        return value
+    m._load = logged_load
+    original_same = m._same
+    def logged_same(actual, expected):
+        result = original_same(actual, expected)
+        if not result:
+            events.append({'check': current, 'comparison': diff(expected, actual)})
+        return result
+    m._same = logged_same
+    names = [node.name for node in ast.parse(Path('/tests/test_output.py').read_text()).body if isinstance(node, ast.FunctionDef) and node.decorator_list]
+    for name in names:
+        current = name
+        start = time.monotonic()
+        sys.settrace(tracer)
+        try:
+            value = getattr(m, name)(Path('/app'))
+            record = {'check': current, 'passed': value}
+        except Exception as exc:
+            record = {'check': current, 'passed': False, 'exception': type(exc).__name__, 'message': str(exc), 'traceback': traceback.format_exc()}
+        finally:
+            sys.settrace(None)
+        record['seconds'] = time.monotonic() - start
+        checks.append(record)
+(DEST / 'checks.json').write_text(json.dumps(checks, indent=2) + '\n')
+(DEST / 'events.json').write_text(json.dumps(events, indent=2) + '\n')
+print(json.dumps(checks, indent=2))

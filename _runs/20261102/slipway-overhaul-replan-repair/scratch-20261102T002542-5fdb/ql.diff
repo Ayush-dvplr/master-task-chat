@@ -1,0 +1,951 @@
+diff --git a/Input_Bundle_QC/01_Instruction_QC.md b/Input_Bundle_QC/01_Instruction_QC.md
+index c11e08f8..28574ea3 100644
+--- a/Input_Bundle_QC/01_Instruction_QC.md
++++ b/Input_Bundle_QC/01_Instruction_QC.md
+@@ -41,9 +41,10 @@ Layout is the author's choice: headings, lists, tables and code blocks are all f
+ - IN-11 Network wording matches the offline contract. `[environment] network_mode` is pinned to `"no-network"` for every task, so there is no declared policy to look up and nothing to compare: the agent's machine has no network, full stop. The instruction must therefore never ask the agent to download, fetch, clone, install or browse anything, and must never name a URL as a source the agent is expected to read. Any such sentence is a fail, because the agent cannot comply and will burn its budget discovering that. The `[verifier]` and `[agent]` network lines are harness plumbing - the judge reaching its model and the agent harness reaching its own - and are irrelevant here; do not read them as the task being online. The instruction does NOT have to mention being offline: silence is correct and complete, and an instruction that never refers to the network is completely fine. If the task genuinely cannot be done without the network, that is a task-design finding against the offline contract, not a reason to treat the instruction as right.
+ - IN-12 Metadata truthfulness: decide for yourself what kind of work DOMINATES the instruction, then compare against task.toml. `[metadata] category` must name that dominant kind of work: a mismatch is a fail, and it is still a fail when the declared category appears only as a side aspect of the task (a Debugging task with a security flavour declared as "Security" fails). `[task] description` must be an honest summary of what the instruction asks: misleading = fail, sloppy but true = minor. `keywords` and `tags` must relate to the task's actual subject matter: completely unrelated entries are a fail, weak-but-related entries are a warn.
+ - IN-13 Internal consistency: the instruction must not contradict itself. Read every requirement against every other requirement. Two statements that demand incompatible things (one paragraph says "print one JSON object", another says "print one line per record"; a constraint forbids a tool another sentence requires), constraints that jointly make the task impossible to complete, or circular dependencies (A must be derived from B while B must be derived from A) are all fails. Name both sentences and explain why an agent cannot satisfy both at once.
+-- IN-14 End state and rules of engagement, never the fix path. An instruction says two legitimate kinds of thing. It says WHAT the finished work must look like, and it says WHAT RULES the agent must work within while producing it: which files it may touch, which tool it must use, what order things happen in, what it must leave alone. What it must never do is hand over the method of solving. The discriminator, applied sentence by sentence: after reading this, does the agent know more about HOW TO GET the answer, or only about what it may and may not do while getting it? The first is a recipe. The second is a constraint, and constraints are expected here, not tolerated (gate 04 JD-16 grades them). Fine: natural context and partial direction ("start by reading the policy file", "make sure the totals match across both sources"); any stated rule of engagement ("change only the files under src/parser", "leave the config untouched", "use the vendored client rather than installing a fresh one", "get the migration written before you touch the schema"). Fail: a numbered or implied sequence of operations that, followed verbatim, produces the answer with no reasoning left ("open X, take the value in row 4, multiply by the rate in Y, write it to Z"); an exact formula handed over when deriving that formula is the work; naming the exact join keys or algorithm when discovering them is the difficulty the task claims. The test: could a careless agent score full reward by transcribing the instruction into code without understanding the problem? If yes, the difficulty is fake and this is a fail. A constraint never trips that test, because closing a door does not produce an answer.
+-- IN-15 Every graded rule of engagement is stated somewhere the agent can read it. If a test or a judged criterion grades HOW the agent worked, the rule must appear in the contract: the instruction itself, or a specification or rules file the instruction points the agent to. The prompt may delegate here just as it may anywhere else (IN-8), so a task that says "the operating rules are in /app/data/RULES.md" is complete and you must not ask for the rules to be copied into the prompt. Open `tests/judge.toml` and list every criterion whose `[criterion.annotations]` table carries `type = "instruction following"`, which is the label a constraint criterion carries (gate 04 JD-16), then scan `tests/test_output.py` for any check grading scope or what was left untouched. Tool-use and ordering rules will not appear among the tests, because tests may not read command history (gate 03 TS-12), so the judged channel is the only place they can be graded. For each one, find the sentence and name the file it lives in. A rule that is graded but appears in no file the agent can read costs the honest agent reward for something it had no way to know, which is the same defect as IN-8's unreachable expectation: fail, and name both the checker and the missing sentence. Vagueness counts against the author here, because a rule the agent cannot act on is not a stated rule. "Be careful around the config" states nothing; "do not modify anything under /etc" states a rule. Judge whether an agent could tell, before acting, whether a given action complies. This check runs in the same direction as gate 04 JD-16 and finds the same defect from the other side. That doubling is deliberate: each gate reads the rule from its own side, here from the prompt and there from the criterion, so a rule stated nowhere has to survive two readings instead of one. Reach your verdict here from the files, not from what the other gate concluded.
++- IN-14 End state and rules of engagement, never the fix path. An instruction says two legitimate kinds of thing. It says WHAT the finished work must look like, and it says WHAT RULES the agent must work within while producing it: which files it may touch, which tool it must use, what order things happen in, what it must leave alone. What it must never do is hand over the method of solving. The discriminator, applied sentence by sentence: after reading this, does the agent know more about HOW TO GET the answer, or only about what it may and may not do while getting it? The first is a recipe. The second is a constraint, and constraints are expected here, not tolerated (gate 04 JD-16 grades them). Fine: natural context and partial direction ("start by reading the policy file", "the figures in your summary must agree with the ledger"), which orients the agent or states what the finished work must look like without telling it what it will find in the data, the line IN-17 draws; any stated rule of engagement ("change only the files under src/parser", "leave the config untouched", "use the vendored client rather than installing a fresh one", "get the migration written before you touch the schema"). Fail: a numbered or implied sequence of operations that, followed verbatim, produces the answer with no reasoning left ("open X, take the value in row 4, multiply by the rate in Y, write it to Z"); an exact formula handed over when deriving that formula is the work; naming the exact join keys or algorithm when discovering them is the difficulty the task claims. The test: could a careless agent score full reward by transcribing the instruction into code without understanding the problem? If yes, the difficulty is fake and this is a fail. A constraint never trips that test, because closing a door does not produce an answer.
++- IN-15 Every graded rule of engagement is stated somewhere the agent can read it. If a test or a judged criterion grades HOW the agent worked, the rule must be stated in a sentence the agent can read: the instruction itself, or any file inside the input directories `environment/Dockerfile` copies into the agent image. The prompt may delegate here just as it may anywhere else (IN-8), and need not name the file, so a task that says "the operating rules are in /app/data/RULES.md" is complete, and so is a RULES.md sitting in the input the agent was handed; you must not ask for the rules to be copied into the prompt. Open `tests/judge.toml` and list every criterion whose `[criterion.annotations]` table carries `type = "instruction following"`, which is the label a constraint criterion carries (gate 04 JD-16). Add any criterion you read as enforcing a rule of engagement whatever its label claims, since the label is a claim to check and not an answer to accept (JD-15), and leave out any you read as a standard of work nobody stated: verification habits, honest reporting and restraint are conduct criteria that need no sentence by design, because demanding one would force the method into the prompt and fail this gate under IN-14, so a conduct criterion wearing the `instruction following` label is a labelling defect for gate 04 rather than a missing sentence for you. Then scan `tests/test_output.py` for any check grading scope or what was left untouched. Tool-use and ordering rules will not appear among the tests, because tests may not read command history (gate 03 TS-12), so the judged channel is the only place they can be graded. For each one, find the sentence and name the file it lives in. A rule that is graded but appears in no file the agent can read costs the honest agent reward for something it had no way to know, which is the same defect as IN-8's unreachable expectation: fail, and name both the checker and the missing sentence. Vagueness counts against the author here, because a rule the agent cannot act on is not a stated rule. "Be careful around the config" states nothing; "do not modify anything under /etc" states a rule. Judge whether an agent could tell, before acting, whether a given action complies. This check runs in the same direction as gate 04 JD-16 and finds the same defect from the other side. That doubling is deliberate: each gate reads the rule from its own side, here from the prompt and there from the criterion, so a rule stated nowhere has to survive two readings instead of one. Reach your verdict here from the files, not from what the other gate concluded.
+ - IN-16 No significant ambiguity in anything that is graded. IN-8 asks whether a graded expectation is reachable at all; this asks the narrower question of whether it is reachable in exactly one way. The defect has a precise shape, and you must show all three parts or you do not have a finding. First, something graded depends on the answer. Second, the contract admits two readings that a competent practitioner could both defend. Third, nothing in any file the agent can read picks between them, so the agent has to guess and the grader punishes half the guesses. Typical shapes: a boundary that could be inclusive or exclusive, an order that could be by first appearance or sorted, a total that could include or exclude a category, a field that could be omitted or emitted empty, a rounding or tie-break the contract never settles. Read the tests and the outcome judged criteria first, because they tell you which questions are actually graded, then read the contract asking whether it answers each one. Report it by writing out both readings in your own words, naming the checker that grades the answer, and saying which files you searched for the tiebreak. A finding without both readings written out is not usable and must not be raised. This is deliberately not a general complaint about vague prose. Wording you merely find loose, terse or unpolished is not this check. If both readings would satisfy every test and every criterion, there is no defect here, because nothing turns on the answer. Say nothing and move on.
++- IN-17 The instruction must not pre-announce what the agent is supposed to discover. Withholding is the default and difficulty is the point: traps, misleading surfaces, data whose shape only emerges from reading it, and rules that show themselves under a single condition are all legitimate, and gate 02 DS-21 protects them. What fails is a prompt that hands over the input's hidden structure, or the branches the work requires, before the agent has looked: "watch out for the null timestamps", "note that two records share an id", "some rows still use the old format", "remember the fiscal year starts in April". Each sentence like that converts a discovery into a transcription, and the bundle still grades clean afterwards, because every announced branch gets its fixture and AL-27 confirms the fixture fires, so nothing downstream will catch it and this gate is the only place it can be caught. Two conditions have to hold together, and the second is the one that separates a hint from a requirement. First, the sentence announces something the agent was meant to find for itself: a property of the input, an edge case inside it, a branch the work has to take. Second, the shipped input ALREADY establishes that thing, so the agent could have read it off the data it was handed (gate 05 AL-1 calls such a fact determinate and carries the worked cases to measure against, the sharpest being that an input which is merely silent about something has established nothing). Only when both hold is the sentence doing nothing but saving the agent the work. If the input does not establish it, the sentence is the only ground the graded item has, and deleting it would not make the task harder, it would make a graded item unfair (AL-1) or the task impossible (DS-21). That sentence is a requirement and it stays. Difficulty is not the test here and neither is how much the sentence gives away, which is why no rule of engagement is ever a hint: nothing in a data file can establish a prohibition, so "change only the files under src/parser" and "leave the config untouched" are requirements by construction, and IN-15 with gate 04 JD-16 oblige the author to state them. The same follows for a signpost that the bundle's own material is not authoritative (Final_checklist CL-6), for whatever settles a graded ambiguity (IN-16), and for the output's required shape and literals wherever the shipped input does not carry them itself (gate 02 DS-25). Default to keeping the sentence. To fail this check you must do two things: name the discovery the sentence replaces, and point to where the shipped input already establishes it. If you cannot do both, the prompt is being helpful rather than broken, and it passes. Orientation that discloses nothing is fine as well ("start by reading the policy file"), and so is any statement of what the finished work must look like. What this check removes is advance warning about what the agent will find once it starts reading.
+ 
+ ## Reference: what the script enforces (context, not a re-check)
+ 
+@@ -57,7 +58,7 @@ instruction_qc.py decides these mechanically and owns the verdict on them. They
+ - IN-S6 The word "reward" does not appear. If the task's domain legitimately needs it, record that as a tasker-override case rather than passing it yourself.
+ - IN-S7 Any input path the prompt does promise under an input COPY destination (/app/data/, /app/repo/, ...) actually exists in environment/, and every artifact declared in task.toml has exactly one landing place the prompt makes inferable. The prompt is never required to mention an input at all, so absence is not a finding here; a promised-but- missing input is, because it sends the agent nowhere. On the output side the script only looks for the literal path string and will warn when it finds just the filename, so judge natural phrasing yourself: one unambiguous destination passes, two plausible destinations or none is a fail.
+ 
+-Everything else in this gate (naturalness, grammar, leaks, acceptance surface, IN-11 network wording, IN-12 metadata truthfulness) has no script coverage at all: you are the only line of defence there.
++Everything else in this gate (naturalness, grammar, leaks, acceptance surface, IN-11 network wording, IN-12 metadata truthfulness, IN-17 pre-announced discoveries) has no script coverage at all: you are the only line of defence there.
+ 
+ ## Checklist (copy verbatim into your report)
+ 
+@@ -83,9 +84,10 @@ Everything else in this gate (naturalness, grammar, leaks, acceptance surface, I
+ - [ ] IN-14 describes the end state and any rules of engagement, never a recipe that is the solution
+ - [ ] IN-15 every graded rule of engagement is stated plainly enough to act on
+ - [ ] IN-16 nothing graded has two defensible readings the contract fails to settle (both readings written out, or no finding)
++- [ ] IN-17 no sentence announcing a discovery the shipped input already establishes (name both the discovery and the input that carries it, or raise nothing); anything the data cannot establish, rules of engagement included, is a requirement and stays
+ 
+ ## Severity guide
+ 
+-fail: IN-1..IN-8 and IN-11 violations, IN-9 answer or algorithm leak in the instruction (a withheld rule you suspect is undiscoverable is recorded here but ruled on by gate 02 DS-21, so do not fail it here), em/en dashes, register so off it reads as AI slop, repeated grammar or spelling errors (IN-L2), IN-12 category mismatch (including dominant-vs-side), misleading description, unrelated keywords/tags, IN-13 contradictions or impossible constraint sets (including rules of engagement that cannot all be obeyed at once), IN-14 solution-recipe instructions, IN-15 a graded rule of engagement that the instruction never states, or states too vaguely for an agent to tell whether an action complies, IN-16 a graded expectation with two defensible readings and nothing in any agent-visible file to settle them. minor: single awkward sentence, one isolated grammar slip, one borderline word, IN-12 sloppy-but-true description, IN-16 an ambiguity you can show is real but that no test or criterion actually turns on. warn: style judgment calls, IN-12 weak-but-related keywords/tags.
++fail: IN-1..IN-8 and IN-11 violations, IN-9 answer or algorithm leak in the instruction (a withheld rule you suspect is undiscoverable is recorded here but ruled on by gate 02 DS-21, so do not fail it here), em/en dashes, register so off it reads as AI slop, repeated grammar or spelling errors (IN-L2), IN-12 category mismatch (including dominant-vs-side), misleading description, unrelated keywords/tags, IN-13 contradictions or impossible constraint sets (including rules of engagement that cannot all be obeyed at once), IN-14 solution-recipe instructions, IN-15 a graded rule of engagement that the instruction never states, or states too vaguely for an agent to tell whether an action complies, IN-16 a graded expectation with two defensible readings and nothing in any agent-visible file to settle them, IN-17 the instruction announcing a discovery that the shipped input already establishes, with both the discovery and the input evidence named. minor: single awkward sentence, one isolated grammar slip, one borderline word, IN-12 sloppy-but-true description, IN-16 an ambiguity you can show is real but that no test or criterion actually turns on. warn: style judgment calls, IN-12 weak-but-related keywords/tags.
+ 
+ Report in the fixed output format defined in the "Output format (all gates)" section of Final_checklist.md, then stop.
+diff --git a/Input_Bundle_QC/02_Data_Solution_QC.md b/Input_Bundle_QC/02_Data_Solution_QC.md
+index 0dff767b..4fd6e7ac 100644
+--- a/Input_Bundle_QC/02_Data_Solution_QC.md
++++ b/Input_Bundle_QC/02_Data_Solution_QC.md
+@@ -64,7 +64,7 @@ The data folder is the world the agent lives in. It must be necessary (task unso
+ - DS-16 The oracle MAY read environment/ (allowed - it runs in the agent container where the input directories exist).
+ - DS-17 The oracle must never read or reference tests/ (test_output.py, judge.toml, reward.toml) - an oracle that peeks at the grader is a fail.
+ - DS-18 Idempotency: running solve.sh twice should not corrupt the result - warn only.
+-- DS-19 Stack conformance: solution code must respect constraints the contract imposes on the agent (stdlib-only, specific language, which files may be touched, which tool to use, what to leave alone). The contract is the instruction plus any specification or rules file it points the agent to, so open that file too: a rule of engagement may live there rather than in the prompt. If the contract binds the agent to constraints the oracle itself violates, flag it.
++- DS-19 Stack conformance: solution code must respect constraints the contract imposes on the agent (stdlib-only, specific language, which files may be touched, which tool to use, what to leave alone). A rule of engagement counts when it is stated in a sentence the agent can read, in the instruction or in any file inside the input directories `environment/Dockerfile` copies into the agent image, so open those files too: a rule may live there rather than in the prompt. If the contract binds the agent to constraints the oracle itself violates, flag it.
+ - DS-20 The oracle obeys the contract, independently of the tests. Passing every test (DS-15) is NOT proof: tests undercover, and an oracle can score 1.0 while violating a stated rule no fixture happens to trigger. Walk the oracle's logic against every rule the contract states, wherever that rule lives, including rules no test exercises. Ordered logic deserves special care: when the contract states a precedence or tie-break chain ("check A before B before C"), read the oracle's actual check order and compare it pairwise against the stated chain. The oracle is the ground truth of the task; when it disagrees with the contract, every agent that obeys the prompt gets punished for the oracle's bug. Any divergence between stated rule and oracle behaviour is a fail, even when no current test would catch it.
+ - DS-24 The oracle is an independent implementation, not a copy of the verifier. Open `solution/solve.py` and `tests/test_output.py` side by side and judge whether the oracle solves the task or merely re-runs the grader's own code. tests_qc measures shared substantive lines, fails at 35% and warns from 20%, but the number is only a prompt to look: a small shared block can be the whole answer, and a large one can be incidental. This matters because a copied oracle is guaranteed to score 1.000. It cannot disagree with the grader, so the Step 10 oracle run returns a green light while proving nothing about whether the task is solvable at all. Two independent implementations only agree when both are right, and that agreement is the only evidence the oracle run actually produces. Some sharing is legitimate. A verifier that must generate a corpus needs an encoder, and the oracle needs one too. What is not legitimate is the oracle importing, copying or restating the logic that decides the grade. Ask which part of the shared code is the thing being graded: if the answer is "the shared part", the oracle proves nothing and this is a fail. Keep overlap as low as the task allows even when it is under the limit, and say so when you see an author sitting just beneath the line.
+ - DS-21 Solvable from what the agent actually receives. This is the mirror of DS-2: DS-2 asks whether the data is needed, this asks whether it is enough. Close `solution/` and `tests/` in your head and hold only what the agent holds, which is `instruction.md` plus everything under `environment/`. Nothing else reaches the agent. One question: could a determined expert, given unlimited time and skill and nothing but those files, actually arrive at the graded answer? If yes, this check passes, however brutal the task is. Difficulty is the point and it may come from anywhere. Traps, deliberately misleading surfaces, rules that only show themselves under one specific condition, data scattered across many files, a value in one file that only makes sense once another file is understood, chains where each step unlocks the next, edge cases that punish a naive reading, long grinding search. None of that is a defect and none of it belongs in your report. Working it out is the agent's job, and a task that gives up its answer easily is a worse task. The defect is different in kind: information the agent needs that exists in none of its files and follows from nothing in them. The clearest case is a value the agent must reproduce exactly while nothing it can see constrains or confirms it, such as a secret key, a private label, or an arbitrary constant taken from the author's head. There the agent has nothing to reason from and no way to tell a right guess from a wrong one, so skill stops mattering and the task is impossible rather than hard. Default to pass. To fail this check you must do two things: name the exact piece of information the solver cannot obtain, and show that it appears in no agent-visible file and follows from nothing in them. If you cannot do both, the task is hard, not impossible, and it passes.
+diff --git a/Input_Bundle_QC/03_Tests_QC.md b/Input_Bundle_QC/03_Tests_QC.md
+index abbe1870..05b93c3d 100644
+--- a/Input_Bundle_QC/03_Tests_QC.md
++++ b/Input_Bundle_QC/03_Tests_QC.md
+@@ -1,6 +1,6 @@
+ # Gate 03 - Tests QC (`tests/`)
+ 
+-The files under review are the test channel of one input bundle: `tests/Dockerfile`, `test.sh`, `test_output.py` (the rewardkit criteria and their weight registrations) and `reward.toml`. (judge.toml has its own gate, 04.) To judge them you also open, read-only, `instruction.md` together with any specification, schema or rules file it points the agent at under `environment/` (TS-17, TS-18, TS-19, TS-20), `task.toml` for the declared artifacts (TS-7), and `tests/judge.toml` for its positive weight total, which `reward.toml` divides by (TS-10). Your findings are still about the tests; defects inside those other files belong to their own gates. If you were not given the bundle path, ask for it and stop.
++The files under review are the test channel of one input bundle: `tests/Dockerfile`, `test.sh`, `test_output.py` (the rewardkit criteria and their weight registrations) and `reward.toml`. (judge.toml has its own gate, 04.) To judge them you also open, read-only, `instruction.md` and the input directories `environment/Dockerfile` copies into the agent image (TS-17, TS-18, TS-19, TS-20), `task.toml` for the declared artifacts (TS-7), and `tests/judge.toml` for its positive weight total, which `reward.toml` divides by (TS-10). Your findings are still about the tests; defects inside those other files belong to their own gates. If you were not given the bundle path, ask for it and stop.
+ 
+ The shape every one of these files must follow is in the "Authoritative test channel templates" section of `Final_checklist.md` (test_output.py, reward.toml with how to read it, test.sh, tests/Dockerfile). This gate checks against those templates and does not restate them in full.
+ 
+@@ -16,14 +16,14 @@ Throughout this gate a "test" means one rewardkit check in `test_output.py`: a t
+ 
+ ## Mindset
+ 
+-The tests ARE the task. An agent that satisfies the contract but fails the tests was robbed; an agent that games the tests without doing the work stole reward. Both are QC failures of the same root kind: the tests and the contract describe different tasks. The contract is the instruction together with any specification, schema or rules file the instruction points the agent to in the container, since the prompt is free to delegate the detail rather than restate it (TS-19). Read every test asking "what observable does this read, and could the agent have learned from the contract that this observable would matter?"
++The tests ARE the task. An agent that satisfies the contract but fails the tests was robbed; an agent that games the tests without doing the work stole reward. Both are QC failures of the same root kind: the tests and the contract describe different tasks. A test is fair when what it reads is either promised by the instruction or determinate in the input the agent was handed, and the prompt does not have to point at the file that establishes it, since working out your own data is the task (TS-19). Read every test asking "what observable does this read, and could the agent have learned, from the prompt or from the input it was given, that this observable would matter?"
+ 
+ ## The two-container rule (memorize this)
+ 
+ Grading runs in a fresh container built FROM `tests/Dockerfile` with `tests/` as the build context. No agent input path (`/app/data`, or wherever environment/Dockerfile COPYs an input directory) EXISTS there. Declared artifacts are uploaded to their exact declared absolute paths (e.g. `/app/decode.py`); the harness copies the declared path string verbatim, which is why task.toml artifacts must be absolute. Therefore:
+ 
+ - TS-1 Nothing under tests/ may unconditionally read an agent input path (`/app/data` or any other input COPY destination) at grade time. Guaranteed crash. Fail. Comments and docstrings that merely mention the path are fine (the script skips them), and a read behind an existence check or env override is safe (the guard falls through to a fallback when the path is absent) - not flagged.
+-- TS-2 `tests/Dockerfile` must `COPY . /tests/` (the image must own the test files: in separate mode Harbor 0.24.0 does not upload tests/ when tests/Dockerfile exists) and install exactly `harbor-rewardkit==0.2.1`, the version Harbor 0.24.0 pins. An unpinned, ranged or different version is a fail.
++- TS-2 `tests/Dockerfile` must `COPY . /tests/` (the image must own the test files: in separate mode Harbor 0.24.0 does not upload tests/ when tests/Dockerfile exists) and install exactly `harbor-rewardkit==0.2.1`, the version Harbor 0.24.0 pins. An unpinned, ranged or different version is a fail. The same line must pin litellm with `==` (the reference pin is `litellm==1.105.0`, what the agent image pins): rewardkit accepts `litellm>=1.83` with no upper bound, so an unpinned verifier takes whatever PyPI serves at build time, and a withdrawn litellm 1.107.0 stable shipped site-packages hooks that fetched and ran remote code in the container holding the judge key. Unpinned or a quarantined version is a fail; another exact version is a warn needing tasker approval.
+ - TS-3 `tests/Dockerfile` should `RUN mkdir -p /app` (reference-task convention). The harness auto-creates artifact parent dirs at upload time, so absence is a warn, not a crash.
+ - TS-4 `tests/Dockerfile` must install every third-party package test_output.py imports other than rewardkit (mind pip aliases: yaml/pyyaml, PIL/pillow, sklearn/scikit-learn) and every tool the scripts invoke (`util-linux` for `setpriv` or `runuser`), on Python 3.12 or newer, which rewardkit requires. pytest is not required. The agent image's packages are NOT available here.
+ - TS-5 Any ground truth the tests need (expected values, fixtures, generators) must live inside tests/ itself, never be read from agent-writable paths.
+@@ -47,7 +47,7 @@ Grading runs in a fresh container built FROM `tests/Dockerfile` with `tests/` as
+ - TS-16 Anti-cheat negatives must fire on the cheat and ONLY on the cheat. Ask for each: could an honest solution trip this? Could a cheater slip past it?
+ - TS-17 Comparisons are exact where the instruction promises exactness: byte equality, int equality, strict JSON equality. Watch the Python trap where `True == 1`: a bool/int confusion that lets `1` pass where `true` is required contradicts an exact-comparison promise - fail if the instruction implies strict types.
+ - TS-18 Tolerances, when legitimate (floats), must be stated in the instruction. A hidden tolerance, or a missing one that makes honest float output fail, is a fail.
+-- TS-19 Every graded behaviour must be learnable by the agent, and every promise made to the agent must be graded by something. Learnable means stated in the instruction OR in a specification, schema or rules file the instruction points it to in the container; the prompt may delegate the detail rather than restate it, so check the shipped spec before calling anything undocumented. On the coverage direction, do not demand that a test cover every promise: a promise may legitimately be graded by a judged criterion instead, which is common for things no assertion can decide. Flag a promise nothing grades at all, never one the judged channel handles. (The full cross-walk happens in Gate 05; flag obvious mismatches you see now, especially error-object shapes and extra undocumented error cases.)
++- TS-19 Every graded behaviour must be learnable by the agent, and every promise the instruction makes must be graded by something. Learnable means stated in the instruction OR determinate in the input the agent is handed, meaning any directory `environment/Dockerfile` copies into the agent image; the prompt may delegate the detail rather than restate it and need not name the file, so read the shipped input before calling anything undocumented. A check grading a rule of engagement rather than a property of the deliverable is the exception: a check on what the agent left alone, or on which paths it touched, needs a sentence that states the rule, because discovery establishes facts and never prohibitions (gate 01 IN-15). On the coverage direction, do not demand that a test cover every promise: a promise may legitimately be graded by a judged criterion instead, which is common for things no assertion can decide. Flag a promise nothing grades at all, never one the judged channel handles. (The full cross-walk happens in Gate 05; flag obvious mismatches you see now, especially error-object shapes and extra undocumented error cases.)
+ - TS-20 Weights map to importance semantically. The scale means something: 5 = a core outcome, the deliverable's primary behaviour; 3 = an important sub-goal or key edge case; 1 = a minor detail or existence check. Negatives: -5 = a red-line cheat; -3 = a serious secondary violation; -1 = rare, minor. Judge every weight against what the test actually grades: a core-deliverable test carrying weight 1, or an existence/formatting check carrying 5, is wrong. Then check the ORDERING: if the instruction makes clear that property A matters more than property B, but B's test outweighs A's, the reward contradicts the task's own priorities - that is a fail, not a style call. Mild imbalance within the right ordering is a minor. All-identical weights are a fail (script).
+ - TS-25 Positive tests grade earned work, never an absence. Read every positive test's decisive assertion: if it passes because something bad is missing (an empty violations list, a banned import that is absent, output that "does not contain" a thing), it hands its points to any solver that simply did nothing wrong, and it inflates the positive total so every real test is worth proportionally less. Absence belongs on the negative side with inverted polarity: a `negative_<cheat>` check that returns True when the bad behaviour IS present, registered with a negative weight. A positive-weight check whose pass condition is an absence is a fail; keep the detection logic, move it to a negative check.
+ - TS-26 No intra-test double payment, in ANY pairing. Pair every test against every other test - negative against positive, positive against positive, negative against negative - and name the observable each reads. Two tests reading the same observable with the same decisive logic pay (or punish) one behaviour twice. Negative-vs-positive example: a positive test asserting output is identical across repeated runs alongside a negative test firing when output differs across runs is one determinism observation paid twice. Positive-vs-positive example: two tests that both decode the same fixture and assert the same field value is one correctness observation earning two weights, inflating that behaviour's share of the positive total. What is NOT a duplicate: two tests reading genuinely different aspects of the same object (the file parses; the parsed values are correct; the encoder round-trips it) - those add distinct signal. Same observable, same logic = keep one side, or rewrite one to read a different observable. Fail.
+@@ -56,6 +56,7 @@ Grading runs in a fresh container built FROM `tests/Dockerfile` with `tests/` as
+ 
+ ## Weight registration rules (script-owned, here for context)
+ 
++- TS-30 Agent file modes are survivable. The oracle installs its program with `cp`, which leaves mode 0644; a real agent writes it through an editor that renames a temp file into place, so the same program arrives at 0600, owned by uid 1000. Harbor hands `/app` to the verifier with those modes intact, and the verifier runs as root, so reading the file is only a problem once a check drops privileges to run it (`setpriv --reuid=nobody`, `runuser`, or Popen `user=`). Then the unprivileged child cannot open the program, every check that executes it returns False on a perfectly correct submission, and the plain oracle run still reads 1.000, so nothing in QC notices until a real trajectory is graded and loses that whole tier. Any verifier that executes agent-written code under a dropped uid must make it readable first: chmod the program and the directories above it (root may), or run a copy the verifier staged itself. Relaxing or removing the privilege drop is not the fix; that trades this bug for TS-24. tests_qc H6 checks the three shapes statically and fails when it finds none; the proof is the `--owner-only` oracle run in Step 10, which reproduces the agent's 0600 modes and must still read exactly 1.000. A bundle that scores lower there is a fail. The owner's own execute bit survives that run (a file already executable becomes 0700, not 0600), so a check may require an executable artifact, but only when the instruction or an agent-visible spec says to make it executable; requiring a mode or a shebang nothing tells the agent about is a CL-5 hidden convention.
+ - TS-21 Exact bijection between check functions and registrations. Every check is registered exactly once, at module level, with `criteria.<name>(weight=W)`. An unregistered check is scored by rewardkit at the default weight 1 without anyone choosing that; a registration naming no check of this file pulls in a rewardkit built-in or crashes the run; a check registered twice is scored twice. The weight lives on the registration and nowhere else: `tests/test_weights.json` is forbidden (structure_qc S3).
+ - TS-22 W is an integer literal from {5, 3, 1, -1, -3, -5}. Zero, 2, floats (`5.0`), strings, a missing weight (rewardkit would default it to 1) and any other argument are all fails.
+ - TS-23 Counts and balance: at least 10 checks (fail), at most 35 (warn); at least one positive and at least one negative check (fail); weights not all identical (fail); the sum of absolute negative weights is at most the sum of positive weights (fail), so the test channel's share of the reward never drops below -0.5.
+@@ -85,11 +86,12 @@ tests_qc.py decides these mechanically and owns the verdict on them. They are wr
+ - TS-S8 test.sh ends with `exec rewardkit /tests --workspace /app --output /logs/verifier/reward.json` and writes no reward bytes itself. The script matches the rewardkit call and reward writes by pattern; read the whole script for any other path that writes or skips (TS-6).
+ - TS-S9 test.sh contains no skip switches, never sources or executes anything from an agent-writable location, never lets an agent-writable directory shadow PATH, and never consults a pre-existing reward file. Each of these is a direct route for the agent into the grading shell or the score.
+ - TS-S10 `tests/reward.toml` has the exact shape TS-10 states, and its two weights equal 0.5 divided by the registered positive total of test_output.py and 0.5 divided by the positive criterion total of judge.toml. The script recomputes the weights from the registrations; whether each registration is the weight the check deserves is yours (TS-20).
+-- TS-S11 tests/Dockerfile exists, has a FROM line, copies the whole tests/ tree to `/tests/`, and installs exactly `harbor-rewardkit==0.2.1`. The harness builds this image with tests/ as the build context and does not upload tests/ at runtime, so an image that never copies the tree greets the verifier with an empty /tests. It also sets `ENV LITELLM_LOCAL_MODEL_COST_MAP=True` (K7): otherwise litellm's GitHub cost-map fetch fails behind the verifier allowlist and rewardkit can deadlock at shutdown before writing reward.json.
++- TS-S11 tests/Dockerfile exists, has a FROM line, copies the whole tests/ tree to `/tests/`, and installs exactly `harbor-rewardkit==0.2.1`. The harness builds this image with tests/ as the build context and does not upload tests/ at runtime, so an image that never copies the tree greets the verifier with an empty /tests. It also sets `ENV LITELLM_LOCAL_MODEL_COST_MAP=True` (K7): otherwise litellm's GitHub cost-map fetch fails behind the verifier allowlist and rewardkit can deadlock at shutdown before writing reward.json. It also pins litellm with `==` (K8); an unpinned litellm lets the build pick up any release of a package that has already shipped a malicious one. A rebuilt image is the only cure, and Docker's layer cache will reuse a poisoned `pip install` layer forever, so rebuild with `--no-cache` once the line changes.
+ - TS-S12 Every third-party import in test_output.py other than rewardkit is installed by tests/Dockerfile (mind pip-name aliases such as yaml coming from pyyaml), on Python 3.12 or newer. A missing dependency crashes the verifier at import time. The mkdir for /app is reference convention only; its absence is a warn, the harness creates artifact parent directories itself.
+ - TS-S13 The oracle is not the verifier's own code wearing a different name. The script measures how much of solve.py reappears in test_output.py and fails at 35%, warning from 20%. Judge the shared block yourself: a small one can still be the entire graded mechanism, and a large one can be an encoder both sides legitimately need. Gate 02 DS-24 carries the full reasoning.
+ - TS-S14 The verifier image installs every tool the grading scripts invoke, and carries the hardening the threat model requires. Missing tools are always a fail because grading cannot run. The protection warns (restricting /tests, clearing stale reward files, locking the log directory) are warns only because the script cannot tell whether grading executes agent code; you can, so convert them under TS-28.
+ - TS-S15 The script inspects test_output.py by parsing it, without running it, so it cannot prove a check never raises. A check that can raise on bad agent output is yours (TS-29).
++- TS-S16 H6 reads the source for one of three readable-program shapes (the privilege dropper grants read, a grant call names the program, or the verifier executes a file it staged). It cannot follow every indirection, so a pass is evidence and not proof; the owner-only oracle run in Step 10 is what settles TS-30.
+ 
+ Everything else in this gate (semantic determinism, one property per test, negative-check polarity actually verified, instruction/test contradictions, weight distribution judgment, exactness and tolerances, absence-grading positive checks, double payment across any check pair, verifier execution isolation, whether bad agent output can make a check raise) has no script coverage at all: you are the only line of defence there.
+ 
+@@ -98,7 +100,7 @@ Everything else in this gate (semantic determinism, one property per test, negat
+ - [ ] TS-0 tests_qc.py run, exit code and findings reported
+ - [ ] TS-S1..TS-S15 tests_qc.py output read, and every failure it reports confirmed in the file and carried into the report
+ - [ ] TS-1 no unconditional reads of agent input paths under tests/ (guarded reads are fine)
+-- [ ] TS-2 tests/Dockerfile has COPY . /tests/, pins harbor-rewardkit==0.2.1 and sets LITELLM_LOCAL_MODEL_COST_MAP=True
++- [ ] TS-2 tests/Dockerfile has COPY . /tests/, pins harbor-rewardkit==0.2.1 and litellm==1.105.0, and sets LITELLM_LOCAL_MODEL_COST_MAP=True
+ - [ ] TS-3 tests/Dockerfile has RUN mkdir -p /app (warn if absent)
+ - [ ] TS-4 all check dependencies and invoked tools installed in the verifier image, Python >= 3.12
+ - [ ] TS-5 ground truth self-contained in tests/
+@@ -115,7 +117,7 @@ Everything else in this gate (semantic determinism, one property per test, negat
+ - [ ] TS-16 negatives fire on the cheat and only the cheat
+ - [ ] TS-17 exact comparisons where exactness promised (bool/int trap checked)
+ - [ ] TS-18 tolerances stated in instruction where used
+-- [ ] TS-19 no obvious contract/test contradiction, checking the shipped spec as well as the prompt; a promise a judged criterion grades is covered (deep pass in Gate 05)
++- [ ] TS-19 no obvious contract/test contradiction, reading the shipped input as well as the prompt; a check on what was left alone rests on a stated sentence, not on discovery; a promise a judged criterion grades is covered (deep pass in Gate 05)
+ - [ ] TS-20 weights map to importance semantically, ordering matches the instruction
+ - [ ] TS-25 no positive test grades an absence
+ - [ ] TS-26 no test pair (any signs) pays twice for one observable
+@@ -126,9 +128,10 @@ Everything else in this gate (semantic determinism, one property per test, negat
+ - [ ] TS-27 no positive test paying for source tokens instead of behaviour
+ - [ ] TS-28 verifier hardening present where grading executes agent code, or explicitly reasoned as not needed
+ - [ ] TS-29 no check can raise on bad, missing or hostile agent output; every check returns a bool
++- [ ] TS-30 agent-written programs stay readable under the privilege drop (H6 passes; Step 10 owner-only oracle run reads 1.000)
+ 
+ ## Severity guide
+ 
+-fail: TS-1, TS-2, TS-4..TS-12 violations, TS-14 prefix/sign mismatch (script-checked), TS-15 wrong polarity, TS-16 negatives that an honest solution could trip, TS-17/19 honest-agent-loses cases, TS-19 contradictions, TS-20 core-vs-minor weight inversions and ordering contradictions, TS-21/TS-22 violations, TS-23 minimums and balance (fewer than 10 checks, no positive, no negative, all weights identical, negatives outweighing positives), TS-24 any isolation miss, TS-25 absence-grading positive tests, TS-26 double payment across any test pair, TS-27 positive tests paying for source tokens rather than behaviour, TS-28 a missing hardening step where grading executes agent code or any tool the scripts invoke that the image never installs, TS-29 a check that can raise on agent output, a `tests/test_weights.json` present. minor: TS-13 doubled asserts with same observable, mild TS-20 imbalance within the correct ordering. warn: TS-3 missing mkdir, TS-23 cap above 35, judgment calls.
++fail: TS-1, TS-2, TS-4..TS-12 violations, TS-14 prefix/sign mismatch (script-checked), TS-15 wrong polarity, TS-16 negatives that an honest solution could trip, TS-17/19 honest-agent-loses cases, TS-19 contradictions, TS-20 core-vs-minor weight inversions and ordering contradictions, TS-21/TS-22 violations, TS-23 minimums and balance (fewer than 10 checks, no positive, no negative, all weights identical, negatives outweighing positives), TS-24 any isolation miss, TS-25 absence-grading positive tests, TS-26 double payment across any test pair, TS-27 positive tests paying for source tokens rather than behaviour, TS-28 a missing hardening step where grading executes agent code or any tool the scripts invoke that the image never installs, TS-29 a check that can raise on agent output, TS-30 an agent-written program executed under a dropped uid without being made readable (H6, or an owner-only oracle run below 1.000), a `tests/test_weights.json` present. minor: TS-13 doubled asserts with same observable, mild TS-20 imbalance within the correct ordering. warn: TS-3 missing mkdir, TS-23 cap above 35, judgment calls.
+ 
+ Report in the fixed output format defined in the "Output format (all gates)" section of Final_checklist.md, then stop.
+diff --git a/Input_Bundle_QC/04_Judge_QC.md b/Input_Bundle_QC/04_Judge_QC.md
+index 3eac2f53..77e096ba 100644
+--- a/Input_Bundle_QC/04_Judge_QC.md
++++ b/Input_Bundle_QC/04_Judge_QC.md
+@@ -1,6 +1,6 @@
+ # Gate 04 - Judge criteria QC (`tests/judge.toml`)
+ 
+-The file under review is `tests/judge.toml`, the LLM-judged scoring channel of one input bundle. It IS consumed at runtime and is as important as the deterministic tests. To judge it you also open, read-only, `solution/solve.sh` and `solution/solve.py` (JD-7), `tests/test_output.py` with its weight registrations and `tests/reward.toml` (JD-8, JD-12), and `instruction.md` together with any specification, schema or rules file it points the agent at under `environment/` (JD-10, JD-11, JD-15, JD-16, JD-17). Your findings are still about the judged criteria; defects inside those other files belong to their own gates. If you were not given the bundle path, ask for it and stop.
++The file under review is `tests/judge.toml`, the LLM-judged scoring channel of one input bundle. It IS consumed at runtime and is as important as the deterministic tests. To judge it you also open, read-only, `solution/solve.sh` and `solution/solve.py` (JD-7), `tests/test_output.py` with its weight registrations and `tests/reward.toml` (JD-8, JD-12), and `instruction.md` with the input directories `environment/Dockerfile` copies into the agent image (JD-10, JD-11, JD-15, JD-16, JD-17). Your findings are still about the judged criteria; defects inside those other files belong to their own gates. If you were not given the bundle path, ask for it and stop.
+ 
+ Run the deterministic script first and include its verdict in your report:
+ 
+@@ -89,10 +89,10 @@ How to phrase a negative. Write the sentence so that "yes" means the bad thing h
+ - JD-12 Counts, spread and balance: at least 8 criteria (fail), at most 35 (warn), at least one positive and at least one negative weight (fail), weights not all identical (fail), and negatives never outweigh positives: the sum of absolute negative weights is at most the sum of positive weights (fail), so the judge channel's share never drops below -0.5 once `tests/reward.toml` divides by the positive total and halves. No clamp is applied anywhere; this rule is what bounds the floor. There is no minimum count of "instruction following" criteria and no required position for them in the file.
+ - JD-13 Importance/weight pairing (fail, script-checked), read by `|weight|`: critically_important requires 3 or 5; important requires 1 or 3. So critically_important at magnitude 1 is a fail, and important at magnitude 5 is a fail. 3 is legal for both importance levels. Beyond the mechanical pairing, judge the labels and magnitudes semantically: 5 = a core outcome, the deliverable's primary behaviour, or a red line; 3 = an important sub-goal, key edge case or serious secondary violation; 1 = a minor detail, existence check or rare minor violation. For a negative criterion read the same scale on the magnitude: -5 for a red line, -3 for a serious secondary violation, -1 for a rare and minor one. A criterion grading the task's central deliverable behaviour weighted 1, a formatting nicety weighted 5, or a magnitude ordering that contradicts the importance ordering implied by the instruction is a fail. That mapping is about the deliverable, so it does not fit a constraint criterion, which is not part of the deliverable at all. Weight a constraint by how serious breaking the rule is: 5 for a rule whose violation would be unacceptable on its own (touching production config, using a forbidden tool), 3 for a real but survivable breach, 1 for a small one. Do not mark a constraint down for being peripheral to the answer, and never read a high-weighted constraint as the "formatting nicety weighted 5" failure above.
+ - JD-14 No double payment inside the file, in ANY pairing. Pair every criterion against every other criterion - negative against positive, positive against positive, negative against negative - and name the observable each reads. Negative-vs-positive example: a positive rewarding "derives the rule independently from the shipped data" alongside a negative penalising "retrieves an external implementation" - one observation (did it copy or not?) paid twice. Positive-vs-positive example: two criteria that both judge whether the agent verified its encoder against the shipped samples, worded differently, pay one act twice. What is NOT a duplicate: two criteria judging genuinely different facets (the agent verified its encoder; the agent reported the verification honestly in its summary). Same observable, same judgement = rewrite one to a distinct observable quality (e.g. showing intermediate derivation steps) or drop one side. Fail.
+-- JD-15 What a criterion may require, and where that requirement comes from. A bundle grades two independent things. Whether the work came out right, and whether the agent stayed inside the rules it was given. Neither excuses the other. An agent can produce a flawless artifact while ignoring every rule it was handed, and that is a real failure, because in a real deployment the rule is often the part that matters most: leave production config alone, use the approved client, stay inside the files you were assigned. Criteria therefore come in three kinds and the rules differ for each, so classify every criterion before you judge it. Nothing in the file declares which of the three it is, so the classification is entirely yours and you make it from the description. The one claim the annotations do make is `type`, and a constraint criterion carries `type = "instruction following"` (JD-16), so read that value as a claim to check rather than an answer to accept. The two mismatches both matter. A criterion you read as an unstated standard but labelled `type = "instruction following"` escapes the conduct test, and a criterion enforcing a stated rule but labelled with any other category escapes JD-16's demand for a quoted sentence. Where your reading and the label disagree, judge the criterion by your reading and report the label as the defect. An OUTCOME criterion asserts something about what was produced: the artifact's content, its format, a value inside it, a fact in the final answer. That is a specification item, and an agent can only meet it if the contract said so. The contract is the instruction TOGETHER WITH any specification, schema or rules file the instruction points it to in the container, because the prompt is allowed to delegate the detail rather than restate it (gate 01 IN-8). Name the sentence it traces to and the file that sentence lives in (gate 05 re-checks the same thing across both layers). An outcome criterion resting on something that appears in no file the agent can read is an oracle expectation the honest agent could not reach: fail. Most outcome criteria also restate a test, so run JD-8 on them as well. A CONSTRAINT criterion enforces a rule of engagement that the contract states out loud: how the output must be shaped, which files may be touched, which tool must be used, what order the work must happen in, what must be left alone. The contract here is the same one the rest of this gate uses, the instruction together with any specification or rules file it points the agent to, because a rule the agent can read is a rule it was given (gate 01 IN-8). It is graded because it was stated, and compliance is the requirement in itself. It does NOT have to make a correct end state more likely, and you must not ask it to. A rule that narrows the agent's freedom without improving its answer is exactly what this class is for. JD-16 says what makes one valid; JD-17 keeps constraints from becoming the whole task. A CONDUCT criterion is a standard of work the author holds the agent to without writing it anywhere: derivation method, verification habits, honest reporting, restraint, safe behaviour. Nothing told the agent it would be judged on this, so the criterion has to earn its place on fairness grounds instead. That is what the two steps below are for. They are a substitute for a missing sentence, which is why they apply here and never to a constraint criterion, where the sentence is sitting in the instruction. Decide each conduct criterion in two steps. Step 1: would every competent route to a correct end state satisfy this criterion? If yes it is legitimate and needs no instruction sentence, because it constrains nothing. Verifying your own work, grounding the solution in the shipped data rather than guessing, and honestly reporting what failed all pass here: no competent route skips them. If no, the criterion requires one particular approach, so go to step 2. Step 2: does that approach make a correct end state more likely, or is it just a preference? It is a preference when two solutions differing only on this point are equally good, and a preference must be removed. It is odds-raising when the approach genuinely improves the chance of getting the task right, and odds-raising approaches earn their place even though they narrow the route. Legitimate under step 1: "The agent verifies its encoder round-trips before concluding", "The agent derives the delta rule from the shipped samples rather than guessing", "The agent reports honestly which inputs it could not handle". Odds-raising under step 2, acceptable: "The agent checks its decoder against several sample files rather than only one", "The agent inspects the shipped data before writing the decoder", "The agent validates each record mode before moving to the next". Preferences, remove them: "The agent implements the decoder as a state machine" (any sound structure works), "The agent uses type hints throughout" (style), "The agent writes intermediate results to a scratch file" (memory is fine). Severity, and read the scope carefully because it is the whole point of the three-way split. For a CONDUCT criterion: a negative that penalises an approach is a fail in every case, because it punishes a route the agent was never told to avoid (negatives aimed at cheating or misconduct, the JD-11 list, are not approaches); a preference weighted 5 is a fail; a preference weighted 1 or 3 is a minor; an odds-raising approach weighted 1 or 3 passes, and at 5 it is a minor, since a route preference should never outweigh the outcome itself. None of that applies to a CONSTRAINT criterion. A negative constraint criterion is normal and correct, because the agent was told. Do not run the two steps on one, do not call it a preference, and do not ask it to raise the odds of a correct answer. Judge it against JD-16 instead. One anchor still binds conduct criteria: name the requirement the conduct SERVES, never one that states it. "Verifies the encoder round-trips" serves the instruction's demand for byte-identical re-encoding. A criterion serving no requirement at all is off-topic: fail. Constraint criteria are exempt from this anchor too: the stated rule IS the requirement.
++- JD-15 What a criterion may require, and where that requirement comes from. A bundle grades two independent things. Whether the work came out right, and whether the agent stayed inside the rules it was given. Neither excuses the other. An agent can produce a flawless artifact while ignoring every rule it was handed, and that is a real failure, because in a real deployment the rule is often the part that matters most: leave production config alone, use the approved client, stay inside the files you were assigned. Criteria therefore come in three kinds and the rules differ for each, so classify every criterion before you judge it. Nothing in the file declares which of the three it is, so the classification is entirely yours and you make it from the description. The one claim the annotations do make is `type`, and a constraint criterion carries `type = "instruction following"` (JD-16), so read that value as a claim to check rather than an answer to accept. The two mismatches both matter. A criterion you read as an unstated standard but labelled `type = "instruction following"` escapes the conduct test, and a criterion enforcing a stated rule but labelled with any other category escapes JD-16's demand for a quoted sentence. Where your reading and the label disagree, judge the criterion by your reading and report the label as the defect. An OUTCOME criterion asserts something about what was produced: the artifact's content, its format, a value inside it, a fact in the final answer. That is a specification item, and an agent can only meet it if it could have known. Two grounds count and either one is enough: the instruction states it, or it is determinate in the input the agent is handed, meaning any directory `environment/Dockerfile` copies into the agent image. The prompt need not point at the file, because working out the shipped data is the task (gate 01 IN-8). Name the sentence it traces to, or the shipped fact it reads, and the file in either case (gate 05 re-checks the same thing across both layers). An outcome criterion resting on something in neither place is an oracle expectation the honest agent could not reach: fail. Most outcome criteria also restate a test, so run JD-8 on them as well. A CONSTRAINT criterion enforces a rule of engagement that the contract states out loud: how the output must be shaped, which files may be touched, which tool must be used, what order the work must happen in, what must be left alone. A rule of engagement is not a fact about the data, so the loose grounding above does not reach it: it has to be STATED, in a sentence the agent can read, in the instruction or in any file inside the input directories `environment/Dockerfile` copies into the agent image, because a rule the agent can read is a rule it was given, while a prohibition cannot be inferred from a CSV (gate 01 IN-8). Rules about the shape of the output are the exception and keep the outcome burden, a shipped example included, since a shape is a fact about the artifact rather than a restriction on the agent (JD-16). And a rule that cannot be stated without disclosing the approach is not a constraint either: demanding its sentence would force the method into the prompt, which gate 01 fails under IN-14, so judge it in the conduct branch below. It is graded because it was stated, and compliance is the requirement in itself. It does NOT have to make a correct end state more likely, and you must not ask it to. A rule that narrows the agent's freedom without improving its answer is exactly what this class is for. JD-16 says what makes one valid; JD-17 keeps constraints from becoming the whole task. A CONDUCT criterion is a standard of work the author holds the agent to without writing it anywhere: derivation method, verification habits, honest reporting, restraint, safe behaviour. Nothing told the agent it would be judged on this, so the criterion has to earn its place on fairness grounds instead. That is what the two steps below are for. They are a substitute for a missing sentence, which is why they apply here and never to a constraint criterion, where the sentence is sitting in the instruction. Decide each conduct criterion in two steps. Step 1: would every competent route to a correct end state satisfy this criterion? If yes it is legitimate and needs no instruction sentence, because it constrains nothing. Verifying your own work, grounding the solution in the shipped data rather than guessing, and honestly reporting what failed all pass here: no competent route skips them. If no, the criterion requires one particular approach, so go to step 2. Step 2: does that approach make a correct end state more likely, or is it just a preference? It is a preference when two solutions differing only on this point are equally good, and a preference must be removed. It is odds-raising when the approach genuinely improves the chance of getting the task right, and odds-raising approaches earn their place even though they narrow the route. Legitimate under step 1: "The agent verifies its encoder round-trips before concluding", "The agent derives the delta rule from the shipped samples rather than guessing", "The agent reports honestly which inputs it could not handle". Odds-raising under step 2, acceptable: "The agent checks its decoder against several sample files rather than only one", "The agent inspects the shipped data before writing the decoder", "The agent validates each record mode before moving to the next". Preferences, remove them: "The agent implements the decoder as a state machine" (any sound structure works), "The agent uses type hints throughout" (style), "The agent writes intermediate results to a scratch file" (memory is fine). Severity, and read the scope carefully because it is the whole point of the three-way split. For a CONDUCT criterion: a negative that penalises an approach is a fail in every case, because it punishes a route the agent was never told to avoid (negatives aimed at cheating or misconduct, the JD-11 list, are not approaches); a preference weighted 5 is a fail; a preference weighted 1 or 3 is a minor; an odds-raising approach weighted 1 or 3 passes, and at 5 it is a minor, since a route preference should never outweigh the outcome itself. None of that applies to a CONSTRAINT criterion. A negative constraint criterion is normal and correct, because the agent was told. Do not run the two steps on one, do not call it a preference, and do not ask it to raise the odds of a correct answer. Judge it against JD-16 instead. One anchor still binds conduct criteria: name the requirement the conduct SERVES, never one that states it. "Verifies the encoder round-trips" serves the instruction's demand for byte-identical re-encoding. A criterion serving no requirement at all is off-topic: fail. Constraint criteria are exempt from this anchor too: the stated rule IS the requirement.
+ - JD-16 What makes a valid constraint criterion. All four must hold, and you check them one criterion at a time.
+-  1. It enforces a rule stated in the contract, which is instruction.md together with any specification, schema or rules file the instruction points the agent to in the container. Quote that sentence and name the file it lives in. If there is no sentence anywhere the agent can read, this is not a constraint criterion at all, it is an unstated standard wearing a label, so send it back through JD-15's conduct branch and judge it there. A rule that is graded but never stated costs the honest agent reward for something it could not have known, the same unfairness as an oracle expectation (gate 01 IN-8): fail.
+-  2. It is one of six kinds, and all six count equally: a format constraint, an output-shape constraint, a scope restriction (which files or areas may be touched), a tool-use constraint, an ordering or procedural constraint, or a negative constraint (what to leave alone). Do not treat format and output-shape rules as second class. They are stated rules like any other, and for a stated rule the outcome burden and the constraint burden are the same burden anyway: trace it to a sentence the agent can read. A task whose natural rules are all about output shape is fully compliant. Whichever kind it is, a constraint criterion carries annotations `type = "instruction following"`: a genuine tool-use constraint labelled `type = "tool use"` is mislabelled. When you meet one, the defect is the label: say so and let the author relabel it, rather than treating the criterion as invalid.
++  1. It enforces a rule STATED in a sentence the agent can read, in instruction.md or in any file inside the input directories `environment/Dockerfile` copies into the agent image. Quote that sentence and name the file it lives in. Discovery counts for the two shape kinds in item 2 and not for the other four: a format is a fact about the artifact and a fact can be read off a shipped example, while a prohibition cannot be inferred from a CSV. Before you demand the sentence, check that the rule is one the author could state without handing over the approach. If stating it would give away how to solve the task, it is not a constraint at all and asking for the sentence would push gate 01 into failing the prompt under IN-14; send it to JD-15's conduct branch, which needs no sentence by design. If there is no sentence anywhere the agent can read, this is not a constraint criterion at all, it is an unstated standard wearing a label, so send it back through JD-15's conduct branch and judge it there. A rule that is graded but never stated costs the honest agent reward for something it could not have known, the same unfairness as an oracle expectation (gate 01 IN-8): fail.
++  2. It is one of six kinds, and all six count equally: a format constraint, an output-shape constraint, a scope restriction (which files or areas may be touched), a tool-use constraint, an ordering or procedural constraint, or a negative constraint (what to leave alone). Do not treat format and output-shape rules as second class. A task whose natural rules are all about output shape is fully compliant. The six do split across the two burdens, though, and the line is whether the rule describes the deliverable or restricts the agent. A format or output-shape rule describes the deliverable, so it carries the outcome burden: an instruction sentence grounds it and so does an example the agent is actually given in the copied input (JD-15, gate 05 AL-1). A scope restriction, a tool-use constraint, a negative constraint and a procedural constraint over the work itself restrict the agent instead, so they have to be stated. Ordering falls on both sides of that line and you place it by asking what the rule is about: which error wins when a fixture carries two faults at once is a property of the output, "reconcile before you export" is an operating rule the agent could not derive and stating it reveals no method, and "parse the header before the body" is neither, because it is the approach - grade that and you are grading a preference, which JD-15's conduct branch removes. Whichever kind it is, a constraint criterion carries annotations `type = "instruction following"`: a genuine tool-use constraint labelled `type = "tool use"` is mislabelled. When you meet one, the defect is the label: say so and let the author relabel it, rather than treating the criterion as invalid.
+   3. It covers exactly one rule. The score is reported per constraint, so a criterion bundling three rules into one sentence cannot produce a per-constraint verdict and leaves the judge with no way to award it partially. Split it. This is JD-5 applied with extra force.
+   4. It is graded once, and by the layer that should own it. JD-8 applies here as everywhere: while every score lands in one reward, a rule graded in both layers pays twice for a single act. What the rule is made of decides which layers are able to grade it at all. A tool-use or ordering rule shows up only in the trajectory, so the judged channel must own it, because tests are outcome-driven and may not read command history (gate 03 TS-12). A format or output-shape rule, or a scope rule over declared artifacts, shows up in what the verifier receives, so a test can grade it as well, and where both layers could grade a rule the test should own it. Scope over undeclared paths is invisible to the verifier, so the judged channel owns it. A deterministic assertion returns the same verdict every run and a judge does not, so spending that variance on a rule an assertion could have settled makes the constraint signal noisier for nothing. When a constraint criterion enforces a rule a test could have checked and no test checks it, say so and name the assertion that would have worked. Warn rather than fail: the criterion is valid and what suffers is signal quality, not the agent. If a test checks it too, that is JD-8 double payment and belongs there instead. (The grade-it-once half is expected to relax when the scores are reported separately.)
+ - JD-17 Constraints ride on a real task, they are not the task. Rules of engagement are layered onto substantial work; the outcome grading still decides whether the task was done. Mentally delete the RESTRICTIVE rules, the scope, tool-use, ordering and negative ones, and ask what is left. Leave format and output-shape rules in place while you do this: they describe the deliverable rather than restricting the route, so removing them would only make the task underspecified. If what remains is a thin exercise that looked demanding only because restrictions were bolted onto it, the constraints are carrying the task: fail, and say what the task would be without them. This is a check against fake difficulty, not a demand for more of it; a task with no restrictive rules at all passes here.
+@@ -136,7 +136,7 @@ Everything else in this gate (truth against the reference solution, overlap with
+ - [ ] JD-12 counts and balance: >=8, <=35 (warn), >=1 positive and >=1 negative weight, weights not all identical, sum|neg| <= sum pos
+ - [ ] JD-13 importance/weight pairing holds by |weight| and magnitudes match semantic importance
+ - [ ] JD-14 no criterion pair (negative or positive) pays twice for one act
+-- [ ] JD-15 every criterion classified as outcome, constraint or conduct; outcome criteria trace to the contract (instruction plus any spec file it points to); conduct criteria hold for every competent route or earn their narrowing by raising the odds of a correct end state, and each serves a real requirement; constraint criteria are exempt from both tests
++- [ ] JD-15 every criterion classified as outcome, constraint or conduct; outcome criteria trace to the instruction or to a determinate fact in the copied input; constraint criteria quote a stated sentence the agent can read and are exempt from the conduct tests, with output-shape rules allowed to rest on a shipped example and any rule unstatable without giving away the approach treated as conduct instead; conduct criteria hold for every competent route or earn their narrowing by raising the odds of a correct end state, and each serves a real requirement
+ - [ ] JD-16 each constraint criterion quotes its stated sentence and names the file it lives in, fits one of the six kinds, carries annotations type "instruction following", covers exactly one rule, and is graded once by the layer that should own it (a rule a test could have checked belongs to the tests)
+ - [ ] JD-17 deleting every constraint still leaves a substantial task
+ - [ ] JD-18 at least one criterion judges the quality of the code the agent writes (name it), or the task authors no code and the line says so
+diff --git a/Input_Bundle_QC/05_Alignment_Integrity_QC.md b/Input_Bundle_QC/05_Alignment_Integrity_QC.md
+index 21f63257..35f685f8 100644
+--- a/Input_Bundle_QC/05_Alignment_Integrity_QC.md
++++ b/Input_Bundle_QC/05_Alignment_Integrity_QC.md
+@@ -18,13 +18,24 @@ CL-1..CL-10 are specified in full - each rule, its client case and the damage it
+ 
+ Build a table with one row per graded observable (every test, every judged criterion) and one row per instruction promise. Then verify BOTH directions:
+ 
+-- AL-1 Everything graded is promised. The rule differs by layer, because tests and judged criteria relate to the instruction differently. Do not apply one rule to both. TESTS, strict: for each test, point to where the agent could have learned this would matter. The contract is the instruction TOGETHER WITH any specification, schema or rules file the instruction points it to in the container; the prompt is allowed to delegate rather than restate (gate 01 IN-8), so a detail living only in a shipped spec is properly promised. What fails is a test asserting a property that appears in no file the agent can read, which is an oracle expectation that costs the honest agent reward for reading the contract correctly. Fail; name the test, the expectation, and the files you searched. JUDGED CRITERIA, split by kind (JD-15 covers this inside gate 04; redo it here). The bundle grades two independent things, whether the work came out right and whether the agent stayed inside the rules it was given, so criteria come in three kinds and you classify before you judge. An OUTCOME criterion, which asserts something about what was produced, is a specification item and carries the same burden as a test: point to where the agent could have learned it, in the instruction or in a spec file the instruction points to, or fail it. A CONSTRAINT criterion enforces a rule of engagement the contract states out loud: how the output must be shaped, which files may be touched, which tool must be used, what order the work happens in, what is left alone. The contract is the instruction plus any spec or rules file it points to, the same as for tests, so a rule living in a shipped rules file is properly stated. Quote the sentence and name its file. It is graded because it was stated, so compliance is the requirement in itself and you must not ask it to improve the odds of a correct answer. A negative constraint criterion is normal and correct here. What fails is a constraint criterion with no sentence to quote anywhere the agent can read, because that is an unstated rule costing the honest agent reward (gate 01 IN-15 finds the same defect from the instruction side). A CONDUCT criterion, which judges how the agent worked (derivation method, verification habits, honest reporting, restraint, safety), has no instruction sentence behind it and needs none, because demanding one would force the method into the instruction, which gate 01 fails under IN-14. The two steps below exist precisely because nobody told the agent, so they apply here and never to a constraint criterion. Step 1: would every competent route to a correct end state satisfy this criterion? If yes it is legitimate, because it constrains nothing. If no, step 2: does the approach it requires make a correct end state more likely, or is it just a preference? A preference, where two solutions differing only on this point are equally good, must be removed; an odds-raising approach earns its place. A negative CONDUCT criterion penalising a legitimate approach is always a fail (negatives aimed at cheating or misconduct, gate 04 JD-11, are not approaches). A preference weighted 5 is a fail and weighted 1 or 3 is a minor; an odds-raising approach weighted 5 is a minor. Then name the requirement the conduct SERVES, not one that states it. A conduct criterion serving no requirement at all is off-topic and fails. Quote the criterion and say which step it broke.
+-- AL-2 Everything promised is graded. For each instruction requirement: point to the test (or criterion) that checks it. An ungraded promise invites solutions that skip it. Strict fail; name the requirement and state that no test or criterion covers it.
+-- AL-3 Exact-shape agreement: output formats, error-object shapes, key names, exit codes, file paths, precedence orders. The classic bug: instruction demands {"error": "x", "version": N} while the test asserts the object equals {"error": "x"}. Compare every literal shape the agent can see against every shape anything grades, byte by byte. "Can see" means the instruction and any specification or schema file shipped in environment/ that it points to; read that spec as part of the contract, because for most bundles the exact shapes live there rather than in the prompt. "Anything grades" means the tests AND any judged criterion that names a shape, since a criterion demanding one format while the contract states another traps the agent exactly as a test would. Any mismatch where following the contract loses reward is an automatic fail, and a shape that contradicts between the instruction and its own spec file is the same fail.
+-- AL-4 Hidden behaviours: a behaviour of the DELIVERABLE that the tests, an outcome judged criterion, or the solution handles while the contract forbids or omits it, where the contract is the instruction plus the spec files it points to (extra error strings when the contract says "do not invent new error strings", undocumented edge cases carrying graded weight in either layer). Fail. Conduct criteria are NOT hidden behaviours and never belong in this finding: JD-15 exempts them from needing a sentence anywhere, so a criterion about verification habits or honest reporting being absent from the contract is correct by design, not a defect.
++- AL-1 Everything graded is promised. The rule differs by layer, because tests and judged criteria relate to the instruction differently. Do not apply one rule to both. TESTS, strict: for each test, point to where the agent could have learned this would matter. Two grounds count and either one is enough. The instruction states it, or the fact is there to be found in the input the agent is handed: any directory under `environment/` that `environment/Dockerfile` copies into the agent image, whatever that directory is called. The prompt does not have to point at the file, because working out the shape of the data you were given is the task; what the fact does have to be is determinate, something the agent can read off the shipped input rather than something the input merely fails to contradict. `tests/` and `solution/` are never grounds, since the agent never sees them. One carve-out, and it is the same one the criteria carry below: where a test grades a rule of engagement rather than a property of the deliverable, what the agent left alone or which paths it touched, discovery does not ground it, because a prohibition cannot be inferred from data. Such a test needs a sentence stating the rule, or the expectation has to be one every competent route would meet anyway, which makes it conduct and moves it to the judged channel (gate 01 IN-15 finds the same defect from the prompt side). What fails is a test asserting a property that is in neither place, which is an oracle expectation that costs the honest agent reward for doing the task correctly. Fail; name the test, the expectation, and the files you searched. JUDGED CRITERIA, split by kind (JD-15 covers this inside gate 04; redo it here). The bundle grades two independent things, whether the work came out right and whether the agent stayed inside the rules it was given, so criteria come in three kinds and you classify before you judge. An OUTCOME criterion, which asserts something about what was produced, is a specification item and carries the same burden as a test: point to the instruction sentence, or to the determinate fact in the copied input, or fail it. A CONSTRAINT criterion enforces a rule of engagement the contract states out loud: how the output must be shaped, which files may be touched, which tool must be used, what order the work happens in, what is left alone. A rule of engagement is not the same kind of thing as a fact about the data, and the loose grounding above does not reach it: it must be STATED, in a sentence the agent can read, in the instruction or in any file inside the input directories `environment/Dockerfile` copies into the agent image. No amount of discovery substitutes, because a prohibition cannot be inferred from a CSV. Two exceptions sit on either side of that. A rule about the shape of the output keeps the test burden above, a shipped example included, because a shape is a fact about the artifact rather than a restriction on the agent. And a rule nobody could state without giving away the approach is not a constraint either: demanding its sentence would force the method into the instruction, which gate 01 fails under IN-14, so judge it as conduct. Quote the sentence and name its file. It is graded because it was stated, so compliance is the requirement in itself and you must not ask it to improve the odds of a correct answer. A negative constraint criterion is normal and correct here. What fails is a constraint criterion with no sentence to quote anywhere the agent can read, because that is an unstated rule costing the honest agent reward (gate 01 IN-15 finds the same defect from the instruction side). A CONDUCT criterion, which judges how the agent worked (derivation method, verification habits, honest reporting, restraint, safety), has no instruction sentence behind it and needs none, because demanding one would force the method into the instruction, which gate 01 fails under IN-14. The two steps below exist precisely because nobody told the agent, so they apply here and never to a constraint criterion. Step 1: would every competent route to a correct end state satisfy this criterion? If yes it is legitimate, because it constrains nothing. If no, step 2: does the approach it requires make a correct end state more likely, or is it just a preference? A preference, where two solutions differing only on this point are equally good, must be removed; an odds-raising approach earns its place. A negative CONDUCT criterion penalising a legitimate approach is always a fail (negatives aimed at cheating or misconduct, gate 04 JD-11, are not approaches). A preference weighted 5 is a fail and weighted 1 or 3 is a minor; an odds-raising approach weighted 5 is a minor. Then name the requirement the conduct SERVES, not one that states it. A conduct criterion serving no requirement at all is off-topic and fails. Quote the criterion and say which step it broke.
++  When a fact counts as determinate, with worked cases. The agent reads the fact off the shipped input; the input being silent about something is not a fact about it. Gate 01 IN-17, gate 03 TS-19 and gate 04 JD-15 all turn on this same judgement, so these are the cases to measure against.
++
++| what the check needs | what the shipped input holds | determinate |
++|---|---|---|
++| timestamps can be absent | 3 of the 40 rows in records.csv carry an empty timestamp | yes, reading the file shows it |
++| ids can repeat | every id in the shipped sample is distinct | no, the input is silent and silence settles nothing, so a check on duplicate ids needs a stated sentence |
++| amounts round half to even | every amount in the sample already carries two decimals | no for the rounding rule, yes for the two-decimal width: the samples show the shape and not the rule behind it |
++| the fiscal year opens in April | config.yml carries `fiscal_start = "04-01"` | yes |
++| the vendor config is off limits | `vendor/` ships and plainly holds configuration | no, a prohibition is never determinate, so this is a stated rule or it is not graded at all (the constraint branch above, gate 04 JD-16) |
++
++  The third row is the one to carry forward: one file can settle one demand and leave the next one open, so judge the fact the check actually needs rather than the file it came from.
++- AL-2 Everything promised is graded. Enumerate from `instruction.md` alone. The unit here is what the PROMPT promises, not everything any shipped file happens to say, so a spec that documents more than this task asks for does not turn its spare detail into ungraded promises. Where the prompt delegates instead of restating ("your output must conform to `schema.json`"), follow the pointer and enumerate the delegated rules the delegation actually invokes, not the whole file: otherwise one sentence collapses a forty-field schema into a single row, and one test touching one field looks like full coverage. For each requirement so enumerated, point to the test or the judged criterion that checks it; either channel satisfies this. An ungraded promise invites solutions that skip it. Strict fail; name the requirement and state that no test or criterion covers it.
++- AL-3 Exact-shape agreement: output formats, error-object shapes, key names, exit codes, file paths, precedence orders. The classic bug: instruction demands {"error": "x", "version": N} while the test asserts the object equals {"error": "x"}. Compare every literal shape the agent can see against every shape anything grades, byte by byte. "Can see" means the instruction and anything shipped in the input directories environment/Dockerfile copies into the agent image, whether or not the prompt names them; read those files as part of the contract, because for most bundles the exact shapes live there rather than in the prompt. "Anything grades" means the tests AND any judged criterion that names a shape, since a criterion demanding one format while the contract states another traps the agent exactly as a test would. Any mismatch where following the contract loses reward is an automatic fail, and a shape that contradicts between the instruction and a shipped spec file is the same fail.
++- AL-4 Hidden behaviours: a behaviour of the DELIVERABLE that the tests, an outcome judged criterion, or the solution handles while the contract forbids or omits it, where the contract is the instruction together with whatever the copied input establishes (AL-1) (extra error strings when the contract says "do not invent new error strings", undocumented edge cases carrying graded weight in either layer). Fail. Conduct criteria are NOT hidden behaviours and never belong in this finding: JD-15 exempts them from needing a sentence anywhere, so a criterion about verification habits or honest reporting being absent from the contract is correct by design, not a defect.
+ - AL-5 The oracle passes its own tests: trace solve.sh output through every test. Any test the oracle would fail proves the bundle broken. Fail.
+ - AL-6 The judged criteria agree with the solution and the instruction (JD-7/JD-10 deep pass): re-verify the three most load-bearing criteria yourself.
+-- AL-27 Trigger depth: a rule only counts as graded when the test's input actually constructs the situation where the rule matters. A test can be named after a rule, tick the AL-2 mapping on paper, and still never exercise it because no fixture creates the triggering case. The classic shape is an ordering or precedence rule ("check the magic before the version"): unless some graded input carries BOTH faults at once, the order never matters and a solver checking things backwards still scores full reward. For every ordering, precedence, or tie-break rule the instruction states, trace the fixtures: for each adjacent pair in the chain, find the graded input with both conditions present and the assertion that the earlier one wins. For every other rule, ask "which graded input would come out differently if the solver broke exactly this rule?" - no such input means the rule is ungraded regardless of what the test is called. Fail; name the rule and the missing fixture.
++- AL-27 Trigger depth: a rule only counts as graded when the test's input actually constructs the situation where the rule matters. A test can be named after a rule, tick the AL-2 mapping on paper, and still never exercise it because no fixture creates the triggering case. The classic shape is an ordering or precedence rule ("check the magic before the version"): unless some graded input carries BOTH faults at once, the order never matters and a solver checking things backwards still scores full reward. For every ordering, precedence, or tie-break rule the bundle grades, whether the instruction states it or the copied input establishes it (AL-1), trace the fixtures: for each adjacent pair in the chain, find the graded input with both conditions present and the assertion that the earlier one wins. For every other rule, ask "which graded input would come out differently if the solver broke exactly this rule?" - no such input means the rule is ungraded regardless of what the test is called. Fail; name the rule and the missing fixture.
+ - AL-28 No penalty stacking. For every negative check in test_output.py AND every negative-weight criterion in judge.toml, name the single concrete agent action that triggers it (hardcoded the shipped answers; edited a file outside the allowed scope; read tests/; emitted nondeterministic output...). Group the negatives by triggering action, ACROSS both layers. One mistake must cost at most one maximum-severity penalty. In the tests, sum the absolute weights in each group: a combined penalty above 5 is stacked, the agent punished twice or three times for one decision and the reward floor distorted for everyone. In `tests/judge.toml`, stacking is two negative-weight criteria pricing one act (sum of absolute weights above 5). Across layers it is one act subtracting in the tests and again in a negative-weight criterion. Example shape: the same hardcoding act firing a -5 check and a -3 check costs 8 for one decision, and the same act firing a -5 judged criterion subtracts a third time in the other channel. Fix: keep the strictest single penalty and retarget or drop the rest, or carve the triggers into genuinely non-overlapping conditions so no single action fires more than one. Fail; show the group, its members, and what each one costs.
+ 
+ ## Metadata truth
+@@ -81,8 +92,8 @@ Review every file in the bundle - both Dockerfiles, test.sh, solve.sh, solve.py,
+ - [ ] CL-8 oracle needs no fallback that skips an instruction-required step
+ - [ ] CL-9 test.sh and check setup never supply the value a later assertion measures
+ - [ ] CL-10 every asserted fact traced to an agent-visible file or a derivation from one; nothing load-bearing lives only in solution/ or tests/
+-- [ ] AL-1 every test and every outcome criterion promised by the contract (the instruction plus any spec file it points to); every constraint criterion quotes the instruction sentence it enforces; every conduct criterion holds for any competent route or earns its narrowing, and serves a real requirement
+-- [ ] AL-2 every instruction promise graded
++- [ ] AL-1 every test and every outcome criterion grounded in the instruction or in a determinate fact in the copied input; anything grading a rule of engagement rather than a property of the deliverable quotes a stated sentence, output-shape rules excepted, and a rule unstatable without giving away the approach is judged as conduct; every conduct criterion holds for any competent route or earns its narrowing, and serves a real requirement
++- [ ] AL-2 every promise enumerated from `instruction.md` alone, delegating sentences expanded into the rules they invoke, each graded by a test or a criterion
+ - [ ] AL-3 exact shapes agree across the contract, tests, solution (read the shipped spec, not just the prompt)
+ - [ ] AL-4 no hidden graded behaviours beyond the contract
+ - [ ] AL-5 oracle would pass every test
+diff --git a/Input_Bundle_QC/Final_checklist.md b/Input_Bundle_QC/Final_checklist.md
+index 44c16f67..759a46cf 100644
+--- a/Input_Bundle_QC/Final_checklist.md
++++ b/Input_Bundle_QC/Final_checklist.md
+@@ -34,7 +34,7 @@ Three names are forbidden outright (structure_qc S3). A `cheat/` directory at th
+ 
+ 1. Harbor builds TWO containers. The agent works in a container built from `environment/Dockerfile` (each input directory lands where its COPY puts it, e.g. `/app/data` because of `COPY data /app/data`, `/app/repo` because of `COPY repo /app/repo`). Grading happens in a SEPARATE fresh container built from `tests/Dockerfile` with `tests/` as the build context. No input directory exists in the grading container. Any grade-time read of an input path (`/app/data` or any other COPY destination) is a guaranteed crash. `[verifier] environment_mode = "separate"` is REQUIRED in task.toml. In Harbor 0.24.0 a `[verifier.environment]` table is what makes the verifier run in its own container, and combining it with `environment_mode = "shared"` is an error; `"separate"` is still pinned so the intent is explicit in every bundle. A verifier that shares the agent's container never builds tests/Dockerfile, the agent-visible `/app/data` becomes the grading corpus, and agent-visible or agent-edited files grade the agent. Absent or any value other than `"separate"` is a fail (structure_qc T2).
+ 2. Artifacts MUST be declared as absolute container paths (e.g. `/app/decode.py`). Harbor copies each declared artifact out of the agent container and back into the verifier container using the declared path string verbatim (`artifact_handler.py: _upload_target_source` returns `artifact.source` verbatim; the copy is a `docker compose cp` on that raw string) and auto-creates parent directories (`ensure_dirs`). A relative or bare filename resolves against the image WORKDIR, which differs across images and providers (the template verifier image sets no WORKDIR, so a bare `decode.py` would land at `/decode.py` while the tests read `/app/decode.py`). Absolute paths are the only deterministic form; a non-absolute artifact entry is a fail (structure_qc T4). Tests must read each artifact at its exact declared absolute path.
+-3. In separate mode `tests/` is NOT uploaded into the verifier at runtime when `tests/Dockerfile` exists (`verifier.py: skip_tests_upload`); the image must own it, so `tests/Dockerfile` must `COPY . /tests/`, install the pinned `harbor-rewardkit==0.2.1` (the version Harbor 0.24.0's own `rewardkit/pyproject.toml` names) and every dependency the checks import.
++3. In separate mode `tests/` is NOT uploaded into the verifier at runtime when `tests/Dockerfile` exists (`verifier.py: skip_tests_upload`); the image must own it, so `tests/Dockerfile` must `COPY . /tests/`, install the pinned `harbor-rewardkit==0.2.1` (the version Harbor 0.24.0's own `rewardkit/pyproject.toml` names), pin `litellm==1.105.0`, and install every dependency the checks import. rewardkit declares `litellm>=1.83` with no upper bound, so an unpinned verifier image installs whatever PyPI serves at build time; a withdrawn litellm 1.107.0 stable shipped a `.pth` and a `sitecustomize.py` that fetched and executed remote code and reached the cloud metadata endpoint, inside the one container that holds the judge key and the hidden tests. Both pins are required (tests_qc.py K5, K8).
+ 4. Reward. Harbor 0.24.0 reads `/logs/verifier/reward.json` first and falls back to `/logs/verifier/reward.txt` only when no reward.json exists. reward.json must be a flat object of name -> number pairs; Harbor rejects NaN, infinity and text values. `tests/test.sh` hardens the verifier and then runs rewardkit over `/tests`; rewardkit writes reward.json (plus `reward-details.json` beside it with every criterion's result), and test.sh writes no reward bytes. Each criterion-bearing file at the top of `tests/` is one scoring input named by its file stem: `test_output` (the deterministic checks in `test_output.py`) and `judge` (the LLM-judged criteria in `judge.toml`). `tests/reward.toml` combines the two into the single `reward` value, each channel counting for half. rewardkit rounds the final value to 4 decimals. Wherever a check speaks of grading, a judged criterion is a graded check exactly as a test is.
+ 5. Network policy is per role (`[environment]`, `[verifier]`, `[verifier.environment]`, `[agent]`). Harbor's default is `"public"`, so an omitted key ships an online task. Every role uses `network_mode`; `allow_internet` must not appear.
+ 6. `[agent] user = "1000:1000"` runs the agent, and the oracle's `solve.sh`, as uid 1000, not root. Every directory a declared artifact is written into must be writable by that uid in the image `environment/Dockerfile` builds (for example `RUN mkdir -p /app && chown 1000:1000 /app` before `COPY data /app/data`), or the oracle dies with `PermissionError` before writing anything and Step 10 reads 0.000. A root-owned output directory is a fail (FC-S22, DS-28).
+@@ -102,18 +102,18 @@ Rules the template encodes:
+ - `[verifier] environment_mode = "separate"` is required; absent or any other value is a fail (see harness fact 1). `timeout_sec` comes before `environment_mode` (aligned with the upstream generator template).
+ - `network_mode` is declared per role, and the roles are three separate decisions that have all been settled once, here, rather than per task. `[environment]` is pinned to `"no-network"`: our tasks are offline tasks, the work must be doable from the shipped image and its `environment/` input alone, and the rest of the bundle must agree with that - an instruction that tells the agent to fetch something, a Dockerfile that installs at run time, or a solution that reaches the network is a fail against this line, not a reason to change it (gates 01, 02 and 05 check the agreement). The key must still be written out, because Harbor's default is `"public"` and an omitted key silently runs the task with the internet open. `[environment]` therefore never carries `allowed_hosts`, and an `[environment]` declaring anything but `"no-network"` is a fail. `[verifier]` is pinned to `"allowlist"` with exactly the hosts shown, because the judged channel is scored by an LLM the verifier reaches over the network: it needs the judge endpoint and nothing else, so an allowlist naming that endpoint is both sufficient and tighter than opening the whole internet. `[verifier.environment]` repeats the same two values and must match `[verifier]` exactly. `[agent]` is pinned to `"allowlist"` with the model hosts shown, which are the hosts the agents we run need to reach their own providers; this is the agent harness talking to its model, not the task being online. An offline task with an online verifier and an online agent harness is therefore the normal, correct combination and never a finding. `allow_internet` anywhere is a fail: `network_mode` is the only network key (see the schema note above). `gpus` must be `0` and `mcp_servers` must be `[]`. `cpus`, `memory_mb` and `storage_mb` are per-task sizing; any positive integer is fine, and they are a finding only when the instruction promises resources that disagree.
+ - `[verifier.env]` is a fixed block, copied exactly, identical in every task: it is the judge wiring the judged channel needs, and it is not a per-task decision. The value is a `${VAR:-default}` placeholder that resolves from the environment of whoever runs the task, which is why the block is safe to ship. A literal value there means an API key has been pasted into a file that goes to the client, and that is a leaked credential rather than a formatting slip. One key, no others.
+-- `[task] authors` carries the author's NAME and nothing else in `name`: not a role note, not a team, not a handle, not an email repeated, and never a placeholder such as `"Author"`. `email` must be a real, well-formed address for that author. An unattributable bundle cannot be queried later, which is the whole purpose of the field. The name is your own full name like `Ram Lakhan` (capitalised words, single spaces); blank, a placeholder like "Task Author", or any other format fails. The email ends in `@ethara.ai`. The email must be built from the name (`ram124@`, `ram.lakhan@`, `rlakhan@` pass for `Ram Lakhan`); one that is not (`r43243@`) is a warn, so the tasker confirms it is the author (FC-S18).
++- `[task] authors` carries the author's NAME and nothing else in `name`: not a role note, not a team, not a handle, not an email repeated, and never a placeholder such as `"Author"`. `email` must be a real, well-formed address for that author. An unattributable bundle cannot be queried later, which is the whole purpose of the field. Write your own name as you spell it: any capitalisation, script, initial, particle, hyphen or apostrophe is accepted, so `Ram Lakhan`, `Anjali kumari`, `Ram K. Lakhan`, `José García` and `van der Berg` all pass. Only a blank name, a placeholder like "Task Author" or "IB Created", or a field holding digits or symbols fails. The email's domain is `ethara.ai` or a subdomain of it. The email should relate to the name (any name word of three letters or more in the local part is enough, so `abdus.samadint17@` relates to `Abdus Samad Ali`); one that cannot be related at all (`r43243@`) is a warn, so the tasker confirms it is the author (FC-S18).
+ - `category` says what the task is. There is no fixed vocabulary to pick from, so the check is truthfulness rather than membership: it must describe the dominant work the task actually asks for and agree with the instruction (gate 05 AL-26). There is no `difficulty` key.
+ - Extra sections fail. task.toml holds exactly the tables and keys above; any other table or sub-table is a fail (structure_qc T2).
+ 
+ ## Authoritative judge.toml template
+ 
+-This is the exact shape every bundle's `tests/judge.toml` must match. The `[judge]` and `[scoring]` tables are pinned and identical in every task; `[judge]` carries no `reasoning_effort` key. rewardkit reads them at run time: `judge` is the model it calls (unless the runner sets `REWARDKIT_JUDGE`), and `[scoring]` is how it adds up this file's criteria. Table order and key order are mandatory, and extra keys are a fail (judge_qc.py G2 in the header, J1 and J6 in a criterion).
++This is the exact shape every bundle's `tests/judge.toml` must match. The `[judge]` and `[scoring]` tables are pinned and identical in every task; `[judge]` carries no `reasoning_effort` key. rewardkit reads them at run time: `judge` is the model it calls (unless the runner sets `REWARDKIT_JUDGE`), and `[scoring]` is how it adds up this file's criteria. `mode = "batched"` is rewardkit's own default and sends every criterion in one judged call. The alternative, `"individual"`, opens one concurrent call per criterion and re-sends the whole trajectory in each of them, so a 30-criterion file pays 30 times the input tokens for the same verdicts; its only real advantage is a per-criterion `files` key, which JD-S3 forbids anyway. The price of batching is blast radius: on a judge timeout rewardkit scores every criterion in the call 0.0, so one slow response zeroes the whole judged half rather than a single criterion. That is what `timeout = 300` is sized for, and a judged run that comes back with every criterion at 0.0 and a timeout warning is an infrastructure failure to re-run, not a task the agent failed. Table order and key order are mandatory, and extra keys are a fail (judge_qc.py G2 in the header, J1 and J6 in a criterion).
+ 
+ ```toml
+ [judge]
+ judge = "openai/gpt-5.6-sol"
+-mode = "individual"
++mode = "batched"
+ timeout = 300
+ atif-trajectory = "/logs/agent/trajectory.json"
+ weight = 1.0
+@@ -244,7 +244,7 @@ FROM python:3.12-slim
+ RUN apt-get update \
+  && apt-get install -y --no-install-recommends util-linux \
+  && rm -rf /var/lib/apt/lists/*
+-RUN pip install --no-cache-dir harbor-rewardkit==0.2.1
++RUN pip install --no-cache-dir harbor-rewardkit==0.2.1 litellm==1.105.0
+ ENV LITELLM_LOCAL_MODEL_COST_MAP=True
+ COPY . /tests/
+ RUN mkdir -p /app
+@@ -253,6 +253,8 @@ WORKDIR /app
+ 
+ The `ENV` line is required (tests_qc.py K7). rewardkit imports litellm, which fetches its model cost map from GitHub at import time. The verifier's allowlist only reaches the OpenAI hosts, so that fetch fails, and the warning it logs races interpreter shutdown into an import deadlock: rewardkit dies before writing reward.json in about half of runs, and Harbor records a verifier error on a correct submission. Step 10 never sees this because its copy runs with a public network.
+ 
++The `litellm==1.105.0` pin is required (tests_qc.py K8) and is the version the agent image pins (FC-S23). Without it pip resolves rewardkit's open `litellm>=1.83` range to whatever PyPI serves during the build, which already once meant a withdrawn 1.107.0 that executed remote code from site-packages in the verifier container. Docker layer caching also means a poisoned `pip install` layer survives every later build on that machine: rebuild verifier images with `docker build --no-cache` (or `docker builder prune`) after changing this line.
++
+ Python 3.12 or newer is required by rewardkit. Add every third-party package the checks import to the `pip install` line. pytest is not needed.
+ 
+ ## How to run the QC
+@@ -270,7 +272,7 @@ Run the four scripts first, then the five model gates, then the execution gate,
+ | 7 | `03_Tests_QC.md` | same |
+ | 8 | `04_Judge_QC.md` | same |
+ | 9 | `05_Alignment_Integrity_QC.md` | same (this one reads the whole bundle) |
+-| 10 | Execution gate | build the tests-only copies with `exe_copy.py`, then run the harbor commands below, verbatim: five oracle runs, one nop run, one stub run |
++| 10 | Execution gate | build the tests-only copies with `exe_copy.py`, then run the harbor commands below, verbatim: five oracle runs, one nop run, one stub run, one owner-only oracle run |
+ | 11 | Final coverage and overlap re-check | Model derives coverage and overlap again from the material, not from its earlier verdicts |
+ 
+ ## Reference: what the scripts enforce (context, not a re-check)
+@@ -296,7 +298,7 @@ task.toml:
+ - FC-S7 environment_mode under [verifier] equals "separate". Anything else, including absence, is a fail (harness fact 1): a verifier sharing the agent's container never builds tests/Dockerfile, and agent-tampered files can grade the agent.
+ - FC-S8 schema_version is exactly "1.4" (any other value is a fail), and artifacts is a non-empty array of absolute container paths with no parent-directory components and no backslashes. The harness copies each declared path string verbatim out of the agent container and into the verifier; a relative path resolves against the image working directory, which is undefined across images and providers.
+ - FC-S9 The description is one non-empty paragraph of at most 100 words; keywords and tags each carry at least one entry.
+-- FC-S18 authors is a non-empty array of `{ name, email }` tables, and an empty array is a fail because the person who created the task must be credited. One entry is the normal case; more are allowed and simply mean more than one person worked on the bundle. The name is required and must not be empty: harbor rejects an author without one, and rejection does not raise, it makes the whole directory stop counting as a task, so the bundle silently vanishes from discovery. A bare email string in the array fails the same way. The name is the author's full name as capitalised words separated by single spaces, like `Ram Lakhan` (at least two words; `Mary-Jane` and `O'Brien` style words are fine). Lowercase, all caps, a single word, an email-style handle (`ram.lakhan`), a role note, a team name or the email repeated is a fail. A blank name or a placeholder ("Task Author", "Author Name", "Your Name", "Test User", "John Doe", "Unknown", "TBD", or any name made only of such stand-in words) is a fail with the message to fill in your own name, because an unattributable bundle cannot be queried later. email must be a well-formed address ending in `@ethara.ai`; any other domain, a bare local part or an unresolved angle-bracket placeholder fails. The email must be built from the name, or it is a warn so the tasker confirms the author: digits and separators before `@` are ignored, and what remains must be made of the name's words, each whole or as its initial, in any order, with at least one word whole. For `Ram Lakhan`: `ram124@`, `ram.lakhan@`, `rlakhan@`, `lakhan.ram@` and `lakhan@` pass; `r43243@`, `rl@`, `ramesh@` and `rahul.mehta@` warn.
++- FC-S18 authors is a non-empty array of `{ name, email }` tables, and an empty array is a fail because the person who created the task must be credited. One entry is the normal case; more are allowed and simply mean more than one person worked on the bundle. The name is required and must not be empty: harbor rejects an author without one, and rejection does not raise, it makes the whole directory stop counting as a task, so the bundle silently vanishes from discovery. A bare email string in the array fails the same way. The name is judged on content, not style: letters in any script plus spaces, hyphens, apostrophes and the periods of initials, with at least one word of two letters. `Ram Lakhan`, `Anjali kumari`, `JOSE GARCIA`, `Ram K. Lakhan`, `Jean-Luc Picard`, `O'Brien`, `van der Berg` and a name written in a non-Latin script all pass, because capitalisation and spelling convention are the author's business. A single word is a warn, not a fail, since some people are credited that way. What fails is a field that is not a name at all: digits or symbols in it (`Ram2`, `a@b.com`, `task_creator`), a blank, or a placeholder — "Task Author", "Task Creator", "IB Created", "task creation", "QC fixes", "Anubis Harness", "Your Name", "Test User", "John Doe", "Unknown", "TBD", or any name made only of such stand-in words, or containing one that no person is called. email must be a well-formed address whose domain is `ethara.ai` or a subdomain of it; any other domain (including near-misses like `ethara.aii`), a bare local part or an unresolved angle-bracket placeholder fails. The email should relate to the name, or it is a warn so the tasker confirms the author: any name word of three letters or more appearing in the local part is enough, and initials count, so for `Ram Lakhan` the addresses `ram124@`, `ram.lakhan@`, `rlakhan@`, `lakhan@` and `rl@` all relate, as do real intern suffixes like `abdus.samadint17@` for `Abdus Samad Ali`; `r43243@` and `rahul.mehta@` warn.
+ - FC-S10 category is a non-empty string that says what the task is. There is no fixed vocabulary, so do not check membership of any list; check truthfulness instead. It must name the dominant work the task actually asks for and agree with the instruction - gate 05 AL-26 owns the judgement, and a category describing a side activity rather than the main one is a finding there. There is no difficulty key in the template.
+ - FC-S11 All duration and timeout numbers are positive, and the junior time estimate is strictly greater than the expert one.
+ - FC-S12 network_mode, read per role, every role pinned. Under [environment] it is present and spelled exactly "no-network": our tasks are offline tasks, so this is not a per-task decision and any other value is a fail. The key must still be written out, because it defaults to "public" and an absent key therefore ships an online task by accident. [environment] never carries allowed_hosts, so one there is an extra key and a fail. Under [verifier] the value is exactly "allowlist" with allowed_hosts exactly ["api.openai.com", "*.openai.com"]: the judged channel is scored by an LLM the verifier has to reach, and it needs that endpoint and nothing wider. [verifier.environment] repeats both values and must match [verifier] exactly; a mismatch between them is a fail. Under [agent] the value is exactly "allowlist" with allowed_hosts exactly ["api.anthropic.com", "api.z.ai"], the hosts the agents we run reach their own model providers on. Gates 01, 02 and 05 check that the instruction, the Dockerfile and the solution all agree with the offline [environment] policy; the verifier and agent lines are harness plumbing and are never part of that comparison, so an offline task with an online verifier and an online agent harness is correct and never a finding. allow_internet anywhere in the file is a fail: network_mode is the only network key. gpus is 0 and mcp_servers is an empty array; cpus, memory_mb and storage_mb are per-task positive integers.
+@@ -337,6 +339,7 @@ Why tests-only. Harbor 0.24.0 runs the same verifier for every agent, and the or
+ ```
+ python3 <QC_FOLDER>/exe_copy.py "/path/to/bundle" /tmp/step10run
+ python3 <QC_FOLDER>/exe_copy.py "/path/to/bundle" /tmp/stubrun --stub
++python3 <QC_FOLDER>/exe_copy.py "/path/to/bundle" /tmp/ownerrun --owner-only
+ ```
+ 
+ The script refuses (exit 1) when `tests/judge.toml` does not load or when tests_qc.py A1-A4 or W1-W7 fails, because a tests-only score built on broken weights proves nothing. Otherwise it copies the bundle and changes exactly these things in the copy, printing each one; paste that output into the sign-off:
+@@ -345,7 +348,8 @@ The script refuses (exit 1) when `tests/judge.toml` does not load or when tests_
+ - rewrites `tests/reward.toml` to `weights = { test_output = 1 / positive total }` (full float), so every positive passing and no negative firing reads exactly 1.0 and doing nothing reads exactly 0.0 - the same channel the shipped bundle scores at half weight;
+ - sets `network_mode = "public"` in `[environment]`, `[verifier]`, `[verifier.environment]` and `[agent]` and drops their `allowed_hosts` lines (the host limit below);
+ - drops the pre-baked OpenHands SDK install (S9 / DS-29) from `environment/Dockerfile`, which turns a multi-minute image build into seconds. It changes no score: the oracle uploads `solution/` and execs `solve.sh`, nop does nothing, and the stub is the oracle over a stub `solution/`, so none of the three ever starts an installed agent or reads `/opt/openhands-sdk-venv`. A real `openhands-sdk` run must use the bundle itself, never this copy;
+-- with `--stub`, replaces `solution/` with the stub described below.
++- with `--stub`, replaces `solution/` with the stub described below;
++- with `--owner-only`, appends two lines to the copy's `solution/solve.sh` that strip group and other access from every file the run wrote under `/app`, which is what a real agent leaves behind: 0600, or 0700 where the owner could already execute the file, so a documented executable artifact stays executable.
+ 
+ Then the runs, from the copies. The oracle runs five times, not once, because one run cannot tell a correct verifier from a flaky one:
+ 
+@@ -357,10 +361,13 @@ harbor run --path /tmp/step10run --agent oracle --env docker --job-name oracle-4
+ harbor run --path /tmp/step10run --agent oracle --env docker --job-name oracle-5 -y
+ harbor run --path /tmp/step10run --agent nop    --env docker --job-name nop-1 -y
+ harbor run --path /tmp/stubrun   --agent oracle --env docker --job-name stub-1 -y
++harbor run --path /tmp/ownerrun  --agent oracle --env docker --job-name owner-only-1 -y
+ ```
+ 
+ Five runs is enough to prove determinism here because nothing in the tests-only channel is stochastic: a disagreement among the five is a flaky check, never noise from a model.
+ 
++The owner-only run exists because the oracle lies about file modes. `solve.sh` installs its program with `cp`, which leaves 0644; a real agent writes the same program through its editor, which creates a temp file and renames it, so the file arrives at 0600, owned by uid 1000 and readable by nobody else. Harbor hands `/app` to the verifier with those modes intact. A verifier that runs the program under `setpriv --reuid=nobody` (or Popen `user=`) then cannot open it, every check that executes the program fails, and the ordinary oracle run still reads 1.000, so the bundle ships and every real trajectory loses that whole tier. The owner-only copy reproduces the agent's mode and must read exactly 1.000 like the other five. Anything lower is a verifier defect, not an agent one: the fix is to chmod the program and its parent directories inside the verifier (it runs as root) or to execute a copy the verifier staged itself, never to relax the privilege drop. tests_qc H6 reads the same property statically; this run is the proof (TS-30).
++
+ `-y` is not optional. The `[verifier.env]` block makes Harbor stop and ask "Tasks in this run will load these from your environment. Proceed?", and without `-y` the command sits waiting for input and then aborts. Harbor also prints "The verifier.env contains an API key ... You will incur costs associated with the API calls" on every run. That line is expected and is not a finding: the copy has no judge, so nothing is spent even when the reviewer's environment exports a key.
+ 
+ On Windows run these from PowerShell or from WSL. The commands themselves are identical; only the path form changes, and forward slashes are accepted, so `"C:/Users/you/bundles/my-task"` works and avoids backslash escaping.
+@@ -416,9 +423,9 @@ There is no cheat run, and a bundle carrying a `cheat/` directory fails (FC-S16)
+ 
+ ## Step 11: final coverage and overlap re-check (mandatory, after everything else)
+ 
+-These two properties are important enough to check twice. After every other step is done, the model running the QC derives them again itself, from the material rather than from its own earlier verdicts: `instruction.md`, any specification, schema or rules file the instruction points the agent at under `environment/`, `tests/test_output.py` (checks and their weight registrations), and `tests/judge.toml`. Redo the mapping; never carry an earlier gate's conclusion into this step as settled. The spec file belongs in this list because the contract below is the instruction plus whatever it delegates to, and without it every spec-delegating test looks unpromised:
++These two properties are important enough to check twice. After every other step is done, the model running the QC derives them again itself, from the material rather than from its own earlier verdicts: `instruction.md`, the input directories `environment/Dockerfile` copies into the agent image, `tests/test_output.py` (checks and their weight registrations), and `tests/judge.toml`. Redo the mapping; never carry an earlier gate's conclusion into this step as settled. The shipped input belongs in this list because it is the second of the two grounds below, and without it every test reading a fact the agent could discover from its own data looks unpromised:
+ 
+-1. Coverage, both directions. Every explicit requirement in the instruction must be checked by at least one test or judged criterion (list each requirement, name its checker). Then go the other way, and mind the layer split. No test may verify anything the contract never asked for, where the contract is the instruction together with any specification, schema or rules file it points the agent to in the container: list each test and name the sentence it enforces and the file that sentence lives in. Judged criteria split three ways and each way has its own burden. A criterion asserting something about what was produced carries the same burden as a test. A criterion enforcing a rule of engagement the contract states out loud (output shape, which files may be touched, which tool, what order, what to leave alone) must quote that sentence and name its file, the contract being the instruction plus anything it points to, and once it does it is legitimate whether or not it improves the odds of a correct answer, negative ones included. A criterion judging how the agent worked (method, verification, honesty, restraint, safety) with no sentence behind it needs none, since requiring one would force the method into the instruction, which IN-14 forbids; instead ask whether every competent route to a correct end state would satisfy it, and if not, whether the approach it requires makes a correct end state more likely or is merely a preference. Name the requirement that last kind serves. Any requirement with no checker is a fail. Any test or outcome criterion with no requirement is a fail. Any constraint criterion with no sentence to quote is a fail. Any conduct criterion that penalises a legitimate approach, enforces a bare preference at weight 5, or serves no requirement at all, is a fail.
++1. Coverage, both directions. Every explicit requirement in `instruction.md` must be checked by at least one test or judged criterion (list each requirement, name its checker). Enumerate from the prompt alone, and where it delegates to a spec, expand the delegation into the rules it actually invokes rather than enumerating the whole file. Then go the other way, and mind the layer split. No test may verify anything that is neither promised by the instruction nor determinate in the input the agent was handed, that input being any directory `environment/Dockerfile` copies into the agent image: list each test and name either the sentence it enforces or the shipped fact it reads, with the file in both cases. The prompt need not point at that file, because working out the data it was given is the agent's job. A test grading a rule of engagement instead, what the agent left alone or which paths it touched, is the exception and needs a sentence that states the rule, since discovery establishes facts and never prohibitions. Judged criteria split three ways and each way has its own burden. A criterion asserting something about what was produced carries the same burden as a test. A criterion enforcing a rule of engagement the contract states out loud (output shape, which files may be touched, which tool, what order, what to leave alone) must quote that sentence and name its file, which may be the instruction or any file inside the input directories `environment/Dockerfile` copies into the agent image, since a rule of engagement has to be stated and cannot be inferred from data, while a rule about the shape of the output keeps the discovery ground because a shape is a fact about the artifact, and a rule nobody could state without giving away the approach is conduct rather than a constraint, since demanding its sentence would force the method into the prompt and IN-14 forbids that, and once it does it is legitimate whether or not it improves the odds of a correct answer, negative ones included. A criterion judging how the agent worked (method, verification, honesty, restraint, safety) with no sentence behind it needs none, since requiring one would force the method into the instruction, which IN-14 forbids; instead ask whether every competent route to a correct end state would satisfy it, and if not, whether the approach it requires makes a correct end state more likely or is merely a preference. Name the requirement that last kind serves. Any requirement with no checker is a fail. Any test or outcome criterion with no requirement is a fail. Any constraint criterion with no sentence to quote is a fail. Any conduct criterion that penalises a legitimate approach, enforces a bare preference at weight 5, or serves no requirement at all, is a fail.
+ 2. No overlap. The tests and the judged criteria must stay distinct. Name the observable each test and each criterion reads; if a test and a criterion read the same observable, that is overlap and a fail, regardless of wording (same rule as JD-8/F0d).
+ 
+ Report this step in the fixed format with two sections, "Coverage" and "Overlap", each listing the full mapping. If it finds something the earlier gates missed, the earlier gate report is also wrong; both get fixed before sign-off.
+@@ -482,7 +489,7 @@ Run them with `instruction.md`, `tests/` (including `tests/judge.toml`), `soluti
+ - [ ] CL-2 Price the forgery before you accept the tests. Walk the positive tests and total what a deliberate fake earns: one hand-written artifact per declared path, filled with plausible values, produced by doing none of the work. Report that total as a share of the positive weight and name every test that paid it. A small share is normal and is not a defect by itself. Tests that pay for a parseable file, a valid shape or the deliverable simply existing are legitimate, and some tasks reasonably award a little for producing the right artifacts at all. Two things fail. One, the forgery reaching the range a genuine partial attempt would earn, because at that point the reward cannot distinguish faking from working. Two, any test that paid while believing it was grading content, which is a broken assertion regardless of the total. Say which of the two you found, or say the total is defensible and why. The number gets reported either way, because the value of this check is that somebody computed it: nobody did on the delivery the client audited, and outright fakes scored full marks on five separate tasks there.
+ - [ ] CL-3 The graded answer is earned, not copied. Take the values grading compares against - the tests, and any judged criterion that names a specific value - and ask whether they can be lifted straight out of something the agent already has: a field in a shipped file that happens to hold the answer, a constant sitting in the instruction, a worked example in the data. Deriving the answer is not this defect and never is - a task whose answer follows from processing the data is working exactly as intended, and CL-10 insists on that reachability. The defect is the answer being present rather than produced, so the tests cannot tell a solver from a transcriber. Fail, naming the file and field it can be copied from. In the client's finding the expected end state followed from constants plus one shipped plan file with no work in between.
+ - [ ] CL-4 Partial credit tracks partial correctness. Count the independently discoverable facts the deliverable carries (per field, per setting, per row), then read how the tests compare them. One wrong fact should cost about one fact's worth of reward. What fails is an answer that is almost entirely right scoring as though it were entirely wrong, and that happens two ways, both worth looking for: one whole-object equality settling N independent facts at once, and a pile of separately weighted tests that all key off that same single comparison. Report what an answer with exactly one fact wrong would score. Two things are not this defect. An instruction that states out loud that only an exact match counts has set that bar deliberately. And weight distribution by itself is fine: one test legitimately owning most of the reward because it checks the main outcome is good design, not a cliff, so do not go looking for a percentage. What matters is whether the curve can tell a near miss from a total miss. The client measured the failure: six of seven hidden settings correct scored 0.041, the same as none of them, because 14 tests worth +5 each all keyed off one dict comparison - 70 of 73 points turning on a single word.
+-- [ ] CL-5 No hidden conventions. Read the exact comparisons in the tests and ask what each one requires beyond the answer being right: the order of a list, the exact spelling of a key or a value, where the file goes and what it is called (`out.json` versus `/app/out/out.json`), letter casing. Each of those must either be stated in the contract (`instruction.md` or a spec file it points the agent to) or be compared in a way that does not care. Anything else grades telepathy. Only what the assertion actually enforces counts. A test that parses JSON and compares dictionaries does not care about key order or whitespace, so there is nothing to find there; you are looking at what the comparison really demands, not at strictness it could theoretically have had. Read the judged criteria the same way: a criterion that expects a naming or layout the contract never states grades telepathy just as a test does. Fail, and quote both the assertion and the sentence that should have promised it. The client found eight such gates in one task, demanding the gold file's exact keys, values and list ordering with nothing in the instruction about ordering at all.
++- [ ] CL-5 No hidden conventions. Read the exact comparisons in the tests and ask what each one requires beyond the answer being right: the order of a list, the exact spelling of a key or a value, where the file goes and what it is called (`out.json` versus `/app/out/out.json`), letter casing. Each of those must either be stated in the instruction, or be established by an example the agent is actually given in the copied input, or be compared in a way that does not care. Anything else grades telepathy. Only what the assertion actually enforces counts. A test that parses JSON and compares dictionaries does not care about key order or whitespace, so there is nothing to find there; you are looking at what the comparison really demands, not at strictness it could theoretically have had. Read the judged criteria the same way: a criterion that expects a naming or layout the contract never states grades telepathy just as a test does. Fail, and quote both the assertion and the sentence that should have promised it. The client found eight such gates in one task, demanding the gold file's exact keys, values and list ordering with nothing in the instruction about ordering at all.
+ - [ ] CL-6 A wrong value we shipped ourselves must be signposted as suspect. Find every place the bundle hands the agent a value it could reasonably copy - sample code, a config, a template, an example payload - and check it against what grading demands, tests and judged criteria alike. Where the two differ, something the agent can read must mark our material as not authoritative. Almost anything does: the instruction saying the shipped code is broken or stale, the task being a repair or debugging task at all, a spec file named as the authority the code must be reconciled against, or a stated symptom the agent can reproduce. This check does not object to traps and does not require the bundle to be internally consistent; wrong values planted on purpose are often the whole task. What fails is the unsignposted version, where the shipped value looks exactly as authoritative as the truth and nothing the agent can read distinguishes them, so passing depends on distrusting our own material for no reason we ever gave. Fail, quoting both values. The client's case turned on one word: shipped sample code used `omit`, the hidden truth was `emit`, nothing flagged the sample as unreliable, and taking our own material at face value cost 70 of 73 points.
+ 
+ - [ ] CL-7 Every file the instruction names exists where grading happens. List each path `instruction.md` tells the agent to read, then confirm each one is present in every corpus the tests grade against, not merely somewhere in the bundle. A path that exists in the sample data but not in the graded data is a fail, and it is the worst kind of fail because following the instructions literally is what triggers it. The client's task told the agent to settle its parameters against a control file the graded corpus does not contain: 26 FileNotFoundErrors, reward 0.124, for doing exactly what the instruction said.
+@@ -506,7 +513,8 @@ Run them with `instruction.md`, `tests/` (including `tests/judge.toml`), `soluti
+ - [ ] Step 10 preflight run and pasted (harbor version 0.24.0 or newer, with the exact number recorded; docker reachable; bundle path listed), or the failing preflight command named with its exact error
+ - [ ] Step 10 oracle run executed for real FIVE times: all five exactly 1.000, every number reported individually (evidence pasted)
+ - [ ] Step 10 nop run executed for real: reward exactly 0.000 (evidence pasted)
+-- [ ] Step 10 stub run executed for real: score reported, tests that paid named, judgement given with reasons (evidence pasted) (when the preflight showed this machine cannot run the harness, mark all three run lines ⏸️ rather than ✅ or ❌, keep the preflight line ✅ because it was attempted and reported, and state plainly that the bundle is not cleared to ship until the runs happen elsewhere)
++- [ ] Step 10 owner-only oracle run executed for real: reward exactly 1.000 with the agent's 0600 modes reproduced (evidence pasted)
++- [ ] Step 10 stub run executed for real: score reported, tests that paid named, judgement given with reasons (evidence pasted) (when the preflight showed this machine cannot run the harness, mark all four run lines ⏸️ rather than ✅ or ❌, keep the preflight line ✅ because it was attempted and reported, and state plainly that the bundle is not cleared to ship until the runs happen elsewhere)
+ - [ ] Step 10 runs made from `exe_copy.py` copies only: its full output pasted (judge.toml validated against the rewardkit 0.2.1 schema, judge.toml deleted, tests-only reward.toml weight, network roles opened), scores recorded as TESTS-ONLY, both copies deleted, and the original confirmed unedited
+ - [ ] Every oracle or empty-run score claimed anywhere in the bundle (TRUTH.md included) is scoped to the test channel; no judged-channel oracle score is claimed, because none can exist
+ - [ ] Step 11: re-check done, coverage mapping complete both directions, zero overlap between tests and judged criteria
+diff --git a/Input_Bundle_QC/Starter.md b/Input_Bundle_QC/Starter.md
+index 22622b99..24122c6f 100644
+--- a/Input_Bundle_QC/Starter.md
++++ b/Input_Bundle_QC/Starter.md
+@@ -47,8 +47,8 @@ Each gate names one or two files it judges, and several more it reads as evidenc
+ |------|------|--------|-----------------------|
+ | 5 | `01_Instruction_QC.md` | instruction.md | task.toml, environment/Dockerfile, environment/, tests/test_output.py, tests/judge.toml |
+ | 6 | `02_Data_Solution_QC.md` | environment/Dockerfile, environment/, solution/ (solve.sh, solve.py, TRUTH.md) | instruction.md, task.toml, tests/test_output.py, tests/judge.toml |
+-| 7 | `03_Tests_QC.md` | tests/Dockerfile, test.sh, test_output.py (checks and weight registrations), reward.toml | instruction.md and any spec file it points at under environment/, task.toml, tests/judge.toml (positive total for reward.toml) |
+-| 8 | `04_Judge_QC.md` | tests/judge.toml | solution/, tests/test_output.py, tests/reward.toml, instruction.md and any spec file it points at under environment/ |
++| 7 | `03_Tests_QC.md` | tests/Dockerfile, test.sh, test_output.py (checks and weight registrations), reward.toml | instruction.md, the input directories environment/Dockerfile copies into the agent image, task.toml, tests/judge.toml (positive total for reward.toml) |
++| 8 | `04_Judge_QC.md` | tests/judge.toml | solution/, tests/test_output.py, tests/reward.toml, instruction.md, the input directories environment/Dockerfile copies into the agent image |
+ | 9 | `05_Alignment_Integrity_QC.md` | the whole bundle, cross-layer, including the client feedback checks CL-1..CL-10 | everything |
+ 
+ Gate 9 carries one block that is not like the others: the client feedback checks CL-1..CL-10. Every one of them exists because the client found that exact defect in tasks we already delivered and measured what it cost, so none of them may be marked ✅ on a reading alone. Each names a number to compute or a file and line to quote, and the sign-off wants that number or that quote. The full wording is in `Final_checklist.md`; gate 05 repeats it so the gate stands on its own.
+diff --git a/Input_Bundle_QC/exe_copy.py b/Input_Bundle_QC/exe_copy.py
+index 605ce2e4..7d152aa1 100644
+--- a/Input_Bundle_QC/exe_copy.py
++++ b/Input_Bundle_QC/exe_copy.py
+@@ -31,11 +31,15 @@ What the copy changes, and nothing else:
+      A real openhands-sdk run must use the bundle itself, never this copy.
+   6. With --stub, replaces solution/ with a solve.sh that only creates each
+      declared artifact empty ({} for .json), for the stub run.
++  7. With --owner-only, appends a trailer to solution/solve.sh that strips group
++     and other access from every file the run wrote under /app (0600, or 0700
++     where the owner could already execute it), the mode an agent editor leaves
++     behind, for the owner-only oracle run.
+ 
+ Every change is printed. Exit codes: 0 copy built, 1 refused, 2 usage error.
+ 
+ Usage:
+-  python3 exe_copy.py <BUNDLE_PATH> <DEST_DIR> [--stub]
++  python3 exe_copy.py <BUNDLE_PATH> <DEST_DIR> [--stub] [--owner-only]
+ """
+ 
+ from __future__ import annotations
+@@ -223,10 +227,48 @@ def write_stub(dest: Path) -> list[str]:
+     return [f"solution/ replaced by a stub solve.sh creating {len(artifacts)} empty artifact(s)"]
+ 
+ 
++def write_owner_only(dest: Path) -> list[str]:
++    """Make the oracle leave its files at mode 0600, the mode an agent editor leaves.
++
++    The OpenHands file_editor writes through a temp file in the same directory
++    and renames it, and temp files are created owner-only, so a program the
++    agent wrote is readable by uid 1000 alone. A verifier that runs that program
++    after dropping to an unprivileged uid cannot open it and fails every check
++    that executes it. solution/solve.sh installs its program with cp, which
++    leaves 0644, so the plain oracle run scores 1.000 and the hole stays
++    invisible until a real trajectory is graded. This variant reproduces the
++    agent's mode, so the same oracle has to score 1.000 against it.
++
++    The owner's own execute bit survives: an agent told to deliver an executable
++    entry point runs chmod +x and lands at 0700, not 0600, so stripping that bit
++    would fail the task for a reason no agent could avoid. Only group and other
++    access, which an editor never grants, is taken away.
++    """
++    solve = dest / "solution" / "solve.sh"
++    trailer = (
++        "\n# Owner-only variant (QC Step 10): leave every file this run wrote readable by its\n"
++        "# owner alone, the mode an agent editor leaves behind, keeping the owner execute bit.\n"
++        "find /app -xdev -type f -user 1000 -perm -u+x -print0 2>/dev/null"
++        " | xargs -0 -r chmod 700 || true\n"
++        "find /app -xdev -type f -user 1000 ! -perm -u+x -print0 2>/dev/null"
++        " | xargs -0 -r chmod 600 || true\n"
++    )
++    solve.write_text(solve.read_text(encoding="utf-8") + trailer, encoding="utf-8")
++    return [
++        "solution/solve.sh: appended a trailer leaving every file the run wrote under /app at"
++        " mode 0600, or 0700 where the owner could already execute it (agent editor mode)"
++    ]
++
++
+ def main(argv: list[str]) -> int:
+-    args = [a for a in argv if a != "--stub"]
+-    stub = len(args) != len(argv)
+-    if len(args) != 2:
++    flags = {a for a in argv if a.startswith("-")}
++    args = [a for a in argv if not a.startswith("-")]
++    stub = "--stub" in flags
++    owner_only = "--owner-only" in flags
++    unknown = sorted(flags - {"--stub", "--owner-only"})
++    if len(args) != 2 or unknown:
++        if unknown:
++            print(f"usage error: unknown flag(s) {' '.join(unknown)}", file=sys.stderr)
+         print((__doc__ or "").split("Usage:")[-1].strip(), file=sys.stderr)
+         return 2
+     bundle, dest = Path(args[0]).resolve(), Path(args[1]).resolve()
+@@ -262,6 +304,9 @@ def main(argv: list[str]) -> int:
+     if stub:
+         for change in write_stub(dest):
+             log(change)
++    if owner_only:
++        for change in write_owner_only(dest):
++            log(change)
+     log("scores from this copy are TESTS-ONLY; the bundle under review was not edited")
+     return 0
+ 
+diff --git a/Input_Bundle_QC/judge_qc.py b/Input_Bundle_QC/judge_qc.py
+index 19e5f3d8..fe6b10e5 100644
+--- a/Input_Bundle_QC/judge_qc.py
++++ b/Input_Bundle_QC/judge_qc.py
+@@ -50,7 +50,7 @@ And whole-file:
+   G1      judge.toml parses and carries a [judge] table plus at least one
+           [[criterion]].
+   G2      [judge] is exactly judge = "openai/gpt-5.6-sol", mode =
+-          "individual", timeout = 300, atif-trajectory =
++          "batched", timeout = 300, atif-trajectory =
+           "/logs/agent/trajectory.json", weight = 1.0, in that order (no
+           reasoning_effort key);
+           [scoring] is exactly aggregation = "weighted-sum"; no other
+@@ -97,7 +97,12 @@ def fails_for(check: str) -> int:
+ # it: the key is left out and fails as an extra key.
+ JUDGE_HEADER: list[tuple[str, object]] = [
+     ("judge", "openai/gpt-5.6-sol"),
+-    ("mode", "individual"),
++    # rewardkit's own default. "individual" would judge each criterion in its
++    # own concurrent call, which re-sends the whole trajectory once per
++    # criterion; on a 30-criterion file that is 30x the input tokens for the
++    # same verdicts. Its one advantage, per-criterion "files", is already
++    # forbidden by J1, so batched costs this contract nothing.
++    ("mode", "batched"),
+     ("timeout", 300),
+     # Without this key rewardkit 0.2.1 never hands the trajectory to the judge,
+     # so every trajectory / state_change criterion would be judged blind.
+diff --git a/Input_Bundle_QC/structure_qc.py b/Input_Bundle_QC/structure_qc.py
+index c8344f11..a1c9cf28 100644
+--- a/Input_Bundle_QC/structure_qc.py
++++ b/Input_Bundle_QC/structure_qc.py
+@@ -26,12 +26,14 @@ Every ID:
+   S1  directory name matches ^[a-z0-9][a-z0-9-]{2,63}$.
+   S2  every required file exists (solve.py is optional).
+   S3  cheat/ (fail), tests/test_weights.json (fail), tests/rubric.json (fail);
+-      any other entry outside the tree fails.
++      a trajectories/ directory of recorded runs at the root warns; any other
++      entry outside the tree fails.
+   S4  environment/ holds at least one input directory besides the Dockerfile
+       (any name: data/, repo/, fixtures/...); every one holds at least one file
+       and is copied into the image by a COPY/ADD in environment/Dockerfile.
+   S5  no reward.txt, reward.json, reward-details.json, ctrf.json, .DS_Store,
+-      __pycache__/, .git/, .pytest_cache/ anywhere.
++      __pycache__/, .git/, .pytest_cache/ anywhere; the four grader-output
++      names warn instead under trajectories/.
+   S6  CRLF: fail in .sh files, warn elsewhere.
+   S7  environment/Dockerfile copies nothing from outside environment/;
+       wildcard sources warn.
+@@ -62,8 +64,9 @@ Every ID:
+   T13 pinned values ([task] name = terminal-bench/<dir> included) and
+       positive-integer cpus/memory_mb/storage_mb.
+   T14 authors: non-empty array of { name, email } tables; name is your own
+-      full name like "Ram Lakhan" (blank or a placeholder like "Task Author"
+-      fails); email ends in @ethara.ai; an email not built from the name warns.
++      name in any capitalisation or script (blank, a placeholder like "Task
++      Author", or digits/symbols fail); email domain is ethara.ai or a
++      subdomain; an email that cannot be related to the name warns.
+   T15 [verifier.env] is exactly OPENAI_API_KEY = "${OPENAI_API_KEY:-}".
+   X1  no em/en dash in any text file; binary-skipped files warn.
+   X2  unresolved generator placeholders fail; TODO/FIXME/XXX/PLACEHOLDER
+@@ -107,6 +110,14 @@ def fails_for(check: str) -> int:
+ 
+ FORBIDDEN_NAMES = {"reward.txt", "reward.json", "reward-details.json", "ctrf.json", ".DS_Store"}
+ FORBIDDEN_DIRS = {"__pycache__", ".git", ".pytest_cache"}
++# Recorded agent runs. Delivery policy accepts a bundle that ships them, so the
++# directory itself and the grader output inside it warn instead of failing: no
++# Dockerfile copies this directory, so nothing in it reaches either container
++# and nothing in it can influence a score. Everything outside it is unchanged.
++TRAJECTORY_DIR = "trajectories"
++# Grader output that is a genuine record of a past run when it sits under
++# trajectories/. .DS_Store is never a run record, so it stays a fail anywhere.
++RUN_RECORD_NAMES = {"reward.txt", "reward.json", "reward-details.json", "ctrf.json"}
+ NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
+ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+ # An author field that credits nobody. Checked case-insensitively.
+@@ -117,16 +128,25 @@ PLACEHOLDER_WORDS = {"task", "tasks", "author", "authors", "name", "names", "you
+                      "default", "team", "admin", "owner", "creator", "maintainer", "dev",
+                      "developer", "bundle", "terminal", "bench", "ethara", "person", "someone",
+                      "me", "none", "null", "na", "n", "a", "unknown", "anonymous", "tbd", "todo",
+-                     "placeholder", "john", "jane", "doe", "foo", "bar", "xxx", "abc"}
++                     "placeholder", "john", "jane", "doe", "foo", "bar", "xxx", "abc",
++                     "ib", "model", "training", "role", "handle", "new", "final", "copy"}
++# Words no person is called, so one of them anywhere marks the whole field a
++# stand-in. The second line is what taskers actually typed instead of a name
++# ("IB Created", "task creation", "QC fixes", "Anubis Harness", "task-generator").
+ STRONG_PLACEHOLDER_WORDS = {"author", "authors", "placeholder", "tbd", "todo", "unknown",
+-                            "anonymous", "yourname", "taskauthor", "doe", "example", "sample"}
+-AUTHOR_DOMAIN = "@ethara.ai"
++                            "anonymous", "yourname", "taskauthor", "doe", "example", "sample",
++                            "created", "creation", "creator", "generator", "generated",
++                            "remediation", "fixed", "fixes", "harness", "anubis", "harbor", "qc"}
++AUTHOR_DOMAIN = "ethara.ai"
+ 
+ 
+ def is_placeholder_name(name: str) -> bool:
+     words = [w for w in re.split(r"[^a-z]+", name.lower()) if w]
+-    if not words or "<" in name or "{" in name:
++    if "<" in name or "{" in name:
+         return True
++    if not words:
++        # A name in a non-Latin script has no words this vocabulary can judge.
++        return not any(character.isalpha() for character in name)
+     return all(w in PLACEHOLDER_WORDS for w in words) or any(w in STRONG_PLACEHOLDER_WORDS for w in words)
+ REQUIRED = ["instruction.md", "task.toml",
+             "environment/Dockerfile", "solution/solve.sh", "solution/TRUTH.md",
+@@ -213,7 +233,10 @@ def check_tree(bundle: Path) -> None:
+         its own grader; tests/test_weights.json fails, since test weights are
+         registered in test_output.py and a second copy drifts;
+         tests/rubric.json fails, since the judged channel is tests/judge.toml
+-        only and a second file is a second source of truth. Any other entry
++        only and a second file is a second source of truth. A trajectories/
++        directory of recorded agent runs at the bundle root warns instead of
++        failing: no Dockerfile copies it, so it reaches neither container and
++        cannot influence a score. Any other entry
+         at the bundle root, in environment/, solution/ or tests/ fails: each
+         holds exactly the entries the tree names. environment/ is the one
+         open folder: besides the Dockerfile it holds the task's input
+@@ -226,7 +249,11 @@ def check_tree(bundle: Path) -> None:
+         sees, and fails.
+     S5  forbidden anywhere: reward.txt / reward.json / reward-details.json /
+         ctrf.json (runtime outputs of grading: shipping one means a pre-baked
+-        score), .DS_Store, __pycache__/, .git/, .pytest_cache/.
++        score), .DS_Store, __pycache__/, .git/, .pytest_cache/. The four
++        grader-output names warn instead of failing when they sit under
++        trajectories/, where they are the record of a past run rather than a
++        score staged for this bundle's grading; .DS_Store is never a run
++        record, so it fails there too.
+     S6  CRLF line endings: fail in .sh files (the shebang becomes "bash\\r"
+         and the script never runs, so no reward is written), warn elsewhere.
+     """
+@@ -263,6 +290,11 @@ def check_tree(bundle: Path) -> None:
+                 continue
+             if folder == "environment" and p.is_dir() and not p.name.startswith("."):
+                 continue
++            if not folder and p.is_dir() and p.name == TRAJECTORY_DIR:
++                warn("S3", f"{rel}/ holds recorded agent runs and is accepted by delivery "
++                           "policy: no Dockerfile copies it, so it reaches neither container "
++                           "and cannot influence a score. Delete it for a clean root.")
++                continue
+             only = (f"only {sorted(allowed)} and input directories" if folder == "environment"
+                     else f"only {sorted(allowed)}")
+             fail("S3", f"unexpected entry {rel}: {folder + '/' if folder else 'the bundle root'} holds "
+@@ -298,8 +330,14 @@ def check_tree(bundle: Path) -> None:
+ 
+     for p in sorted(bundle.rglob("*")):
+         rel = p.relative_to(bundle)
++        in_trajectory = rel.parts[:1] == (TRAJECTORY_DIR,)
+         if p.name in FORBIDDEN_NAMES:
+-            fail("S5", f"forbidden file: {rel}")
++            if in_trajectory and p.name in RUN_RECORD_NAMES:
++                warn("S5", f"{rel} is grader output from a recorded run, accepted by "
++                           "delivery policy: nothing copies trajectories/ into either "
++                           "container, so it is no pre-baked score for this bundle.")
++            else:
++                fail("S5", f"forbidden file: {rel}")
+         if p.is_dir() and p.name in FORBIDDEN_DIRS:
+             fail("S5", f"forbidden directory: {rel}")
+         if p.is_file() and is_text(p) and b"\r\n" in p.read_bytes():
+@@ -363,19 +401,56 @@ def check_agent_image_scope(bundle: Path) -> None:
+         ok("S7", "agent image copies nothing from outside environment/")
+ 
+ 
+-_NAME_WORD = r"[A-Z](?:[a-z]+|'[A-Z][a-z]+)(?:-[A-Z][a-z]+)*"
+-AUTHOR_NAME_RE = re.compile(rf"^{_NAME_WORD}(?: {_NAME_WORD})+$")
++NAME_PUNCTUATION = " -.'\u2019"
++
++
++def name_words(name: str) -> list[str]:
++    return [w for w in re.split(rf"[{re.escape(NAME_PUNCTUATION)}]+", name.strip()) if w]
++
++
++def is_name_shaped(name: str) -> bool:
++    """A person's name in any script, judged on content rather than style.
++
++    Capitalisation, script and initials are not judged: `Anjali kumari`,
++    `JOSE GARCIA`, `Ram K. Lakhan`, `van der Berg`, `O'Brien` and non-Latin
++    names all qualify. Only digits, `@`, underscores and other symbols
++    disqualify, which is what separates a name from a handle like
++    `task_creator` or an email.
++    """
++    text = name.strip()
++    if not text or any(character.isdigit() for character in text):
++        return False
++    if not all(character.isalpha() or character in NAME_PUNCTUATION for character in text):
++        return False
++    words = name_words(text)
++    return bool(words) and max(len(w) for w in words) >= 2
++
++
++def email_in_domain(email: str) -> bool:
++    host = email.strip().lower().rsplit("@", 1)[-1]
++    return host == AUTHOR_DOMAIN or host.endswith("." + AUTHOR_DOMAIN)
+ 
+ 
+ def name_matches_email(name: str, email: str) -> bool:
+-    """True when the email's local part, digits and separators dropped, is
+-    built from the name's words in any order, each word used whole, as its
+-    initial, or skipped, with at least one word used whole: ram124, ram.lakhan,
+-    rlakhan and lakhan.ram all relate to Ram Lakhan; r43243 does not."""
++    """True when the address plausibly belongs to the named person.
++
++    Any name word of three letters or more appearing in the local part is
++    enough, so the intern suffixes in real addresses relate fine
++    (`abdus.samadint17` to `Abdus Samad Ali`). Initials count too (`rl`,
++    `r.k.lakhan`). A name with no Latin words cannot be compared, so it is
++    accepted rather than warned about. `r43243` still fails to relate.
++    """
+     local = re.sub(r"[^a-z]", "", email.strip().split("@", 1)[0].lower())
+     words = [w for w in re.split(r"[^a-z]+", name.lower()) if w]
+-    if not local or not words:
++    if not words:
++        return True
++    if not local:
+         return False
++    if any(len(w) >= 3 and w in local for w in words):
++        return True
++    initials = "".join(w[0] for w in words)
++    if len(initials) > 1 and (local.startswith(initials) or local.startswith(initials[::-1])):
++        return True
+ 
+     def build(rest: str, ws: tuple[str, ...], whole: bool) -> bool:
+         if not ws:
+@@ -395,8 +470,9 @@ def check_authors(authors: object) -> None:
+     strings. On rejection the task directory stops being recognised as a task
+     at all, so the bundle disappears from discovery instead of raising: nothing
+     here can be relaxed on the grounds that "it still parses". The name
+-    must be a full name like "Ram Lakhan"; an email not built from the name
+-    warns, so the tasker confirms the author.
++    must be a name rather than a handle or a stand-in, in whatever
++    capitalisation and script the author uses; an email that cannot be
++    related to the name warns, so the tasker confirms the author.
+     """
+     if not isinstance(authors, list) or not authors:
+         fail("T14", "[task] authors must be a non-empty array of { name, email } tables: "
+@@ -419,14 +495,20 @@ def check_authors(authors: object) -> None:
+                         "name and nothing else; the address belongs in email.")
+         elif is_placeholder_name(name):
+             fail("T14", f"{where} name {name!r} is a placeholder, not a person. Fill in your own full name, like 'Ram Lakhan'.")
+-        elif not AUTHOR_NAME_RE.match(name.strip()):
+-            fail("T14", f"{where} name {name!r} must be the author's full name as capitalised words separated by single spaces, like 'Ram Lakhan'")
++        elif not is_name_shaped(name.strip()):
++            fail("T14", f"{where} name {name!r} is not a name: it holds digits or symbols. "
++                        "Any capitalisation, script, initial or particle is fine, so write your "
++                        "own name as you spell it, like 'Ram Lakhan'.")
++        elif len(name_words(name)) == 1:
++            warn("T14", f"{where} name {name!r} is a single word; give your full name unless "
++                        "that really is how you are credited")
+         email = entry.get("email")
+         if not isinstance(email, str) or not EMAIL_RE.match(email.strip()) or "<" in email:
+             fail("T14", f"{where} email {email!r} is missing or not a well-formed address")
+-        elif not email.strip().lower().endswith(AUTHOR_DOMAIN):
+-            fail("T14", f"{where} email {email!r} must be your ethara.ai address (ending in {AUTHOR_DOMAIN})")
+-        elif (isinstance(name, str) and AUTHOR_NAME_RE.match(name.strip())
++        elif not email_in_domain(email):
++            fail("T14", f"{where} email {email!r} must be your ethara.ai address (the domain is "
++                        f"{AUTHOR_DOMAIN} or a subdomain of it)")
++        elif (isinstance(name, str) and is_name_shaped(name.strip())
+               and not is_placeholder_name(name) and not name_matches_email(name, email)):
+             warn("T14", f"{where} name {name!r} does not match the email {email!r}; "
+                         "confirm it is the author")
+diff --git a/Input_Bundle_QC/tests_qc.py b/Input_Bundle_QC/tests_qc.py
+index 2c4c569c..715cd456 100644
+--- a/Input_Bundle_QC/tests_qc.py
++++ b/Input_Bundle_QC/tests_qc.py
+@@ -26,18 +26,20 @@ What this script enforces:
+   B1-B5  test.sh: ends with the exact rewardkit line run once, no skip
+          switches, no sourcing or PATH shadowing, writes no reward itself,
+          no exit/return/|| path that skips rewardkit.
+-  K1-K7  tests/Dockerfile: FROM, COPY . /tests/, mkdir -p /app (warn),
++  K1-K8  tests/Dockerfile: FROM, COPY . /tests/, mkdir -p /app (warn),
+          every third-party import installed, harbor-rewardkit==0.2.1 pinned,
+-         Python 3.12 or newer, LITELLM_LOCAL_MODEL_COST_MAP=True.
++         Python 3.12 or newer, LITELLM_LOCAL_MODEL_COST_MAP=True, litellm
++         pinned to an exact version.
+   R1-R5  tests/reward.toml: parses with only reward and scoring tables,
+          one [[reward]] of the pinned shape, channel weights equal to
+          0.5 / positive total, [scoring.test_output] pinned, no other
+          criteria-bearing input under tests/.
+   O1     solve.py is an independent implementation, not a copy of the
+          verifier.
+-  H1,H3-H5 verifier hardening: util-linux installed when setpriv/runuser is
++  H1,H3-H6 verifier hardening: util-linux installed when setpriv/runuser is
+          used, /tests restricted, stale reward files cleared, log directory
+-         locked to root.
++         locked to root, agent-written programs made readable before the
++         uid drop.
+ 
+ Every ID:
+ 
+@@ -78,6 +80,9 @@ Every ID:
+       allowlist blocks that, and the failure warning races interpreter
+       shutdown into an import deadlock that kills rewardkit before it writes
+       reward.json (about half of runs with no route to GitHub).
++  K8  litellm installed with an exact == pin. rewardkit accepts litellm>=1.83
++      with no upper bound, so an unpinned verifier image takes whatever PyPI
++      serves while holding the judge key and the hidden tests.
+   R1  reward.toml parses; top level is exactly reward and scoring.
+   R2  exactly one [[reward]] with keys name, aggregation, weights;
+       name = "reward", aggregation = "weighted-sum", weights naming exactly
+@@ -93,6 +98,9 @@ Every ID:
+   H3  /tests restricted (chmod -R go-rwx /tests) (warn).
+   H4  test.sh removes stale reward files (warn).
+   H5  test.sh locks the log directory: chown root + chmod 755 (warn; 700 also warns).
++  H6  when checks drop the uid, the agent-written program they execute is made
++      readable first (chmod, or run a copy the verifier wrote). An agent editor
++      leaves it at mode 0600; solve.sh uses cp, so only a real trajectory feels it.
+ 
+ Usage: python3 tests_qc.py /path/to/bundle
+ Exit codes: 0 = pass (warns allowed), 1 = fail, 2 = usage error.
+@@ -145,6 +153,15 @@ def load_toml(p: Path) -> dict | None:
+ 
+ ALLOWED_WEIGHTS = {5, 3, 1, -1, -3, -5}
+ REWARDKIT_PIN = "harbor-rewardkit==0.2.1"
++# rewardkit requires litellm>=1.83 with no upper bound, so an unpinned verifier
++# install takes whatever PyPI serves at build time. On 2026-10-21 that was a
++# litellm 1.107.0 stable (since withdrawn) carrying a .pth plus sitecustomize
++# that fetched and executed remote code and reached the cloud metadata endpoint,
++# inside the one image that holds the judge key and the hidden tests. The pin is
++# the same version the agent image pins (structure_qc S9, DS-29).
++LITELLM_PIN = "litellm==1.105.0"
++# Versions known to carry the payload; never accept them even when pinned.
++LITELLM_QUARANTINE = {"1.107.0"}
+ # Authoritative stdlib list from the interpreter itself; a hand-maintained
+ # set drifts across Python versions and produces false positives.
+ STDLIB = frozenset(sys.stdlib_module_names)
+@@ -584,6 +601,8 @@ def check_dockerfile(bundle: Path, imports: set[str]) -> None:
+     K5  rewardkit is installed as exactly harbor-rewardkit==0.2.1 (the version
+         Harbor 0.24.0 names); missing, unpinned, ranged or other versions fail.
+     K6  a python:X.Y base image is 3.12 or newer (rewardkit requires it).
++    K8  litellm carries an exact == pin on a pip install line, is not a
++        withdrawn version, and matches the version the agent image pins.
+     """
+     p = bundle / "tests" / "Dockerfile"
+     if not p.is_file():
+@@ -623,6 +642,30 @@ def check_dockerfile(bundle: Path, imports: set[str]) -> None:
+     if not fails_for("K5"):
+         ok("K5", f"{REWARDKIT_PIN} pinned")
+ 
++    joined = re.sub(r"\\\s*\n", " ", text)
++    install_text = "\n".join(l for l in joined.splitlines() if "pip install" in l and not l.lstrip().startswith("#"))
++    litellm_specs = re.findall(r"(?<![\w-])litellm(?![\w-])\s*([=<>!~]=?[^\s'\"\\]*)?", install_text)
++    if not litellm_specs:
++        fail("K8", f"tests/Dockerfile installs rewardkit without pinning litellm; add {LITELLM_PIN} "
++             "to the pip line (rewardkit accepts litellm>=1.83 with no upper bound, so the build "
++             "takes whatever PyPI serves)")
++    flagged = not litellm_specs
++    for spec in litellm_specs:
++        version = spec[2:] if spec.startswith("==") else ""
++        if not version:
++            fail("K8", f"litellm installed as 'litellm{spec}'; pin exactly {LITELLM_PIN}")
++        elif version in LITELLM_QUARANTINE:
++            fail("K8", f"litellm=={version} is withdrawn and shipped remote-code-execution "
++                 f"hooks in site-packages; pin {LITELLM_PIN}")
++        elif f"litellm=={version}" != LITELLM_PIN:
++            warn("K8", f"litellm pinned to {version}, not the {LITELLM_PIN} the agent image pins "
++                 "(S9/DS-29); a deliberate bump needs tasker approval")
++        else:
++            continue
++        flagged = True
++    if not flagged:
++        ok("K8", f"{LITELLM_PIN} pinned in the verifier image")
++
+     if re.search(r"^ENV\s+LITELLM_LOCAL_MODEL_COST_MAP=(?:True|true|1)\s*$", text, re.M):
+         ok("K7", "LITELLM_LOCAL_MODEL_COST_MAP=True set")
+     else:
+@@ -850,6 +893,124 @@ def check_hardening(bundle: Path) -> None:
+             warn("H5", "verifier log directory not locked (chown root:root + chmod 755)")
+ 
+ 
++DROPS_PRIVILEGES = re.compile(r"setpriv|runuser|setuid|setresuid|preexec_fn|extra_groups")
++GRANTS_READ = re.compile(r"chmod|grant|readable|share")
++STAGES_FILE = re.compile(r"copyfile|copy2|copytree|shutil\.copy|write_text|write_bytes")
++PY_LITERAL = re.compile(r"""['"][^'"\s]*\.py['"]""")
++
++
++def _names(node: ast.AST) -> set[str]:
++    return {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
++
++
++# Interpreter switches that sit between sys.executable and the program path.
++# -c and -m take code or a module name, so the list holds no program file at
++# all and there is nothing for H6 to look for; -X and -W take a value of their
++# own, so the token after them is not the program either.
++NO_PROGRAM_FLAGS = {"-c", "-m"}
++FLAGS_WITH_VALUE = {"-X", "-W", "-Q", "--check-hash-based-pycs"}
++STRING_LITERAL = re.compile(r"""^['"](.*)['"]$""", re.S)
++
++
++def _executed_programs(tree: ast.AST) -> list[ast.expr]:
++    """The program each `[sys.executable, ...]` list runs, skipping switches.
++
++    `python -I program.py` is the usual hardening form, so the token after
++    sys.executable is frequently `-I` and not the program. Reporting that
++    asks the author to chmod a command-line switch.
++    """
++    programs = []
++    for node in ast.walk(tree):
++        if not isinstance(node, ast.List):
++            continue
++        parts = [ast.unparse(e) for e in node.elts]
++        if "sys.executable" not in parts:
++            continue
++        index = parts.index("sys.executable") + 1
++        while index < len(parts):
++            literal = STRING_LITERAL.match(parts[index])
++            if literal is None or not literal.group(1).startswith("-"):
++                break
++            switch = literal.group(1)
++            if switch in NO_PROGRAM_FLAGS:
++                index = len(parts)
++                break
++            index += 2 if switch in FLAGS_WITH_VALUE else 1
++        if index < len(parts):
++            programs.append(node.elts[index])
++    return programs
++
++
++def _drop_builders(tree: ast.AST) -> list[ast.FunctionDef]:
++    return [n for n in ast.walk(tree)
++            if isinstance(n, ast.FunctionDef)
++            and re.search(r"setpriv|runuser|_SETPRIV", ast.unparse(n))]
++
++
++def check_agent_program_readable(bundle: Path) -> None:
++    """H6: a verifier that drops privileges must make the agent's program readable.
++
++    Agent editors write through a temp file and rename it, so a program the agent
++    wrote lands at mode 0600 (owner-only). Checks that run it as an unprivileged
++    user then cannot open it and fail even on a correct submission. The oracle's
++    solve.sh installs its program with cp, which leaves 0644, so Step 10 reads
++    1.000 and the hole stays invisible until a real trajectory is graded. Passing
++    shapes: the privilege dropper grants read to its arguments, a grant call names
++    the executed program, or the verifier executes a python file it staged itself.
++    """
++    path = bundle / "tests" / "test_output.py"
++    if not path.is_file():
++        return
++    src = read(path)
++    if not DROPS_PRIVILEGES.search(src):
++        return
++    try:
++        tree = ast.parse(src)
++    except SyntaxError:
++        return
++    programs = _executed_programs(tree)
++    if not programs:
++        return
++
++    if any(GRANTS_READ.search(ast.unparse(f)) for f in _drop_builders(tree)):
++        ok("H6", "the privilege dropper grants read on the program it is about to run")
++        return
++
++    staged_py = {t.id for node in ast.walk(tree)
++                 if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None
++                 and PY_LITERAL.search(ast.unparse(node.value))
++                 for t in ([node.target] if isinstance(node, ast.AnnAssign) else node.targets)
++                 if isinstance(t, ast.Name)}
++    calls = [c for c in ast.walk(tree) if isinstance(c, ast.Call)]
++    granted: set[str] = set()
++    staged: set[str] = set()
++    for call in calls:
++        text = ast.unparse(call)
++        if GRANTS_READ.search(text):
++            granted |= _names(call)
++        if STAGES_FILE.search(text) and _names(call) & staged_py:
++            staged |= _names(call) | staged_py
++
++    aliases: dict[str, set[str]] = {}
++    for node in ast.walk(tree):
++        if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None:
++            targets = [node.target] if isinstance(node, ast.AnnAssign) else node.targets
++            bound = {t.id for t in targets if isinstance(t, ast.Name)}
++            aliases.setdefault(ast.unparse(node.value), set()).update(bound)
++
++    unguarded = sorted({ast.unparse(p) for p in programs
++                        if not ((_names(p) | aliases.get(ast.unparse(p), set()))
++                                & (granted | staged))})
++    if unguarded:
++        fail("H6", "grading runs an agent-written program under a dropped uid without making it "
++             f"readable first: {', '.join(unguarded)}. An agent editor leaves that file at mode "
++             "0600, so every check that executes it fails on a correct submission. chmod the "
++             "program and its parents (the verifier is root) or run a copy the verifier staged, "
++             "then prove it with the --owner-only oracle run in Step 10")
++    else:
++        ok("H6", "the agent-written program is made readable before the uid drop")
++
++
+ def main() -> int:
+     if len(sys.argv) != 2:
+         print(__doc__)
+@@ -870,6 +1031,7 @@ def main() -> int:
+     check_reward_toml(bundle, weights)
+     check_oracle_independence(bundle)
+     check_hardening(bundle)
++    check_agent_program_readable(bundle)
+ 
+     print(f"tests_qc: {bundle.name}")
+     print("=" * 60)

@@ -1,0 +1,5 @@
+- [x] 1 read
+- [x] 2 write program once
+- [x] 3 self-check shipped data
+- [x] 4 freeze + FINAL_REPLY.md
+- [x] 5 BLIND_REPORT.md + result.json
