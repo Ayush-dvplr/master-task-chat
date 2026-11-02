@@ -20,5 +20,8 @@ P8. Teammates build tasks that pass QC and score well; Ayush's tasks cannot do t
 P9. Very bad at creating new tasks compared with fixing tasks (exact meaning: Q38).
 P10. After an upgrade, some templates are still old.
 
+Added 3 Nov 2026 (ENTRY 16)
+P11. Research prompts for ChatGPT and Gemini deep research (new lever angles, teammate task study) are static; they do not grow with the knowledge base and are lost or stale after compaction.
+
 Ayush's wording for P1 to P6, kept as he wrote it:
 "1. context size and compaction or opencode heavy compress then it lost all its learning 2. fixing QC then sometimes it either loss the lever or fixes make new errors 3. although i have mac m1 max still facing issues in running multiple dockor session and they are polling and waiting and even though i know they can run at same still they poll an wait 4. hardening the task as per the proven 5. token consumption is quite high 6. align using multiple tools like using codex sometimes for sessions , or opencode claude or opecode gpt , and there are more"
