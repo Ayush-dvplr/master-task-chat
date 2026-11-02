@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 02:29 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 02:42 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
@@ -40,7 +40,7 @@ KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 Only skimmed so far (README, GOALS, state.json, AUTO_POLICY, dockfree.py, auto.py limits, BOARD head); that skim is in FINDINGS.md and CONTRADICTIONS.md. Nothing else read in depth; nothing here yet.
 
 NEXT STEPS
-1. Helpers W1-002 (hardening constraints) and W1-003 (records, parked questions, missing paths) are running: check WORKER_LOG.md; when done, spot check, commit tmp/, tell Ayush what to push.
+1. W1-002 done and verified: tmp/W1-002/CONSTRAINTS.md (182 hardening constraints), CONFLICTS.md (44). Next with it: Ayush reviews the conflicts first, then the constraints. W1-003 (records, parked questions, missing paths) is running: when done, spot check, commit tmp/W1-003, tell Ayush what to push.
 2. Recovery prompt: cold test W1-001 done and its gaps fixed. Use the prompt saved in prompts/RECOVERY_PROMPT.md.
 3. When Ayush allows, read the master_chat_tasks records to answer Q35 and Q39 and the questions marked IN RECORDS.
 4. Go through UNVERIFIED_RULES.md batch 1 with Ayush.
