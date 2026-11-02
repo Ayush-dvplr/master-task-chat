@@ -32,9 +32,9 @@ WHERE WE ARE
 4. Master: one saved opencode session named "Master Task Chat" on Opus 5.5 (model stays per session). Sisyphus (oh my openagent) is the default agent of every opencode session. Task sessions (build, QC, fix): Ayush pastes prompts by hand into opencode GPT Sol 6.1, opencode Opus 5.5, or Codex. Subagents (Q57): fine in principle; avoided for cost and because they default to Claude and fail in GPT sessions when the Claude limit is used up (F6.7).
 5. P9 means (b): fixing works, designing new tasks is weak (Q38).
 6. Ayush pastes the recovery prompt in this same session after compaction (Q52).
-8. P4 hardening: there is no method yet; it must hide levers, avoid leaks, pass QC, keep oracle 1 and nop 0, and more (Q20). Proposed first step: a verified constraint list (Q61).
-9. Helpers: W1 and W2 allowed, no limit (Q58, flag Q62); report only, full findings in tmp/ with sha8 ids (Q59); W3 prompts go to opencode GPT Sol 6.1 with a no subagents line (Q60).
-7. Nothing outside upgrade_plan/ has been edited. PROCEED not given.
+7. P4 hardening: there is no method yet; it must hide levers, avoid leaks, pass QC, keep oracle 1 and nop 0, and more (Q20). Proposed first step: a verified constraint list (Q61).
+8. Helpers: W1 and W2 allowed, no limit (Q58, flag Q62); report only, full findings in tmp/ with sha8 ids (Q59); W3 prompts go to opencode GPT Sol 6.1 with a no subagents line (Q60).
+9. Nothing outside upgrade_plan/ has been edited. PROCEED not given.
 
 KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 Only skimmed so far (README, GOALS, state.json, AUTO_POLICY, dockfree.py, auto.py limits, BOARD head); that skim is in FINDINGS.md and CONTRADICTIONS.md. Nothing else read in depth; nothing here yet.
