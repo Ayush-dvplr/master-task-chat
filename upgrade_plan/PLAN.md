@@ -18,8 +18,10 @@ Idea A (Ayush direction, Q51): a background script, using no AI tokens, that mea
 Idea B. One Docker rule, written in one place, replacing C1 and C6.
 Idea C. Measure the Mac once (how many kill tests, oracle runs and paid runs fit together without a hang) and set the limits from that measurement.
 
-P4 HARDENING (depends on Q20 to Q22, R25 to R30)
-To be written after Q20 is answered.
+P4 HARDENING (depends on Q20 to Q22, Q61, R25 to R30)
+Problem as Ayush states it (Q20): there is no clear method. Hardening has to keep levers hidden (no leak of tests or rubric), pass QC, keep what makes the task hard, keep oracle 1 and nop 0, and follow many other constraints at the same time.
+Step 1 (proposed, Q61): one numbered list of every hardening constraint with its source, verified by Ayush.
+Step 2: a hardening method built only from the verified list, with a script check for each constraint that a script can check (oracle and nop, leak grep, lever regression from P2 Idea A).
 
 P5 TOKENS (depends on Q23 to Q25, R31, R33)
 Idea A. Context packs per step: a fix session gets only the rules for its finding ids, not whole files.

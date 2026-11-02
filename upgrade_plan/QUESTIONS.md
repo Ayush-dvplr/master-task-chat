@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q20, Q57, Q58, Q59, Q60.
+LIVE NOW: Q61, Q62.
 PARKED until the records are read (R_RECORDS): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, Q35 details, Q39. Claude checks the records first, then asks only what is left.
 PARKED until their problem is planned: Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -36,7 +36,7 @@ Q18. The 27 Oct Mac hang: do you know the cause (memory, disk, too many containe
 Q19. How many Docker jobs at the same time do you believe the Mac can run, and of what kind (kill tests, oracle or nop, paid harness runs)? [OPEN]
 
 P4 HARDENING
-Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [OPEN. Note: until 3 Nov 02:15 this line wrongly carried the Q38 answer; fixed after cold test W1-001]
+Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [ANSWERED: no method yet; that is the problem itself. Hardening must hide levers, not leak tests or rubric, pass QC, keep the hard parts, keep oracle 1 and nop 0, and more. FOLLOW UP Q61. Note: until 3 Nov 02:15 this line wrongly carried the Q38 answer; fixed after W1-001]
 Q21. Which tasks should be hardened first? [OPEN]
 Q22. What goes wrong today when you harden: the lever does not bite, QC flags it, or too many rounds? [OPEN]
 
@@ -89,9 +89,12 @@ Q55. Should the recovery also reload part of the master_chat_tasks records, or o
 
 Q56. You said you "saved and renamed it in Open Code Sisyphus". Sisyphus is also the name of the main agent of the oh my openagent plugin, and the settings report (a fresh session) ran as "Sisyphus, Ultraworker". So: (1) is "Sisyphus" a name you gave the master session, or the plugin agent, or both? (2) When you paste a worker prompt into a new opencode session, does that session also run as the Sisyphus agent by default? [ANSWERED: the master session is named "Master Task Chat"; Sisyphus is the default agent shown at the bottom of every opencode reply. FOLLOW UP Q57]
 
-Q57. Following Q56: Sisyphus is the default agent, so every opencode session runs as Sisyphus, including worker sessions you paste prompts into. The second half of Q48 is still open: Sisyphus pushes subagents and background tasks, while your 31 Oct rule says GPT prompts must "strictly do not run subagents". For opencode workers, which should win? [OPEN]
-Q58. Worker sessions (WORKERS.md): are you fine with Claude using both W1 helpers inside this session and W2 separate cloud sessions? Any limit you want, for example at most 2 workers at a time? [OPEN]
-Q59. Should workers only return their report (Claude stores it), as WORKERS.md proposes, or may they write their report file into upgrade_plan/reports/ and push it themselves? [OPEN]
-Q60. For W3 prompts (things only the Mac can see), which tool should you paste them into by default: opencode Opus 5.5, opencode GPT Sol 6.1, or Codex? [OPEN]
+Q57. Following Q56: Sisyphus is the default agent, so every opencode session runs as Sisyphus, including worker sessions you paste prompts into. The second half of Q48 is still open: Sisyphus pushes subagents and background tasks, while your 31 Oct rule says GPT prompts must "strictly do not run subagents". For opencode workers, which should win? [ANSWERED: subagents are fine in principle; the rule is for cost and because subagents default to Claude and fail in a GPT session once the Claude limit is used up]
+Q58. Worker sessions (WORKERS.md): are you fine with Claude using both W1 helpers inside this session and W2 separate cloud sessions? Any limit you want, for example at most 2 workers at a time? [ANSWERED: both fine, no limit on number or tokens; Ayush wants the end result. FLAG Q62]
+Q59. Should workers only return their report (Claude stores it), as WORKERS.md proposes, or may they write their report file into upgrade_plan/reports/ and push it themselves? [ANSWERED: report only; full findings may go in a separate tmp folder, each file mapped by a sha like id]
+Q60. For W3 prompts (things only the Mac can see), which tool should you paste them into by default: opencode Opus 5.5, opencode GPT Sol 6.1, or Codex? [ANSWERED: opencode GPT Sol 6.1 for now]
+
+Q61. P4 hardening: you said there are "plenty of things" to follow (hide levers, no leak of tests or rubric, pass QC, oracle 1 and nop 0, and more). Proposal: a helper collects every hardening constraint from your records (route 1 notes, LEVER_RULES, QC playbook, lessons, feedback) into one numbered list, with the source of each. Then you go through it and mark each KEEP, CHANGE or DROP, like UNVERIFIED_RULES. That list becomes the base of a hardening method. Is that the right first step, and may that helper read the records now (this would lift R_RECORDS for this one job)? [OPEN]
+Q62. FLAG on Q58 versus P5 and Q57: you said subagents cost a lot of tokens, and P5 is "token use is very high", yet for my helpers there is no token limit. Do my helpers in this Claude session draw on the same Claude account and usage limit as your opencode Opus 5.5 task sessions? If yes, heavy helper use here can exhaust the limit your task work needs. Is that acceptable, or should helpers run at quiet times only? (W1-001 used about 79k tokens.) [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

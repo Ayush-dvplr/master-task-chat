@@ -1,6 +1,6 @@
 WORKERS: HOW THIS UPGRADE SESSION USES OTHER SESSIONS
 
-Draft agreed in principle by Ayush on 3 Nov 2026 (his message after Q56). Details below are Claude's proposal; open points are Q57 to Q60.
+Agreed by Ayush on 3 Nov 2026 (Q58 to Q60): W1 and W2 both allowed, no limit on number or tokens (flag Q62 open); report only, full findings in tmp/; W3 prompts go into opencode GPT Sol 6.1.
 
 WORDS
 "Helper" (W1, W2, W3) = a session that works for THIS upgrade session. "Task session" = a session in Ayush's task system (build, QC, fix), which Ayush runs in opencode or Codex. The "no subagents" line in a brief applies to the helper itself.
@@ -36,6 +36,12 @@ VERIFICATION BY THE MASTER (before storing)
 2. Any claim that changes a decision gets its line checked, always.
 3. A failed spot check means the report is not stored; the worker is asked again or the point goes to Ayush.
 4. Stored facts in FINDINGS.md carry the worker id and "verified by master" or "UNVERIFIED".
+
+TMP FOLDER (Q59)
+When a report is too long for chat, the helper's complete findings go in upgrade_plan/tmp/<helper id>/ (written by the master from the helper's report, committed so they survive compaction). Each file is listed in WORKER_LOG.md with the first 8 characters of its sha256, so a reference like "W1-002 a1b2c3d4" always points to one exact file version.
+
+W3 PROMPTS (Q60)
+Default target: opencode with GPT Sol 6.1. Every W3 prompt says: read only, do not run subagents (they would start on Claude, F6.7), do all work in this chat, return plain text.
 
 LOG
 Every worker gets a row in WORKER_LOG.md: id, kind (W1, W2, W3), date, purpose, questions covered, status (running, done, verified, rejected), where the report is stored.

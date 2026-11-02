@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 02:13 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 02:25 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
@@ -29,16 +29,18 @@ WHERE WE ARE
 1. Problems: P1 to P10 recorded. Priority order = the order Ayush wrote them, compaction (P1) first (Q34).
 2. P1 cause, strong evidence: the DCP plugin (Dynamic Context Pruning) has run 258 compressions in the master session, keeping only about 4 to 5% as summary (FINDINGS F1.8). Native auto compaction is off. compaction-rules.js does not cover DCP.
 3. Mac: 32 GiB, 10 cores. Docker Desktop VM 15.6 GiB, 8 CPUs. Claude's reading (UNVERIFIED, Q16 and Q17 parked): waiting comes from dockfree counting task.toml limits, not real use. Ayush wants a background script (no AI tokens) that manages Docker room dynamically; AI can see it and start or stop it (Q51).
-4. Master: one saved opencode session named "Master Task Chat" on Opus 5.5 (model stays per session). Sisyphus (oh my openagent) is the default agent of every opencode session. Task sessions (build, QC, fix): Ayush pastes prompts by hand into opencode GPT Sol 6.1, opencode Opus 5.5, or Codex. Subagent rule for task sessions: Q57.
+4. Master: one saved opencode session named "Master Task Chat" on Opus 5.5 (model stays per session). Sisyphus (oh my openagent) is the default agent of every opencode session. Task sessions (build, QC, fix): Ayush pastes prompts by hand into opencode GPT Sol 6.1, opencode Opus 5.5, or Codex. Subagents (Q57): fine in principle; avoided for cost and because they default to Claude and fail in GPT sessions when the Claude limit is used up (F6.7).
 5. P9 means (b): fixing works, designing new tasks is weak (Q38).
 6. Ayush pastes the recovery prompt in this same session after compaction (Q52).
+8. P4 hardening: there is no method yet; it must hide levers, avoid leaks, pass QC, keep oracle 1 and nop 0, and more (Q20). Proposed first step: a verified constraint list (Q61).
+9. Helpers: W1 and W2 allowed, no limit (Q58, flag Q62); report only, full findings in tmp/ with sha8 ids (Q59); W3 prompts go to opencode GPT Sol 6.1 with a no subagents line (Q60).
 7. Nothing outside upgrade_plan/ has been edited. PROCEED not given.
 
 KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 Only skimmed so far (README, GOALS, state.json, AUTO_POLICY, dockfree.py, auto.py limits, BOARD head); that skim is in FINDINGS.md and CONTRADICTIONS.md. Nothing else read in depth; nothing here yet.
 
 NEXT STEPS
-1. Get answers to the LIVE questions listed at the top of QUESTIONS.md (Q20, Q57 to Q60).
+1. Get answers to the LIVE questions listed at the top of QUESTIONS.md (Q61, Q62).
 2. Recovery prompt: cold test W1-001 done and its gaps fixed. Use the prompt saved in prompts/RECOVERY_PROMPT.md.
 3. When Ayush allows, read the master_chat_tasks records to answer Q35 and Q39 and the questions marked IN RECORDS.
 4. Go through UNVERIFIED_RULES.md batch 1 with Ayush.

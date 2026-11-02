@@ -98,3 +98,13 @@ Q53 recommendation accepted: update RESUME.md and push after every exchange wher
 Q55 recommendation accepted: a "known from records" section in RESUME.md, about 1 KB max, each fact with its source; details in FINDINGS.md.
 
 Recorded as: cold test W1-001 done; fixes applied (see WORKER_LOG.md).
+
+ENTRY 9. 3 Nov 2026 02:25 IST, answers in chat (word for word)
+"20: See, that's the problem right now. I don't know how exactly to hard the task, because by hiding, there are many things that we have to keep in mind. Our events does not get exposed, or the test of the rubrics does not get leaked somehow. We have to pass the QC, but at the same time maintain those things that are making the task harder itself. And there are plenty of things that I have to follow while hardening it. One of them is like Oracle and nop should be 1 and 0 So there are a lot of things. So that's the case. We have to work on this too.
+
+57. See, no problem with running sub agents. Why I impose that, not these sub agents? Because first of all, it's very cost consuming thing. Like, there are plenty of tokens is used when the sub agents are used. So I stopped using sub agents, and for the open code session that uses GPT, I explicitly mentioned not to use sub agents. For example, if my Claude is exhausted, now I'm using GPT sole 0.1, let's say, then due to the defaults are set to the Claude, so all the sub agents that it run started with Claude and its limit is exhausted, so it failed. So these are the scenarios.
+58. ya good and no limit on number or token i just wants the end result after this is something exactly what i am planning for 
+59.  okay report but you can create a seprate tmp folder to store complete findings if needed and map teh file with some sha kind of thing 
+60. right now i will paste in gpt sol 6.1 in opencode"
+
+Recorded as: Q20: no method yet; hardening must hide levers (no leak of tests or rubric), pass QC, keep what makes it hard, oracle 1 and nop 0, and many more constraints; to be worked out (Q61). Q57: subagents are fine in principle; the rule exists for cost and because subagents default to Claude, so in a GPT session they fail once the Claude limit is used up (FINDINGS F6.7). Q58: W1 and W2 both fine, no limit on number or tokens (FLAG Q62). Q59: helpers return a report; full findings may go in a separate tmp folder, mapped by a sha like id. Q60: W3 prompts go into opencode GPT Sol 6.1.
