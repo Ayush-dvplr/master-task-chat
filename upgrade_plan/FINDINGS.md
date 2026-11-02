@@ -53,6 +53,15 @@ P8. TEAMMATES
 
 F8.1 master_chat_work/20261102_test_design_study/deep2/WHY.md (study 1deab9c, PARTIAL, 6 of 10 causes proven) looked at why Opus loses tests on 10 teammate tasks. Not yet read by Claude in this planning round.
 
+FROM RQ3 AND RQ4 (3 Nov, inputs/)
+
+F1.6 Native auto compaction is OFF in opencode, but the DCP plugin (@tarquinen/opencode-dcp 3.2.0) runs with default settings. DCP prunes older tool outputs from the context automatically. This can remove what the master read during the read order without any visible compaction. Strong candidate for "heavy compress loses the learning". UNVERIFIED until Q41 and a test.
+F1.7 A custom compaction plugin already exists (~/.config/opencode/plugins/compaction-rules.js, 17 Oct). It asks the summary to keep standing instructions, approvals, job status and UNSAVED findings. It does not ask to keep the current rule versions, lever rules or templates. So rules learned from files can still fall out.
+F5.5 oh-my-openagent 5.1.33 is installed and the settings session ran as its agent "Sisyphus, Ultraworker". Such agents add a long system prompt to every turn and encourage subagents and parallel background tasks. Possible extra token cost and a clash with the "no subagents" rule. UNVERIFIED until Q40, Q42.
+F6.5 Models reach opencode through several routes: anthropic (default anthropic/claude-opus-5), kiro provider (20 models, trustAllTools true), and a GPT route not in the config file (Q43).
+F6.6 Default model in the config is claude-opus-5, while auto.py says workers run claude-opus-5-5 (AUTO_POLICY Limits). Model choice is set in more than one place.
+F3.7 Mac: 32 GiB RAM, 10 cores. Docker Desktop VM: about 15.6 GiB (15970 MiB), 8 CPUs. With dockfree's 3072 MiB headroom, room for limits is about 12.9 GiB: three 4 GiB containers fit, a fourth does not. Any container without a memory limit is counted as 4 GiB.
+
 OTHER
 
 F7.1 master_chat_tasks/auto/__pycache__/auto.cpython-314.pyc is tracked in git.

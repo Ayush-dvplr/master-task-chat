@@ -20,3 +20,7 @@ Recorded as:
 Q0: yes (do not edit until both are 100% sure).
 Q3: the list above. Compaction is first. New problems P7 to P10 added to PROBLEMS.md. Follow up questions Q34 to Q39.
 "3. give me here in the chat": read by Claude as: give the RQ3 Mac commands and the RQ4 opencode prompt in chat. Given in chat on 3 Nov.
+
+3 Nov 2026, RQ3 and RQ4 output pasted in chat
+Saved word for word in inputs/mac_docker_20261103.txt and inputs/opencode_settings_20261103.md.
+Recorded as: Q14 answered (32 GiB, 10 cores). Q15 answered (Docker Desktop 29.8.2, VM about 15.6 GiB, 8 CPUs). Q5 and Q6 partly answered. Follow up questions Q40 to Q47.

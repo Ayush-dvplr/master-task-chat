@@ -8,7 +8,7 @@ Terminal_2.0_Harbor_Harness, at least scripts/master_queue.py and anything it im
 RQ2. QC kit (OPEN)
 Input_Bundle_QC (the live kit you QC against). Needed for P2. Copy into upgrade_plan/inputs/qc_kit/.
 
-RQ3. Docker settings (OPEN)
+RQ3. Docker settings (DONE 3 Nov, saved in inputs/mac_docker_20261103.txt)
 Run these in Terminal on the Mac and paste the output into chat:
 
 ```bash
@@ -23,7 +23,7 @@ docker info --format 'mem={{.MemTotal}} cpus={{.NCPU}} os={{.OperatingSystem}} v
 docker context ls
 ```
 
-RQ4. opencode settings (OPEN)
+RQ4. opencode settings (DONE 3 Nov, saved in inputs/opencode_settings_20261103.md)
 Paste this prompt into a NEW opencode session and bring back its reply:
 
 ```text

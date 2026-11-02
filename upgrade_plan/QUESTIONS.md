@@ -10,8 +10,8 @@ Q3. Which of the six problems hurts most right now, so the plan starts there? [A
 Q4. Should the UNVERIFIED_RULES.md batches come one batch at a time in chat, or will you read the file and answer by rule id? [OPEN]
 
 P1 COMPACTION
-Q5. Does the master chat run in the opencode TUI (auto.py mentions "oc master")? Which model and provider? [OPEN]
-Q6. Is opencode auto compaction on? Do you also compact by hand? About how many compactions per day? (RQ4 may answer this.) [OPEN]
+Q5. Does the master chat run in the opencode TUI (auto.py mentions "oc master")? Which model and provider? [PARTLY ANSWERED by RQ4: oc function exists, default model anthropic/claude-opus-5; FOLLOW UP Q40]
+Q6. Is opencode auto compaction on? Do you also compact by hand? About how many compactions per day? (RQ4 may answer this.) [PARTLY ANSWERED by RQ4: native auto compaction is OFF, so compaction is by hand; DCP plugin prunes context on its own; FOLLOW UP Q41, Q44]
 Q7. After a compaction, what exactly did the master get wrong? Old lever rules, your feedback (links, tables), running sessions, something else? One or two real examples. [OPEN]
 Q8. May superseded files (LEVER_RULES v1 and v2, snapshots, old template versions) move to a history folder the master never reads? [OPEN]
 Q9. Would you accept the master reading one small generated state card (under about 4 KB) after compaction, instead of the 7 step read order? [OPEN]
@@ -23,8 +23,8 @@ Q12. The new errors after fixes: mostly new QC findings at recheck, or broken or
 Q13. Is the QC kit owned by someone else (you can only change your bundle), or can its rules change? [OPEN]
 
 P3 DOCKER
-Q14. How much RAM does your M1 Max have, 32 GB or 64 GB? (RQ3 may answer this.) [OPEN]
-Q15. Docker Desktop, OrbStack or Colima? Memory and CPUs given to its VM now? [OPEN]
+Q14. How much RAM does your M1 Max have, 32 GB or 64 GB? (RQ3 may answer this.) [ANSWERED by RQ3: 32 GiB, 10 cores]
+Q15. Docker Desktop, OrbStack or Colima? Memory and CPUs given to its VM now? [ANSWERED by RQ3: Docker Desktop 29.8.2, VM about 15.6 GiB, 8 CPUs]
 Q16. When sessions wait, what do they print: dockfree START=no, the harness queue, or the auto.py busy worker limit? [OPEN]
 Q17. Which Docker rule is in force: one at a time, max 2 heavy, or dockfree only? (CONTRADICTIONS C1, C6) [OPEN]
 Q18. The 27 Oct Mac hang: do you know the cause (memory, disk, too many containers)? [OPEN]
@@ -59,5 +59,15 @@ Q36. P8: do your teammates use the same QC kit and the same generator as you? Do
 Q37. P8: can you share one or two teammate tasks that passed QC and scored well, with their scores? I saw master_chat_work/20261102_test_design_study (10 teammate tasks). Are those the right examples, or are there better ones? [OPEN]
 Q38. P9: "very bad at creating new tasks with respect to the fixing tasks". Which do you mean: (a) new tasks built from scratch come out worse than tasks that get fixed, (b) the system is good at fixing but bad at designing new tasks, or (c) something else? [OPEN]
 Q39. P10: which templates were still old after an upgrade? Name one case (which upgrade, which template, which session used the old one). I already found one: state.json and README line 31 still say P12 v4 while INDEX says v5 is active (CONTRADICTIONS C3). [OPEN]
+
+FROM THE RQ3 AND RQ4 OUTPUT (3 Nov)
+Q40. Which opencode agent does the master chat use: the plain opencode agent, or Sisyphus from the oh-my-openagent plugin (the settings report was written by "Sisyphus, Ultraworker")? Which model does the master use, and is it the same for workers? [OPEN]
+Q41. The DCP plugin (Dynamic Context Pruning) is on with default settings. It removes or shortens older tool outputs from the context by itself, even with auto compaction off. Did you install it on purpose, and when? Did the "loses all its learning" problem start around the same time? [OPEN]
+Q42. Why is oh-my-openagent installed? Do workers run under Sisyphus too? It adds its own large system prompt and pushes subagents and background tasks, which may clash with your "no subagents" rule and raise token use. [OPEN]
+Q43. The report came from "GPT 6.1 Sol", which is not in the config file. Which provider gives you GPT in opencode (ChatGPT login, OpenAI API, something else)? [OPEN]
+Q44. How do you compact by hand: the /compact command, or starting a new session? How often per day for the master chat? [OPEN]
+Q45. When the Mac hung on 27 Oct, how many opencode sessions and Docker containers were running? Do you have any memory numbers (Activity Monitor) from a busy time? [OPEN]
+Q46. Would you allow, later and only as a measured test, raising the Docker Desktop memory above 15.6 GiB? The Mac has 32 GiB, but opencode sessions and the browser also need RAM, so the right number has to be measured, not guessed. [OPEN]
+Q47. Your pasted config lost some square brackets (the "plugin" list). Is that only from copying, and is the real file valid? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
