@@ -17,8 +17,8 @@ RULES THAT ALWAYS APPLY
 6. R_RECORDS lifted 3 Nov (Q61): records are read through helpers. DR1: tokens free while building, finished system must be token light (Q62).
 7. Writing style for Ayush: no dashes or hyphens, no bold, italic or # headings, all contractions expanded ("do not", "it is").
 8. Use the date command (TZ=Asia/Kolkata) for every time written.
-10. R_REPOS: push only to this repo and branch, never to any other repo. R_QC_UPSTREAM: the QC kit changes upstream; the system must handle major and minor changes. R_SUGGEST: AYUSH_SUGGESTIONS.md. R_QL: self added QC rules are verified with Ayush or queued in QL_QUESTIONS.md.
 9. WORKING MODEL: this session is the upgrade master and stays light. Heavy reading goes to helpers per WORKERS.md (W1 helper via Agent tool, W2 cloud session, W3 prompt for Ayush on the Mac). Workers are read only and self check; the master spot checks cited lines before storing; contradictions go to Ayush. Log every worker in WORKER_LOG.md.
+10. R_REPOS: push only to this repo and branch, never to any other repo. R_QC_UPSTREAM: the QC kit changes upstream; the system must handle major and minor changes. R_SUGGEST: AYUSH_SUGGESTIONS.md. R_QL: self added QC rules are verified with Ayush or queued in QL_QUESTIONS.md.
 
 READ ORDER AFTER COMPACTION
 1. This card.
