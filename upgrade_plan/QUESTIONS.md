@@ -2,60 +2,60 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q64 (push list, re-explained), Q65 (re-asked in parts Q65a to Q65e), Q72, Q73.
-FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, Q35, Q39. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
-PARKED until their problem is planned: Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
+LIVE NOW: Q74 (boundary, most important), Q64, Q65a to Q65e, Q72, Q73.
+FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
+PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
 
 PROCESS
 Q0. You wrote "Do not edit when you are 100% sure". I read it as "do not edit UNTIL we are both 100% sure". Is that right? [ANSWERED: yes]
-Q1. Is this repo a full copy of your Mac folders master_chat_tasks and master_chat_work, or a snapshot that may be older than the Mac? [OPEN]
-Q2. After PROCEED, where do changes go: committed in this repo on the branch for you to copy to the Mac, or written as files for you to place by hand? [OPEN]
+Q1. Is this repo a full copy of your Mac folders master_chat_tasks and master_chat_work, or a snapshot that may be older than the Mac? [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q2. After PROCEED, where do changes go: committed in this repo on the branch for you to copy to the Mac, or written as files for you to place by hand? [PARKED until its problem is planned]
 Q3. Which of the six problems hurts most right now, so the plan starts there? [ANSWERED: compaction first, plus new problems P7 to P10; order confirmed in Q34]
-Q4. Should the UNVERIFIED_RULES.md batches come one batch at a time in chat, or will you read the file and answer by rule id? [OPEN]
+Q4. Should the UNVERIFIED_RULES.md batches come one batch at a time in chat, or will you read the file and answer by rule id? [PARKED until its problem is planned]
 
 P1 COMPACTION
 Q5. Does the master chat run in the opencode TUI (auto.py mentions "oc master")? Which model and provider? [ANSWERED: opencode TUI session "Master Task Chat", Opus 5.5 (Q40, Q50, Q56)]
 Q6. Is opencode auto compaction on? Do you also compact by hand? About how many compactions per day? (RQ4 may answer this.) [ANSWERED: native auto compaction OFF; DCP compresses on its own (Q41, Q44, Q49)]
-Q7. After a compaction, what exactly did the master get wrong? Old lever rules, your feedback (links, tables), running sessions, something else? One or two real examples. [OPEN]
-Q8. May superseded files (LEVER_RULES v1 and v2, snapshots, old template versions) move to a history folder the master never reads? [OPEN]
-Q9. Would you accept the master reading one small generated state card (under about 4 KB) after compaction, instead of the 7 step read order? [OPEN]
+Q7. After a compaction, what exactly did the master get wrong? Old lever rules, your feedback (links, tables), running sessions, something else? One or two real examples. [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q8. May superseded files (LEVER_RULES v1 and v2, snapshots, old template versions) move to a history folder the master never reads? [PARKED until its problem is planned]
+Q9. Would you accept the master reading one small generated state card (under about 4 KB) after compaction, instead of the 7 step read order? [PARKED until its problem is planned]
 
 P2 QC FIXES
-Q10. Are the careful program and the blind programs saved for every task in a fixed place? Where? [OPEN]
-Q11. When a fix lost a lever, how did you find out: next blind read, paid run, or reading the diff? [OPEN]
-Q12. The new errors after fixes: mostly new QC findings at recheck, or broken oracle or nop runs, or both? [OPEN]
-Q13. Is the QC kit owned by someone else (you can only change your bundle), or can its rules change? [OPEN]
+Q10. Are the careful program and the blind programs saved for every task in a fixed place? Where? [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q11. When a fix lost a lever, how did you find out: next blind read, paid run, or reading the diff? [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q12. The new errors after fixes: mostly new QC findings at recheck, or broken oracle or nop runs, or both? [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q13. Is the QC kit owned by someone else (you can only change your bundle), or can its rules change? [PARKED until its problem is planned]
 
 P3 DOCKER
 Q14. How much RAM does your M1 Max have, 32 GB or 64 GB? (RQ3 may answer this.) [ANSWERED by RQ3: 32 GiB, 10 cores]
 Q15. Docker Desktop, OrbStack or Colima? Memory and CPUs given to its VM now? [ANSWERED by RQ3: Docker Desktop 29.8.2, VM about 15.6 GiB, 8 CPUs]
-Q16. When sessions wait, what do they print: dockfree START=no, the harness queue, or the auto.py busy worker limit? [OPEN]
-Q17. Which Docker rule is in force: one at a time, max 2 heavy, or dockfree only? (CONTRADICTIONS C1, C6) [OPEN]
-Q18. The 27 Oct Mac hang: do you know the cause (memory, disk, too many containers)? [OPEN]
-Q19. How many Docker jobs at the same time do you believe the Mac can run, and of what kind (kill tests, oracle or nop, paid harness runs)? [OPEN]
+Q16. When sessions wait, what do they print: dockfree START=no, the harness queue, or the auto.py busy worker limit? [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q17. Which Docker rule is in force: one at a time, max 2 heavy, or dockfree only? (CONTRADICTIONS C1, C6) [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q18. The 27 Oct Mac hang: do you know the cause (memory, disk, too many containers)? [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q19. How many Docker jobs at the same time do you believe the Mac can run, and of what kind (kill tests, oracle or nop, paid harness runs)? [PARKED until its problem is planned]
 
 P4 HARDENING
 Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [ANSWERED: no method yet; that is the problem itself. Hardening must hide levers, not leak tests or rubric, pass QC, keep the hard parts, keep oracle 1 and nop 0, and more. FOLLOW UP Q61. Note: until 3 Nov 02:15 this line wrongly carried the Q38 answer; fixed after W1-001]
-Q21. Which tasks should be hardened first? [OPEN]
-Q22. What goes wrong today when you harden: the lever does not bite, QC flags it, or too many rounds? [OPEN]
+Q21. Which tasks should be hardened first? [PARKED until its problem is planned]
+Q22. What goes wrong today when you harden: the lever does not bite, QC flags it, or too many rounds? [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
 
 P5 TOKENS
-Q23. Which plans do you pay for (Claude Max, Anthropic API, ChatGPT Pro or Plus, OpenAI API, others)? Is the pain usage limits or money? [OPEN]
-Q24. Which step feels most expensive: build, QC, fix, blind reads, or the master chat itself? [OPEN]
-Q25. Are cheaper models fine for mechanical steps (tallies, diffs, intake), or must every session use the strongest model? [OPEN]
+Q23. Which plans do you pay for (Claude Max, Anthropic API, ChatGPT Pro or Plus, OpenAI API, others)? Is the pain usage limits or money? [PARKED until its problem is planned]
+Q24. Which step feels most expensive: build, QC, fix, blind reads, or the master chat itself? [PARKED until its problem is planned]
+Q25. Are cheaper models fine for mechanical steps (tallies, diffs, intake), or must every session use the strongest model? [PARKED until its problem is planned]
 
 P6 TOOLS
-Q26. Every tool and model you use now, including the others (Gemini CLI, Kiro, Cursor, anything). [OPEN]
-Q27. Which tool for which step, and why (cost, quality, limits)? [OPEN]
-Q28. Should auto mode start and watch Codex and the others by itself, or is it enough that they report back in one shared format when you start them by hand? [OPEN]
-Q29. Known limits per tool in practice (for example Codex cannot reach Docker, GPT skips parts of long prompts)? [OPEN]
+Q26. Every tool and model you use now, including the others (Gemini CLI, Kiro, Cursor, anything). [PARKED until its problem is planned]
+Q27. Which tool for which step, and why (cost, quality, limits)? [PARKED until its problem is planned]
+Q28. Should auto mode start and watch Codex and the others by itself, or is it enough that they report back in one shared format when you start them by hand? [PARKED until its problem is planned]
+Q29. Known limits per tool in practice (for example Codex cannot reach Docker, GPT skips parts of long prompts)? [PARKED until its problem is planned]
 
 RECORD CONTRADICTIONS (see CONTRADICTIONS.md)
-Q30. Count cap: is there any cap on tests and judge criteria, a warn above 35, or no cap at all? (C2) [OPEN]
-Q31. Which P12 fix template is active, v4 or v5? (C3) [OPEN]
-Q32. Is the gate tests under 85, rubric under 85, final under 40, and the older 100, 100, 70 dead? (C4) [OPEN]
-Q33. Push needs 1 harness run, or 8 runs on final approval? (C5) [OPEN]
+Q30. Count cap: is there any cap on tests and judge criteria, a warn above 35, or no cap at all? (C2) [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q31. Which P12 fix template is active, v4 or v5? (C3) [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q32. Is the gate tests under 85, rubric under 85, final under 40, and the older 100, 100, 70 dead? (C4) [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
+Q33. Push needs 1 harness run, or 8 runs on final approval? (C5) [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
 
 NEW PROBLEMS P7 TO P10 (from the Q3 answer, 3 Nov)
 Q34. Is your Q3 list in priority order, so compaction (P1) comes first, then the others in the order you wrote them? [ANSWERED: yes]
@@ -63,7 +63,7 @@ Q35. P7: when you "upgrade the master chat session", what kind of upgrade do you
 Q36. P8: do your teammates use the same QC kit and the same generator as you? Do they build by hand, with their own chat, or with a system like yours? [ANSWERED: same QC; generator differs, it only gives structure and a plan, Ayush sometimes finds it useless; some friends use direct prompts with everything in them]
 Q37. P8: can you share one or two teammate tasks that passed QC and scored well, with their scores? I saw master_chat_work/20261102_test_design_study (10 teammate tasks). Are those the right examples, or are there better ones? [LATER, Ayush will answer]
 Q38. P9: "very bad at creating new tasks with respect to the fixing tasks". Which do you mean: (a) new tasks built from scratch come out worse than tasks that get fixed, (b) the system is good at fixing but bad at designing new tasks, or (c) something else? [ANSWERED: (b)]
-Q39. P10: which templates were still old after an upgrade? Name one case (which upgrade, which template, which session used the old one). I already found one: state.json and README line 31 still say P12 v4 while INDEX says v5 is active (CONTRADICTIONS C3). [IN RECORDS, read later]
+Q39. P10: which templates were still old after an upgrade? Name one case (which upgrade, which template, which session used the old one). I already found one: state.json and README line 31 still say P12 v4 while INDEX says v5 is active (CONTRADICTIONS C3). [ANSWERED FROM RECORDS: 5 cases in tmp/W1-003/ANSWERS_FROM_RECORDS.md]
 
 FROM THE RQ3 AND RQ4 OUTPUT (3 Nov)
 Q40. Which opencode agent does the master chat use: the plain opencode agent, or Sisyphus from the oh-my-openagent plugin (the settings report was written by "Sisyphus, Ultraworker")? Which model does the master use, and is it the same for workers? [ANSWERED: Sisyphus; master always Opus 5.5; workers sometimes Codex, opencode Opus 5.5, or GPT 6.1 Sol. FLAG Q48, Q50]
@@ -100,11 +100,11 @@ Q62. FLAG on Q58 versus P5 and Q57: you said subagents cost a lot of tokens, and
 AFTER HELPERS W1-002 AND W1-003 (3 Nov)
 Q63. Secrets: all 24 tracked wrapper.log files under master_chat_work (gate_run and traj folders) contain an OPENAI_API_KEY value. Is this repo private? Is that value a real OpenAI key or a local bridge token? Do you want it rotated, and masked in the repo after PROCEED? [DROPPED: Ayush said ignore]
 Q64. May I give you the push list from tmp/W1-003/MISSING.md (MUST items: QC/reports, the live QC kit Input_Bundle_QC, harness master_queue.py and .master-queue/state.json, blind program folders under _runs, opencode config without keys, the newest records and the 3 sessions running at copy time)? Never push: ~/.codex/auth.json, ~/.tb-master-key, ~/.ssh, oc-bridge secrets, ~/.local/share/opencode. [OPEN]
-Q65. Please confirm or correct the answers the records gave (short list in chat 3 Nov). In particular Q35: episode A (24 to 25 Oct, plan v1 plus habit levers, contract sentences stated the whole graded procedure) or episode B (31 Oct to 2 Nov, min plan v2 and route 1, misread rule levers lost to careful Opus)? [OPEN]
+Q65. Please confirm or correct the answers the records gave (short list in chat 3 Nov). In particular Q35: episode A (24 to 25 Oct, plan v1 plus habit levers, contract sentences stated the whole graded procedure) or episode B (31 Oct to 2 Nov, min plan v2 and route 1, misread rule levers lost to careful Opus)? [SPLIT into Q65a to Q65e]
 
 GOAL AND NEW RULES (ENTRY 11, 3 Nov)
 Q66. FLAG: you wrote tests and rubric must not be above 80. The records (gate v3.7, state.json line 126) say tests under 85, rubric under 85, final under 40. Which is current: 80 or 85? [ANSWERED: 85 now (v3.7), but make the gate dynamic (DR2)]
-Q67. FLAG: "my goal is not to make 100% genuine task". Your own records say difficulty must come from computation on hidden data, never from withheld rules (GOALS G11), and every graded fact needs a determinate source (route 1 R2). Which of those still hold? Concretely, what do you want to allow that a "genuine" task would not have? Claude's boundary is in README GOAL item 5. [ANSWERED: many tasks needed; PL and QL say passing QC is fine; every task must be solvable (DR3). FOLLOW UP Q72]
+Q67. FLAG: "my goal is not to make 100% genuine task". Your own records say difficulty must come from computation on hidden data, never from withheld rules (GOALS G11), and every graded fact needs a determinate source (route 1 R2). Which of those still hold? Concretely, what do you want to allow that a "genuine" task would not have? Claude's boundary is in README GOAL item 7. [ANSWERED: many tasks needed; PL and QL say passing QC is fine; every task must be solvable (DR3). FOLLOW UP Q72]
 Q68. FLAG: GOALS G9 says uniqueness is checked only against your own registry ("No check against Anubis/Finalized needed"). Now a task must also differ from teammates' tasks. Where can the system see teammates' tasks to compare (Anubis_Tasks_Samples, Finalized_Tasks_RFP, something else)? Who flags a copy, and what counts as "the same task"? [ANSWERED: against his own tasks; each build new; never a close copy of one teammate task]
 Q69. QC kit upstream: which repo does the PL push the kit to? The newest snapshot here is knowledge/fingerprints/qc.json, made 25 Oct at kit head 5574d77e, with 6 older archives. Has the kit changed since 25 Oct? How do you tell a major from a minor change today? [ANSWERED: PL repo "terminal bench 2.0"; minor and major defined in README 8b; agents decide; Ayush can paste the kit]
 Q70. QL queue: is QL_QUESTIONS.md the right place, and do you forward the questions to the QL by hand? Any format the QL prefers? [ANSWERED: yes, Ayush forwards by hand]
@@ -117,5 +117,8 @@ Q65d. Q30 to Q33: no limit on the number of tests (over 35 only gives a warning 
 Q65e. Q35 (2 days of tests 100 after an upgrade): episode A, 24 to 25 Oct, or episode B, 31 Oct to 2 Nov? [OPEN]
 Q72. Q67 follow up: "solvable" in your words is "with enough time and everything shipped, an agent can solve it". Does that also mean every graded value has one correct answer that the shipped instruction and data decide (no value that only the hidden tests decide)? [OPEN]
 Q73. You asked to change the README goal heading. It is now "GOAL OF THE TASK SYSTEM". Is that what you wanted, or a different wording? [OPEN]
+
+Q74. Please confirm or change Claude's boundary (README GOAL item 7). Your words in ENTRY 11 ("bypassing the QC", "not possible to follow the legit process") and ENTRY 12 ("if it is passing the QC, it is fine", "task must be solvable") are recorded. Claude's reading: every lever must keep the task solvable from what it ships and must pass QC as the kit is written; Claude will not design something whose purpose is to hide an unsolvable or underspecified grading from QC, the PL or the QL. Do you agree with this as the working rule? [OPEN]
+Q64 note (saved explanation): the "push list" is the list of folders Ayush copies INTO THIS repo so Claude can read them (tmp/W1-003/MISSING.md, MUST items). It does not contradict R_REPOS: Claude never pushes anywhere except this repo; Ayush adds material here himself. It matches RQ1 and RQ2 in REQUESTS.md and Ayush's Q69 offer to paste the QC kit.
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

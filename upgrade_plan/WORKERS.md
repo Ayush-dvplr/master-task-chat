@@ -1,6 +1,6 @@
 WORKERS: HOW THIS UPGRADE SESSION USES OTHER SESSIONS
 
-Agreed by Ayush on 3 Nov 2026 (Q58 to Q60): W1 and W2 both allowed, no limit on number or tokens (flag Q62 open); report only, full findings in tmp/; W3 prompts go into opencode GPT Sol 6.1.
+Agreed by Ayush on 3 Nov 2026 (Q58 to Q60): W1 and W2 both allowed, no limit on number or tokens (Q62 answered: free while building, DR1); report only, full findings in tmp/; W3 prompts go into opencode GPT Sol 6.1.
 
 WORDS
 "Helper" (W1, W2, W3) = a session that works for THIS upgrade session. "Task session" = a session in Ayush's task system (build, QC, fix), which Ayush runs in opencode or Codex. The "no subagents" line in a brief applies to the helper itself.
@@ -15,7 +15,7 @@ THREE KINDS OF WORKER
 W1. Helper inside this session (Claude starts it with its Agent tool).
   For: reading and researching anything in this repo.
   How: Claude writes the brief, the helper reads in its own context and returns only its report. Its reading does not fill this session's context.
-  Writes: nothing. Read only. The master stores the result.
+  Writes: only its own folder tmp/<helper id>/ (see TMP FOLDER). Read only everywhere else. The master stores the result.
 W2. Separate cloud session (Claude starts it with its create_session tool).
   For: long jobs that would run for a long time, or several jobs in parallel.
   How: Claude sends the brief, the session works on its own, Claude reads its final report.
@@ -45,7 +45,7 @@ Default target: opencode with GPT Sol 6.1. Every W3 prompt says: read only, do n
 
 LOG
 Every worker gets a row in WORKER_LOG.md: id, kind (W1, W2, W3), date, purpose, questions covered, status (running, done, verified, rejected), where the report is stored.
-Full reports are saved under reports/ with the worker id in the name.
+A short report (cold tests and similar) is saved under reports/ by the master; long findings live in tmp/<helper id>/.
 
 COST CONTROL (P5)
 1. A worker is used only when the reading is bigger than a few files.

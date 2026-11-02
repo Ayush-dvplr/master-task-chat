@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 03:05 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 03:07 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
@@ -27,7 +27,7 @@ READ ORDER AFTER COMPACTION
 4. QUESTIONS.md: read the status of every question; work from the OPEN and FOLLOW UP ones.
 5. The last two entries of ANSWERS.md (each entry starts with "ENTRY n."; use grep -n "^ENTRY" to find them).
 6. WORKERS.md and WORKER_LOG.md (any helper with status running must be checked first).
-7. Open FINDINGS.md, CONTRADICTIONS.md, UNVERIFIED_RULES.md, PLAN.md, REQUESTS.md or inputs/ only when the next step needs them.
+7. When the next step is the conflict review, also open tmp/W1-002/CONFLICTS.md. Open FINDINGS.md, CONTRADICTIONS.md, UNVERIFIED_RULES.md, PLAN.md, REQUESTS.md or inputs/ only when the next step needs them.
 
 WHERE WE ARE
 1. Problems: P1 to P10 recorded. Priority order = the order Ayush wrote them, compaction (P1) first (Q34).
@@ -44,12 +44,12 @@ KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 1. Copy is complete to about 3 Nov 00:45 IST; 3 sessions were running then (tmp/W1-003, Q1).
 2. After compaction the master loses format and process rules, not task facts (lessons.jsonl lines 89 and 100).
 3. 27 Oct hang: 3 orphan Python solvers on the host, about 185 GB, swap full (feedback.jsonl line 21).
-4. Gate live: tests under 85, rubric under 85, final under 40; no count cap; P12 v5 active; push = 1 run on frozen bytes (tmp/W1-003, Q30 to Q33, unconfirmed by Ayush).
+4. Gate: tests under 85, rubric under 85, final under 40 (confirmed Q66; a score of exactly 85 fails). Harness model is Opus 5; the master chat runs Opus 5.5. No count cap, P12 v5 active, push = 1 run on frozen bytes (records; confirm Q65d).
 5. 182 hardening rules, 44 conflicts (tmp/W1-002).
 
-NEXT STEPS
-1. W1-002 done and verified: tmp/W1-002/CONSTRAINTS.md (182 hardening constraints), CONFLICTS.md (44). Next with it: Ayush reviews the conflicts first, then the constraints. W1-003 done and verified (one correction: 24 wrapper.log files hold an OPENAI_API_KEY, not 2). Live questions: Q64, Q65a to Q65e, Q72, Q73. Cold recovery test W1-004 run on 3 Nov (see WORKER_LOG). Next: go through the W1-002 conflicts with Ayush.
-2. Recovery prompt: cold test W1-001 done and its gaps fixed. Use the prompt saved in prompts/RECOVERY_PROMPT.md.
-3. When Ayush allows, read the master_chat_tasks records to answer Q35 and Q39 and the questions marked IN RECORDS.
-4. Go through UNVERIFIED_RULES.md batch 1 with Ayush.
-5. Then shape PLAN.md, starting with P1.
+NEXT STEPS (in this order)
+1. Answer the LIVE questions at the top of QUESTIONS.md, Q74 (boundary) first.
+2. Conflict review: open tmp/W1-002/CONFLICTS.md and go through its 5 most serious conflicts with Ayush one at a time (C3 timeouts, C5 careful program, C25 with C6 how much may be written, C1 parking, C2 with C22 carriers), then the rest.
+3. Q4 (how to review UNVERIFIED_RULES), then UNVERIFIED_RULES.md batch 1 with Ayush.
+4. Shape PLAN.md, P1 (compaction) first, then the order in PROBLEMS.md.
+5. Recovery prompt: prompts/RECOVERY_PROMPT.md, cold tested twice (W1-001, W1-004).
