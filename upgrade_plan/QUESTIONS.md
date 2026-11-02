@@ -31,7 +31,7 @@ Q18. The 27 Oct Mac hang: do you know the cause (memory, disk, too many containe
 Q19. How many Docker jobs at the same time do you believe the Mac can run, and of what kind (kill tests, oracle or nop, paid harness runs)? [OPEN]
 
 P4 HARDENING
-Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [FOLLOW UP: Ayush asked what (a) and (b) mean; explained in chat 3 Nov, waiting for answer]
+Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [ANSWERED: (b), the system fixes well but is weak at designing new tasks]
 Q21. Which tasks should be hardened first? [OPEN]
 Q22. What goes wrong today when you harden: the lever does not bite, QC flags it, or too many rounds? [OPEN]
 
@@ -68,18 +68,20 @@ Q43. The report came from "GPT 6.1 Sol", which is not in the config file. Which 
 Q44. How do you compact by hand: the /compact command, or starting a new session? How often per day for the master chat? [ANSWERED: the plan was by hand, but now it mostly compacts at around 30 to 40% and drops to 7 to 10%, losing important context. FLAG Q49]
 Q45. When the Mac hung on 27 Oct, how many opencode sessions and Docker containers were running? Do you have any memory numbers (Activity Monitor) from a busy time? [ANSWERED: no exact numbers, about 3 times the limit set in the files]
 Q46. Would you allow, later and only as a measured test, raising the Docker Desktop memory above 15.6 GiB? The Mac has 32 GiB, but opencode sessions and the browser also need RAM, so the right number has to be measured, not guessed. [ANSWERED: 15.6 GiB is probably enough, since not every task uses the memory its task.toml asks for. FLAG Q51]
-Q47. Your pasted config lost some square brackets (the "plugin" list). Is that only from copying, and is the real file valid? [FOLLOW UP: Ayush asked where; explained in chat 3 Nov]
+Q47. Your pasted config lost some square brackets (the "plugin" list). Is that only from copying, and is the real file valid? [FOLLOW UP: Ayush ran the file as a command (permission denied); print command given in chat 3 Nov]
 
 FLAGS AND CROSS QUESTIONS ON THE 3 NOV ANSWERS (rule R_FLAG)
-Q48. Q40 and Q42 do not fit together fully. Codex workers do not run under Sisyphus, so "workers use the same" is true only for opencode workers. Also Sisyphus pushes subagents, while your 31 Oct rule says GPT prompts must "strictly do not run subagents". Which wins for workers: Sisyphus non stop with subagents, or no subagents? [OPEN]
-Q49. Q44 versus the config: native auto compaction is OFF, yet you see compaction at 30 to 40%. So something else is shrinking the context: most likely DCP, or a feature of the Sisyphus plugin. Next time it happens, can you copy the exact message or screen text you see? [OPEN]
-Q50. The config default model is claude-opus-5, but you say the master always uses Opus 5.5. Do you pick Opus 5.5 by hand in each session (or with a flag)? [OPEN]
-Q51. Q46 fits what I found: if 15.6 GiB is enough in practice, the waiting comes mostly from dockfree counting task.toml LIMITS (and 4 GiB for any container without a limit), not real use. But Q45 says you once ran about 3 times the limit and the Mac hung. So "enough" holds for real use, but not if everything starts at once. Do you agree with this reading? [OPEN]
+Q48. Q40 and Q42 do not fit together fully. Codex workers do not run under Sisyphus, so "workers use the same" is true only for opencode workers. Also Sisyphus pushes subagents, while your 31 Oct rule says GPT prompts must "strictly do not run subagents". Which wins for workers: Sisyphus non stop with subagents, or no subagents? [ANSWERED: master = one saved opencode session, Opus 5.5. Worker prompts go by hand into opencode GPT Sol 6.1, opencode Opus 5.5, or Codex. FOLLOW UP Q56]
+Q49. Q44 versus the config: native auto compaction is OFF, yet you see compaction at 30 to 40%. So something else is shrinking the context: most likely DCP, or a feature of the Sisyphus plugin. Next time it happens, can you copy the exact message or screen text you see? [ANSWERED with screen text: "DCP | -8168.3K removed, +311.2K summary" and "Compression #258 -17.8K removed, +957 summary, 16 messages and 13 tools". See FINDINGS F1.8]
+Q50. The config default model is claude-opus-5, but you say the master always uses Opus 5.5. Do you pick Opus 5.5 by hand in each session (or with a flag)? [ANSWERED: the model is set once per session and stays when the session is resumed]
+Q51. Q46 fits what I found: if 15.6 GiB is enough in practice, the waiting comes mostly from dockfree counting task.toml LIMITS (and 4 GiB for any container without a limit), not real use. But Q45 says you once ran about 3 times the limit and the Mac hung. So "enough" holds for real use, but not if everything starts at once. Do you agree with this reading? [FOLLOW UP: explained again in plain words in chat 3 Nov]
 
 RECOVERY PROMPT (part 2)
-Q52. When will you use the recovery prompt: after I compact in this same session, in a brand new session, or both? [OPEN]
-Q53. Should I update RESUME.md and push after every exchange (always current, one small commit each time), or only at milestones? [OPEN]
-Q54. May I verify the recovery prompt with a cold test: start one fresh helper agent that gets only the prompt, then check that it reports the state correctly? It costs some tokens. [OPEN]
-Q55. Should the recovery also reload part of the master_chat_tasks records, or only this upgrade_plan folder for now? [OPEN]
+Q52. When will you use the recovery prompt: after I compact in this same session, in a brand new session, or both? [ANSWERED: paste it in this same session after compaction]
+Q53. Should I update RESUME.md and push after every exchange (always current, one small commit each time), or only at milestones? [FOLLOW UP: Ayush asked for a recommendation; given in chat 3 Nov]
+Q54. May I verify the recovery prompt with a cold test: start one fresh helper agent that gets only the prompt, then check that it reports the state correctly? It costs some tokens. [FOLLOW UP: explained in plain words in chat 3 Nov]
+Q55. Should the recovery also reload part of the master_chat_tasks records, or only this upgrade_plan folder for now? [ANSWERED: yes, so it does not need to read again; Claude recommendation given in chat 3 Nov]
+
+Q56. You said you "saved and renamed it in Open Code Sisyphus". Sisyphus is also the name of the main agent of the oh my openagent plugin, and the settings report (a fresh session) ran as "Sisyphus, Ultraworker". So: (1) is "Sisyphus" a name you gave the master session, or the plugin agent, or both? (2) When you paste a worker prompt into a new opencode session, does that session also run as the Sisyphus agent by default? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

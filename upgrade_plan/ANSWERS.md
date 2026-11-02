@@ -43,3 +43,29 @@ Recorded as: Q14 answered (32 GiB, 10 cores). Q15 answered (Docker Desktop 29.8.
 39. i don't remeber but it will be in the master_task_somewhere Almost all of your questions, and for most of the questions or upcoming questions, you can get answer from the master task chat. There are decisions or the files, the status, lessons, the files that it write at as logs. So I guess you should read that too, but not now. Save the above answers as per you need. Add one more rule that you must flag me if somewhere I am wrong or cross question to the answers that I provide you. The answer may also contradict something else. And the most important thing you have to do right now you are at 17% context, and as this chat is going to be too long, so first find, verify, and give me one single prompt, a short prompt that I will use so that you can recover your context, at least the major ones that are needed, as many of these things in between our chats are random messages, researches, files you read, but you are storing it properly. So first let's plan and create that, so that this upgrade session, even after contest limit, if you compact yourself automatically or ask me to compact you, then I will give you the prompt, you will read the respective files and gain good context and be back on the track, because right now you are pointing everything, asking everything, and correctly. That's how I want to follow the upgrade plan. So also you can ask me for this one part 2."
 
 Recorded as: Q34 yes. Q35 to Q36, Q40 to Q46 answered (see QUESTIONS.md). Q37 later. Q38 and Q47: Ayush asked what they mean; explained in chat 3 Nov. Q39: answer is in the master_chat_tasks records; read later, not now. New rules R_FLAG and R_RECORDS added to README.md. Recovery prompt requested: RESUME.md created.
+
+3 Nov 2026 02:0x IST, answers in chat (word for word; Ayush sent the first half twice, kept once)
+"38 option b
+47 mac@MacBookPro ~ % ~/.config/opencode/opencode.jsonc
+zsh: permission denied: /Users/mac/.config/opencode/opencode.jsonc
+mac@MacBookPro ~ % 
+
+Q48. Q40 and Q42 : I mean, when I use the thing, I have Codex installed, Claude Code installed, and Open Code installed. So basically, sometimes for the main master session, it's one single session. Okay, I saved and renamed it in Open Code Sisyphus, and I use Opus 5.5 in that. Beside that, when it give me a prompt like for QC, for building, for fixing, I either use Open Code GPT, GPT Sol 6.1, or Claude Opus 5.5, and even I have Codex too. So I directly sometimes put that prompt in the Codex. Okay.
+
+49: DCP | -8168.3K removed, +311.2K summary
+
+│█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█│
+▣ Compression #258 -17.8K removed, +957 summary
+→ Topic: Flood QC v4 intake + fix issued
+→ Items: 16 messages and 13 tools compresse
+
+50 not each time as in opencode one time session model is set when open that from session (like resume session) it's already opened in that model previously selected 
+
+51: did not get it what you said can you say it again in laymen terms
+
+52. i will try to paste in this itself as after compaction you still have some more context than a new session 
+53. what's your recomendation 
+54. can you explain this in laymen terms in short 
+55. yes i guess to so that it again do not need find or read whats your recomendation"
+
+Recorded as: Q38 = option b (fixing is fine, designing new tasks is weak). Q47: the command ran the file instead of printing it; a print command was given in chat. Q48, Q49, Q50, Q52 answered. Q51, Q54 explained again in plain words in chat. Q53, Q55: Claude recommendation given in chat, waiting for OK.
