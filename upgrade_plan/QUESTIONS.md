@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q76, Q77.
+LIVE NOW: none. Waiting for helper W1-005 (QC kit change).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -123,7 +123,7 @@ Q64 note (saved explanation): the "push list" is the list of folders Ayush copie
 
 Q75. Count caps (Q65d): you set a personal soft cap of 70 and a hard cap of 100 for the number of tests and of rubric criteria, plus the QC minimum. Earlier feedback (24 Oct 12:52) said "there is not cap". (1) Is the hard cap of 100 your own rule, or from the PL, QL or harness? (2) Is a count between 70 and 100 fine whenever it helps the score? These will be settings like the gate (DR2). [ANSWERED: hard cap 100 is Ayush\'s own rule]
 
-Q76. Item 6 of the push list is not in main: the newest master_chat_tasks records (the copy still stops at 3 Nov 00:45) and the outputs of the 3 sessions running then (hangar fix_qcv4, flood fix_qcv4, sensor QC v3). Did you mean to push them, or are they not needed? [OPEN]
-Q77. QC kit check: compared with your 25 Oct snapshot (knowledge/fingerprints/qc.json), 2 of the 12 kit files changed: 05_Alignment_Integrity_QC.md and Final_checklist.md. The other 10 are the same. May a helper read the change and classify it MINOR or MAJOR by your definition (README 8b)? That is also a first real test of the R_QC_UPSTREAM idea. [OPEN]
+Q76. Item 6 of the push list is not in main: the newest master_chat_tasks records (the copy still stops at 3 Nov 00:45) and the outputs of the 3 sessions running then (hangar fix_qcv4, flood fix_qcv4, sensor QC v3). Did you mean to push them, or are they not needed? [ANSWERED: not needed]
+Q77. QC kit check: compared with your 25 Oct snapshot (knowledge/fingerprints/qc.json), 2 of the 12 kit files changed: 05_Alignment_Integrity_QC.md and Final_checklist.md. The other 10 are the same. May a helper read the change and classify it MINOR or MAJOR by your definition (README 8b)? That is also a first real test of the R_QC_UPSTREAM idea. [ANSWERED: yes; helper W1-005]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
