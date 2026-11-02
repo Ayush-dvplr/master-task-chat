@@ -49,7 +49,7 @@ What the records say: there is no single fixed place. Each kind has a rule, and 
 1. Paid run (harness) programs:
    1. The harness writes the run under Terminal_2.0_Harbor_Harness/.kiro-run-<slug>-<ts>/ (example: MCW/20261102_hangar-check-replan/harden_r1/gate_run_a1/result.json trial_uri) and jobs/. Both are outside this repo.
    2. The master copies each counted run into MCW/<date>_<slug>/gate_run_aN/ (with TRIP.md). Examples: MCW/20261031_flood-repair-portfolio/gate_run_a1 (TRIP.md, logs, trajectory), MCW/20261102_hangar-check-replan/harden_r1/gate_run_a1 (agent, artifacts, verifier, result.json), MCW/20261101_depot-charge-plan/harden_r3/gate_run_a1.
-   3. A harden session extracts the agent's final program into OUT/agent_program/ (MCT/prompts/templates/P9_harden_from_results_v4.md:52 "save the agent's final program and outputs ... as OUT/agent_program/"). About 30 such folders exist, for example MCW/20261025_tariff-engine-audit-repair/harden_r2/agent_program.
+   3. A harden session extracts the agent's final program into OUT/agent_program/ (MCT/prompts/templates/P9_harden_from_results_v4.md:52 "save the agent's final program and outputs ... as OUT/agent_program/"). 28 folders named agent_program* exist, for example MCW/20261025_tariff-engine-audit-repair/harden_r2/agent_program.
 2. Blind programs (P13):
    1. Until 30 Oct: /tmp/blind/<slug>-<ts>/ (log.jsonl:162, 23 Oct 14:58; auto/runs/20261027T2031_evening/REPORT.md:8). The 30 Oct reboot wiped /tmp (MCT/prompts/templates/_COMMON_RULES_v5.md:17), so those programs are gone unless copied.
    2. From 31 Oct: /Users/mac/Desktop/Terminal Bench/_runs/<YYYYMMDD>/<slug>/blind-<TS>/app/ with work/BLIND_REPORT.md and result json (MCT/prompts/templates/P13_blind_solve_v2.md:7, :36-38). _runs/ is not in the repo.
@@ -99,7 +99,7 @@ What the records say: all three kinds occur; since 31 Oct the most common is doc
 2. Harness queue (master_queue.py): MCT/auto/runs/20261027T2239_overnight/REPORT.md:20 (28 Oct 03:40) "district run is QUEUED, not started: master_queue counts the workers' own harbor run --agent oracle gate runs ... against its 2-run" limit. Also MCT/decisions.jsonl:418 (29 Oct 01:47) "Live MQ still PAUSED (old cold-chain usage-limit reason, limit long over)".
 3. auto.py worker slots and stalls: MCT/auto/runs/20261027T0200_night/REPORT.md:47 and :48 ("Freed slot"), :38 ("3022cae busy, so send refused"); 20261027T2239_overnight/REPORT.md:30 "STALL 05:00-07:50: every busy worker ... made no visible progress for ~2 h 50 min".
 4. Also: "New Harbor chain is waiting for capacity, not yet running a lane" (hangar LOG.md:6).
-Confidence: HIGH that all three exist in the records; MEDIUM that START=no is the main one now (counted 15 work files with START=no, all from 31 Oct on).
+Confidence: HIGH that all three exist in the records; MEDIUM that START=no is the main one now (13 files in master_chat_work contain START=no: 12 session logs or reports plus MIN_PLAN_v2.md; dockfree exists only since 31 Oct).
 Ayush still to confirm: which message he sees most in daily use.
 
 Q17. WHICH DOCKER RULE IS IN FORCE? (C1, C6)

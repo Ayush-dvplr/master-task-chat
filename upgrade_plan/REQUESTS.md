@@ -37,6 +37,8 @@ Read only. Do not change any file. Report, as plain text:
 Do not run subagents. Do all work in this chat.
 ```
 
+RQ1 and RQ2 are part of the W1-003 MUST list (Q64). Full list with counts and reasons: tmp/W1-003/MISSING.md.
+
 RQ5. One example of a compaction loss (OPEN)
 A screenshot or pasted text of a moment after compaction where the master got something wrong. Put it in upgrade_plan/inputs/examples/.
 

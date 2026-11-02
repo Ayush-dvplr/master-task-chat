@@ -64,6 +64,11 @@ F6.7 (Ayush, Q57) Subagents started from an opencode session default to Claude m
 F6.6 Default model in the config is claude-opus-5, while auto.py says workers run claude-opus-5-5 (AUTO_POLICY Limits). Model choice is set in more than one place.
 F3.7 Mac: 32 GiB RAM, 10 cores. Docker Desktop VM: about 15.6 GiB (15970 MiB), 8 CPUs. With dockfree's 3072 MiB headroom, room for limits is about 12.9 GiB: three 4 GiB containers fit, a fourth does not. Any container without a memory limit is counted as 4 GiB.
 
+FROM HELPERS (3 Nov)
+F11.1 Hardening has 182 rules spread over many files, and 44 conflicts or vague points (tmp/W1-002). Old rule text stays in template bodies with only a bracket note for the new rule (W1-002 C3). Verified by master.
+F11.2 Answers from records for the parked questions: tmp/W1-003/ANSWERS_FROM_RECORDS.md. Key: what is lost after compaction is format and process rules, not task facts (Q7); the 27 Oct hang came from 3 orphan Python solvers on the host (not Docker) holding about 185 GB with swap full (feedback.jsonl line 21, verified); levers lost in fixes were mostly noticed only at the next paid run (Q11).
+F11.3 SECURITY: all 24 tracked wrapper.log files contain an OPENAI_API_KEY value on the harbor command line (verified by master, value not printed).
+
 OTHER
 
 F7.1 master_chat_tasks/auto/__pycache__/auto.cpython-314.pyc is tracked in git.

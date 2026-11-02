@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 02:42 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 02:45 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
@@ -37,10 +37,14 @@ WHERE WE ARE
 9. Nothing outside upgrade_plan/ has been edited. PROCEED not given.
 
 KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
-Only skimmed so far (README, GOALS, state.json, AUTO_POLICY, dockfree.py, auto.py limits, BOARD head); that skim is in FINDINGS.md and CONTRADICTIONS.md. Nothing else read in depth; nothing here yet.
+1. Copy is complete to about 3 Nov 00:45 IST; 3 sessions were running then (tmp/W1-003, Q1).
+2. After compaction the master loses format and process rules, not task facts (lessons.jsonl lines 89 and 100).
+3. 27 Oct hang: 3 orphan Python solvers on the host, about 185 GB, swap full (feedback.jsonl line 21).
+4. Gate live: tests under 85, rubric under 85, final under 40; no count cap; P12 v5 active; push = 1 run on frozen bytes (tmp/W1-003, Q30 to Q33, unconfirmed by Ayush).
+5. 182 hardening rules, 44 conflicts (tmp/W1-002).
 
 NEXT STEPS
-1. W1-002 done and verified: tmp/W1-002/CONSTRAINTS.md (182 hardening constraints), CONFLICTS.md (44). Next with it: Ayush reviews the conflicts first, then the constraints. W1-003 (records, parked questions, missing paths) is running: when done, spot check, commit tmp/W1-003, tell Ayush what to push.
+1. W1-002 done and verified: tmp/W1-002/CONSTRAINTS.md (182 hardening constraints), CONFLICTS.md (44). Next with it: Ayush reviews the conflicts first, then the constraints. W1-003 done and verified (one correction: 24 wrapper.log files hold an OPENAI_API_KEY, not 2). Waiting for Ayush on Q63 (secrets), Q64 (push list), Q65 (confirm answers from records). Then: go through the W1-002 conflicts with Ayush.
 2. Recovery prompt: cold test W1-001 done and its gaps fixed. Use the prompt saved in prompts/RECOVERY_PROMPT.md.
 3. When Ayush allows, read the master_chat_tasks records to answer Q35 and Q39 and the questions marked IN RECORDS.
 4. Go through UNVERIFIED_RULES.md batch 1 with Ayush.

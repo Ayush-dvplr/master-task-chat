@@ -2,8 +2,8 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: none. Waiting for helpers W1-002 and W1-003.
-PARKED until helper W1-003 reports (records now open to helpers): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, Q35 details, Q39. Claude checks the records first, then asks only what is left.
+LIVE NOW: Q63 (secrets), Q64 (push list), Q65 (confirm answers from records).
+FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, Q35, Q39. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
 
@@ -96,5 +96,10 @@ Q60. For W3 prompts (things only the Mac can see), which tool should you paste t
 
 Q61. P4 hardening: you said there are "plenty of things" to follow (hide levers, no leak of tests or rubric, pass QC, oracle 1 and nop 0, and more). Proposal: a helper collects every hardening constraint from your records (route 1 notes, LEVER_RULES, QC playbook, lessons, feedback) into one numbered list, with the source of each. Then you go through it and mark each KEEP, CHANGE or DROP, like UNVERIFIED_RULES. That list becomes the base of a hardening method. Is that the right first step, and may that helper read the records now (this would lift R_RECORDS for this one job)? [ANSWERED: yes; also read the master chat records, and list what is missing from the repo (for example the QC folder) so Ayush can push it]
 Q62. FLAG on Q58 versus P5 and Q57: you said subagents cost a lot of tokens, and P5 is "token use is very high", yet for my helpers there is no token limit. Do my helpers in this Claude session draw on the same Claude account and usage limit as your opencode Opus 5.5 task sessions? If yes, heavy helper use here can exhaust the limit your task work needs. Is that acceptable, or should helpers run at quiet times only? (W1-001 used about 79k tokens.) [ANSWERED: no limit during this build; the finished system must be light on tokens in daily use (DR1)]
+
+AFTER HELPERS W1-002 AND W1-003 (3 Nov)
+Q63. Secrets: all 24 tracked wrapper.log files under master_chat_work (gate_run and traj folders) contain an OPENAI_API_KEY value. Is this repo private? Is that value a real OpenAI key or a local bridge token? Do you want it rotated, and masked in the repo after PROCEED? [OPEN]
+Q64. May I give you the push list from tmp/W1-003/MISSING.md (MUST items: QC/reports, the live QC kit Input_Bundle_QC, harness master_queue.py and .master-queue/state.json, blind program folders under _runs, opencode config without keys, the newest records and the 3 sessions running at copy time)? Never push: ~/.codex/auth.json, ~/.tb-master-key, ~/.ssh, oc-bridge secrets, ~/.local/share/opencode. [OPEN]
+Q65. Please confirm or correct the answers the records gave (short list in chat 3 Nov). In particular Q35: episode A (24 to 25 Oct, plan v1 plus habit levers, contract sentences stated the whole graded procedure) or episode B (31 Oct to 2 Nov, min plan v2 and route 1, misread rule levers lost to careful Opus)? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
