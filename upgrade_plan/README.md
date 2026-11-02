@@ -13,6 +13,8 @@ GOAL OF THE TASK SYSTEM (Ayush, 3 Nov 2026, ANSWERS.md ENTRY 11 and 12; heading 
 6. Uniqueness: measured against Ayush's own tasks. Every build is new, never a copy of an old task. A task must also never be a close copy of one teammate task (an approach may be reused).
 7. Claude's boundary: Claude helps make tasks hard while solvable and QC passing. Claude does not help hide a defect from the QC kit, the PL or the QL (for example grading that cannot be solved or is underspecified, made to look valid). Where a request crosses that line, Claude says so.
 8. Every upgrade decision is checked against this goal.
+9. Solvability is also a QC check (DS-21, F0e, CL-10 "solvable from visible files"). SOLVABILITY_PROMPT, Ayush's extra check, used only if the QL asks: "Read only the prompt in instruction.md and the artifacts in environment/ except for Dockerfile and check if the all the things requested by prompt are completely solveable or not, if an agent is given more than enough time and resources."
+10. Count caps (Ayush, ENTRY 13; Q75 open): tests and rubric criteria each at least the QC minimum, personal soft cap 70, hard cap 100. Settings, like the gate.
 
 The edit rule (Ayush, 3 Nov 2026)
 1. No file outside upgrade_plan/ is created, edited, moved or deleted until Ayush types the exact word PROCEED.

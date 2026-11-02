@@ -62,6 +62,7 @@ F5.5 oh-my-openagent 5.1.33 is installed and the settings session ran as its age
 F6.5 Models reach opencode through several routes: anthropic (default anthropic/claude-opus-5), kiro provider (20 models, trustAllTools true), and a GPT route not in the config file (Q43).
 F6.7 (Ayush, Q57) Subagents started from an opencode session default to Claude models, not to the session's model. In a GPT Sol 6.1 session, once the Claude limit is used up, every subagent fails. This is why the "no subagents" rule exists, besides cost. Possible fix to check later: set the subagent or agent models in the oh my openagent config so they follow the session's provider. UNVERIFIED that the plugin allows this.
 F6.6 Default model in the config is claude-opus-5, while auto.py says workers run claude-opus-5-5 (AUTO_POLICY Limits). Model choice is set in more than one place.
+F3.8 (Ayush, Q65b) The 27 Oct hang also had other apps, wrong Docker settings and a VMware VM running at the same time. So the background Docker script (S1) must watch the whole Mac memory and swap, not only Docker.
 F3.7 Mac: 32 GiB RAM, 10 cores. Docker Desktop VM: about 15.6 GiB (15970 MiB), 8 CPUs. With dockfree's 3072 MiB headroom, room for limits is about 12.9 GiB: three 4 GiB containers fit, a fourth does not. Any container without a memory limit is counted as 4 GiB.
 
 FROM HELPERS (3 Nov)

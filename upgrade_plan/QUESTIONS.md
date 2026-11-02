@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q74 (boundary, most important), Q64, Q65a to Q65e, Q72, Q73.
+LIVE NOW: Q64 (asked point by point in chat 3 Nov), Q73 (asked again), Q75.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -110,15 +110,17 @@ Q69. QC kit upstream: which repo does the PL push the kit to? The newest snapsho
 Q70. QL queue: is QL_QUESTIONS.md the right place, and do you forward the questions to the QL by hand? Any format the QL prefers? [ANSWERED: yes, Ayush forwards by hand]
 Q71. AYUSH_SUGGESTIONS.md now holds S1 to S5 from this chat. Are there older suggestions in the records (for example in feedback.jsonl) that should be added too? [ANSWERED: no, only suggestions from this upgrade]
 
-Q65a. Q7 (what goes wrong after compaction): the records say the master forgets HOW to work (links, tables, session status, caps), not the task facts. True? [OPEN]
-Q65b. Q18 (27 Oct hang): the records say the cause was 3 Python solver programs left running on the Mac itself, outside Docker, using about 185 GB. True? [OPEN]
-Q65c. Q11 and Q12 (QC fixes): the records say a lost lever was usually noticed only at the next paid run, and the "new errors" were new QC findings, not broken oracle or nop. True? [OPEN]
-Q65d. Q30 to Q33: no limit on the number of tests (over 35 only gives a warning that is accepted; QL1 asks the QL), fix template P12 v5 is the active one, and one harness run on frozen bytes is enough to push. True? [OPEN]
-Q65e. Q35 (2 days of tests 100 after an upgrade): episode A, 24 to 25 Oct, or episode B, 31 Oct to 2 Nov? [OPEN]
-Q72. Q67 follow up: "solvable" in your words is "with enough time and everything shipped, an agent can solve it". Does that also mean every graded value has one correct answer that the shipped instruction and data decide (no value that only the hidden tests decide)? [OPEN]
-Q73. You asked to change the README goal heading. It is now "GOAL OF THE TASK SYSTEM". Is that what you wanted, or a different wording? [OPEN]
+Q65a. Q7 (what goes wrong after compaction): the records say the master forgets HOW to work (links, tables, session status, caps), not the task facts. True? [ANSWERED: yes]
+Q65b. Q18 (27 Oct hang): the records say the cause was 3 Python solver programs left running on the Mac itself, outside Docker, using about 185 GB. True? [ANSWERED: yes; also other apps, wrong Docker settings and VMware were running (happened once)]
+Q65c. Q11 and Q12 (QC fixes): the records say a lost lever was usually noticed only at the next paid run, and the "new errors" were new QC findings, not broken oracle or nop. True? [ANSWERED: yes]
+Q65d. Q30 to Q33: no limit on the number of tests (over 35 only gives a warning that is accepted; QL1 asks the QL), fix template P12 v5 is the active one, and one harness run on frozen bytes is enough to push. True? [ANSWERED: yes, but count caps exist: soft 70, hard 100, tests and rubric, minimum per QC. FOLLOW UP Q75]
+Q65e. Q35 (2 days of tests 100 after an upgrade): episode A, 24 to 25 Oct, or episode B, 31 Oct to 2 Nov? [ANSWERED: B, 31 Oct and 1 Nov]
+Q72. Q67 follow up: "solvable" in your words is "with enough time and everything shipped, an agent can solve it". Does that also mean every graded value has one correct answer that the shipped instruction and data decide (no value that only the hidden tests decide)? [ANSWERED: defined by the solvability prompt in README (ENTRY 13)]
+Q73. You asked to change the README goal heading. It is now "GOAL OF THE TASK SYSTEM". Is that what you wanted, or a different wording? [FOLLOW UP: asked again in plain words in chat 3 Nov]
 
-Q74. Please confirm or change Claude's boundary (README GOAL item 7). Your words in ENTRY 11 ("bypassing the QC", "not possible to follow the legit process") and ENTRY 12 ("if it is passing the QC, it is fine", "task must be solvable") are recorded. Claude's reading: every lever must keep the task solvable from what it ships and must pass QC as the kit is written; Claude will not design something whose purpose is to hide an unsolvable or underspecified grading from QC, the PL or the QL. Do you agree with this as the working rule? [OPEN]
+Q74. Please confirm or change Claude's boundary (README GOAL item 7). Your words in ENTRY 11 ("bypassing the QC", "not possible to follow the legit process") and ENTRY 12 ("if it is passing the QC, it is fine", "task must be solvable") are recorded. Claude's reading: every lever must keep the task solvable from what it ships and must pass QC as the kit is written; Claude will not design something whose purpose is to hide an unsolvable or underspecified grading from QC, the PL or the QL. Do you agree with this as the working rule? [ANSWERED: solvability is a QC check (DS-21, F0e, CL-10); extra solvability prompt only if the QL asks; Ayush did not object to the boundary, so it stands as the working rule unless he reopens it]
 Q64 note (saved explanation): the "push list" is the list of folders Ayush copies INTO THIS repo so Claude can read them (tmp/W1-003/MISSING.md, MUST items). It does not contradict R_REPOS: Claude never pushes anywhere except this repo; Ayush adds material here himself. It matches RQ1 and RQ2 in REQUESTS.md and Ayush's Q69 offer to paste the QC kit.
+
+Q75. Count caps (Q65d): you set a personal soft cap of 70 and a hard cap of 100 for the number of tests and of rubric criteria, plus the QC minimum. Earlier feedback (24 Oct 12:52) said "there is not cap". (1) Is the hard cap of 100 your own rule, or from the PL, QL or harness? (2) Is a count between 70 and 100 fine whenever it helps the score? These will be settings like the gate (DR2). [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

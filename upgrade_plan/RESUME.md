@@ -1,12 +1,12 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 03:07 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 03:20 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
 
 GOAL (README.md "GOAL OF THE TASK SYSTEM"; read it every time)
-Ayush must produce many tasks. Each must pass the current QC kit, be solvable from what it ships (DR3), be new (never a copy of an old task or of one teammate task), and make Opus 5 score under the gate: today tests under 85, rubric under 85, final under 40, but the gate is a changeable setting (DR2). Focus: levers and wordings that make Opus lose points while QC passes. Claude's boundary: README GOAL item 7.
+Ayush must produce many tasks. Each must pass the current QC kit, be solvable from what it ships (DR3), be new (never a copy of an old task or of one teammate task), and make Opus 5 score under the gate: today tests under 85, rubric under 85, final under 40, but the gate is a changeable setting (DR2). Focus: levers and wordings that make Opus lose points while QC passes. Solvability is a QC check (DS-21, F0e, CL-10). Count caps: QC minimum, soft 70, hard 100 (Q75). Claude's boundary: README GOAL item 7, not objected to.
 
 RULES THAT ALWAYS APPLY
 1. Edit nothing outside upgrade_plan/ until Ayush types the exact word PROCEED. Even then, only changes both are 100% sure of.
@@ -43,12 +43,13 @@ WHERE WE ARE
 KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 1. Copy is complete to about 3 Nov 00:45 IST; 3 sessions were running then (tmp/W1-003, Q1).
 2. After compaction the master loses format and process rules, not task facts (lessons.jsonl lines 89 and 100).
-3. 27 Oct hang: 3 orphan Python solvers on the host, about 185 GB, swap full (feedback.jsonl line 21).
+3. 27 Oct hang: 3 orphan Python solvers on the host (about 185 GB, swap full), plus other apps, wrong Docker settings and VMware (feedback.jsonl line 21, Q65b).
+6. The 2 days of tests 100 after an upgrade = 31 Oct and 1 Nov: misread rule levers lost to careful Opus (Q65e).
 4. Gate: tests under 85, rubric under 85, final under 40 (confirmed Q66; a score of exactly 85 fails). Harness model is Opus 5; the master chat runs Opus 5.5. No count cap, P12 v5 active, push = 1 run on frozen bytes (records; confirm Q65d).
 5. 182 hardening rules, 44 conflicts (tmp/W1-002).
 
 NEXT STEPS (in this order)
-1. Answer the LIVE questions at the top of QUESTIONS.md, Q74 (boundary) first.
+1. Answer the LIVE questions at the top of QUESTIONS.md (Q64 push list point by point, Q73, Q75).
 2. Conflict review: open tmp/W1-002/CONFLICTS.md and go through its 5 most serious conflicts with Ayush one at a time (C3 timeouts, C5 careful program, C25 with C6 how much may be written, C1 parking, C2 with C22 carriers), then the rest.
 3. Q4 (how to review UNVERIFIED_RULES), then UNVERIFIED_RULES.md batch 1 with Ayush.
 4. Shape PLAN.md, P1 (compaction) first, then the order in PROBLEMS.md.

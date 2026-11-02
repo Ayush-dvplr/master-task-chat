@@ -133,3 +133,14 @@ ENTRY 12. 3 Nov 2026 03:05 IST, answers in chat (word for word)
 65. did not get it ask me again in laymen terms"
 
 Recorded as: Q66 gate is 85, 85, 40 now (v3.7) but must be a changeable setting (DR2). Q67 Ayush must produce many tasks for his job; PL and QL say passing QC is fine; HARD REQUIREMENT: every task must be solvable from the task and instruction alone, with enough time (DR3); README goal heading to be changed (Q73). Q68 uniqueness is against his own tasks: every build must be new, never a copy of an old task, and never a close copy of one teammate task. Q69 the kit lives in the PL repo "terminal bench 2.0" (Terminal_2.0_Harbor_Harness); minor change = leniency or a lenient rule that does not affect fix mapping, hiding or traps; major = anything that does; agents decide. Q70 Ayush forwards QL questions by hand. Q71 suggestions only from this upgrade. Q63 dropped by Ayush. Q64 and Q65 re-explained in chat.
+
+ENTRY 13. 3 Nov 2026 03:20 IST, answers in chat (word for word)
+"74. i guess its mentioned in the QC too that the task is solvable  and if not then we uses this simple promt to verify : Read only the prompt in instruction.md and the artifacts in environment/ except for Dockerfile and check if the all the things requested by prompt are completely solveable or not, if an agent is given more than enough time and resources.  (like to be double sure and if this is in the QC then no need to it until QL asks)
+
+64. ask me this point wise what  you and from where i can get those in short 
+65.  1. yes 2. yes also many other apps are running on my mac and my docker setting are also incorrect and main some vmware is also running while using opencode and dockor that also took so much space making my mac hang (only occur 1 time) 3. yes 4. yes but i apprently my personal cap of 70 but can also exceed this but has hard cap of 100 (for both test and rubrics ) but have min cap according to QC 5. yes it happend on 31st oct and 1 nov 
+
+72. check in above reponse i explained it more , still not satisfied you can ask me 
+73. did not get it ask me again in laymen terms"
+
+Recorded as: Q74 solvability is a QC check (records: DS-21, F0e, CL-10 "solvable from visible files", knowledge/intake/handover_digest.json line 43); extra solvability prompt saved as SOLVABILITY_PROMPT (README), used only if the QL asks; boundary not objected to (Q74 closed as AGREED by Claude's reading, Ayush may reopen). Q65a yes. Q65b yes, plus other apps, wrong Docker settings and VMware running at the same time (once). Q65c yes. Q65d yes, but count caps: personal soft cap 70, hard cap 100, for both tests and rubric criteria, minimum per QC (FOLLOW UP Q75). Q65e episode B (31 Oct and 1 Nov). Q72 answered by the solvability prompt. Q64 and Q73 asked again in chat.
