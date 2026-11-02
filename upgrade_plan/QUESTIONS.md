@@ -3,10 +3,10 @@ QUESTIONS FOR AYUSH
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
 PROCESS
-Q0. You wrote "Do not edit when you are 100% sure". I read it as "do not edit UNTIL we are both 100% sure". Is that right? [OPEN]
+Q0. You wrote "Do not edit when you are 100% sure". I read it as "do not edit UNTIL we are both 100% sure". Is that right? [ANSWERED: yes]
 Q1. Is this repo a full copy of your Mac folders master_chat_tasks and master_chat_work, or a snapshot that may be older than the Mac? [OPEN]
 Q2. After PROCEED, where do changes go: committed in this repo on the branch for you to copy to the Mac, or written as files for you to place by hand? [OPEN]
-Q3. Which of the six problems hurts most right now, so the plan starts there? [OPEN]
+Q3. Which of the six problems hurts most right now, so the plan starts there? [ANSWERED, FOLLOW UP Q34]
 Q4. Should the UNVERIFIED_RULES.md batches come one batch at a time in chat, or will you read the file and answer by rule id? [OPEN]
 
 P1 COMPACTION
@@ -51,5 +51,13 @@ Q30. Count cap: is there any cap on tests and judge criteria, a warn above 35, o
 Q31. Which P12 fix template is active, v4 or v5? (C3) [OPEN]
 Q32. Is the gate tests under 85, rubric under 85, final under 40, and the older 100, 100, 70 dead? (C4) [OPEN]
 Q33. Push needs 1 harness run, or 8 runs on final approval? (C5) [OPEN]
+
+NEW PROBLEMS P7 TO P10 (from the Q3 answer, 3 Nov)
+Q34. Is your Q3 list in priority order, so compaction (P1) comes first, then the others in the order you wrote them? [OPEN]
+Q35. P7: when you "upgrade the master chat session", what kind of upgrade do you mean (new template versions, new rules, new tools, a new plan like v3.7 or v3.8)? What became worse afterwards? One real example. [OPEN]
+Q36. P8: do your teammates use the same QC kit and the same generator as you? Do they build by hand, with their own chat, or with a system like yours? [OPEN]
+Q37. P8: can you share one or two teammate tasks that passed QC and scored well, with their scores? I saw master_chat_work/20261102_test_design_study (10 teammate tasks). Are those the right examples, or are there better ones? [OPEN]
+Q38. P9: "very bad at creating new tasks with respect to the fixing tasks". Which do you mean: (a) new tasks built from scratch come out worse than tasks that get fixed, (b) the system is good at fixing but bad at designing new tasks, or (c) something else? [OPEN]
+Q39. P10: which templates were still old after an upgrade? Name one case (which upgrade, which template, which session used the old one). I already found one: state.json and README line 31 still say P12 v4 while INDEX says v5 is active (CONTRADICTIONS C3). [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

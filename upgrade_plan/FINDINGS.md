@@ -44,6 +44,15 @@ F6.2 Codex and other tools are invisible to auto mode. Only the board and result
 F6.3 feedback 31 Oct 16:12: GPT prompts for opencode must say "strictly do not run subagents".
 F6.4 auto/plans/20261029_smoketest_kiro.md exists, so Kiro was tried at least once.
 
+P10. OLD TEMPLATES AFTER UPGRADES
+
+F10.1 state.json template_versions still says P12_recheck_fix v4, P1 v1, P3 v1, P4 v1, P5 v1, P6 v1, P10 v1, while prompts/templates holds newer files (P1 v3, P3 to P6 v2, P10 v2, P12 v5). Also see CONTRADICTIONS C3.
+F10.2 Template versions are named in at least four places: state.json, README line 31, knowledge/INDEX.md, prompts/templates/CHANGELOG.md. An upgrade has to update all of them by hand.
+
+P8. TEAMMATES
+
+F8.1 master_chat_work/20261102_test_design_study/deep2/WHY.md (study 1deab9c, PARTIAL, 6 of 10 causes proven) looked at why Opus loses tests on 10 teammate tasks. Not yet read by Claude in this planning round.
+
 OTHER
 
 F7.1 master_chat_tasks/auto/__pycache__/auto.cpython-314.pyc is tracked in git.
