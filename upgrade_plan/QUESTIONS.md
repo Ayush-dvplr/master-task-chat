@@ -2,8 +2,8 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q61, Q62.
-PARKED until the records are read (R_RECORDS): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, Q35 details, Q39. Claude checks the records first, then asks only what is left.
+LIVE NOW: none. Waiting for helpers W1-002 and W1-003.
+PARKED until helper W1-003 reports (records now open to helpers): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, Q35 details, Q39. Claude checks the records first, then asks only what is left.
 PARKED until their problem is planned: Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
 
@@ -94,7 +94,7 @@ Q58. Worker sessions (WORKERS.md): are you fine with Claude using both W1 helper
 Q59. Should workers only return their report (Claude stores it), as WORKERS.md proposes, or may they write their report file into upgrade_plan/reports/ and push it themselves? [ANSWERED: report only; full findings may go in a separate tmp folder, each file mapped by a sha like id]
 Q60. For W3 prompts (things only the Mac can see), which tool should you paste them into by default: opencode Opus 5.5, opencode GPT Sol 6.1, or Codex? [ANSWERED: opencode GPT Sol 6.1 for now]
 
-Q61. P4 hardening: you said there are "plenty of things" to follow (hide levers, no leak of tests or rubric, pass QC, oracle 1 and nop 0, and more). Proposal: a helper collects every hardening constraint from your records (route 1 notes, LEVER_RULES, QC playbook, lessons, feedback) into one numbered list, with the source of each. Then you go through it and mark each KEEP, CHANGE or DROP, like UNVERIFIED_RULES. That list becomes the base of a hardening method. Is that the right first step, and may that helper read the records now (this would lift R_RECORDS for this one job)? [OPEN]
-Q62. FLAG on Q58 versus P5 and Q57: you said subagents cost a lot of tokens, and P5 is "token use is very high", yet for my helpers there is no token limit. Do my helpers in this Claude session draw on the same Claude account and usage limit as your opencode Opus 5.5 task sessions? If yes, heavy helper use here can exhaust the limit your task work needs. Is that acceptable, or should helpers run at quiet times only? (W1-001 used about 79k tokens.) [OPEN]
+Q61. P4 hardening: you said there are "plenty of things" to follow (hide levers, no leak of tests or rubric, pass QC, oracle 1 and nop 0, and more). Proposal: a helper collects every hardening constraint from your records (route 1 notes, LEVER_RULES, QC playbook, lessons, feedback) into one numbered list, with the source of each. Then you go through it and mark each KEEP, CHANGE or DROP, like UNVERIFIED_RULES. That list becomes the base of a hardening method. Is that the right first step, and may that helper read the records now (this would lift R_RECORDS for this one job)? [ANSWERED: yes; also read the master chat records, and list what is missing from the repo (for example the QC folder) so Ayush can push it]
+Q62. FLAG on Q58 versus P5 and Q57: you said subagents cost a lot of tokens, and P5 is "token use is very high", yet for my helpers there is no token limit. Do my helpers in this Claude session draw on the same Claude account and usage limit as your opencode Opus 5.5 task sessions? If yes, heavy helper use here can exhaust the limit your task work needs. Is that acceptable, or should helpers run at quiet times only? (W1-001 used about 79k tokens.) [ANSWERED: no limit during this build; the finished system must be light on tokens in daily use (DR1)]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

@@ -38,7 +38,7 @@ VERIFICATION BY THE MASTER (before storing)
 4. Stored facts in FINDINGS.md carry the worker id and "verified by master" or "UNVERIFIED".
 
 TMP FOLDER (Q59)
-When a report is too long for chat, the helper's complete findings go in upgrade_plan/tmp/<helper id>/ (written by the master from the helper's report, committed so they survive compaction). Each file is listed in WORKER_LOG.md with the first 8 characters of its sha256, so a reference like "W1-002 a1b2c3d4" always points to one exact file version.
+When findings are long, the helper writes them itself into upgrade_plan/tmp/<helper id>/ (its only allowed write; no commit, no push) and returns a short report. The master spot checks, then commits the folder so it survives compaction. Each file is listed in WORKER_LOG.md with the first 8 characters of its sha256, so a reference like "W1-002 a1b2c3d4" always points to one exact file version.
 
 W3 PROMPTS (Q60)
 Default target: opencode with GPT Sol 6.1. Every W3 prompt says: read only, do not run subagents (they would start on Claude, F6.7), do all work in this chat, return plain text.

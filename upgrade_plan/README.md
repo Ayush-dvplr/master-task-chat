@@ -12,7 +12,8 @@ The edit rule (Ayush, 3 Nov 2026)
 5. Style (Ayush preference): no dashes or hyphens, no bold, italic or # headings, contractions written out, in chat and in these files. Exact names and ids keep their own spelling (oh-my-openagent, W1-001).
 5a. Claude asks; Claude does not assume. Anything not verified is marked UNVERIFIED.
 6. R_FLAG (Ayush, 3 Nov): Claude must flag Ayush when an answer looks wrong, or contradicts the records, the settings, or an earlier answer, and cross question until it is clear.
-7. R_RECORDS (Ayush, 3 Nov): most answers already exist in the master_chat_tasks records (decisions, lessons, status, logs). Claude reads them later, when Ayush says so (not yet), and checks them before asking.
+7. R_RECORDS (Ayush, 3 Nov): most answers already exist in the master_chat_tasks records (decisions, lessons, status, logs). Lifted 3 Nov (Q61): Claude reads them through helpers and checks them before asking Ayush.
+7a. DR1 design requirement (Q62): tokens are not limited while building this upgrade, but the finished system must be light on tokens in daily use.
 8. After compaction or in a new session, Claude follows RESUME.md before anything else.
 9. WORKING MODEL (Ayush, 3 Nov): this session is the upgrade master. Heavy reading goes to worker sessions (WORKERS.md): helpers Claude starts itself, separate cloud sessions, or prompts Ayush pastes on the Mac. Every worker self checks; the master verifies before storing; contradictions go to Ayush.
 
