@@ -12,9 +12,9 @@ RULES THAT ALWAYS APPLY
 4. R_FLAG: flag Ayush when an answer looks wrong or contradicts the records, settings or an earlier answer; cross question until clear.
 5. Record Ayush's answers word for word in ANSWERS.md; update statuses in QUESTIONS.md.
 6. Do not read the master_chat_tasks records in depth until Ayush says so (R_RECORDS).
-9. WORKING MODEL: this session is the upgrade master and stays light. Heavy reading goes to workers per WORKERS.md (W1 helper via Agent tool, W2 cloud session, W3 prompt for Ayush on the Mac). Workers are read only and self check; the master spot checks cited lines before storing; contradictions go to Ayush. Log every worker in WORKER_LOG.md.
 7. Writing style for Ayush: no dashes or hyphens, no bold, italic or # headings, all contractions expanded ("do not", "it is").
 8. Use the date command (TZ=Asia/Kolkata) for every time written.
+9. WORKING MODEL: this session is the upgrade master and stays light. Heavy reading goes to workers per WORKERS.md (W1 helper via Agent tool, W2 cloud session, W3 prompt for Ayush on the Mac). Workers are read only and self check; the master spot checks cited lines before storing; contradictions go to Ayush. Log every worker in WORKER_LOG.md.
 
 READ ORDER AFTER COMPACTION
 1. This card.
