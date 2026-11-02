@@ -163,3 +163,14 @@ ENTRY 16. 3 Nov 2026 04:00 IST, suggestions and a new problem (word for word)
 "let it suggestions that I like to come in my mind, and we add these suggestions like whenever it comes. First of all, local setup of open code if possible, like inside that root folder there will be these two folders, master task chat and master chat work or whatever it is. And apart from this, I will run directly from the root folder, and at the root there is specific config, the best config possible for the open code, and open code uses that specific one config only. If I run from that root, doesn't matter what set in my default or global path. Okay, and yeah, one more, that is whenever I already mentioned it, whenever the UC is updated, it verifies, the read only verifies from the git link, a hash copy or something like that, and act on it. First let me know only, and if there's some any other session of QC, then just mention in the report like it's mentioning right now. And one more problem that I'm facing, so I'm using ChatGPT open, ChatGPT and Gemini deep search to find different new angles for the levers or anything to increase our knowledge base, and also our teammate tasks to check out how they are doing this. So I want, as our knowledge grows, there is no static prompt, there should be some dynamic prompt, and again it can handle the compaction too. It doesn't like if it's compacted once, then it's not going to handle those. So goes to and write prompts in different ways, like verify the universe we have, find new things, explore, like those. Okay."
 
 Recorded as: suggestions S6, S7, S8 in AYUSH_SUGGESTIONS.md; new problem P11 in PROBLEMS.md; questions Q78 to Q81. "UC" read as "QC". Nothing acted on yet.
+
+ENTRY 17. 3 Nov 2026 04:08 IST, answers in chat (word for word)
+"78. yes Terminal Bench root, all sessions but i am planning to change the root folder as inside this there are multiples other folders too so maintaining git is not possible properly in that 
+
+79. just tell me later i will have a session and then decide 
+80. it does not work because the major sorce of knowledge is the teamates tasks as i already mentioned 100% genuine logic does not able to create that passes the score that we are aiming for 
+81. right now it gives me promot and i ask it to make respective empty md file where i apste the response
+82. yes 
+83. did not get it ask again in laymen terms"
+
+Recorded as: Q78 root today is "Terminal Bench", all sessions start there; Ayush plans a NEW root folder, because Terminal Bench holds many other folders and git cannot be kept clean there (FOLLOW UP Q84). Q79 kit change: only report; Ayush decides later in a session. Q80 the main knowledge source is teammate tasks; research must center on them (FOLLOW UP Q85). Q81 today: the master gives a prompt, makes an empty md file, Ayush pastes the response into it. Q82 yes: conflict review started (CONFLICT_REVIEW.md). Q83 asked again in plain words.

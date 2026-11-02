@@ -63,6 +63,7 @@ Files
 7. CONTRADICTIONS.md: places where the current records disagree with each other.
 8. REQUESTS.md: material Claude needs from Ayush (repos, uploads, opencode output, Docker settings).
 9. WORKERS.md: how helper sessions of this upgrade are used and verified. WORKER_LOG.md: one row per helper. reports/: full helper reports. prompts/: prompts for Ayush to paste on the Mac.
+9b. CONFLICT_REVIEW.md: decisions on the hardening rule conflicts, one by one.
 9a. AYUSH_SUGGESTIONS.md: Ayush's suggestions and their status. QL_QUESTIONS.md: questions queued for the QL.
 10. inputs/: material Ayush gave (RQ3 and RQ4 output pasted in chat on 3 Nov, saved by Claude).
 11. PLAN.md: the draft fix for each problem. Not approved.
