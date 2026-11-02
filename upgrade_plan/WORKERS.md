@@ -2,6 +2,9 @@ WORKERS: HOW THIS UPGRADE SESSION USES OTHER SESSIONS
 
 Draft agreed in principle by Ayush on 3 Nov 2026 (his message after Q56). Details below are Claude's proposal; open points are Q57 to Q60.
 
+WORDS
+"Helper" (W1, W2, W3) = a session that works for THIS upgrade session. "Task session" = a session in Ayush's task system (build, QC, fix), which Ayush runs in opencode or Codex. The "no subagents" line in a brief applies to the helper itself.
+
 THE MODEL
 1. This session is the upgrade master. It plans, asks, decides with Ayush, and stores. It stays light.
 2. Heavy reading and research (big folders, the records, the QC kit, many files) runs in worker sessions. The master gets only the report.

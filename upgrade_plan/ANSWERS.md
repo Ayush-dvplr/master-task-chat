@@ -1,19 +1,19 @@
 ANSWERS FROM AYUSH (word for word)
 
-Format: date and time IST, question id, answer as written.
+Format: each entry starts with a line "ENTRY n." then date and time (IST), Ayush's words, and "Recorded as". All times in this folder are IST.
 
-3 Nov 2026 (before 01:19 IST), process rules
+ENTRY 1. 3 Nov 2026 (before 01:19 IST), process rules
 "this is going to be very huge update, and you are not going to edit anything until I explicitly type proceed, PROCEED, exact spelling. Okay, so first make a separate folder for planning everything, every questions inside that, and your plan, how you are fixing, how you are handling everything. Do not edit when you are 100% sure. Okay, till then you and me both are 100% sure about this, and I'm telling you every problem I will face, everything in that. So second, if you need anything, ask me. I will add it to the folder and push it to the remote and tell you. For open code settings, just ask me or give me the prompt. I will paste in the open code and get those settings. Okay, any other folder QC you need, I will upload that too manually. And even though for the QC rules and everything, do not assume all the pre things that are added, like avoid this or avoid that, is correct. Ask me again until I will verify that is not assumed to be correct. And before making this folder, you can also ask me questions. Okay."
 
 Note by Claude: Claude read "Do not edit when you are 100% sure" as "do not edit UNTIL we are both 100% sure". This reading is Q0 in QUESTIONS.md. Confirmed by Ayush on 3 Nov ("1. yes").
 
-3 Nov 2026, folder setup (answered through the question dialog)
+ENTRY 2. 3 Nov 2026, folder setup (answered through the question dialog)
 Q: May I create and keep updating the planning folder itself, committing and pushing only that folder? A: "Yes, plan folder only"
 Q: Where should the planning folder live? A: "Repo root: upgrade_plan/"
 Q: How do you want to answer my questions? A: "Answer in chat"
 Q: How should the files be split? A: "make seaprate file so that everything is clean and properly structured like readme , plan , questions , etc"
 
-3 Nov 2026 (after 01:19 IST), answers in chat
+ENTRY 3. 3 Nov 2026 (after 01:19 IST), answers in chat
 "1. yes 2. compacting , sometimes I try to upgrade the the master chat session but it becomes worse , my teamates are building tasks and somehow passing the QC and getting good score but mine ones cannot do that , qc fixes are not done properly (sometimes loses score and sometimes create new problems) , very bad at creating new tasks with respect to the fixing tasks , while upgrades some templates are still old 3. give me here in the chat"
 
 Recorded as:
@@ -21,11 +21,11 @@ Q0: yes (do not edit until both are 100% sure).
 Q3: the list above. Compaction is first. New problems P7 to P10 added to PROBLEMS.md. Follow up questions Q34 to Q39.
 "3. give me here in the chat": read by Claude as: give the RQ3 Mac commands and the RQ4 opencode prompt in chat. Given in chat on 3 Nov.
 
-3 Nov 2026, RQ3 and RQ4 output pasted in chat
+ENTRY 4. 3 Nov 2026, RQ3 and RQ4 output pasted in chat
 Saved word for word in inputs/mac_docker_20261103.txt and inputs/opencode_settings_20261103.md.
 Recorded as: Q14 answered (32 GiB, 10 cores). Q15 answered (Docker Desktop 29.8.2, VM about 15.6 GiB, 8 CPUs). Q5 and Q6 partly answered. Follow up questions Q40 to Q47.
 
-3 Nov 2026 01:47 IST, answers in chat (word for word)
+ENTRY 5. 3 Nov 2026 01:47 IST, answers in chat (word for word)
 "40. sisyphus, master always use opus 5.5 and workers sometimes codex, opencode opus 5.5 or sometimes gpt sol 6.1 
 41. I guess its the problem but the fact it is also correct that the opencode master also needs to compress wisely too.
 42. Because it works better non-stop and yes workers use same without human interactions needed (i guess so ) 
@@ -44,7 +44,7 @@ Recorded as: Q14 answered (32 GiB, 10 cores). Q15 answered (Docker Desktop 29.8.
 
 Recorded as: Q34 yes. Q35 to Q36, Q40 to Q46 answered (see QUESTIONS.md). Q37 later. Q38 and Q47: Ayush asked what they mean; explained in chat 3 Nov. Q39: answer is in the master_chat_tasks records; read later, not now. New rules R_FLAG and R_RECORDS added to README.md. Recovery prompt requested: RESUME.md created.
 
-3 Nov 2026 01:59 IST, answers in chat (word for word; Ayush sent the first half twice, kept once)
+ENTRY 6. 3 Nov 2026 01:59 IST, answers in chat (word for word; Ayush sent the first half twice, kept once)
 "38 option b
 47 mac@MacBookPro ~ % ~/.config/opencode/opencode.jsonc
 zsh: permission denied: /Users/mac/.config/opencode/opencode.jsonc
@@ -70,7 +70,7 @@ Q48. Q40 and Q42 : I mean, when I use the thing, I have Codex installed, Claude 
 
 Recorded as: Q38 = option b (fixing is fine, designing new tasks is weak). Q47: the command ran the file instead of printing it; a print command was given in chat. Q48, Q49, Q50, Q52 answered. Q51, Q54 explained again in plain words in chat. Q53, Q55: Claude recommendation given in chat, waiting for OK.
 
-3 Nov 2026 02:11 IST, answers in chat (word for word)
+ENTRY 7. 3 Nov 2026 02:11 IST, answers in chat (word for word)
 "47: mac@MacBookPro Terminal Bench % grep -n -A6 '"plugin"' ~/.config/opencode/opencode.jsonc
 4:  "plugin": [
 5-    "@tarquinen/opencode-dcp@3.2.0",
@@ -90,3 +90,11 @@ mac@MacBookPro Terminal Bench %
 one important thing i missed : So basically, from now on, we will work like the way we are working with the chat sessions. This particular session is my master chat for upgrade. And if you need some other chat session that is doing deep study on other folders or anything, that itself take a lot of context and you need only the report. So you can write and give me the prompt, or if possible, you can open new sessions yourself and run those and ask in the end, ask it to verify too. And after that, you will verify and then store. If any contradiction occurs, you will ask me. But for this one, thus this part two, let's plan and update all the respective documents, and it must survive the compaction too. And tell me, is it correct or not, and how you are going to handle either giving me prompt for the sessions or you will be doing yourself. If you are doing yourself, then how you are doing it."
 
 Recorded as: Q47 file is valid, brackets were lost only in copying. Q51: Ayush wants a dynamic background script (no AI tokens) that manages Docker room; AI can see it and start or stop it. Q53, Q55: Claude recommendations accepted. Q54: yes, cold test approved. Q56: the master session is named "Master Task Chat"; Sisyphus is the default opencode agent shown at the bottom of every reply. New working model: WORKERS.md.
+
+ENTRY 8. 3 Nov 2026 02:13 IST, Claude explanations that Ayush answered (saved so the answers keep their meaning)
+Q51 as explained in chat: dockfree adds up the memory each task.toml says it might need, not what containers really use; so three tasks that "might need 4 GB" fill the 15.6 GB box on paper and the fourth waits, even if each really uses about 1 GB. But on 27 Oct about 3 times the limit froze the Mac. Ayush answered: a dynamic background script with no AI tokens.
+Q54 as explained in chat: one fresh helper gets only the recovery prompt; if it reports the state correctly the prompt works, otherwise the card is fixed. Ayush answered: yes.
+Q53 recommendation accepted: update RESUME.md and push after every exchange where something changes; skip pure chat.
+Q55 recommendation accepted: a "known from records" section in RESUME.md, about 1 KB max, each fact with its source; details in FINDINGS.md.
+
+Recorded as: cold test W1-001 done; fixes applied (see WORKER_LOG.md).

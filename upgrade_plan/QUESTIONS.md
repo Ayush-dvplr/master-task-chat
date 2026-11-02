@@ -2,16 +2,21 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
+LIVE NOW: Q20, Q57, Q58, Q59, Q60.
+PARKED until the records are read (R_RECORDS): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, Q35 details, Q39. Claude checks the records first, then asks only what is left.
+PARKED until their problem is planned: Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
+LATER (Ayush): Q37.
+
 PROCESS
 Q0. You wrote "Do not edit when you are 100% sure". I read it as "do not edit UNTIL we are both 100% sure". Is that right? [ANSWERED: yes]
 Q1. Is this repo a full copy of your Mac folders master_chat_tasks and master_chat_work, or a snapshot that may be older than the Mac? [OPEN]
 Q2. After PROCEED, where do changes go: committed in this repo on the branch for you to copy to the Mac, or written as files for you to place by hand? [OPEN]
-Q3. Which of the six problems hurts most right now, so the plan starts there? [ANSWERED, FOLLOW UP Q34]
+Q3. Which of the six problems hurts most right now, so the plan starts there? [ANSWERED: compaction first, plus new problems P7 to P10; order confirmed in Q34]
 Q4. Should the UNVERIFIED_RULES.md batches come one batch at a time in chat, or will you read the file and answer by rule id? [OPEN]
 
 P1 COMPACTION
-Q5. Does the master chat run in the opencode TUI (auto.py mentions "oc master")? Which model and provider? [PARTLY ANSWERED by RQ4: oc function exists, default model anthropic/claude-opus-5; FOLLOW UP Q40]
-Q6. Is opencode auto compaction on? Do you also compact by hand? About how many compactions per day? (RQ4 may answer this.) [PARTLY ANSWERED by RQ4: native auto compaction is OFF, so compaction is by hand; DCP plugin prunes context on its own; FOLLOW UP Q41, Q44]
+Q5. Does the master chat run in the opencode TUI (auto.py mentions "oc master")? Which model and provider? [ANSWERED: opencode TUI session "Master Task Chat", Opus 5.5 (Q40, Q50, Q56)]
+Q6. Is opencode auto compaction on? Do you also compact by hand? About how many compactions per day? (RQ4 may answer this.) [ANSWERED: native auto compaction OFF; DCP compresses on its own (Q41, Q44, Q49)]
 Q7. After a compaction, what exactly did the master get wrong? Old lever rules, your feedback (links, tables), running sessions, something else? One or two real examples. [OPEN]
 Q8. May superseded files (LEVER_RULES v1 and v2, snapshots, old template versions) move to a history folder the master never reads? [OPEN]
 Q9. Would you accept the master reading one small generated state card (under about 4 KB) after compaction, instead of the 7 step read order? [OPEN]
@@ -31,7 +36,7 @@ Q18. The 27 Oct Mac hang: do you know the cause (memory, disk, too many containe
 Q19. How many Docker jobs at the same time do you believe the Mac can run, and of what kind (kill tests, oracle or nop, paid harness runs)? [OPEN]
 
 P4 HARDENING
-Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [ANSWERED: (b), the system fixes well but is weak at designing new tasks]
+Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [OPEN. Note: until 3 Nov 02:15 this line wrongly carried the Q38 answer; fixed after cold test W1-001]
 Q21. Which tasks should be hardened first? [OPEN]
 Q22. What goes wrong today when you harden: the lever does not bite, QC flags it, or too many rounds? [OPEN]
 
@@ -57,7 +62,7 @@ Q34. Is your Q3 list in priority order, so compaction (P1) comes first, then the
 Q35. P7: when you "upgrade the master chat session", what kind of upgrade do you mean (new template versions, new rules, new tools, a new plan like v3.7 or v3.8)? What became worse afterwards? One real example. [ANSWERED: an upgrade led to 2 days of tasks scoring tests 100; details are in the records, read later]
 Q36. P8: do your teammates use the same QC kit and the same generator as you? Do they build by hand, with their own chat, or with a system like yours? [ANSWERED: same QC; generator differs, it only gives structure and a plan, Ayush sometimes finds it useless; some friends use direct prompts with everything in them]
 Q37. P8: can you share one or two teammate tasks that passed QC and scored well, with their scores? I saw master_chat_work/20261102_test_design_study (10 teammate tasks). Are those the right examples, or are there better ones? [LATER, Ayush will answer]
-Q38. P9: "very bad at creating new tasks with respect to the fixing tasks". Which do you mean: (a) new tasks built from scratch come out worse than tasks that get fixed, (b) the system is good at fixing but bad at designing new tasks, or (c) something else? [OPEN]
+Q38. P9: "very bad at creating new tasks with respect to the fixing tasks". Which do you mean: (a) new tasks built from scratch come out worse than tasks that get fixed, (b) the system is good at fixing but bad at designing new tasks, or (c) something else? [ANSWERED: (b)]
 Q39. P10: which templates were still old after an upgrade? Name one case (which upgrade, which template, which session used the old one). I already found one: state.json and README line 31 still say P12 v4 while INDEX says v5 is active (CONTRADICTIONS C3). [IN RECORDS, read later]
 
 FROM THE RQ3 AND RQ4 OUTPUT (3 Nov)
