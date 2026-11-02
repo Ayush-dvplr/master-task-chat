@@ -108,3 +108,9 @@ ENTRY 9. 3 Nov 2026 02:25 IST, answers in chat (word for word)
 60. right now i will paste in gpt sol 6.1 in opencode"
 
 Recorded as: Q20: no method yet; hardening must hide levers (no leak of tests or rubric), pass QC, keep what makes it hard, oracle 1 and nop 0, and many more constraints; to be worked out (Q61). Q57: subagents are fine in principle; the rule exists for cost and because subagents default to Claude, so in a GPT session they fail once the Claude limit is used up (FINDINGS F6.7). Q58: W1 and W2 both fine, no limit on number or tokens (FLAG Q62). Q59: helpers return a report; full findings may go in a separate tmp folder, mapped by a sha like id. Q60: W3 prompts go into opencode GPT Sol 6.1.
+
+ENTRY 10. 3 Nov 2026 02:29 IST, answers in chat (word for word)
+"61. Yes, it would approach. Beside these, read the main task master chat task one. And there will be a few things that I not pushed that you might need. One of them is QC folder, where it stores all the QCs and report. So check all those and tell me. I will copy and paste, or I will say I will push those two so that you can run better levers or QC or everything. You can plan around everything. Ask me if you have questions regarding this too.
+62. So basically, completely building this thing, that will be my regular work, and using that much token is not acceptable at that time, every time it's uses. Right now I'm building something very meaningful, so I'm not stopping you for the tokens or anything. Understand?"
+
+Recorded as: Q61 yes; a helper builds the hardening constraint list. R_RECORDS lifted: Claude may now read master_chat_tasks (and master_chat_work) through helpers. Claude must also list what the records point to but is not in the repo (for example the QC folder with all QC reports), so Ayush can push or paste it. Q62: no token limit now, while the system is being built; but the FINISHED system must be light on tokens in daily use (design requirement DR1).
