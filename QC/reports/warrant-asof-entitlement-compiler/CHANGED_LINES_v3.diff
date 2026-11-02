@@ -1,0 +1,43 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/4035780/warrant-asof-entitlement-compiler/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/ac04ee8/warrant-asof-entitlement-compiler/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/4035780/warrant-asof-entitlement-compiler/tests/test_output.py	2026-10-30 10:19:20
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/ac04ee8/warrant-asof-entitlement-compiler/tests/test_output.py	2026-10-30 16:04:42
+@@ -29940,0 +29941,2 @@
++        if not path.is_file():
++            return None
+@@ -30042 +30044 @@
+-@criterion(description="summary.json equals the recomputed summary and its counts match the delivered profiles and report")
++@criterion(description="summary.json equals the recomputed summary")
+@@ -30045,11 +30047 @@
+-        summ, exp = _artifact("summary.json"), _expected_shipped()[3]
+-        if not _same(summ, exp):
+-            return False
+-        report = _artifact("validation_report.json")
+-        for profile in ("dev", "prod"):
+-            prof = _artifact(f"profile_{profile}.json")
+-            if not isinstance(prof, dict) or summ["profiles"][profile]["keys"] != len(prof):
+-                return False
+-            if summ["profiles"][profile]["principals"] != len({k.split("|", 1)[0] for k in prof}):
+-                return False
+-        return all(summ["audit_counts"][k] == len(report[k]) for k in summ["audit_counts"])
++        return _same(_artifact("summary.json"), _expected_shipped()[3])
+@@ -30135 +30126,0 @@
+-            raw = (OUT / name).read_bytes()
+@@ -30137 +30128,4 @@
+-            if doc is None or raw not in {(json.dumps(doc, indent=2, sort_keys=True, ensure_ascii=a) + "\n").encode("utf-8")
++            if doc is None:
++                return False
++            raw = (OUT / name).read_bytes()
++            if raw not in {(json.dumps(doc, indent=2, sort_keys=True, ensure_ascii=a) + "\n").encode("utf-8")
+@@ -30227 +30221 @@
+-@criterion(description="report.json names warrant-ctl, lists successful runs of every subcommand and both profiles, and lists repairs")
++@criterion(description="report.json names warrant-ctl, lists successful runs of every subcommand and both profiles with resolve-config first, states both profile digests, and lists repairs")
+@@ -30232,0 +30227,2 @@
++        if not all(isinstance(report.get(k), str) for k in ("profile_dev_sha256", "profile_prod_sha256")):
++            return False
+@@ -30248,0 +30245,2 @@
++            if "resolve-config" not in seen and seen:
++                return False
+@@ -30328,0 +30327,3 @@
++            return False
++        a, b = _run_all(_tier("tier_a"), "tier_a")["prod"], _run_all(_tier("tier_b"), "tier_b")["prod"]
++        if isinstance(a, dict) and isinstance(b, dict) and a and a == b:

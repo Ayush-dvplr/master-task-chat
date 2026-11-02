@@ -1,0 +1,16 @@
+# flood-repair-portfolio QC v4 | board 688700c | full
+- [x] S0 2026-11-02 22:49 IST
+- [x] script 1 2026-11-02 22:50 IST
+- [x] script 2 2026-11-02 22:51 IST
+- [x] script 3 2026-11-02 22:52 IST
+- [x] script 4 2026-11-02 22:53 IST
+- [x] gate 01 2026-11-02 23:00 IST
+- [x] gate 02 2026-11-02 23:03 IST
+- [x] gate 03 2026-11-02 23:07 IST
+- [x] gate 04 2026-11-02 23:10 IST
+- [x] gate 05 2026-11-02 23:17 IST
+- [x] QL table 2026-11-02 23:25 IST
+- [x] Step 10 2026-11-02 23:27 IST
+- [x] Step 11 2026-11-02 23:30 IST
+- [x] final report 2026-11-02 23:31 IST
+- [x] compare 2026-11-02 23:33 IST

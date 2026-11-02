@@ -1,0 +1,16 @@
+# _progress_v10.md — district-heat-flex-procurement (a8e4f16), report v10.md, MODE recheck
+- [x] S0 preconditions + carry-over 05:56
+- [x] script 1 05:56
+- [x] script 2 05:56
+- [x] script 3 05:56
+- [x] script 4 05:56
+- [x] gate 01 06:01
+- [x] gate 02 06:04
+- [x] gate 03 06:05
+- [x] gate 04 06:07
+- [x] gate 05 06:08
+- [x] QL table 06:11
+- [x] Step 10 06:12
+- [x] Step 11 06:14
+- [x] final report 06:14
+- [x] compare 06:14

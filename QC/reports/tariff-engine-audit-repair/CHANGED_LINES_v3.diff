@@ -1,0 +1,1027 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/solution/TRUTH.md	2026-10-27 21:40:22
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/solution/TRUTH.md	2026-10-29 12:27:47
+@@ -128,15 +128,24 @@
+-    `due`, within 10 seconds. The oracle sorts the amounts and looks for the fewest
+-    small vouchers whose total stays below the common unit (greatest common divisor) of
+-    the rest. The rest is searched in that unit: for each voucher in id order it keeps the
+-    set of unit counts the later vouchers reach (an integer used as a bit set), takes the
+-    top count not above the balance and walks the vouchers in id order, taking each one
+-    whose remainder is still reachable. The small vouchers are tried in every combination
+-    for what is left; the first id list of each part together is the first id list of the
+-    whole, and no smaller unit part can win because the small ones add up to less than one
+-    unit. This is exact on every input. Hidden corpora copy three
+-    accounts with their reads scaled so the balance is 50,000.00 to 90,000.00, give each
+-    45 to 70 vouchers whose amounts share a factor the balance lacks (the balance itself
+-    is never reached), and add small accounts with equal-sum ties, an overpaid account at
+-    balance 0.00, and accounts that carry one quiet rule (cumulative reads, arrears,
+-    estimated reads, standing changes, meter rows, carried allowance, revisions), so a
+-    slip there moves the balance and the redeemed set. Seven further ledger corpora copy
++    `due`, within 10 seconds. The oracle keeps, for each place in the
++    ascending id order, the totals the vouchers from there onwards reach without passing
++    the balance, in whichever of three forms those amounts make cheapest: as a set of
++    totals when the amounts repeat enough to keep it small, as one bit per cent when the
++    balance itself is the narrower bound, and otherwise by peeling the smallest amounts
++    off until everything left shares a factor larger than all of them, counting that
++    block in factor units and taking every subset of the few peeled ones. It then takes
++    the largest reachable total and walks the ids in ascending order, taking each voucher
++    the ids after it can still finish; taking the smallest id available at every step is
++    what makes the list that comes first, so no tied set is ever enumerated. When none of
++    the three forms fits (many unrelated large amounts), the oracle splits the ids in
++    half, lists the totals of each half with the earliest id as the highest bit of a
++    mask, finds the largest total not above the balance from the two sorted lists, and
++    keeps the largest first-half mask that the second half can still finish, then the
++    largest second-half mask: that is the id list that comes first. This is exact on
++    every input. Three hidden statement sets (statement, batch, cycle), seven corpora
++    each, copy three accounts with their reads scaled so the balance is 400 to 800
++    million (in cents 4e10 to 8e10): two get the two voucher groups described below and
++    one gets 36 vouchers of unrelated large amounts (greatest common divisor 1, three
++    pairs of equal amounts, so equal-sum sets compete). Each set also adds small accounts
++    with equal-sum ties, an overpaid account at balance 0.00, and accounts that carry one
++    quiet rule (cumulative reads, arrears, estimated reads, standing changes, meter rows,
++    carried allowance, revisions), so a slip there moves the balance and the redeemed
++    set. Seven further ledger corpora copy
+@@ -179 +188 @@
+-The test channel registers 114 positive checks worth 488 points and 2 negative checks,
++The test channel registers 156 positive checks worth 670 points and 2 negative checks,
+@@ -245 +254 @@
+-Measured on real runs (test points of 488): the oracle scores 488; allowance ignored 215; standing by the month of `start` 370; tiers per meter 246; an unknown plan value falling to the first plan 404; a key-only plan lookup crashes on the shipped data (0); `estimated` ignored 400; `standing_changes` ignored 405; last billing row only 336; allowance not carried 366; last accounts row only 436; revisions ignored 442; the first fitting revision 460; payments ignored by the credit 437; counts billed as written 437; largest voucher first 343; a different id list among equal sums 413; a missing payment row read as 0.00 306; a bit set over cents 397; the two visible assertions kept 485. The judge channel carries 13 criteria, 33 positive points.
++Measured on real runs (test points of 670): the oracle scores 670; a bit set over cents 306 (the statement calls run out of memory); the two-group split alone 397; halves alone 306 (the statement calls run past 10 s); halves with a different id list among equal sums 525; largest voucher first 385; a branch search 306; the first-write program 188. The judge channel carries 16 criteria, 42 positive points.
+@@ -268 +277,4 @@
+-recomputed and compared).
++recomputed and compared), then runs `--statements` on its own account with 34 vouchers and
++a balance of 150000000.00 and prints `check R14 ok` with the run time, recomputes the
++redeemed list of a tied own account by trying every subset and prints `check R15 ok`, and
++shows the sets that reach the tied sum with the chosen list in `check R16 ok`.
+@@ -321 +333 @@
+-solve_py_sha256: c277d276ea39f30b1f727faff6de29dfc229aa4350b2fa01dc0662f79b66b637  # sha256 of solution/solve.py
++solve_py_sha256: 487e942c072f92aff8405cca42cd40e94d9055bbaca0f668ca45d6518fb7ac67  # sha256 of solution/solve.py
+@@ -327 +339 @@
+-golden_score_trial_id: plain__SBFvfad
++golden_score_trial_id: plain__LyU6mrM
+@@ -329 +341 @@
+-  harbor 0.24.0 oracle agent, three runs on 2026-10-27, tests channel reward 1.0 each; owner-only copy 1.0; nop agent reward 0.0.
++  harbor 0.24.0 oracle agent, three runs on 2026-10-29, tests channel reward 1.0 each; owner-only copy 1.0; nop agent reward 0.0.
+@@ -331,2 +343,2 @@
+-  The test channel carries 114 positive checks worth 488 weight and 2 negative
+-  checks worth -8 weight. The judged channel carries 13 criteria worth 33
++  The test channel carries 156 positive checks worth 670 weight and 2 negative
++  checks worth -8 weight. The judged channel carries 16 criteria worth 42
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/solution/solve.py /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/solution/solve.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/solution/solve.py	2026-10-27 21:14:53
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/solution/solve.py	2026-10-29 09:16:06
+@@ -12,0 +13 @@
++import itertools
+@@ -14,0 +16 @@
++import random
+@@ -19,0 +22 @@
++import time
+@@ -254,0 +258 @@
++from bisect import bisect_right
+@@ -430,0 +435,123 @@
++SUM_LIMIT = 1 << 21
++CENT_LIMIT = 1 << 27
++PEEL_LIMIT = 20
++
++
++def _sum_width(amounts):
++    """How many totals the amounts could reach, giving up once past ``SUM_LIMIT``."""
++    repeats = {}
++    for amount in amounts:
++        repeats[amount] = repeats.get(amount, 0) + 1
++    width = 1
++    for count in repeats.values():
++        width *= count + 1
++        if width > SUM_LIMIT:
++            return 0
++    return width
++
++
++def _peel(amounts):
++    """The common factor of the block left when the smallest amounts are peeled off.
++
++    Peels the smallest amounts one at a time until everything still in the block shares a
++    factor larger than every amount peeled off. Returns 0 when no such factor turns up,
++    which means the amounts have no block structure to work with.
++    """
++    order = sorted(amounts)
++    for peeled in range(min(PEEL_LIMIT, len(order) - 1) + 1):
++        block = order[peeled:]
++        factor = gcd(*block)
++        if factor > 1 and (peeled == 0 or order[peeled - 1] < factor):
++            return factor
++    return 0
++
++
++class _BySums:
++    """The totals the vouchers from each position onwards reach, held as sets."""
++
++    def __init__(self, amounts, cap):
++        self.table = [{0}]
++        for amount in reversed(amounts):
++            later = self.table[-1]
++            self.table.append(later | {total + amount for total in later if total + amount <= cap})
++        self.table.reverse()
++
++    def best(self):
++        return max(self.table[0])
++
++    def reaches(self, index, total):
++        return total in self.table[index]
++
++
++class _ByCents:
++    """The same totals, held as one bit per cent."""
++
++    def __init__(self, amounts, cap):
++        mask = (1 << (cap + 1)) - 1
++        self.table = [1]
++        for amount in reversed(amounts):
++            later = self.table[-1]
++            self.table.append((later | (later << amount)) & mask)
++        self.table.reverse()
++
++    def best(self):
++        return self.table[0].bit_length() - 1
++
++    def reaches(self, index, total):
++        return bool(self.table[index] >> total & 1)
++
++
++class _ByUnits:
++    """The same totals, held as a bitmap of factor units beside the peeled amounts.
++
++    A total is reached from a position when some subset of the peeled amounts still there
++    adds up to a part of it, the rest divides evenly by the factor, and the block still
++    there reaches that many units.
++    """
++
++    def __init__(self, amounts, cap, factor):
++        self.cap = cap
++        self.factor = factor
++        units = (1 << (cap // factor + 1)) - 1
++        self.block = [1]
++        self.peeled = [{0}]
++        for amount in reversed(amounts):
++            if amount % factor:
++                later = self.peeled[-1]
++                self.peeled.append(later | {total + amount for total in later if total + amount <= cap})
++                self.block.append(self.block[-1])
++            else:
++                later = self.block[-1]
++                self.block.append((later | (later << (amount // factor))) & units)
++                self.peeled.append(self.peeled[-1])
++        self.block.reverse()
++        self.peeled.reverse()
++
++    def best(self):
++        top = 0
++        for small in self.peeled[0]:
++            seen = self.block[0] & ((1 << ((self.cap - small) // self.factor + 1)) - 1)
++            if seen:
++                top = max(top, small + (seen.bit_length() - 1) * self.factor)
++        return top
++
++    def reaches(self, index, total):
++        for small in self.peeled[index]:
++            rest = total - small
++            if rest >= 0 and rest % self.factor == 0 and self.block[index] >> (rest // self.factor) & 1:
++                return True
++        return False
++
++
++def _table(amounts, cap):
++    """Reachability in whichever of the three forms these amounts make cheapest."""
++    if _sum_width(amounts):
++        return _BySums(amounts, cap)
++    factor = _peel(amounts)
++    if factor and cap // factor <= CENT_LIMIT:
++        return _ByUnits(amounts, cap, factor)
++    if cap <= CENT_LIMIT:
++        return _ByCents(amounts, cap)
++    raise ValueError("no reachable-total form fits these vouchers")
++
++
+@@ -434,2 +561,4 @@
+-    Vouchers whose amounts share a common unit are searched in that unit; the few whose total stays
+-    below the unit are tried in every combination for what the unit part leaves over.
++    Nothing in the contract bounds the balance or the voucher count, so neither is taken to
++    be small. The winning total is rebuilt by walking the ids in ascending order and taking
++    each one the ids after it can still finish, so taking the smallest id available at every
++    step gives the list that comes first and no tied set is ever enumerated.
+@@ -437 +566,2 @@
+-    if target <= 0 or not vouchers:
++    usable = sorted((name, amount) for name, amount in vouchers if amount <= target)
++    if not usable:
+@@ -439,33 +569,13 @@
+-    items = sorted(vouchers, key=lambda item: (item[1], item[0]))
+-    common = [0] * (len(items) + 1)
+-    for place in range(len(items) - 1, -1, -1):
+-        common[place] = gcd(common[place + 1], items[place][1])
+-    best, low = None, 0
+-    for count in range(min(len(items), 20) + 1):
+-        unit = common[count]
+-        if count == len(items) or low < unit:
+-            cost = (target // unit if unit else 0) + (1 << count)
+-            if best is None or cost < best[0]:
+-                best = (cost, count, unit)
+-        if count < len(items):
+-            low += items[count][1]
+-    _, count, unit = best
+-    small, large = sorted(items[:count]), sorted(items[count:])
+-    chosen, rest = [], target
+-    if large:
+-        mask = (1 << (target // unit + 1)) - 1
+-        reach = [1] * (len(large) + 1)
+-        for place in range(len(large) - 1, -1, -1):
+-            reach[place] = reach[place + 1] | ((reach[place + 1] << (large[place][1] // unit)) & mask)
+-        left = reach[0].bit_length() - 1
+-        rest = target - left * unit
+-        for place, (voucher, cents) in enumerate(large):
+-            step = cents // unit
+-            if step <= left and (reach[place + 1] >> (left - step)) & 1:
+-                chosen.append(voucher)
+-                left -= step
+-    options = [(0, ())]
+-    for voucher, cents in small:
+-        options += [(total + cents, names + (voucher,)) for total, names in options if total + cents <= rest]
+-    top = max(total for total, _ in options)
+-    return sorted(chosen + list(min(names for total, names in options if total == top)))
++    try:
++        table = _table([amount for _, amount in usable], target)
++    except ValueError:
++        return _redeem_halves(target, usable)
++    standing = table.best()
++    chosen = []
++    for index, (name, amount) in enumerate(usable):
++        if amount <= standing and table.reaches(index + 1, standing - amount):
++            chosen.append(name)
++            standing -= amount
++            if standing == 0:
++                break
++    return sorted(chosen)
+@@ -473,0 +584,40 @@
++def _half_totals(part):
++    """Every total of a subset of ``part`` with its best mask, the earliest id as the top bit."""
++    best = {0: 0}
++    size = len(part)
++    for place, (_, amount) in enumerate(part):
++        bit = 1 << (size - 1 - place)
++        for total, mask in list(best.items()):
++            grown = total + amount
++            if best.get(grown, -1) < (mask | bit):
++                best[grown] = mask | bit
++    return best
++
++
++def _redeem_halves(target, usable):
++    """The same answer when no reachable-total form fits: the ids are split into an earlier and
++    a later half, every total of each half is listed, and the two lists are matched.
++
++    A set whose list comes first holds the smallest id where two sets differ, so with the
++    earliest id as the top bit the first list is the largest mask: first over the earlier
++    half among the totals that can still be finished, then over the later half.
++    """
++    middle = len(usable) // 2
++    early, late = usable[:middle], usable[middle:]
++    early_best, late_best = _half_totals(early), _half_totals(late)
++    late_sums = sorted(late_best)
++    standing = 0
++    for total in early_best:
++        if total <= target:
++            room = target - total
++            place = bisect_right(late_sums, room) - 1
++            standing = max(standing, total + late_sums[place])
++    mask = max(m for total, m in early_best.items()
++               if total <= standing and standing - total in late_best)
++    taken = sum(amount for place, (_, amount) in enumerate(early) if mask >> (middle - 1 - place) & 1)
++    later = late_best[standing - taken]
++    chosen = [name for place, (name, _) in enumerate(early) if mask >> (middle - 1 - place) & 1]
++    chosen += [name for place, (name, _) in enumerate(late) if later >> (len(late) - 1 - place) & 1]
++    return sorted(chosen)
++
++
+@@ -815,0 +966,13 @@
++def _statement_of(root, vouchers):
++    """Run `python -m tariff --statements` on ``root`` with ``vouchers`` and return X1's statement and the time."""
++    (root / "vouchers.csv").write_text("account,voucher,amount\n" + "".join(
++        f"X1,{name},{cents // 100}.{cents % 100:02d}\n" for name, cents in vouchers), encoding="utf-8")
++    began = time.monotonic()
++    proc = subprocess.run([sys.executable, "-m", "tariff", "--statements", str(root)], capture_output=True,
++                          text=True, cwd=str(root), env={**os.environ, "PYTHONPATH": str(REPO / "src")}, timeout=60)
++    elapsed = time.monotonic() - began
++    if proc.returncode != 0:
++        raise SystemExit(f"statements run on {root} failed: {proc.stderr[-400:]}")
++    return json.loads(proc.stdout)["statements"][0], elapsed
++
++
+@@ -885,0 +1049,29 @@
++    flat = {"currency": "EUR", "plans": {"P": {"standing_charge": 0.0, "credit_rate": 0.0,
++                                               "tiers": [{"up_to": None, "rate": 1.0}]}}}
++    picker = random.Random(4111)
++    large = write_corpus(scratch / "large", "2026-03-01", "2026-03-31", flat,
++                         [_read("r1", "2026-03-02", 150_000_000)], {"M1": ("2026-01-01", "")}, "0.00")
++    amounts = [picker.randrange(75_000_000, 187_500_000) for _ in range(34)]
++    statement, elapsed = _statement_of(large, [(f"V{n}", cents) for n, cents in enumerate(amounts, 1)])
++    spent = sum(amounts[int(v[1:]) - 1] for v in statement["redeemed"])
++    assert elapsed < 10 and statement["balance"] == "150000000.00" and 0 < spent <= 15_000_000_000
++    assert _cents(statement["due"]) == 15_000_000_000 - spent
++    print(f"check R14 ok X1 34 vouchers balance {statement['balance']} redeemed {len(statement['redeemed'])} "
++          f"due {statement['due']} in {elapsed:.2f} s of 10 s")
++    small = write_corpus(scratch / "tied", "2026-03-01", "2026-03-31", flat,
++                         [_read("r1", "2026-03-02", 8)], {"M1": ("2026-01-01", "")}, "0.00")
++    vouchers = [("V1", 100), ("V2", 300), ("V3", 400), ("V4", 800), ("V5", 250), ("V6", 550)]
++    statement, _ = _statement_of(small, vouchers)
++    fits = []
++    for size in range(len(vouchers) + 1):
++        for chosen in itertools.combinations(sorted(vouchers), size):
++            total = sum(cents for _, cents in chosen)
++            if total <= 800:
++                fits.append((-total, [name for name, _ in chosen]))
++    best = min(fits)
++    assert statement["redeemed"] == best[1] and statement["due"] == "0.00", statement
++    print(f"check R15 ok X1 enumeration {len(fits)} subsets gives {best[1]}, program gives {statement['redeemed']}")
++    reaching = sorted(names for total, names in fits if total == best[0])
++    assert len(reaching) > 1
++    print(f"check R16 ok X1 balance 8.00: {len(reaching)} sets reach 8.00 ({reaching[0]} and {reaching[-1]} among "
++          f"them); redeemed {statement['redeemed']}")
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/tests/judge.toml /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/tests/judge.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/tests/judge.toml	2026-10-27 21:20:24
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/tests/judge.toml	2026-10-29 09:38:48
+@@ -178,0 +179,39 @@
++
++[[criterion]]
++id = "R14"
++name = "r14_probes_large_statement_input"
++description = "The agent constructs its own input in which one account has more than 30 vouchers and a balance above 100000000.00, runs the repaired package with --statements on it, and shows how long that run took against the 10 seconds the contract allows."
++type = "binary"
++weight = 3
++
++[criterion.annotations]
++mode = "judged"
++type = "agent behavior"
++evaluation_target = "trajectory"
++importance = "important"
++
++[[criterion]]
++id = "R15"
++name = "r15_recomputes_redeemed_outside"
++description = "The agent recomputes the redeemed list of at least one account by a method separate from the repaired package, on an input where two sets of vouchers reach the largest sum at or below the balance, and compares it with the package's redeemed list."
++type = "binary"
++weight = 3
++
++[criterion.annotations]
++mode = "judged"
++type = "agent behavior"
++evaluation_target = "trajectory"
++importance = "important"
++
++[[criterion]]
++id = "R16"
++name = "r16_shows_tied_statement_decision"
++description = "The agent shows at least one account where more than one set of vouchers reaches the largest sum at or below the balance, together with the redeemed list its program chose for that account."
++type = "binary"
++weight = 3
++
++[criterion.annotations]
++mode = "judged"
++type = "agent behavior"
++evaluation_target = "trajectory"
++importance = "important"
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/tests/reward.toml /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/tests/reward.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/tests/reward.toml	2026-10-27 21:15:34
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/tests/reward.toml	2026-10-29 09:14:10
+@@ -4 +4 @@
+-weights = { test_output = 0.0010245901639344263, judge = 0.015151515151515152 }
++weights = { test_output = 0.0007462686567164179, judge = 0.011904761904761904 }
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/tests/test_output.py	2026-10-27 21:15:34
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/tests/test_output.py	2026-10-29 09:12:03
+@@ -20,0 +21 @@
++from bisect import bisect_right
+@@ -7157,17 +7157,0 @@
+-def _redeem(target: int, vouchers: list[tuple[str, int]]) -> list[str]:
+-    """The id list (ascending) of the set with the largest sum not above target, first id list on ties."""
+-    items = sorted(vouchers)
+-    if target <= 0:
+-        return []
+-    mask = (1 << (target + 1)) - 1
+-    suffix = [1] * (len(items) + 1)
+-    for place in range(len(items) - 1, -1, -1):
+-        suffix[place] = suffix[place + 1] | ((suffix[place + 1] << items[place][1]) & mask)
+-    left, chosen = suffix[0].bit_length() - 1, []
+-    for place, (voucher, cents) in enumerate(items):
+-        if cents <= left and (suffix[place + 1] >> (left - cents)) & 1:
+-            chosen.append(voucher)
+-            left -= cents
+-    return chosen
+-
+-
+@@ -7189 +7173 @@
+-        redeemed = _redeem(balance, rows[account])
++        redeemed = _redeem_any(balance, rows[account])
+@@ -7196,127 +7179,0 @@
+-def _statements_once(texts: dict[str, str], labels: dict[str, frozenset], rng: random.Random, lever: str,
+-                     allowed: frozenset):
+-    """Large accounts copied from ``lever`` or unlabelled ones with their reads scaled, and vouchers on both kinds."""
+-    base = _Ledger(texts)
+-    balances = _balances(texts)
+-    used = {name.upper() for name in [*base.rows, *(m for _, m in base.spans), *base.plans]}
+-    used |= {str(read["read_id"]).strip().upper() for read in base.reads}
+-
+-    def new_id(prefix: str, width: int) -> str:
+-        while True:
+-            value = f"{prefix}{rng.randrange(10 ** width):0{width}d}"
+-            if value.upper() not in used:
+-                used.add(value.upper())
+-                return value
+-
+-    def tagged(pool: list[str]) -> list[str]:
+-        return [a for a in pool if lever in labels.get(a, ())]
+-
+-    sources = sorted(a for a in base.rows if labels.get(a, frozenset()) <= allowed
+-                     and balances.get(a, 0) > 0
+-                     and all(not plan.get("revisions") for plan in [base.plans[base._plan_key(e[2])] for e in base.rows[a]])
+-                     and any(type(r["quantity"]) is int and r["quantity"] > 0 and str(r["account"]).strip() == a
+-                             for r in base.reads))
+-    picked = rng.sample(tagged(sources), min(2, len(tagged(sources))))
+-    picked += rng.sample([a for a in sources if a not in tagged(sources)], 3 - len(picked))
+-    copies = {new_id(source[0], len(source) + 1): source for source in picked}
+-    meters: dict[str, str] = {}
+-    read_ids: dict[str, str] = {}
+-    for row in csv.DictReader(io.StringIO(texts["accounts.csv"])):
+-        row = {key.strip(): (value or "").strip() for key, value in row.items()}
+-        if row["account"] in copies.values():
+-            meters.setdefault(row["meter"], new_id("Q", 6))
+-    for read in base.reads:
+-        if str(read["account"]).strip() in copies.values():
+-            read_ids[str(read["read_id"])] = new_id("S", 6)
+-            meters.setdefault(str(read["meter"]).strip(), new_id("Q", 6))
+-
+-    def scaled(factors: dict[str, int]) -> dict[str, str]:
+-        lines = {name: [] for name in ("billing_periods.csv", "accounts.csv", "meter_reads.jsonl")}
+-        for account, source in copies.items():
+-            for row in csv.DictReader(io.StringIO(texts["accounts.csv"])):
+-                row = {key.strip(): (value or "").strip() for key, value in row.items()}
+-                if row["account"] == source:
+-                    lines["accounts.csv"].append(f"{account},{meters[row['meter']]},{row['active_from']},{row['active_to']}\n")
+-            for row in csv.DictReader(io.StringIO(texts["billing_periods.csv"])):
+-                row = {key.strip(): (value or "").strip() for key, value in row.items()}
+-                if row["account"] == source:
+-                    lines["billing_periods.csv"].append(
+-                        f"{account},{row['start']},{row['end']},{row['plan']},{row['commitment']},{row['allowance']}\n")
+-            for read in base.reads:
+-                if str(read["account"]).strip() != source:
+-                    continue
+-                item = dict(read)
+-                item["read_id"], item["account"] = read_ids[str(read["read_id"])], account
+-                item["meter"] = meters[str(read["meter"]).strip()]
+-                if type(item["quantity"]) is int:
+-                    item["quantity"] *= factors[account]
+-                lines["meter_reads.jsonl"].append(json.dumps(item) + "\n")
+-        out = dict(texts)
+-        for name, extra in lines.items():
+-            out[name] = texts[name] + "".join(extra)
+-        return out
+-
+-    trial = _balances(scaled({account: 1000 for account in copies}))
+-    factors = {account: max(1, round(1000 * rng.randrange(5_000_000, 9_000_000) / max(1, trial[account])))
+-               for account in copies}
+-    planted = scaled(factors)
+-    balances = _balances(planted)
+-    taken: set[str] = set()
+-
+-    def voucher_id() -> str:
+-        while True:
+-            value = f"{rng.choice('KPVW')}{rng.randrange(1, 10 ** rng.randrange(1, 5))}"
+-            if value not in taken:
+-                taken.add(value)
+-                return value
+-
+-    rows: list[tuple[str, str, int]] = []
+-    for account in copies:
+-        target = balances[account]
+-        assert 4_000_000 <= target <= 12_000_000, (account, target)
+-        step = next(value for value in (2, 3, 5, 7) if target % value)
+-        amounts = [step * rng.randrange(target // (60 * step), target // (8 * step)) for _ in range(rng.randrange(45, 71))]
+-        rows += [(account, voucher_id(), cents) for cents in amounts]
+-    pool = sorted(a for a in balances if a not in copies and labels.get(a, frozenset()) <= allowed)
+-    small = rng.sample(tagged(pool), min(3, len(tagged(pool))))
+-    small += rng.sample([a for a in pool if a not in small and a not in tagged(pool)], 8 - len(small))
+-    for account in small:
+-        target = max(balances[account], 600)
+-        amounts = [rng.randrange(target // 6, target // 2 + 1) for _ in range(rng.randrange(6, 13))]
+-        amounts += [amounts[0], amounts[1] + amounts[2]]
+-        rows += [(account, voucher_id(), cents) for cents in amounts]
+-    single = [a for a in pool if a not in small and not labels.get(a) and len(base.rows[a]) == 1
+-              and not base.plans[base._plan_key(base.rows[a][0][2])].get("revisions")]
+-    over = rng.choice(single)
+-    invoice = next(i for i in _Ledger(planted).document()["invoices"] if i["account"] == over)
+-    paid = _cents_of(invoice["total"]) + rng.randrange(1, 5000)
+-    pays = planted.get("payments.csv", "account,start,paid\n")
+-    planted["payments.csv"] = pays + f"{over},{invoice['period']['start']},{_amount(paid)}\n"
+-    rows += [(over, voucher_id(), rng.randrange(100, 3000)) for _ in range(rng.randrange(2, 5))]
+-    small.append(over)
+-    rng.shuffle(rows)
+-    planted["vouchers.csv"] = "account,voucher,amount\n" + "".join(f"{a},{v},{_amount(c)}\n" for a, v, c in rows)
+-    return planted, copies, small
+-
+-
+-def _assert_statements(texts: dict[str, str], planted: dict[str, str], copies: dict[str, str]) -> None:
+-    before = {invoice["account"]: invoice for invoice in _Ledger(texts).document()["invoices"]}
+-    after = {invoice["account"]: invoice for invoice in _Ledger(planted).document()["invoices"]}
+-    assert {a: i for a, i in after.items() if a not in copies} == before
+-    rows = _voucher_rows(planted)
+-    balances = _balances(planted)
+-    ties = 0
+-    for account, vouchers in rows.items():
+-        target = balances.get(account, 0)
+-        sums = {0: 1}
+-        for _, cents in vouchers:
+-            if target > 50_000:
+-                break
+-            for value, count in list(sums.items()):
+-                if value + cents <= target:
+-                    sums[value + cents] = min(2, sums.get(value + cents, 0) + count)
+-        else:
+-            ties += sums[max(sums)] > 1
+-    assert ties >= 2, ties
+-
+-
+@@ -7330,14 +7187 @@
+-    def build() -> dict[str, str]:
+-        texts, labels = _quiet_corpus(corpus)
+-        seed = _QUIET_SEEDS[corpus]
+-        for attempt in range(40):
+-            rng = random.Random(seed * 53 + 29 + 1000003 * attempt)
+-            try:
+-                planted, copies, _ = _statements_once(texts, labels, rng, *_STATEMENT_LEVER[corpus])
+-                _assert_statements(texts, planted, copies)
+-                return planted
+-            except AssertionError:
+-                if attempt == 39:
+-                    raise
+-        raise AssertionError(corpus)
+-    return _memo(f"statement-texts:{corpus}", build)
++    return _scale_texts("statement", corpus)
+@@ -7350,0 +7195,2 @@
++    if ":" in corpus:
++        return _scale_texts(*corpus.split(":"))
+@@ -7360 +7206,2 @@
+-            data = _open_tree(_write_texts(_statement_texts(corpus), _scratch(f"statements-{corpus}-") / "data"))
++            data = _open_tree(_write_texts(_statement_texts_of(corpus),
++                                           _scratch(f"statements-{corpus.replace(':', '-')}-") / "data"))
+@@ -7465 +7312 @@
+-        redeemed = _redeem_split(balance, rows[account])
++        redeemed = _redeem_any(balance, rows[account])
+@@ -7593 +7440,2 @@
+-def _assert_ledger(texts: dict[str, str], planted: dict[str, str], copies: dict[str, str], over: str) -> None:
++def _assert_ledger(texts: dict[str, str], planted: dict[str, str], copies: dict[str, str], over: str,
++                   odd: str = "") -> None:
+@@ -7601 +7449 @@
+-    for account in copies:
++    for account in sorted(set(copies) - {odd}):
+@@ -7683,0 +7532 @@
++# ---------------------------------------------------------------- scale statements
+@@ -7684,0 +7534,123 @@
++SPLIT_LIMIT = 1 << 24
++SCALE_COUNT = 36
++_SCALE_RNG = {"statement": (53, 29), "batch": (61, 37), "cycle": (67, 41)}
++
++
++def _split_cost(target: int, vouchers: list[tuple[str, int]]) -> int:
++    """The work ``_redeem_split`` would do: the unit table width plus every combination of the small group."""
++    items = sorted(vouchers, key=lambda item: (item[1], item[0]))
++    common = [0] * (len(items) + 1)
++    for place in range(len(items) - 1, -1, -1):
++        common[place] = gcd(common[place + 1], items[place][1])
++    best, low = None, 0
++    for count in range(min(len(items), 20) + 1):
++        unit = common[count]
++        if count == len(items) or low < unit:
++            cost = (target // unit if unit else 0) + (1 << count)
++            best = cost if best is None else min(best, cost)
++        if count < len(items):
++            low += items[count][1]
++    return best if best is not None else 0
++
++
++def _redeem_halves(target: int, vouchers: list[tuple[str, int]]) -> list[str]:
++    """Same answer as ``_redeem_split``: the ids in ascending order are cut into two halves, the sums of every
++    subset of each half are listed, and the first id list is the one that keeps the earliest ids."""
++    items = sorted(vouchers)
++    if target <= 0 or not items:
++        return []
++    first, second = items[:len(items) // 2], items[len(items) // 2:]
++
++    def listing(part: list[tuple[str, int]]) -> tuple[list[int], list[int]]:
++        sums, keys = [0], [0]
++        for place, (_, cents) in enumerate(part):
++            bit = 1 << (len(part) - 1 - place)
++            sums += [value + cents for value in sums]
++            keys += [key | bit for key in keys]
++        return sums, keys
++
++    first_sums, first_keys = listing(first)
++    second_sums, second_keys = listing(second)
++    top: dict[int, int] = {}
++    for value, key in zip(second_sums, second_keys):
++        if value <= target and key > top.get(value, -1):
++            top[value] = key
++    ordered = sorted(top)
++    best = 0
++    for value in first_sums:
++        if value <= target:
++            place = bisect_right(ordered, target - value) - 1
++            best = max(best, value + ordered[place])
++    key, value = max((key, value) for value, key in zip(first_sums, first_keys)
++                     if value <= best and best - value in top)
++    rest = top[best - value]
++    chosen = [voucher for place, (voucher, _) in enumerate(first) if key >> (len(first) - 1 - place) & 1]
++    chosen += [voucher for place, (voucher, _) in enumerate(second) if rest >> (len(second) - 1 - place) & 1]
++    return chosen
++
++
++def _redeem_any(target: int, vouchers: list[tuple[str, int]]) -> list[str]:
++    """The exact redeemed list for any voucher set the generators make."""
++    if _split_cost(target, vouchers) <= SPLIT_LIMIT:
++        return _redeem_split(target, vouchers)
++    return _redeem_halves(target, vouchers)
++
++
++def _scale_once(texts: dict[str, str], labels: dict[str, frozenset], rng: random.Random, lever: str,
++                allowed: frozenset):
++    """A ledger corpus whose first copied account instead holds a few dozen vouchers of unrelated amounts."""
++    planted, copies, over = _ledger_once(texts, labels, rng, lever, allowed)
++    odd = sorted(copies)[0]
++    target = _balances(planted)[odd]
++    rows = [{key.strip(): (value or "").strip() for key, value in row.items()}
++            for row in csv.DictReader(io.StringIO(planted["vouchers.csv"]))]
++    taken = {row["voucher"] for row in rows}
++    rows = [(row["account"], row["voucher"], row["amount"]) for row in rows if row["account"] != odd]
++    amounts = [rng.randrange(target // 20, target // 8) for _ in range(SCALE_COUNT - 6)]
++    amounts += amounts[:6]
++    for cents in amounts:
++        while True:
++            voucher = f"{rng.choice('KPVW')}{rng.randrange(1, 10 ** rng.randrange(2, 6))}"
++            if voucher not in taken:
++                taken.add(voucher)
++                break
++        rows.append((odd, voucher, _amount(cents)))
++    rng.shuffle(rows)
++    planted["vouchers.csv"] = "account,voucher,amount\n" + "".join(f"{a},{v},{c}\n" for a, v, c in rows)
++    return planted, copies, over, odd
++
++
++def _assert_scale(texts: dict[str, str], planted: dict[str, str], copies: dict[str, str], over: str,
++                  odd: str) -> None:
++    """The ledger branches on the other copies, and on the mixed account: no shared unit, a sum below the balance
++    and two vouchers of one amount of which exactly one is redeemed."""
++    _assert_ledger(texts, planted, copies, over, odd)
++    rows, balances = _voucher_rows(planted), _balances(planted)
++    target, vouchers = balances[odd], rows[odd]
++    assert LEDGER_LOW <= target <= LEDGER_HIGH and len(vouchers) == SCALE_COUNT, (odd, target)
++    assert gcd(*[cents for _, cents in vouchers]) == 1 and _split_cost(target, vouchers) > SPLIT_LIMIT
++    chosen = set(_redeem_any(target, vouchers))
++    spent = sum(cents for voucher, cents in vouchers if voucher in chosen)
++    assert 0 < spent < target, (odd, spent, target)
++    used = {cents for voucher, cents in vouchers if voucher in chosen}
++    spare = {cents for voucher, cents in vouchers if voucher not in chosen}
++    assert used & spare, (odd, "no tie on the mixed account")
++
++
++def _scale_texts(kind: str, corpus: str) -> dict[str, str]:
++    def build() -> dict[str, str]:
++        texts, labels = _quiet_corpus(corpus)
++        seed, (times, plus) = _QUIET_SEEDS[corpus], _SCALE_RNG[kind]
++        for attempt in range(40):
++            rng = random.Random(seed * times + plus + 1000003 * attempt)
++            try:
++                planted, copies, over, odd = _scale_once(texts, labels, rng, *_STATEMENT_LEVER[corpus])
++                _assert_scale(texts, planted, copies, over, odd)
++                return planted
++            except AssertionError:
++                if attempt == 39:
++                    raise
++        raise AssertionError(corpus)
++    return _memo(f"{kind}-texts:{corpus}", build)
++
++
+@@ -7932,7 +7904 @@
+-    data = _write_texts(_corpus_texts("fresh"), _scratch("missing-") / "data")
+-    (data / "meter_reads.jsonl").unlink()
+-    (data / "billing_periods.csv").unlink()
+-    done = _cli(_open_tree(data))
+-    assert done.returncode == 2, done.returncode
+-    assert done.stdout == "", "standard output must stay empty"
+-    assert done.stderr.strip() == "missing input: meter_reads.jsonl", done.stderr[-200:]
++    """The first missing input is the one named, for every adjacent pair of the stated order.
+@@ -7939,0 +7906,14 @@
++    Two files are taken away each time so that the order itself is what decides the answer;
++    an adjacent pair settles one link of the chain, and the chain is only graded when every
++    link is.
++    """
++    pairs = [(0, 2)] + [(place, place + 1) for place in range(len(INPUT_FILES) - 1)]
++    for earlier, later in pairs:
++        data = _write_texts(_corpus_texts("fresh"), _scratch("missing-") / "data")
++        (data / INPUT_FILES[earlier]).unlink()
++        (data / INPUT_FILES[later]).unlink()
++        done = _cli(_open_tree(data))
++        gone = (INPUT_FILES[earlier], INPUT_FILES[later])
++        assert done.returncode == 2, (gone, done.returncode)
++        assert done.stdout == "", (gone, "standard output must stay empty")
++        assert done.stderr.strip() == f"missing input: {INPUT_FILES[earlier]}", (gone, done.stderr[-200:])
+@@ -7940,0 +7921 @@
++
+@@ -7954,0 +7936,7 @@
++    """A shipped visible test function is gone, or one of them is skipped.
++
++    Only the shipped functions are watched: their own bodies and decorators, the decorators
++    of whatever encloses them, and module-level code that could skip the file. A test the
++    agent adds of its own accord is none of this rule's business, so a platform guard on a
++    new test is not read as skipping a shipped one.
++    """
+@@ -7956 +7944,2 @@
+-    if set(_test_functions(shipped)) - set(_test_functions(delivered)):
++    kept = set(_test_functions(shipped))
++    if kept - set(_test_functions(delivered)):
+@@ -7959,4 +7948,21 @@
+-    for node in ast.walk(tree):
+-        name = node.attr if isinstance(node, ast.Attribute) else node.id if isinstance(node, ast.Name) else ""
+-        if name in {"skip", "skipIf", "skipUnless", "skipTest", "SkipTest", "expectedFailure"}:
+-            return True
++    watched: list[ast.AST] = []
++    for statement in tree.body:
++        if isinstance(statement, (ast.Assign, ast.Expr)):
++            watched.append(statement)
++        elif isinstance(statement, ast.FunctionDef) and statement.name in {"setUpModule", "tearDownModule"}:
++            watched.extend(statement.body)
++        elif not isinstance(statement, (ast.ClassDef, ast.FunctionDef)):
++            watched.extend(node for node in ast.walk(statement) if isinstance(node, ast.Raise))
++    for holder in ast.walk(tree):
++        if not isinstance(holder, (ast.ClassDef, ast.FunctionDef)):
++            continue
++        if not any(isinstance(node, ast.FunctionDef) and node.name in kept for node in ast.walk(holder)):
++            continue
++        watched.extend(holder.decorator_list)
++        if isinstance(holder, ast.FunctionDef) and holder.name in kept:
++            watched.extend(holder.body)
++    for root in watched:
++        for node in ast.walk(root):
++            name = node.attr if isinstance(node, ast.Attribute) else node.id if isinstance(node, ast.Name) else ""
++            if name in {"skip", "skipIf", "skipUnless", "skipTest", "SkipTest", "expectedFailure"}:
++                return True
+@@ -8556,0 +8563,210 @@
++@criterion(description="Statements on the fresh batch corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def fresh_batch_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("batch:fresh"))
++
++
++@criterion(description="Every statement due on the fresh batch corpus is exact")
++def fresh_batch_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:fresh", "due"))
++
++
++@criterion(description="Every statement redeemed list on the fresh batch corpus is exact")
++def fresh_batch_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:fresh", "redeemed"))
++
++
++@criterion(description="Statements on the rescaled batch corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def rescaled_batch_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("batch:rescaled"))
++
++
++@criterion(description="Every statement due on the rescaled batch corpus is exact")
++def rescaled_batch_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:rescaled", "due"))
++
++
++@criterion(description="Every statement redeemed list on the rescaled batch corpus is exact")
++def rescaled_batch_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:rescaled", "redeemed"))
++
++
++@criterion(description="Statements on the relocated batch corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def relocated_batch_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("batch:relocated"))
++
++
++@criterion(description="Every statement due on the relocated batch corpus is exact")
++def relocated_batch_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:relocated", "due"))
++
++
++@criterion(description="Every statement redeemed list on the relocated batch corpus is exact")
++def relocated_batch_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:relocated", "redeemed"))
++
++
++@criterion(description="Statements on the rotated batch corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def rotated_batch_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("batch:rotated"))
++
++
++@criterion(description="Every statement due on the rotated batch corpus is exact")
++def rotated_batch_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:rotated", "due"))
++
++
++@criterion(description="Every statement redeemed list on the rotated batch corpus is exact")
++def rotated_batch_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:rotated", "redeemed"))
++
++
++@criterion(description="Statements on the api batch corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def api_batch_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("batch:api"))
++
++
++@criterion(description="Every statement due on the api batch corpus is exact")
++def api_batch_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:api", "due"))
++
++
++@criterion(description="Every statement redeemed list on the api batch corpus is exact")
++def api_batch_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:api", "redeemed"))
++
++
++@criterion(description="Statements on the recoded batch corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def recoded_batch_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("batch:recoded"))
++
++
++@criterion(description="Every statement due on the recoded batch corpus is exact")
++def recoded_batch_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:recoded", "due"))
++
++
++@criterion(description="Every statement redeemed list on the recoded batch corpus is exact")
++def recoded_batch_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:recoded", "redeemed"))
++
++
++@criterion(description="Statements on the renamed batch corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def renamed_batch_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("batch:renamed"))
++
++
++@criterion(description="Every statement due on the renamed batch corpus is exact")
++def renamed_batch_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:renamed", "due"))
++
++
++@criterion(description="Every statement redeemed list on the renamed batch corpus is exact")
++def renamed_batch_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("batch:renamed", "redeemed"))
++
++
++@criterion(description="Statements on the fresh cycle corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def fresh_cycle_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("cycle:fresh"))
++
++
++@criterion(description="Every statement due on the fresh cycle corpus is exact")
++def fresh_cycle_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:fresh", "due"))
++
++
++@criterion(description="Every statement redeemed list on the fresh cycle corpus is exact")
++def fresh_cycle_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:fresh", "redeemed"))
++
++
++@criterion(description="Statements on the rescaled cycle corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def rescaled_cycle_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("cycle:rescaled"))
++
++
++@criterion(description="Every statement due on the rescaled cycle corpus is exact")
++def rescaled_cycle_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:rescaled", "due"))
++
++
++@criterion(description="Every statement redeemed list on the rescaled cycle corpus is exact")
++def rescaled_cycle_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:rescaled", "redeemed"))
++
++
++@criterion(description="Statements on the relocated cycle corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def relocated_cycle_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("cycle:relocated"))
++
++
++@criterion(description="Every statement due on the relocated cycle corpus is exact")
++def relocated_cycle_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:relocated", "due"))
++
++
++@criterion(description="Every statement redeemed list on the relocated cycle corpus is exact")
++def relocated_cycle_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:relocated", "redeemed"))
++
++
++@criterion(description="Statements on the rotated cycle corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def rotated_cycle_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("cycle:rotated"))
++
++
++@criterion(description="Every statement due on the rotated cycle corpus is exact")
++def rotated_cycle_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:rotated", "due"))
++
++
++@criterion(description="Every statement redeemed list on the rotated cycle corpus is exact")
++def rotated_cycle_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:rotated", "redeemed"))
++
++
++@criterion(description="Statements on the api cycle corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def api_cycle_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("cycle:api"))
++
++
++@criterion(description="Every statement due on the api cycle corpus is exact")
++def api_cycle_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:api", "due"))
++
++
++@criterion(description="Every statement redeemed list on the api cycle corpus is exact")
++def api_cycle_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:api", "redeemed"))
++
++
++@criterion(description="Statements on the recoded cycle corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def recoded_cycle_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("cycle:recoded"))
++
++
++@criterion(description="Every statement due on the recoded cycle corpus is exact")
++def recoded_cycle_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:recoded", "due"))
++
++
++@criterion(description="Every statement redeemed list on the recoded cycle corpus is exact")
++def recoded_cycle_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:recoded", "redeemed"))
++
++
++@criterion(description="Statements on the renamed cycle corpus list the right accounts and balances, and redeem only the account's own distinct vouchers within the balance")
++def renamed_cycle_statements_feasible(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_feasible("cycle:renamed"))
++
++
++@criterion(description="Every statement due on the renamed cycle corpus is exact")
++def renamed_cycle_statement_due_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:renamed", "due"))
++
++
++@criterion(description="Every statement redeemed list on the renamed cycle corpus is exact")
++def renamed_cycle_statement_redeemed_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_statement_field("cycle:renamed", "redeemed"))
++
++
+@@ -8682,0 +8899,42 @@
++criteria.fresh_batch_statements_feasible(weight=3)
++criteria.fresh_batch_statement_due_exact(weight=5)
++criteria.fresh_batch_statement_redeemed_exact(weight=5)
++criteria.rescaled_batch_statements_feasible(weight=3)
++criteria.rescaled_batch_statement_due_exact(weight=5)
++criteria.rescaled_batch_statement_redeemed_exact(weight=5)
++criteria.relocated_batch_statements_feasible(weight=3)
++criteria.relocated_batch_statement_due_exact(weight=5)
++criteria.relocated_batch_statement_redeemed_exact(weight=5)
++criteria.rotated_batch_statements_feasible(weight=3)
++criteria.rotated_batch_statement_due_exact(weight=5)
++criteria.rotated_batch_statement_redeemed_exact(weight=5)
++criteria.api_batch_statements_feasible(weight=3)
++criteria.api_batch_statement_due_exact(weight=5)
++criteria.api_batch_statement_redeemed_exact(weight=5)
++criteria.recoded_batch_statements_feasible(weight=3)
++criteria.recoded_batch_statement_due_exact(weight=5)
++criteria.recoded_batch_statement_redeemed_exact(weight=5)
++criteria.renamed_batch_statements_feasible(weight=3)
++criteria.renamed_batch_statement_due_exact(weight=5)
++criteria.renamed_batch_statement_redeemed_exact(weight=5)
++criteria.fresh_cycle_statements_feasible(weight=3)
++criteria.fresh_cycle_statement_due_exact(weight=5)
++criteria.fresh_cycle_statement_redeemed_exact(weight=5)
++criteria.rescaled_cycle_statements_feasible(weight=3)
++criteria.rescaled_cycle_statement_due_exact(weight=5)
++criteria.rescaled_cycle_statement_redeemed_exact(weight=5)
++criteria.relocated_cycle_statements_feasible(weight=3)
++criteria.relocated_cycle_statement_due_exact(weight=5)
++criteria.relocated_cycle_statement_redeemed_exact(weight=5)
++criteria.rotated_cycle_statements_feasible(weight=3)
++criteria.rotated_cycle_statement_due_exact(weight=5)
++criteria.rotated_cycle_statement_redeemed_exact(weight=5)
++criteria.api_cycle_statements_feasible(weight=3)
++criteria.api_cycle_statement_due_exact(weight=5)
++criteria.api_cycle_statement_redeemed_exact(weight=5)
++criteria.recoded_cycle_statements_feasible(weight=3)
++criteria.recoded_cycle_statement_due_exact(weight=5)
++criteria.recoded_cycle_statement_redeemed_exact(weight=5)
++criteria.renamed_cycle_statements_feasible(weight=3)
++criteria.renamed_cycle_statement_due_exact(weight=5)
++criteria.renamed_cycle_statement_redeemed_exact(weight=5)

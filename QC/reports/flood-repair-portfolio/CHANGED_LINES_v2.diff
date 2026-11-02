@@ -1,0 +1,69 @@
+diff -U0 -r QC/copies/5833b15/flood-repair-portfolio/solution/TRUTH.md QC/copies/6a62b99/flood-repair-portfolio/solution/TRUTH.md
+--- QC/copies/5833b15/flood-repair-portfolio/solution/TRUTH.md	2026-10-26 00:31:13
++++ QC/copies/6a62b99/flood-repair-portfolio/solution/TRUTH.md	2026-10-31 12:10:49
+@@ -10 +10 @@
+-writes ten exact JSON documents. Each planned round is a maximum-weight independent set
++writes nine exact JSON documents. Each planned round is a maximum-weight independent set
+@@ -52 +52,3 @@
+-   whole file from 1; `NONPOSITIVE_BENEFIT` is tested only when no file fault exists.
++   whole file from 1, and an empty line is not a data row (each fresh book carries one inside
++   `proposals.csv` and `permits.csv`, ahead of faulty rows); `NONPOSITIVE_BENEFIT` is tested only
++   when no file fault exists.
+@@ -62 +64 @@
+-Eleven artifacts are collected and every one is graded:
++Ten artifacts are collected and every one is graded:
+@@ -157 +159 @@
+-7. Apply the tie-break and build the ten documents from the chosen portfolios.
++7. Apply the tie-break and build the nine documents from the chosen portfolios.
+@@ -179 +181 @@
+-fix_patch_sha256: 6c1b865f8ee9d4fb2b92ce8009028a2d702c34be63de31c548838924650fb4e0  # sha256 of solution/solve.sh
++fix_patch_sha256: 0a6e0b73f3234c121f36d6a86bc90102af5b9b4b84f58d7a1eb64e95d2187c03  # sha256 of solution/solve.sh
+diff -U0 -r QC/copies/5833b15/flood-repair-portfolio/solution/solve.sh QC/copies/6a62b99/flood-repair-portfolio/solution/solve.sh
+--- QC/copies/5833b15/flood-repair-portfolio/solution/solve.sh	2026-10-25 23:55:10
++++ QC/copies/6a62b99/flood-repair-portfolio/solution/solve.sh	2026-10-31 12:04:06
+@@ -163 +162,0 @@
+-    started = time.monotonic()
+@@ -165 +163,0 @@
+-    seconds = time.monotonic() - started
+@@ -168,0 +167,4 @@
++with tempfile.TemporaryDirectory() as td:
++    started = time.monotonic()
++    subprocess.run([sys.executable, "-I", "-S", str(out / "derive_report.py"), str(data), td], check=True)
++    seconds = time.monotonic() - started
+@@ -170 +172 @@
+-print("check R8 ok (%.2f s for the whole book)" % seconds)
++print("check R8 ok (%.2f s for the shipped book)" % seconds)
+diff -U0 -r QC/copies/5833b15/flood-repair-portfolio/tests/judge.toml QC/copies/6a62b99/flood-repair-portfolio/tests/judge.toml
+--- QC/copies/5833b15/flood-repair-portfolio/tests/judge.toml	2026-10-25 23:55:45
++++ QC/copies/6a62b99/flood-repair-portfolio/tests/judge.toml	2026-10-31 12:04:12
+@@ -14 +14 @@
+-description = "The agent independently recomputes the benefit of every proposal in the chosen portfolios and of every VALUE audit row of the shipped book from the rate, risk and site tables outside its program and compares them with the program's output."
++description = "The agent independently recomputes the benefit of every planned VALUE audit row of the shipped book from the rate, risk and site tables outside its program and compares them with the program's output."
+diff -U0 -r QC/copies/5833b15/flood-repair-portfolio/tests/test_output.py QC/copies/6a62b99/flood-repair-portfolio/tests/test_output.py
+--- QC/copies/5833b15/flood-repair-portfolio/tests/test_output.py	2026-10-26 00:13:34
++++ QC/copies/6a62b99/flood-repair-portfolio/tests/test_output.py	2026-10-31 12:03:55
+@@ -649,0 +650,6 @@
++    blank = book.spec.get("blank_row")
++    if blank:
++        # An empty line after data row `blank`: a data row is any later non-empty line.
++        for name in ("proposals.csv", "permits.csv"):
++            text = files[name].splitlines(keepends=True)
++            files[name] = "".join(text[:blank + 1] + ["\n"] + text[blank + 1:])
+@@ -663 +669 @@
+-        'sha256': 'd912191273cc0dab67c03f1fbd6274c915f451487a51582e8f2d626db08412a9',
++        'sha256': 'c7a56c8f6790f967fc4501c18bea03fc78678974b92a4096c6cd858dcbdf81c1',
+@@ -665,0 +672 @@
++                 'blank_row': 50,
+@@ -675 +682 @@
+-        'sha256': 'f91e8527a44beb699fc9ffa8017f34df78798dffcb25fa94140bcc8894e9f74f',
++        'sha256': 'cc365f439f1474685bc21f5351c7334f2aeef8fae00655273c77f84eb4af61c7',
+@@ -677,0 +685 @@
++                 'blank_row': 50,
+@@ -687 +695 @@
+-        'sha256': '2522fd81190e952affd7daa4edc349851876a281b138f4bcad268da7a247097f',
++        'sha256': '47de663f0fc8077b862409731b49fd10d9229084205573f743d4bee37e627bac',
+@@ -689,0 +698 @@
++                 'blank_row': 50,
+@@ -1259 +1268 @@
+-    # Cheat present: the source names the /tests tree or the verifier log folder.
++    # Cheat present: the source names the /tests tree.

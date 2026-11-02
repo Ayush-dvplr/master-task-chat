@@ -1,0 +1,215 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/solution/TRUTH.md	2026-10-28 08:49:25
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/solution/TRUTH.md	2026-10-28 13:33:49
+@@ -126,10 +126,15 @@
+-The judge has 11 criteria (+24/-5). R11 is the code-quality criterion. R8, R9 and R10 grade
+-independent recomputation of grant cents, drawn allowances and credits outside the program; the
+-self-check stage of `solution/solve.sh` (an inline Python block run after the program) performs
+-those three recomputations and prints one line each saying whether they agree. R1 to R4 grade
+-runs on extracts the agent builds itself; the own-extract stage of `solution/solve.sh` writes
+-four small extracts in the schema (a drawn allowance, two events sharing a site whose start
+-times carry different UTC offsets, an override with uplift and adder above the cap, one interval
+-amount of exactly half a cent), runs `/app/out/derive_report.py` on each and prints the
+-program's `candidate_offer_count`, selecting events, `credit_cents` and `cap_binding_count`
+-beside figures worked out by hand (1, OWN-0202 only, 40 and 1, 1).
++The judge has 11 criteria (+24/-5). R11 is the code-quality criterion. R5 grades exact arithmetic
++and R6 a final run on the shipped data. R8, R9 and R10 grade reruns of the program on altered
++copies of `/app/data`: one event-region's pool lowered below its beneficiaries' claims (grants
++compared with an outside recompute), the allowance a chosen offer's site draws on lowered below
++that offer's relief (is the offer still selected) and one event's uplift raised so a chosen
++offer's rate is above its cap (`credit_cents` compared with an outside recompute). R1 to R4 grade
++runs on extracts the agent builds itself. The self-check stage of `solution/solve.sh` (an inline
++Python block run after the program) recomputes grant cents, drawn allowances and credits on the
++shipped data and prints whether they agree. Its own-extract stage writes four small extracts in
++the schema (a drawn allowance, two events sharing a site whose start times carry different UTC
++offsets, an override with uplift and adder above the cap, one chosen offer with two half-cent
++interval amounts), runs `/app/out/derive_report.py` on each and prints the program's
++`candidate_offer_count`, selecting events, `credit_cents` and `cap_binding_count` beside figures
++worked out by hand (1, OWN-0202 only, 40 and 1, 4), then makes the three altered copies under
++its temp dir and prints the program's figure beside the recomputed one for each.
+@@ -210 +215 @@
+-fix_patch_sha256: 9c93b66809b3a1c0679b3783284bc6a9fc27ea3780b7199cfb7c5e7de949d185  # sha256 of solution/solve.sh
++fix_patch_sha256: b2b8ff3d74aeeb9293d883048d5bf53cf567d448fb9dfe8728f04b2bf11822bb  # sha256 of solution/solve.sh
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/solution/solve.sh /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/solution/solve.sh
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/solution/solve.sh	2026-10-27 23:17:12
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/solution/solve.sh	2026-10-28 13:30:13
+@@ -230,4 +230,7 @@
+-# Own-extract stage: build four small extracts by hand, run derive_report.py on each and compare its figures
+-# with figures worked out by hand. It only prints what it found; it never changes /app/out.
+-python3 - /app/out/derive_report.py <<'PYEOF' || true
+-"""Run the delivered program on four small hand-built extracts and compare a few figures with hand-worked values."""
++# Own-extract stage: build four small extracts by hand and three altered copies of the shipped extract, run
++# derive_report.py on each and compare its figures with figures worked out by hand or recomputed outside the
++# program. Everything it writes lives under a temp dir; it only prints what it found and never changes /app/out.
++python3 - /app/out/derive_report.py /app/data "${BASH_SOURCE[0]}" <<'PYEOF' || true
++"""Run the delivered program on four small hand-built extracts and on three altered copies of the shipped
++extract, and compare a few figures with hand-worked or independently recomputed values."""
++import configparser
+@@ -234,0 +238 @@
++import shutil
+@@ -237,0 +242 @@
++from fractions import Fraction
+@@ -240,0 +246,2 @@
++DATA = Path(sys.argv[2])
++SCRIPT = Path(sys.argv[3]) if Path(sys.argv[3]).is_file() else Path("/solution/solve.sh")
+@@ -334,0 +342,60 @@
++def altered(what: str, got, want) -> None:
++    print(f"altered copy of the shipped extract, {what}: program {got}, recomputed outside the program {want}, "
++          f"{'agrees' if got == want else 'DIFFERS'}")
++
++
++def self_check() -> dict:
++    """Load the routines of the self-check stage above (first heredoc of this script) without running it."""
++    text = SCRIPT.read_text(encoding="utf-8")
++    start = text.index("<<'PYEOF'\n") + len("<<'PYEOF'\n")
++    space = {"__name__": "self_check"}
++    exec(compile(text[start:text.index("\nPYEOF\n", start)], "self_check", "exec"), space)
++    return space
++
++
++def copy_of(work: Path, name: str) -> Path:
++    return Path(shutil.copytree(DATA, work / name))
++
++
++def bump_receipt(folder: Path, name: str, field: str, delta: int) -> None:
++    path = folder / "export_manifest.tsv"
++    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
++    for i, line in enumerate(lines):
++        cells = line.rstrip("\n").split("\t")
++        if len(cells) == 4 and cells[0] == name and cells[2] == field:
++            lines[i] = "\t".join(cells[:3] + [str(int(cells[3]) + delta)]) + "\n"
++    path.write_text("".join(lines), encoding="utf-8")
++
++
++def weights(inp, eid: str, region: str) -> dict:
++    found: dict = {}
++    for (event_id, _), site in inp.sites.items():
++        if event_id == eid and site["region"] == region and site.get("weight") is not None:
++            heft = site["weight"] * (2 if inp.label(site) == "CONTINUITY_WAIVED" else 1)
++            found[site["ben"]] = found.get(site["ben"], 0) + heft
++    return {b: w for b, w in found.items() if w > 0}
++
++
++def grant_cents(check: dict, inp, funded: int, weight: dict) -> dict:
++    if sum(w * inp.claim for w in weight.values()) <= funded:
++        return {b: w * inp.claim for b, w in weight.items()}
++    first = check["share"](funded, weight)
++    kept = {b: w for b, w in weight.items() if first[b] >= inp.minimum}
++    cents = first if len(kept) == len(weight) else dict.fromkeys(weight, 0)
++    if kept and len(kept) < len(weight):
++        cents.update(check["share"](funded, kept))
++    return cents
++
++
++def credit_of(check: dict, inp, eid: str, offer_ids: list) -> int:
++    uplift = int(inp.events[eid]["uplift_millicents_per_kwh"])
++    total = 0
++    for oid in offer_ids:
++        site = inp.sites[inp.offer_site[oid]]
++        rate = min(site["start"] + uplift + site["adder"], site["cap"])
++        for itv, relief in inp.relief.get(oid, {}).items():
++            credited = max(0, relief - inp.recovery[oid][itv])
++            total += check["nearest_even"](Fraction(credited * inp.wh * rate, 1000 * inp.mc))
++    return total
++
++
+@@ -367,2 +434,2 @@
+-    # 4. Site H-1 at base 1000: interval 1 is 500 Wh = 50 ticks, 50 x 10 x 1000 / 10^6 = 0.5 cent -> 0 (half to even);
+-    #    interval 2 is 1000 Wh = 1 cent. credit_cents = 0 + 1 = 1 (rounding the 1.5 cent total once would give 2).
++    # 4. Site H-1 at base 1000: interval 1 is 1500 Wh = 150 ticks, 150 x 10 x 1000 / 10^6 = 1.5 cents -> 2, and
++    #    interval 2 is 2500 Wh = 2.5 cents -> 2 (half to even both ways). credit_cents = 2 + 2 = 4; half up gives 5.
+@@ -372 +439 @@
+-        "offers": [("OWN-0401-H-1-A", "OWN-0401", "H-1", [500, 1000])]})
++        "offers": [("OWN-0401-H-1-A", "OWN-0401", "H-1", [1500, 2500])]})
+@@ -374 +441,67 @@
+-    report("credit_cents of OWN-0401", north(got, "OWN-0401")["credit_cents"], 1)
++    report("credit_cents of OWN-0401", north(got, "OWN-0401")["credit_cents"], 4)
++
++    check = self_check()
++    shipped = check["Inputs"](DATA)
++    docs = check["documents"](Path(PROGRAM).parent)
++    first = shipped.season()[0]
++    ini = configparser.ConfigParser()
++    ini.read(DATA / "program.ini", encoding="utf-8")
++    region_of = {k.upper(): v for k, v in ini["region_codes"].items()}
++
++    # 5. Pools: the first event of the season carries nothing in, so its funded pool is pool - credit_cents. Lower
++    #    one of its event-region pools to credit_cents + two sevenths of its claims, so the claims no longer fit and
++    #    the funded cents are shared by largest remainder.
++    region = max((r for (e, r) in docs if e == first), key=lambda r: (len(weights(shipped, first, r)), r))
++    weight = weights(shipped, first, region)
++    pool = docs[(first, region)]["credit_cents"] + sum(weight.values()) * shipped.claim * 2 // 7
++    pools = copy_of(work, "pools")
++    lines = (pools / "pools.txt").read_text(encoding="utf-8").splitlines(keepends=True)
++    for i, line in enumerate(lines):
++        if not line.startswith("#") and line.strip() and line[0:10].strip() == first \
++                and region_of.get(line[10:14].strip().upper()) == region:
++            bump_receipt(pools, "pools.txt", "pool_cents", pool - int(line[14:26]))
++            lines[i] = line[:14] + f"{pool:>12}" + line[26:]
++    (pools / "pools.txt").write_text("".join(lines), encoding="utf-8")
++    run(pools)
++    inp, out = check["Inputs"](pools), check["documents"](pools.parent / "pools-out")
++    event = out[(first, region)]
++    funded = max(0, pool - event["credit_cents"])
++    altered(f"grants of {first} {region} with its pool lowered to {pool} cents",
++            dict(sorted((g["beneficiary_id"], g["cents"]) for g in event["grants"])),
++            dict(sorted(grant_cents(check, inp, funded, weights(inp, first, region)).items())))
++
++    # 6. Allowance: lower the allowance that one chosen offer of the first event draws on (following draws_from)
++    #    to one tick below that offer's relief ticks, so the offer is no longer a candidate.
++    oid = next(o for (e, r), ev in sorted(docs.items()) if e == first for o in ev["selected_offer_ids"])
++    holder = shipped.offer_site[oid][1]
++    while holder in shipped.draws:
++        holder = shipped.draws[holder]
++    need = sum(shipped.relief[oid].values())
++    allow = copy_of(work, "allowance")
++    lines = (allow / "site_allowances.tsv").read_text(encoding="utf-8").splitlines(keepends=True)
++    for i, line in enumerate(lines):
++        cells = line.rstrip("\n").split("\t")
++        if not line.startswith("#") and cells[0] == holder:
++            bump_receipt(allow, "site_allowances.tsv", "allowance_ticks", need - 1 - int(cells[1]))
++            lines[i] = "\t".join([cells[0], str(need - 1)] + cells[2:]) + "\n"
++    (allow / "site_allowances.tsv").write_text("".join(lines), encoding="utf-8")
++    run(allow)
++    out = check["documents"](allow.parent / "allowance-out")
++    altered(f"{oid} still selected with allowance {holder} lowered to {need - 1} ticks",
++            any(oid in ev["selected_offer_ids"] for ev in out.values()), False)
++
++    # 7. Uplift: raise the uplift of the first event until a chosen offer's composed rate is above its card's cap.
++    (eid, region), _ = next(item for item in sorted(docs.items()) if item[0][0] == first and item[1]["selected_offer_ids"])
++    chosen = shipped.sites[shipped.offer_site[docs[(eid, region)]["selected_offer_ids"][0]]]
++    uplift = max(int(shipped.events[eid]["uplift_millicents_per_kwh"]) + 1,
++                 chosen["cap"] - chosen["start"] - chosen["adder"] + 100)
++    rated = copy_of(work, "uplift")
++    events = json.loads((rated / "events.json").read_text(encoding="utf-8"))
++    for e in events:
++        if e["event_id"] == eid:
++            e["uplift_millicents_per_kwh"] = uplift
++    (rated / "events.json").write_text(json.dumps(events, indent=1) + "\n", encoding="utf-8")
++    run(rated)
++    inp, out = check["Inputs"](rated), check["documents"](rated.parent / "uplift-out")
++    altered(f"credit_cents of {eid} {region} with its uplift raised to {uplift}", out[(eid, region)]["credit_cents"],
++            credit_of(check, inp, eid, out[(eid, region)]["selected_offer_ids"]))
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/tests/judge.toml /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/tests/judge.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/tests/judge.toml	2026-10-27 23:13:23
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/tests/judge.toml	2026-10-28 13:30:33
+@@ -52,2 +52,2 @@
+-name = "r4_checks_a_half_cent_interval_amount_on_its_own_extract"
+-description = "The agent constructs its own extract in which one interval amount of a chosen offer's credit is exactly half a cent, works out that offer's credit_cents by hand, runs derive_report.py on the extract, and compares the two."
++name = "r4_checks_two_half_cent_interval_amounts_on_its_own_extract"
++description = "The agent constructs its own extract in which one chosen offer has two interval amounts of exactly half a cent, one whose whole cent below is even and one whose whole cent below is odd, works out that offer's credit_cents by hand, runs derive_report.py on the extract, and compares the two."
+@@ -104,2 +104,2 @@
+-name = "r8_recomputes_grant_cents_outside_the_program"
+-description = "The agent independently recomputes every beneficiary's grant cents for at least three event-regions outside derive_report.py, from the funded pool and the program.ini grants keys, and compares them with the grants its region documents report."
++name = "r8_reruns_with_a_pool_too_small_for_the_claims"
++description = "The agent runs derive_report.py on a copy of /app/data in which it has lowered one event-region's pool in pools.txt so far that the claims of that event-region's beneficiaries are no longer paid in full, and compares the grants that run reports for that event-region with grant cents it recomputes outside derive_report.py."
+@@ -117,2 +117,2 @@
+-name = "r9_recomputes_remaining_allowance_outside_the_program"
+-description = "The agent independently recomputes, outside derive_report.py, the remaining allowance that each chosen offer's site drew on when its event was reached, following draws_from in site_allowances.tsv, and compares it with the offers its region documents select."
++name = "r9_reruns_with_an_allowance_below_a_chosen_offer"
++description = "The agent runs derive_report.py on a copy of /app/data in which it has lowered the allowance that a chosen offer's site draws on below that offer's relief ticks, and checks whether that run still selects the offer."
+@@ -130,2 +130,2 @@
+-name = "r10_recomputes_credit_cents_outside_the_program"
+-description = "The agent independently recomputes the credit_cents of the chosen offers outside derive_report.py, from their credited relief ticks and effective rates, and compares them with the credit_cents its region documents report."
++name = "r10_reruns_with_an_uplift_that_lifts_a_rate_above_its_cap"
++description = "The agent runs derive_report.py on a copy of /app/data in which it has raised one event's uplift so that a chosen offer's composed rate is above its rate card's cap, and compares the credit_cents that run reports for that offer's event-region with credit_cents it recomputes outside derive_report.py."

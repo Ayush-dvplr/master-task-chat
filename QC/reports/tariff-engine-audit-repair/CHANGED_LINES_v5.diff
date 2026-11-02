@@ -1,0 +1,79 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/e91a9d2/tariff-engine-audit-repair/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/b172987/tariff-engine-audit-repair/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/e91a9d2/tariff-engine-audit-repair/solution/TRUTH.md	2026-10-29 16:36:04
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/b172987/tariff-engine-audit-repair/solution/TRUTH.md	2026-10-29 21:51:42
+@@ -190,2 +190,10 @@
+-Every check extracts `/app/out/patched-repo.zip` and runs the package inside it as
+-`nobody` with `setpriv`.
++The checks that run agent code extract `/app/out/patched-repo.zip` and run the package
++inside it as `nobody` with `setpriv`, each child in its own session whose process group
++is killed when the call returns or times out: package metadata (`import tariff`), the
++visible tests, every corpus check below (statements and ledger included), missing input,
++two runs, and `negative_hardcoded_sample_answers`. Four checks read the delivered JSON
++only and run nothing: module notes, summary, repair report shape and previously failing
++cases. Archive layout reads the archive members, corrected test names and
++`negative_visible_test_removed` read the delivered `tests/test_visible.py` (with
++`test_fixes.json`), and regression rows compare `test_fixes.json` with totals the tests
++compute themselves; none of these runs the package.
+@@ -193,4 +201,5 @@
+-- Archive layout (1), package metadata (1), the delivered package passing the shipped
+-  visible tests with only the two contract-wrong tests corrected (a copy held by the
+-  tests) (3), corrected test names (3), regression rows (3), module notes (1), summary
+-  (1), repair report shape (1), previously failing cases (1).
++- Archive layout (1), package metadata (1), the delivered package passing both its
++  delivered `tests/test_visible.py` and the shipped visible tests with only the two
++  contract-wrong tests corrected (a copy held by the tests) (3), corrected test names
++  (3), regression rows (3), module notes (1), summary (1), repair report shape (1),
++  previously failing cases (1).
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/e91a9d2/tariff-engine-audit-repair/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/b172987/tariff-engine-audit-repair/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/e91a9d2/tariff-engine-audit-repair/tests/test_output.py	2026-10-29 15:12:10
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/b172987/tariff-engine-audit-repair/tests/test_output.py	2026-10-29 21:42:27
+@@ -12,0 +13 @@
++import signal
+@@ -5636,0 +5638,22 @@
++def _kill_group(process: subprocess.Popen) -> None:
++    try:
++        os.killpg(process.pid, signal.SIGKILL)
++    except (ProcessLookupError, PermissionError):
++        return  # the group has already exited
++
++
++def _group_run(command: list[str], env: dict[str, str], cwd: Path, timeout: float) -> subprocess.CompletedProcess:
++    """Run agent code in its own session; its whole process group is killed when the call ends."""
++    with subprocess.Popen(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
++                          cwd=str(cwd), start_new_session=True) as process:
++        try:
++            stdout, stderr = process.communicate(timeout=timeout)
++        except subprocess.TimeoutExpired:
++            _kill_group(process)
++            process.wait()
++            raise
++        finally:
++            _kill_group(process)
++    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
++
++
+@@ -5638,2 +5661 @@
+-    return subprocess.run(_untrusted_command(command), text=True, capture_output=True, env=env,
+-                          cwd=str(cwd), timeout=120)
++    return _group_run(_untrusted_command(command), env, cwd, 120)
+@@ -7222,2 +7244 @@
+-            done = subprocess.run(command, text=True, capture_output=True, env=_env(_repo()),
+-                                  cwd=str(_scratch("cwd-")), timeout=STATEMENT_SECONDS)
++            done = _group_run(command, _env(_repo()), _scratch("cwd-"), STATEMENT_SECONDS)
+@@ -7501,2 +7522 @@
+-            done = subprocess.run(command, text=True, capture_output=True, env=_env(_repo()),
+-                                  cwd=str(_scratch("cwd-")), timeout=STATEMENT_SECONDS)
++            done = _group_run(command, _env(_repo()), _scratch("cwd-"), STATEMENT_SECONDS)
+@@ -7803,0 +7824 @@
++    command = [sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", "test_visible.py"]
+@@ -7805,2 +7826 @@
+-    done = _run([sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", "test_visible.py"],
+-                _env(root), root)
++    done = _run(command, _env(root), root)
+@@ -7808,0 +7829,3 @@
++    repo = _repo()
++    done = _run(command, _env(repo), repo)
++    assert done.returncode == 0, f"delivered tests/test_visible.py: {done.stderr[-600:]}"
+@@ -8015 +8038 @@
+-@criterion(description="The delivered package passes the shipped visible tests with the two contract-wrong tests corrected")
++@criterion(description="The delivered package passes its delivered tests/test_visible.py and the shipped visible tests with the two contract-wrong tests corrected")

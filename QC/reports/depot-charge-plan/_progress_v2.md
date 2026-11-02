@@ -1,0 +1,16 @@
+# _progress_v2.md — depot-charge-plan (board 5a811bc), report v2.md
+- [x] S0 12:12 IST
+- [x] script 1 12:12 IST
+- [x] script 2 12:12 IST
+- [x] script 3 12:12 IST
+- [x] script 4 12:12 IST
+- [x] gate 01 12:16 IST
+- [x] gate 02 12:19 IST
+- [x] gate 03 12:21 IST
+- [x] gate 04 12:22 IST
+- [x] gate 05 12:25 IST
+- [x] QL table 12:27 IST
+- [x] Step 10 13:38 IST
+- [x] Step 11 12:28 IST
+- [x] final report 13:38 IST
+- [x] compare 13:38 IST

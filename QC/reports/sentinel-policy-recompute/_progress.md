@@ -1,0 +1,18 @@
+# Progress: sentinel-policy-recompute (board 24b37c6), report v7.md
+(previous round board aaec5ad / v6.md progress replaced)
+
+- [x] S0 preconditions (12:50 IST)
+- [x] script 1 (12:50 IST)
+- [x] script 2 (12:50 IST)
+- [x] script 3 (12:50 IST)
+- [x] script 4 (12:50 IST)
+- [x] gate 01 (13:02 IST)
+- [x] gate 02 (13:03 IST)
+- [x] gate 03 (13:06 IST)
+- [x] gate 04 (13:09 IST)
+- [x] gate 05 (13:17 IST)
+- [x] QL table (13:19 IST)
+- [x] Step 10 (13:19 IST)
+- [x] Step 11 (13:20 IST)
+- [x] final report (13:22 IST)
+- [x] compare (13:22 IST)

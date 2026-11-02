@@ -1,0 +1,18 @@
+# _progress_v14 (fc01863, report v14.md)
+- [x] S0 02:43
+- [x] S0.4 carry-over 03:04
+- [x] script 1 02:43
+- [x] script 2 02:43
+- [x] script 3 02:43
+- [x] script 4 02:43
+- [x] Step 10 launch 02:46 (chains runs.log + runs_b.log)
+- [x] gate 01 02:47
+- [x] gate 02 02:56
+- [x] gate 03 02:58
+- [x] gate 04 02:59
+- [x] gate 05 03:00
+- [x] QL table 03:02
+- [x] Step 10 03:00
+- [x] Step 11 03:04
+- [x] final report 03:04
+- [x] compare 03:05

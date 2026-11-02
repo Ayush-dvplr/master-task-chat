@@ -1,0 +1,16 @@
+# Progress v4 (faeab3c, recheck)
+- [x] S0 11:35 IST
+- [x] script 1 11:37 IST
+- [x] script 2 11:37 IST
+- [x] script 3 11:37 IST
+- [x] script 4 11:37 IST
+- [x] gate 01 11:42 IST
+- [x] gate 02 11:46 IST
+- [x] gate 03 11:49 IST
+- [x] gate 04 11:50 IST
+- [x] gate 05 11:53 IST
+- [x] QL table 11:56 IST
+- [x] Step 10 11:56 IST
+- [x] Step 11 11:56 IST
+- [x] final report 11:57 IST
+- [x] compare 11:58 IST

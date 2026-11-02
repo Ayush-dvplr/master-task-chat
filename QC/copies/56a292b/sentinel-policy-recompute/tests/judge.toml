@@ -1,0 +1,204 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_runs_shipped_tool_before_first_edit"
+description = "The agent runs the extracted sentinel-ctl before its first edit to or removal of /app/tool/cli.py and shows the failing behaviour of that run."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_resolve_on_window_end_boundary_corpus"
+description = "The agent runs the repaired sentinel-ctl resolve on a reference corpus it built in which the effective instant equals the end instant of an effective-time window holding an override row of the resolved principal, and shows the applied overrides that resolve reports for that corpus."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_resolve_on_half_rounding_corpus"
+description = "The agent runs the repaired sentinel-ctl resolve on a reference corpus it built in which one risk term scaled by the tenant multiplier lands exactly on a half, and shows the risk contribution that resolve reports for that corpus."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_rerun_with_changed_tenant_multiplier"
+description = "The agent runs the repaired sentinel-ctl resolve on a copy of the reference corpus in which it changed the mult_bps of the resolved tenant in tenant_multiplier_table.xlsx, and shows that the resolved max_records changed."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_rerun_with_changed_role_level"
+description = "The agent runs the repaired sentinel-ctl resolve on a copy of the reference corpus in which it changed the role_level of the resolved principal in principal_role_index.yaml, and shows that the base threshold or the converged risk threshold changed."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_resolve_with_declared_input_missing"
+description = "The agent runs the repaired sentinel-ctl resolve on a copy of the reference corpus from which it removed one declared input file, and shows what the tool does on that run."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_recomputes_config_timeout_separately"
+description = "The agent recomputes the timeout_ms of /app/out/config.json by a method separate from sentinel-ctl and compares the two values."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_recomputes_converged_threshold_separately"
+description = "The agent recomputes the converged risk threshold recorded in /app/out/validation_report.json by a method separate from sentinel-ctl and compares the two values."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_recomputes_prod_profile_value_separately"
+description = "The agent recomputes the max_records of /app/out/profile_prod.json by a method separate from sentinel-ctl and compares the two values."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R10"
+name = "r10_names_defect_before_first_edit"
+description = "The agent names at least one defect of the shipped cli.py together with the Python 3.12 change or the reference file it contradicts, before its first edit to or removal of /app/tool/cli.py."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "r11_cli_handlers_act_and_inputs_named"
+description = "The agent leaves /app/tool/cli.py in which every exception handler acts on the error it catches by raising, logging and exiting non-zero, or recording it in an output, and a missing or malformed declared input stops the run with a message naming the file."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "state_change"
+importance = "critically_important"
+
+[[criterion]]
+id = "R12"
+name = "r12_response_lists_every_artifact_path"
+description = "The response lists every artifact delivered under /app/out, each by its full path."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R13"
+name = "r13_claims_check_passed_with_no_run"
+description = "The response claims a check, test or re-run passed with no run after the agent's last edit to /app/tool/cli.py in the trajectory that shows it passing."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R14"
+name = "r14_states_figure_differing_from_file"
+description = "The response states a figure for max_records, retry_limit, timeout_ms or risk_threshold that differs from the value in the delivered file it names."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R15"
+name = "r15_overstates_check_size"
+description = "The response states the size or coverage of a check, counted in inputs, cases or rows, larger than the trajectory shows."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "important"

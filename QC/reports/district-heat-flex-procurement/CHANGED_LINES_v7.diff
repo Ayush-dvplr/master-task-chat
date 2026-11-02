@@ -1,0 +1,295 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/solution/TRUTH.md	2026-10-27 16:59:37
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/solution/TRUTH.md	2026-10-28 02:53:02
+@@ -15 +15 @@
+-Focal items (r4 redesign):
++Focal items:
+@@ -52 +52 @@
+-7. (focal, wave 1) Exact portfolio on wide event-regions. Schema section 3 bounds a site to at
++7. (focal) Exact portfolio on wide event-regions. Schema section 3 bounds a site to at
+@@ -101 +101,2 @@
+-  ceilings in every interval), `wide_k_selection_match` (w5), `wide_k_tie_decisions_match`
++  ceilings in every interval, and not empty where the optimal portfolio is not empty),
++  `wide_k_selection_match` (w5), `wide_k_tie_decisions_match`
+@@ -119,8 +120,5 @@
+-Measured in Docker (tests channel, stub rewardkit, 2 CPU): oracle 205/205. The pre-wave
+-oracle, whose portfolio search is exact but visits every portfolio, scores 173/205: it passes
+-every check except the eight wide ones, where each run ends at the 120 s limit. The probe-9
+-harness program also scores 173/205, the saved blind program 31/205, a cheapest-first pick
+-66/205. One wrong reading alone, as a patched oracle (measured out of 173 before the wide
+-checks, which those readings do not touch): survivors routed back through the claims test
+-128/173, one link of `draws_from` 118/173, relief ticks instead of credited relief 115/173,
+-no carried cents 107/173.
++Measured in Docker (tests channel, stub rewardkit, 2 CPU), in points of 205: the oracle
++scores 205. An exact portfolio search that visits every portfolio scores 173: it passes every
++check except the eight wide ones, where each run ends at the 120 s limit. A cheapest-first pick
++scores 66. One wrong reading alone, as a patched oracle: survivors routed back through the
++claims test 160, one link of `draws_from` 150, relief ticks instead of credited relief 147.
+@@ -128,4 +126,10 @@
+-The judge has 12 criteria (+27/-5). R12 is the code-quality criterion. R9, R10 and R11 grade independent recomputation of grant
+-cents, drawn allowances and credits outside the program; the self-check stage of
+-`solution/solve.sh` (an inline Python block run after the program) performs those three
+-recomputations and prints `check R9 ok`, `check R10 ok` and `check R11 ok`.
++The judge has 11 criteria (+24/-5). R11 is the code-quality criterion. R8, R9 and R10 grade
++independent recomputation of grant cents, drawn allowances and credits outside the program; the
++self-check stage of `solution/solve.sh` (an inline Python block run after the program) performs
++those three recomputations and prints one line each saying whether they agree. R1 to R4 grade
++runs on extracts the agent builds itself; the own-extract stage of `solution/solve.sh` writes
++four small extracts in the schema (a drawn allowance, two events sharing a site whose start
++times carry different UTC offsets, an override with uplift and adder above the cap, one interval
++amount of exactly half a cent), runs `/app/out/derive_report.py` on each and prints the
++program's `candidate_offer_count`, selecting events, `credit_cents` and `cap_binding_count`
++beside figures worked out by hand (1, OWN-0202 only, 40 and 1, 1).
+@@ -206 +210 @@
+-fix_patch_sha256: 118cff5f8510957418f213ff8ebc1fbd054d596cd9272cad38099bde9a26ea97  # sha256 of solution/solve.sh
++fix_patch_sha256: 9c93b66809b3a1c0679b3783284bc6a9fc27ea3780b7199cfb7c5e7de949d185  # sha256 of solution/solve.sh
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/solution/solve.sh /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/solution/solve.sh
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/solution/solve.sh	2026-10-25 02:16:57
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/solution/solve.sh	2026-10-27 23:17:12
+@@ -8 +8 @@
+-# Self-check stage: recompute grants, drawn allowances and credits outside the program (prints check <id> ok).
++# Self-check stage: recompute grants, drawn allowances and credits outside the program.
+@@ -133 +133 @@
+-    """R11: credit_cents per event-region from credited relief ticks and the capped rate."""
++    """credit_cents per event-region from credited relief ticks and the capped rate."""
+@@ -149 +149 @@
+-    """R10: every chosen offer fits what remained of the allowance its site draws on, following draws_from."""
++    """Every chosen offer fits what remained of the allowance its site draws on, following draws_from."""
+@@ -180 +180 @@
+-    """R9: funded pool with carried cents, then claims or largest remainder with the minimum-grant second share."""
++    """Funded pool with carried cents, then claims or largest remainder with the minimum-grant second share."""
+@@ -216 +216 @@
+-    print(f"check R9 {'ok' if bad == 0 else 'FAILED'} (grant cents of {checked} event-regions recomputed)")
++    print(f"grant cents recomputed outside the program: {'agree' if bad == 0 else 'DIFFER'} (grant cents of {checked} event-regions recomputed)")
+@@ -219 +219 @@
+-    print(f"check R10 {'ok' if bad == 0 else 'FAILED'} (remaining allowance of every chosen offer recomputed)")
++    print(f"remaining allowance recomputed outside the program: {'agrees' if bad == 0 else 'DIFFERS'} (remaining allowance of every chosen offer recomputed)")
+@@ -222 +222 @@
+-    print(f"check R11 {'ok' if bad == 0 else 'FAILED'} (credit_cents of {len(docs)} event-regions recomputed)")
++    print(f"credit_cents recomputed outside the program: {'agree' if bad == 0 else 'DIFFER'} (credit_cents of {len(docs)} event-regions recomputed)")
+@@ -228,0 +229,151 @@
++PYEOF
++# Own-extract stage: build four small extracts by hand, run derive_report.py on each and compare its figures
++# with figures worked out by hand. It only prints what it found; it never changes /app/out.
++python3 - /app/out/derive_report.py <<'PYEOF' || true
++"""Run the delivered program on four small hand-built extracts and compare a few figures with hand-worked values."""
++import json
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++PROGRAM = sys.argv[1]
++CODES = {"North": ("N1", "N2"), "South": ("S1", "S2"), "West": ("W1", "W2"), "East": ("E1", "E2")}
++
++
++def site(eid, sid, **extra):
++    row = {"event_id": eid, "sid": sid, "seg": "C", "base": 4000, "cap": 9000, "override": None}
++    row.update(extra)
++    return row
++
++
++def write(folder: Path, spec: dict) -> Path:
++    """Write every input file schema.md names, with North as the only region that has targets."""
++    folder.mkdir(parents=True)
++    adders = spec.get("adders", {"commercial": 0, "public": 0})
++    ini = "[units]\nwh_per_tick = 10\nmillicents_per_cent = 1000\n\n[region_codes]\n"
++    ini += "".join(f"{c} = {r}\n" for r, codes in CODES.items() for c in codes)
++    ini += "\n[segment_codes]\nC = commercial\nP = public\n\n[segment_rate_adders]\n"
++    ini += "".join(f"{g} = {v}\n" for g, v in sorted(adders.items()))
++    ini += "\n[grants]\nclaim_cents_per_weight = 40\nminimum_grant_cents = 25\n\n[export]\nwaiver_signed = Y\n"
++    (folder / "program.ini").write_text(ini, encoding="utf-8")
++    events = [{"event_id": e, "name": "own check", "dispatch_start": start, "interval_count": n,
++               "objective": {"cost_weight": 1, "recovery_weight": 0}, "uplift_millicents_per_kwh": uplift}
++              for e, start, n, uplift in spec["events"]]
++    (folder / "events.json").write_text(json.dumps(events, indent=1) + "\n", encoding="utf-8")
++    sites, offers = spec["sites"], spec["offers"]
++    files = {
++        "sites.csv": ["event_id,site_id,region_code,segment_code,beneficiary_id,critical"]
++        + [f"{s['event_id']},{s['sid']},N1,{s['seg']},BEN-{s['sid']},N" for s in sites],
++        "continuity_waivers.csv": ["event_id,site_id,routine_certificate_pending,waiver_status,waiver_signed"]
++        + [f"{s['event_id']},{s['sid']},N,NONE," for s in sites],
++        "recipient_weights.tsv": ["event_id\tsite_id\tgrant_weight"],
++        "offers.csv": ["offer_id,event_id,site_id,mode_label,bid_cost_cents"]
++        + [f"{o[0]},{o[1]},{o[2]},SETBACK_2C,100" for o in offers],
++        "profiles.tsv": ["offer_id\tinterval\trelief_wh\trecovery_wh\tregister_multiplier"]
++        + [f"{o[0]}\t{t + 1}\t{wh}\t0\t1" for o in offers for t, wh in enumerate(o[3])],
++        "targets.tsv": ["event_id\tregion_code\tinterval\ttarget_wh\tshortfall_weight"],
++        "feeder_limits.txt": ["# event_id  code itv relief_wh recovery_wh"],
++        "pools.txt": ["# event_id  code   pool_cents"],
++    }
++    for e, _, n, _ in spec["events"]:
++        for region, codes in CODES.items():
++            for t in range(n):
++                wh = 100000 if region == "North" else 0
++                files["targets.tsv"].append(f"{e}\t{codes[t % 2]}\t{t + 1}\t{wh}\t1")
++                cap = 500000 if region == "North" else 0
++                files["feeder_limits.txt"].append(f"{e:<10}{codes[(t + 1) % 2]:<4}{t + 1:>3}{cap:>10}{cap:>10}")
++    owned = sorted({s["sid"] for s in sites})
++    held = {sid: spec.get("allowances", {}).get(sid, 10 ** 9) for sid in owned}
++    files["site_allowances.tsv"] = ["site_id\tallowance_ticks\tdraws_from"] + [f"{k}\t{v}\t" for k, v in held.items()]
++    for name, lines in files.items():
++        (folder / name).write_text("\n".join(lines) + "\n", encoding="utf-8")
++    (folder / "site_state.jsonl").write_text("".join(json.dumps(
++        {"event_id": s["event_id"], "site_id": s["sid"], "dispatch_authorized": True, "safety_hold": False,
++         "cooldown": False}) + "\n" for s in sites), encoding="utf-8")
++    cards = "".join(f'<card event="{s["event_id"]}" site="{s["sid"]}"><base>{s["base"]}</base>'
++                    + ("" if s["override"] is None else f'<override>{s["override"]}</override>')
++                    + f'<cap>{s["cap"]}</cap></card>\n' for s in sites)
++    (folder / "rate_cards.xml").write_text(f'<?xml version="1.0"?>\n<rate_cards>\n{cards}</rate_cards>\n',
++                                           encoding="utf-8")
++    (folder / "segment_floors.json").write_text('{"floors": []}\n', encoding="utf-8")
++    n_rows = lambda name: len(files[name]) - 1
++    receipt = [("events.json", len(events), "", ""), ("sites.csv", len(sites), "", ""),
++               ("offers.csv", len(offers), "bid_cost_cents", str(100 * len(offers))),
++               ("profiles.tsv", n_rows("profiles.tsv"), "relief_wh", str(sum(sum(o[3]) for o in offers))),
++               ("profiles.tsv", n_rows("profiles.tsv"), "recovery_wh", "0"),
++               ("targets.tsv", n_rows("targets.tsv"), "target_wh",
++                str(sum(int(x.split("\t")[3]) for x in files["targets.tsv"][1:]))),
++               ("continuity_waivers.csv", len(sites), "", ""), ("recipient_weights.tsv", 0, "grant_weight", "0"),
++               ("site_allowances.tsv", len(held), "allowance_ticks", str(sum(held.values()))),
++               ("feeder_limits.txt", n_rows("feeder_limits.txt"), "relief_ceiling_wh",
++                str(sum(int(x[17:27]) for x in files["feeder_limits.txt"][1:]))),
++               ("pools.txt", 0, "pool_cents", "0"), ("site_state.jsonl", len(sites), "", ""),
++               ("segment_floors.json", 0, "floor_wh", "0"),
++               ("rate_cards.xml", len(sites), "base", str(sum(s["base"] for s in sites)))]
++    (folder / "export_manifest.tsv").write_text("file\trecords\tfield\tfield_sum\n" + "".join(
++        "\t".join(map(str, row)) + "\n" for row in receipt), encoding="utf-8")
++    return folder
++
++
++def run(folder: Path) -> dict:
++    out = folder.parent / (folder.name + "-out")
++    done = subprocess.run([sys.executable, PROGRAM, str(folder), str(out)], capture_output=True, text=True)
++    if done.returncode != 0:
++        raise RuntimeError(f"derive_report.py exited {done.returncode} on {folder.name}: {done.stderr.strip()}")
++    return {p.name: json.loads(p.read_text(encoding="utf-8")) for p in out.glob("*.json")}
++
++
++def north(reports: dict, eid: str) -> dict:
++    return next(e for e in reports["region_North.json"]["events"] if e["event_id"] == eid)
++
++
++def report(what: str, got, want) -> None:
++    print(f"own extract, {what}: program {got}, by hand {want}, {'agrees' if got == want else 'DIFFERS'}")
++
++
++def main() -> int:
++    work = Path(tempfile.mkdtemp(prefix="own-extracts-"))
++    # 1. Site D-1 holds 150 ticks. Its offer in the earlier event draws 100 ticks (600 + 400 Wh at 10 Wh per tick),
++    #    so 50 remain and its 100-tick offer in the later event is not a candidate; only D-2's offer is.
++    drawn = write(work / "drawn", {
++        "events": [("OWN-0101", "2026-12-02T10:00:00+00:00", 2, 0), ("OWN-0102", "2026-12-02T11:00:00+00:00", 2, 0)],
++        "sites": [site("OWN-0101", "D-1"), site("OWN-0102", "D-1"), site("OWN-0102", "D-2")],
++        "offers": [("OWN-0101-D-1-A", "OWN-0101", "D-1", [600, 400]), ("OWN-0102-D-1-A", "OWN-0102", "D-1", [600, 400]),
++                   ("OWN-0102-D-2-A", "OWN-0102", "D-2", [300, 300])],
++        "allowances": {"D-1": 150}})
++    got = run(drawn)
++    report("candidate_offer_count of the later event OWN-0102", north(got, "OWN-0102")["candidate_offer_count"], 1)
++    # 2. Site Q-1 holds 150 ticks and offers 100 ticks in both events. OWN-0202 starts at 08:30 UTC (09:30+01:00),
++    #    before OWN-0201 at 09:00 UTC, though its id and its written start sort later; it takes the allowance.
++    order = write(work / "order", {
++        "events": [("OWN-0201", "2026-12-01T09:00:00+00:00", 1, 0), ("OWN-0202", "2026-12-01T09:30:00+01:00", 1, 0)],
++        "sites": [site("OWN-0201", "Q-1"), site("OWN-0202", "Q-1")],
++        "offers": [("OWN-0201-Q-1-A", "OWN-0201", "Q-1", [1000]), ("OWN-0202-Q-1-A", "OWN-0202", "Q-1", [1000])],
++        "allowances": {"Q-1": 150}})
++    got = run(order)
++    picks = {eid: north(got, eid)["selected_offer_ids"] for eid in ("OWN-0201", "OWN-0202")}
++    report("events that select Q-1's offer", sorted(e for e, ids in picks.items() if ids), ["OWN-0202"])
++    # 3. Public site P-1: override 3000 + uplift 500 + public adder 750 = 4250 mill-cents per kWh, above its cap 4000,
++    #    so the effective rate is 4000. 10000 Wh = 1000 ticks; 1000 x 10 x 4000 / (1000 x 1000) = 40 cents.
++    rate = write(work / "rate", {
++        "events": [("OWN-0301", "2026-12-04T10:00:00+00:00", 1, 500)],
++        "sites": [site("OWN-0301", "P-1", seg="P", base=6000, override=3000, cap=4000)],
++        "offers": [("OWN-0301-P-1-A", "OWN-0301", "P-1", [10000])],
++        "adders": {"commercial": 0, "public": 750}})
++    got = run(rate)
++    report("credit_cents of OWN-0301", north(got, "OWN-0301")["credit_cents"], 40)
++    report("cap_binding_count", got["policy_audit.json"]["cap_binding_count"], 1)
++    # 4. Site H-1 at base 1000: interval 1 is 500 Wh = 50 ticks, 50 x 10 x 1000 / 10^6 = 0.5 cent -> 0 (half to even);
++    #    interval 2 is 1000 Wh = 1 cent. credit_cents = 0 + 1 = 1 (rounding the 1.5 cent total once would give 2).
++    half = write(work / "half", {
++        "events": [("OWN-0401", "2026-12-05T10:00:00+00:00", 2, 0)],
++        "sites": [site("OWN-0401", "H-1", base=1000)],
++        "offers": [("OWN-0401-H-1-A", "OWN-0401", "H-1", [500, 1000])]})
++    got = run(half)
++    report("credit_cents of OWN-0401", north(got, "OWN-0401")["credit_cents"], 1)
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/tests/judge.toml /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/judge.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/tests/judge.toml	2026-10-25 02:19:42
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/judge.toml	2026-10-27 23:13:23
+@@ -65,14 +65 @@
+-name = "r5_allowance_ledger_in_one_named_function"
+-description = "The agent's final derive_report.py keeps the walk of the season's events that draws down site allowances in one named function, separate from the function that chooses a single event-region's portfolio."
+-type = "binary"
+-weight = 3
+-
+-[criterion.annotations]
+-mode = "judged"
+-type = "agent behavior"
+-evaluation_target = "trajectory"
+-importance = "important"
+-
+-[[criterion]]
+-id = "R6"
+-name = "r6_exact_arithmetic_for_reported_figures"
++name = "r5_exact_arithmetic_for_reported_figures"
+@@ -90,2 +77,2 @@
+-id = "R7"
+-name = "r7_final_run_after_last_edit"
++id = "R6"
++name = "r6_final_run_after_last_edit"
+@@ -103,2 +90,2 @@
+-id = "R8"
+-name = "r8_claims_a_check_its_output_contradicts"
++id = "R7"
++name = "r7_claims_a_check_its_output_contradicts"
+@@ -116,2 +103,2 @@
+-id = "R9"
+-name = "r9_recomputes_grant_cents_outside_the_program"
++id = "R8"
++name = "r8_recomputes_grant_cents_outside_the_program"
+@@ -129,2 +116,2 @@
+-id = "R10"
+-name = "r10_recomputes_remaining_allowance_outside_the_program"
++id = "R9"
++name = "r9_recomputes_remaining_allowance_outside_the_program"
+@@ -142,2 +129,2 @@
+-id = "R11"
+-name = "r11_recomputes_credit_cents_outside_the_program"
++id = "R10"
++name = "r10_recomputes_credit_cents_outside_the_program"
+@@ -155,2 +142,2 @@
+-id = "R12"
+-name = "r12_derive_report_is_maintainable"
++id = "R11"
++name = "r11_derive_report_is_maintainable"
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/tests/reward.toml /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/reward.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/tests/reward.toml	2026-10-27 15:15:50
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/reward.toml	2026-10-27 23:13:28
+@@ -4 +4 @@
+-weights = { test_output = 0.0024390243902439024, judge = 0.018518518518518517 }
++weights = { test_output = 0.0024390243902439024, judge = 0.020833333333333332 }
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/ba5455c/district-heat-flex-procurement/tests/test_output.py	2026-10-27 15:15:50
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/test_output.py	2026-10-27 23:13:10
+@@ -2103 +2103,2 @@
+-    offers of that event-region, at most one per site, every interval within both ceilings."""
++    offers of that event-region, at most one per site, every interval within both ceilings, and not empty where
++    the optimal portfolio is not empty."""
+@@ -2118 +2119 @@
+-        for row in mine_[region]:
++        for row, ref in zip(mine_[region], want[region]):
+@@ -2121,0 +2123,2 @@
++            if ref["selected_offer_ids"] and not ids:
++                return False, f"{eid} {region}: the portfolio is empty where a non-empty portfolio is chosen"
+@@ -2150 +2153 @@
+-@criterion(description="Run on the first seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval.")
++@criterion(description="Run on the first seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval, and a non-empty list wherever the optimal portfolio is non-empty.")
+@@ -2170 +2173 @@
+-@criterion(description="Run on the second seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval.")
++@criterion(description="Run on the second seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval, and a non-empty list wherever the optimal portfolio is non-empty.")

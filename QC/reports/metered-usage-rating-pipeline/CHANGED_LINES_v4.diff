@@ -1,0 +1,48 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/145bdba/metered-usage-rating-pipeline/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/solution/TRUTH.md	2026-10-29 09:20:31
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/145bdba/metered-usage-rating-pipeline/solution/TRUTH.md	2026-10-29 18:23:47
+@@ -113 +113 @@
+-The test channel has 111 positive checks with positive weight total 419 and
++The test channel has 112 positive checks with positive weight total 422 and
+@@ -146,0 +147,3 @@
++- `missing_adjacent_pairs_in_list_order` (3): for each of the ten neighbouring pairs in
++  the contract's input list, both files removed at once; each run exits non-zero and its
++  `missing input` lines name the earlier file of the pair and no other file.
+@@ -190 +193 @@
+-test_output.py: 42fc893fa97b400f4c67d170914515607c0b2ad8b6b1a68870c07caa79f3c53a
++test_output.py: a8f5f94ebc10d30fc57d80513d1782667cd20e1e858f65d9ea7c08f5258af6d1
+@@ -192 +195 @@
+-reward.toml: c6e6b0af2e241f5b2c83aceef37169e5f1b97504ebc5a8b98ba303445e190d50
++reward.toml: 99b3e7713c97024da851a5d8b8bbac4744d06dd819ca4ee3175b71c5415361d4
+@@ -292 +295 @@
+-  The test channel carries 111 positive checks worth 419 weight and 1
++  The test channel carries 112 positive checks worth 422 weight and 1
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/tests/reward.toml /Users/mac/Desktop/Terminal Bench/QC/copies/145bdba/metered-usage-rating-pipeline/tests/reward.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/tests/reward.toml	2026-10-29 09:15:41
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/145bdba/metered-usage-rating-pipeline/tests/reward.toml	2026-10-29 18:09:23
+@@ -4 +4 @@
+-weights = { test_output = 0.0011933174224343676, judge = 0.01 }
++weights = { test_output = 0.001184834123222749, judge = 0.01 }
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/145bdba/metered-usage-rating-pipeline/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/tests/test_output.py	2026-10-29 09:15:36
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/145bdba/metered-usage-rating-pipeline/tests/test_output.py	2026-10-29 18:23:47
+@@ -1468,0 +1469,11 @@
++def _check_missing_adjacent_pairs() -> None:
++    _full_run_ok()
++    for i, (first, second) in enumerate(zip(REF_INPUTS, REF_INPUTS[1:])):
++        files = {k: v for k, v in _hidden_files().items() if k not in (first, second)}
++        run = _run(files, "missing-pair-%d" % i)
++        assert run["returncode"] not in (0, None), "exit status %r with %s and %s absent" % (run["returncode"], first, second)
++        named = set(_named_missing(run["stderr"]))
++        assert named == {first}, "with %s and %s absent, stderr names %s instead of only %s" % (
++            first, second, ", ".join(sorted(named)) or "no file", first)
++
++
+@@ -1840,0 +1852,5 @@
++@criterion(description="The program completes the fresh month, and for every two neighbouring files in the contract's input list, with both removed at once it exits non-zero and its 'missing input: <file name>' lines on stderr name the earlier of the two and no other file.")
++def missing_adjacent_pairs_in_list_order(workspace: Path) -> bool:
++    return _holds(_check_missing_adjacent_pairs)
++
++
+@@ -2144,0 +2161 @@
++criteria.missing_adjacent_pairs_in_list_order(weight=3)

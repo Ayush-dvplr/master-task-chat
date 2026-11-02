@@ -1,0 +1,16 @@
+# _progress_v5.md — QC v5, board 94a3e0a, MODE recheck
+- [x] S0 12:29 IST
+- [x] script 1 12:29 IST
+- [x] script 2 12:29 IST
+- [x] script 3 12:29 IST
+- [x] script 4 12:29 IST
+- [x] gate 01 12:33 IST
+- [x] gate 02 12:35 IST
+- [x] gate 03 12:38 IST
+- [x] gate 04 12:42 IST
+- [x] gate 05 12:44 IST
+- [x] QL table 12:49 IST
+- [x] Step 10 12:49 IST
+- [x] Step 11 12:53 IST
+- [x] final report 12:56 IST
+- [x] compare 12:58 IST

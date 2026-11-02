@@ -1,0 +1,17 @@
+# Progress — outage-window-replan (c20b7b6), report v1.md
+
+- [x] S0 (07:39 IST)
+- [x] script 1 (07:40 IST)
+- [x] script 2 (07:40 IST)
+- [x] script 3 (07:40 IST)
+- [x] script 4 (07:40 IST)
+- [x] gate 01 (07:45 IST)
+- [x] gate 02 (07:48 IST)
+- [x] gate 03 (07:51 IST)
+- [x] gate 04 (07:53 IST)
+- [x] gate 05 (07:58 IST)
+- [x] QL table (08:02 IST)
+- [x] Step 10 (08:00 IST)
+- [x] Step 11 (08:01 IST)
+- [x] final report (08:02 IST)
+- [x] compare (08:02 IST)

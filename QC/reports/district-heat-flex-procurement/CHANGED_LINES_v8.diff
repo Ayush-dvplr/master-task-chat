@@ -1,0 +1,98 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/solution/TRUTH.md	2026-10-28 02:53:02
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/solution/TRUTH.md	2026-10-28 08:49:25
+@@ -54 +54 @@
+-   number of sites. The two wide hidden extracts have 20 to 26 sites with candidates in every
++   number of sites. The four wide hidden extracts have 20 to 26 sites with candidates in every
+@@ -59 +59 @@
+-   cheapest-first pick is feasible but not best. Graded by `wide_0_*` and `wide_1_*`.
++   cheapest-first pick is feasible but not best. Graded by `wide_0_*` to `wide_3_*`.
+@@ -68 +68 @@
+-  planted grant pools and no `draws_from` rows), on two seeded wide extracts and on three
++  planted grant pools and no `draws_from` rows), on four seeded wide extracts and on three
+@@ -86 +86 @@
+-`tests/test_output.py` has 58 checks: 55 positive (205 points) and 3 negatives (-13).
++`tests/test_output.py` has 66 checks: 63 positive (237 points) and 3 negatives (-13).
+@@ -99 +99 @@
+-- Wide extracts (32): for each of the two wide extracts `wide_k_portfolios_feasible` (w3:
++- Wide extracts (64): for each of the four wide extracts `wide_k_portfolios_feasible` (w3:
+@@ -118 +118 @@
+-and mutated checks carry 141 of 205 points.
++and mutated checks carry 173 of 237 points.
+@@ -120,5 +120,5 @@
+-Measured in Docker (tests channel, stub rewardkit, 2 CPU), in points of 205: the oracle
+-scores 205. An exact portfolio search that visits every portfolio scores 173: it passes every
+-check except the eight wide ones, where each run ends at the 120 s limit. A cheapest-first pick
+-scores 66. One wrong reading alone, as a patched oracle: survivors routed back through the
+-claims test 160, one link of `draws_from` 150, relief ticks instead of credited relief 147.
++Measured in Docker (tests channel, stub rewardkit, 2 CPU), in points of 237: the oracle
++scores 237. An exact portfolio search that visits every portfolio scores 173: it passes every
++check except the sixteen wide ones, where each run ends at the 120 s limit. A cheapest-first pick
++scores 72. One wrong reading alone, as a patched oracle: survivors routed back through the
++claims test 192, one link of `draws_from` 182, relief ticks instead of credited relief 179.
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/reward.toml /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/tests/reward.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/reward.toml	2026-10-27 23:13:28
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/tests/reward.toml	2026-10-28 07:53:28
+@@ -4 +4 @@
+-weights = { test_output = 0.0024390243902439024, judge = 0.020833333333333332 }
++weights = { test_output = 0.002109704641350211, judge = 0.020833333333333332 }
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/6b3fb2a/district-heat-flex-procurement/tests/test_output.py	2026-10-27 23:13:10
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/d1dab52/district-heat-flex-procurement/tests/test_output.py	2026-10-28 07:53:28
+@@ -1404 +1404 @@
+-WIDE_SEEDS = (EVAL_SEED % 99991 + 11, EVAL_SEED % 99989 + 29)
++WIDE_SEEDS = (EVAL_SEED % 99991 + 11, EVAL_SEED % 99989 + 29, EVAL_SEED % 99971 + 43, EVAL_SEED % 99961 + 53)
+@@ -1409,0 +1410,3 @@
++    7120: {("W20-0285", "West"): 1, ("W20-0322", "South"): 1, ("W20-0470", "East"): 1},
++    24943: {("W23-0100", "North"): 1, ("W23-0211", "East"): 1, ("W23-0470", "North"): 1,
++            ("W23-0618", "South"): 1, ("W23-0766", "East"): 1},
+@@ -2192,0 +2196,40 @@
++@criterion(description="Run on the third seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval, and a non-empty list wherever the optimal portfolio is non-empty.")
++def wide_2_portfolios_feasible(workspace: Path) -> bool:
++    return _graded("wide_2_portfolios_feasible", lambda: wide_feasible(workspace, 2))
++
++
++@criterion(description="Run on the third seeded wide season extract, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them.")
++def wide_2_selection_match(workspace: Path) -> bool:
++    return _graded("wide_2_selection_match", lambda: wide_passes(workspace, "selection", 2))
++
++
++@criterion(description="Run on the third seeded wide season extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them.")
++def wide_2_tie_decisions_match(workspace: Path) -> bool:
++    return _graded("wide_2_tie_decisions_match", lambda: wide_passes(workspace, "tie_decisions", 2))
++
++
++@criterion(description="Run on the third seeded wide season extract, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them.")
++def wide_2_intervals_match(workspace: Path) -> bool:
++    return _graded("wide_2_intervals_match", lambda: wide_passes(workspace, "intervals", 2))
++
++
++@criterion(description="Run on the fourth seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval, and a non-empty list wherever the optimal portfolio is non-empty.")
++def wide_3_portfolios_feasible(workspace: Path) -> bool:
++    return _graded("wide_3_portfolios_feasible", lambda: wide_feasible(workspace, 3))
++
++
++@criterion(description="Run on the fourth seeded wide season extract, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them.")
++def wide_3_selection_match(workspace: Path) -> bool:
++    return _graded("wide_3_selection_match", lambda: wide_passes(workspace, "selection", 3))
++
++
++@criterion(description="Run on the fourth seeded wide season extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them.")
++def wide_3_tie_decisions_match(workspace: Path) -> bool:
++    return _graded("wide_3_tie_decisions_match", lambda: wide_passes(workspace, "tie_decisions", 3))
++
++
++@criterion(description="Run on the fourth seeded wide season extract, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them.")
++def wide_3_intervals_match(workspace: Path) -> bool:
++    return _graded("wide_3_intervals_match", lambda: wide_passes(workspace, "intervals", 3))
++
++
+@@ -2370,0 +2414,8 @@
++criteria.wide_2_portfolios_feasible(weight=3)
++criteria.wide_2_selection_match(weight=5)
++criteria.wide_2_tie_decisions_match(weight=5)
++criteria.wide_2_intervals_match(weight=3)
++criteria.wide_3_portfolios_feasible(weight=3)
++criteria.wide_3_selection_match(weight=5)
++criteria.wide_3_tie_decisions_match(weight=5)
++criteria.wide_3_intervals_match(weight=3)

@@ -1,0 +1,60 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/e91a9d2/tariff-engine-audit-repair/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/solution/TRUTH.md	2026-10-29 12:27:47
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/e91a9d2/tariff-engine-audit-repair/solution/TRUTH.md	2026-10-29 16:36:04
+@@ -146 +146 @@
+-    one gets 36 vouchers of unrelated large amounts (greatest common divisor 1, three
++    one gets 36 vouchers of unrelated large amounts (greatest common divisor 1, six
+@@ -231,6 +231,15 @@
+-- Statements: the shipped statement document whole (5); on each hidden statement corpus
+-  (own random stream, seed x 53 + 29) the accounts, balances and a feasible redeemed set
+-  (3), every `due` (5) and every `redeemed` list (5). The statement command is run with
+-  `--statements` and stopped after 10 seconds. The invoice corpora are not changed by
+-  the statement planting; `_assert_statements` checks that every invoice outside the
+-  copied accounts is unchanged and that each corpus holds at least two ties.
++- Statements: the shipped statement document whole (5). Three hidden statement sets,
++  statement, batch and cycle, are built by `_scale_texts` from the seven quiet-rule
++  corpora, each set with its own random stream (`_SCALE_RNG`: seed x 53 + 29, x 61 + 37,
++  x 67 + 41). On every corpus of every set: the accounts, balances and a feasible
++  redeemed set (3), every `due` (5) and every `redeemed` list (5), so 21 checks and 91
++  points per set, 273 over the three. Each corpus document comes from one `--statements`
++  call, stopped after 10 seconds and shared by its three checks. `_scale_once` copies
++  three accounts as the ledger corpora do and gives the first of them 36 vouchers of
++  unrelated large amounts in place of the two groups, six amounts drawn twice.
++  `_assert_scale` runs `_assert_ledger` on the corpus (every invoice outside the copied
++  accounts unchanged, both voucher groups used and a tie in each group, the overpaid
++  account at 0.00) and checks the 36-voucher account: balance between 3e10 and 1e11
++  cents, greatest common divisor 1, too wide for the two-group split (cost above 2^24),
++  a redeemed sum above 0 and below the balance, and one amount held by a redeemed and
++  an unredeemed voucher.
+@@ -339 +348 @@
+-golden_score_trial_id: plain__LyU6mrM
++golden_score_trial_id: plain__vwQbTos
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/e91a9d2/tariff-engine-audit-repair/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/a4ffe55/tariff-engine-audit-repair/tests/test_output.py	2026-10-29 09:12:03
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/e91a9d2/tariff-engine-audit-repair/tests/test_output.py	2026-10-29 15:12:10
+@@ -15,0 +16 @@
++import threading
+@@ -5503,0 +5505,2 @@
++_MEMO_LOCKS: dict[str, Any] = {}
++_MEMO_GUARD = threading.Lock()
+@@ -5587 +5590,6 @@
+-    """Compute once per verifier run; a failure is remembered and raised again."""
++    """Compute once per verifier run; a failure is remembered and raised again.
++
++    rewardkit runs checks on several threads, so each key has its own lock: the
++    first caller builds (one child process per corpus) and the others wait for
++    that one result instead of starting their own copy of the same child.
++    """
+@@ -5589,4 +5597,8 @@
+-        try:
+-            _MEMO[key] = (True, build())
+-        except Exception as error:  # remembered so each dependent check fails alike
+-            _MEMO[key] = (False, error)
++        with _MEMO_GUARD:
++            lock = _MEMO_LOCKS.setdefault(key, threading.RLock())
++        with lock:
++            if key not in _MEMO:
++                try:
++                    _MEMO[key] = (True, build())
++                except Exception as error:  # remembered so each dependent check fails alike
++                    _MEMO[key] = (False, error)

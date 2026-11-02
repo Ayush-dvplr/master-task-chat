@@ -1,0 +1,16 @@
+# _progress.md flood-repair-portfolio (5833b15) report v1.md
+- [x] S0 11:35 IST
+- [x] script 1 11:35 IST
+- [x] script 2 11:35 IST
+- [x] script 3 11:35 IST
+- [x] script 4 11:35 IST
+- [x] gate 01 11:40 IST
+- [x] gate 02 11:43 IST
+- [x] gate 03 11:47 IST
+- [x] gate 04 11:50 IST
+- [x] gate 05 11:49 IST
+- [x] QL table 11:55 IST
+- [x] Step 10 11:55 IST
+- [x] Step 11 11:55 IST
+- [x] final report 11:58 IST
+- [x] compare 11:59 IST

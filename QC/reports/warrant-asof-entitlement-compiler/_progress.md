@@ -1,0 +1,13 @@
+# Progress: warrant-asof-entitlement-compiler (bdd41f8), report v1.md
+- [x] S0 (06:55 IST)
+- [x] scripts 1-4 (06:55 IST)
+- [x] gate 01 (07:01 IST)
+- [x] gate 02 (07:04 IST)
+- [x] gate 03 (07:08 IST)
+- [x] gate 04 (07:11 IST)
+- [x] gate 05 (07:15 IST)
+- [x] QL table (07:16 IST; owner-only row settled in Step 10)
+- [x] Step 10 (08:37 IST)
+- [x] Step 11 (07:19 IST)
+- [x] final report (08:38 IST)
+- [x] compare (08:38 IST; no earlier version)

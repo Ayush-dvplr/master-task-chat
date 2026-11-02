@@ -1,0 +1,122 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/4fef871/cold-chain-backbone-quote/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/7304a6f/cold-chain-backbone-quote/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/4fef871/cold-chain-backbone-quote/solution/TRUTH.md	2026-10-28 04:16:06
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/7304a6f/cold-chain-backbone-quote/solution/TRUTH.md	2026-10-28 12:58:01
+@@ -62 +62 @@
+-| fresh_1 | 10 | 50 | 0.10 |
++| fresh_1 | 10 | 50 | 0.09 |
+@@ -64 +64 @@
+-| fresh_3 | 10 | 50 | 0.09 |
++| fresh_3 | 10 | 50 | 0.08 |
+@@ -66,2 +66,2 @@
+-| relocated | 10 | 50 | 0.08 |
+-| rejections | 10 | 50 | 0.04 |
++| relocated | 10 | 50 | 0.07 |
++| rejections | 11 | 54 | 0.04 |
+@@ -70 +70 @@
+-| wide_2 | 10 | 50 | 0.14 |
++| wide_2 | 10 | 50 | 0.12 |
+@@ -125 +125 @@
+-over all cold rooms 85; terminal-metric tree 28; activation charged per booked link 15; report lines
++over all cold rooms 85; terminal-metric tree 28; activation charged per booked link 19; report lines
+@@ -180 +180 @@
+-solve_py_sha256: af71247064e7a2ac04fe4b1b71a461a3e06ba2d5aa80fd1870601c8d63aaf517
++solve_py_sha256: 95357e7b9606c85e29b998e53ca6c19a4b9bb06a0cfb9bf2538ddf2ebfe10166
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/4fef871/cold-chain-backbone-quote/solution/solve.py /Users/mac/Desktop/Terminal Bench/QC/copies/7304a6f/cold-chain-backbone-quote/solution/solve.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/4fef871/cold-chain-backbone-quote/solution/solve.py	2026-10-28 03:25:10
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/7304a6f/cold-chain-backbone-quote/solution/solve.py	2026-10-28 12:31:05
+@@ -609,0 +610,24 @@
++def book_reach(book: Path) -> tuple[int, int, int]:
++    """Largest site count and cold-room count of one project, and the widest corridor-position span of a link."""
++    sites: dict[str, int] = {}
++    cold: dict[str, int] = {}
++    with open(book / "sites.csv", newline="", encoding="utf-8") as handle:
++        for row in csv.DictReader(handle):
++            sites[row["project"]] = sites.get(row["project"], 0) + 1
++            cold[row["project"]] = cold.get(row["project"], 0) + (row["role"] == "cold_room")
++    order = tomllib.loads((book / "access_rules.toml").read_text(encoding="utf-8"))["corridors"]["order"]
++    places: dict[str, list] = {}
++    with open(book / "layout.tsv", newline="", encoding="utf-8") as handle:
++        for row in csv.DictReader(handle, delimiter="\t"):
++            if row["corridor"] in order and row["slot"].strip().isdigit():
++                places.setdefault(row["project"], []).append((order.index(row["corridor"]), int(row["slot"]), row["site"]))
++    rank = {(pid, site): k + 1 for pid, rows in places.items() for k, (_c, _s, site) in enumerate(sorted(rows))}
++    span = 0
++    for line in (book / "links.jsonl").read_text(encoding="utf-8").splitlines():
++        row = json.loads(line)
++        a, b = (row["project"], row["a"]), (row["project"], row["b"])
++        if a in rank and b in rank:
++            span = max(span, abs(rank[a] - rank[b]))
++    return max(sites.values()), max(cold.values()), span
++
++
+@@ -777,4 +800,0 @@
+-        positions = {}
+-        with open(book / "layout.tsv", newline="", encoding="utf-8") as handle:
+-            for row in csv.DictReader(handle, delimiter="\t"):
+-                positions[(row["project"], row["site"])] = row
+@@ -795,16 +815,8 @@
+-        cold = sum(1 for p in roles.values() for r in p.values() if r == "cold_room")
+-        order = tomllib.loads((book / "access_rules.toml").read_text(encoding="utf-8"))["corridors"]["order"]
+-        rank = {}
+-        for pid in roles:
+-            mine = sorted((order.index(r["corridor"]), int(r["slot"]), key) for key, r in positions.items()
+-                          if key[0] == pid)
+-            rank.update({key: k + 1 for k, (_c, _s, key) in enumerate(mine)})
+-        gap = 0
+-        for line in (book / "links.jsonl").read_text(encoding="utf-8").splitlines():
+-            row = json.loads(line)
+-            a, b = (row["project"], row["a"]), (row["project"], row["b"])
+-            if a in rank and b in rank:
+-                gap = max(gap, abs(rank[a] - rank[b]))
+-    print(f"check built far-reaching book ok: {projects} projects, {cold} cold rooms, largest corridor position "
+-          f"gap of an open link {gap}, finished in {elapsed:.2f} s of the {4 * projects + 10} s limit, quotes "
+-          f"recomputed from the raw files and every cold room joined to the depot")
++        built = book_reach(book)
++    shipped = book_reach(CI)
++    assert built[0] > shipped[0] and built[1] > shipped[1] and built[2] > shipped[2]
++    print(f"check built far-reaching book ok: {projects} projects; largest project {built[0]} sites and "
++          f"{built[1]} cold rooms against {shipped[0]} sites and {shipped[1]} cold rooms in the shipped book; "
++          f"widest open link spans {built[2]} corridor positions against {shipped[2]} in the shipped book; "
++          f"finished in {elapsed:.2f} s of the {4 * projects + 10} s limit, quotes recomputed from the raw files "
++          f"and every cold room joined to the depot")
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/4fef871/cold-chain-backbone-quote/tests/judge.toml /Users/mac/Desktop/Terminal Bench/QC/copies/7304a6f/cold-chain-backbone-quote/tests/judge.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/4fef871/cold-chain-backbone-quote/tests/judge.toml	2026-10-28 03:24:49
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/7304a6f/cold-chain-backbone-quote/tests/judge.toml	2026-10-28 12:31:23
+@@ -66 +66 @@
+-description = "The agent runs the repaired command on a book it builds itself that is larger and reaches further than the shipped book, and the trajectory shows the elapsed time of that run next to the limit stated in api_contract.md."
++description = "The agent runs the repaired command on a book it builds itself in which one project has more sites or cold rooms than any project of the shipped book and an open link spans more corridor positions than any link of the shipped book, and the trajectory shows the elapsed time of that run next to the limit stated in api_contract.md."
+@@ -131 +131 @@
+-description = "The response names every project of /app/ci that /app/out/module_parser.json records as rejected."
++description = "The response names every project of /app/ci that /app/out/module_parser.json records as rejected and gives a rejection code for each."
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/4fef871/cold-chain-backbone-quote/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/7304a6f/cold-chain-backbone-quote/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/4fef871/cold-chain-backbone-quote/tests/test_output.py	2026-10-28 04:06:22
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/7304a6f/cold-chain-backbone-quote/tests/test_output.py	2026-10-28 12:34:32
+@@ -6,0 +7 @@
++import hashlib
+@@ -6515,7 +6516,4 @@
+-def _quotes_own_networks(name: str) -> None:
+-    """Precondition of the rerun checks: each project of the run is quoted at the cost of the network it names."""
+-    book = _read_book(_book(name))
+-    for pid, entry in _delivered(name)["module_core.json"]["projects"].items():
+-        proj = book["accepted"][pid]
+-        chosen = [link for link in proj["links"] if link[0] in set(entry["links"])]
+-        assert entry["quote"] == _network_cost(proj, chosen), pid + " quote is not the cost of its own network"
++_UNEDITED_PACKAGE_DIGESTS = {
++    "fresh_1": "e27a79387aa00498f10aa17695aceb1bdc3f7f493fa32ed3d8bf294fc1f422f6",
++    "fresh_2": "4b219d7c620ec9dcc7107135490b4e0723ab0c8cc8af5215d19aa54c18addd24",
++}
+@@ -6523,0 +6522,8 @@
++def _differs_from_unedited_package(name: str) -> None:
++    """Precondition of the rerun checks: the run quotes projects and its documents are not those of the package as shipped."""
++    docs = _delivered(name)
++    assert docs["module_core.json"].get("projects"), name + " run quotes no project"
++    digest = hashlib.sha256(json.dumps(docs, sort_keys=True).encode("utf-8")).hexdigest()
++    assert digest != _UNEDITED_PACKAGE_DIGESTS[name], name + " documents equal those of the package as shipped"
++
++
+@@ -6525 +6531 @@
+-    _quotes_own_networks("fresh_2")
++    _differs_from_unedited_package("fresh_2")
+@@ -6531 +6537 @@
+-    _quotes_own_networks("fresh_1")
++    _differs_from_unedited_package("fresh_1")

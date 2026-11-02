@@ -1,0 +1,27 @@
+name = "repo-patch"
+summary = "Repair a broken local Python source repository and deliver a patched source archive plus truthful repair report."
+artifacts = ["/app/out/patched-repo.zip", "/app/out/repair-report.json", "/app/out/module_core.json", "/app/out/module_parser.json", "/app/out/module_report.json", "/app/out/test_fixes.json", "/app/out/summary.json"]
+min_inputs = 6
+min_outputs = 6
+default_description = "Repair the shipped stdlib-only Python repository, preserve its visible tests, and deliver a patched source archive with a truthful repair report."
+# repaired package on verifier-generated ledgers, which no context file can
+# affect, so deleting one context file costs only the checks that read it.
+datagen_input = "ci"
+default_keywords = ["python", "repo-patch", "debugging", "source-repair", "stdlib"]
+
+# Input directories under environment/ and where each lands in the agent image
+# (QC S4: every one is a COPY source in environment/Dockerfile).
+[[inputs]]
+dir = "repo"
+mount = "/app/repo"
+
+[[inputs]]
+dir = "ci"
+mount = "/app/ci"
+
+# Which input files each file needs to be interpreted (documentation of the interlock).
+[dependencies]
+"repo" = ["package_manifest.json", "build_config.json", "api_contract.md"]
+"failing_tests.log" = ["regression_cases.jsonl"]
+"lint_report.json" = ["repo"]
+"regression_cases.jsonl" = ["repo"]

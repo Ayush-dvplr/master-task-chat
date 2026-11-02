@@ -1,0 +1,16 @@
+# Progress b7c42a8f-6d19-4e35-9f82-5a3c1d7e8042 (board 02c7202), report v1.md
+- [x] S0 16:37 IST
+- [x] script 1 16:37 IST
+- [x] script 2 16:37 IST
+- [x] script 3 16:37 IST
+- [x] script 4 16:37 IST
+- [x] gate 01 16:45 IST
+- [x] gate 02 16:58 IST
+- [x] gate 03 16:57 IST
+- [x] gate 04 17:00 IST
+- [x] gate 05 17:04 IST
+- [x] QL table 17:06 IST
+- [x] Step 10 17:07 IST
+- [x] Step 11 17:09 IST
+- [x] final report 17:10 IST
+- [x] compare 17:10 IST (n/a: v1 is the first version)

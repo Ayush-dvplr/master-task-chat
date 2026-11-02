@@ -1,0 +1,16 @@
+# hangar-check-replan QC v2 progress (board 46018f1, recheck)
+- [x] S0 preconditions + carry-over 19:56 IST
+- [x] script 1 19:56 IST
+- [x] script 2 19:56 IST
+- [x] script 3 19:56 IST
+- [x] script 4 19:56 IST
+- [x] gate 01 20:09 IST
+- [x] gate 02 20:10 IST
+- [x] gate 03 20:13 IST
+- [x] gate 04 20:16 IST
+- [x] gate 05 20:19 IST
+- [x] QL table 20:22 IST
+- [x] Step 10 20:22 IST
+- [x] Step 11 20:22 IST
+- [x] final report 20:25 IST
+- [x] compare 20:25 IST

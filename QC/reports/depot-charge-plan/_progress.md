@@ -1,0 +1,17 @@
+# _progress depot-charge-plan (03ec0bf) report v1.md
+- [x] S0 03:46
+- [x] script 1 03:46
+- [x] script 2 03:46
+- [x] script 3 03:46
+- [x] script 4 03:46
+- [x] gate 01 03:53
+- [x] gate 02 03:55
+- [x] gate 03 03:57
+- [x] gate 04 03:59
+- [x] gate 05 04:03
+- [x] QL table 04:06
+- [x] Step 10 04:06
+- [x] Step 11 04:08
+- [x] final report 04:10
+- [x] compare 04:10 (no earlier version)
+- note: Step 10 lanes launched 03:48 (lane1 oracle-1..3, lane2 owner-1, lane3 nop-1+stub-1); warm images built (warm.log). Do NOT relaunch; poll lanes, then echo ALL_DONE > logs/runs.log

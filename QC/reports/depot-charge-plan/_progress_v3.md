@@ -1,0 +1,16 @@
+# _progress_v3.md — depot-charge-plan (cae75b8), report v3.md
+- [x] S0 14:32 IST
+- [x] script 1 14:32 IST
+- [x] script 2 14:32 IST
+- [x] script 3 14:32 IST
+- [x] script 4 14:32 IST
+- [x] gate 01 14:35 IST
+- [x] gate 02 14:39 IST
+- [x] gate 03 14:41 IST
+- [x] gate 04 14:43 IST
+- [x] gate 05 14:46 IST
+- [x] QL table 14:47 IST
+- [x] Step 10 15:15 IST
+- [x] Step 11 14:48 IST
+- [x] final report 15:15 IST
+- [x] compare 15:16 IST

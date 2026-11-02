@@ -1,0 +1,18 @@
+# hangar-check-replan QC v3 progress (b63471d, recheck)
+- [x] S0 preconditions 23:27 IST
+- [x] S0.4 carry-over 23:27 IST
+- [x] script 1 23:27 IST
+- [x] script 2 23:27 IST
+- [x] script 3 23:27 IST
+- [x] script 4 23:27 IST
+- [x] Step 10 launch 23:43 IST (lanes 1-2 started; lane 3 waiting dockfree)
+- [x] gate 01 23:43 IST
+- [x] gate 02 23:50 IST
+- [x] gate 03 23:51 IST
+- [x] gate 04 23:53 IST
+- [x] gate 05 (23:56 IST)
+- [x] QL table 23:59 IST
+- [x] Step 10 results 00:00 IST
+- [x] Step 11 00:01 IST
+- [x] final report 00:02 IST
+- [x] compare 00:03 IST

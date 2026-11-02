@@ -1,0 +1,18 @@
+# Progress v2 (a36c154, outage-window-replan, recheck)
+- [x] S0 08:48 IST
+- [x] S0.4 carry-over 08:50 IST
+- [x] script 1 08:50 IST
+- [x] script 2 08:50 IST
+- [x] script 3 08:50 IST
+- [x] script 4 08:50 IST
+- [x] Step 10 launch 08:51 IST
+- [x] gate 01 08:51 IST
+- [x] gate 02 08:53 IST
+- [x] gate 03 08:55 IST
+- [x] gate 04 08:56 IST
+- [x] gate 05 08:59 IST
+- [x] QL table 09:03 IST
+- [x] Step 10 09:01 IST
+- [x] Step 11 09:03 IST
+- [x] final report 09:04 IST
+- [x] compare 09:04 IST

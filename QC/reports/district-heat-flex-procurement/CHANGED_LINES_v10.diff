@@ -1,0 +1,394 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/instruction.md /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/instruction.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/instruction.md	2026-10-23 09:05:01
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/instruction.md	2026-10-29 04:27:40
+@@ -9,2 +8,0 @@
+-When you finish, reply with a short report of what the program does and how you checked it.
+-
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/solution/TRUTH.md	2026-10-28 13:33:49
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/solution/TRUTH.md	2026-10-29 05:14:33
+@@ -49 +49,8 @@
+-   labels; floor attainment. These are graded inside the family documents.
++   labels; floor attainment. These are graded inside the family documents. The hidden extracts
++   also draw their own `wh_per_tick`, `millicents_per_cent`, region codes (two or three per
++   region) and segment codes, so units and codes must come from `program.ini`; the settlement
++   extract omits the `public` adder option (adder 0); the season extract drops kept profile rows
++   of chosen offers (0 Wh there), lets a site in one region draw on the allowance of a site in
++   another region of the same event (both chosen only if each region's draw is counted after the
++   event), and sets allowances exactly equal to an offer's relief; the settlement extract has
++   pools where the claims sum exactly to F.
+@@ -108,2 +115,2 @@
+-  (-5), `negative_external_dependency_or_network` (-3). The program must use only the
+-  Python 3.12 standard library.
++  (-5), `negative_external_dependency_or_network` (-3, a module outside the Python 3.12 standard
++  library is imported).
+@@ -117 +124,4 @@
+-season and settlement generators plant a separating grant pool in every region. Hidden, wide
++season and settlement generators plant a separating grant pool in every region, and a seed is
++kept only when each guarded wrong reading (including fixed 10/1000 units, the shipped code maps,
++a missing adder read as 750, an offer with a missing row dropped, allowance drawn inside the
++event, `<` for the allowance test and for the claims test) changes a graded family. Hidden, wide
+@@ -123,2 +133,5 @@
+-scores 72. One wrong reading alone, as a patched oracle: survivors routed back through the
+-claims test 192, one link of `draws_from` 182, relief ticks instead of credited relief 179.
++scores 54. One wrong reading alone, as a patched oracle: survivors routed back through the
++claims test 192, one link of `draws_from` 182, relief ticks instead of credited relief 184,
++fixed 10/1000 units 147, the shipped code maps 137, a missing adder read as 750 202, an offer
++with a missing row dropped 222, allowance drawn inside the event 202, `<` for the allowance
++test 197, `<` for the claims test 232.
+@@ -126 +139 @@
+-The judge has 11 criteria (+24/-5). R11 is the code-quality criterion. R5 grades exact arithmetic
++The judge has 12 criteria (+27/-5). R11 is the code-quality criterion. R5 grades exact arithmetic
+@@ -131,2 +144,3 @@
+-offer's rate is above its cap (`credit_cents` compared with an outside recompute). R1 to R4 grade
+-runs on extracts the agent builds itself. The self-check stage of `solution/solve.sh` (an inline
++offer's rate is above its cap (`credit_cents` compared with an outside recompute). R1 to R4 and
++R12 grade runs on extracts the agent builds itself; R3 (credit_cents) and R12 (cap_binding_count)
++are the two checks on the composed rate above its cap. The self-check stage of `solution/solve.sh` (an inline
+@@ -188 +202 @@
+-5. Run the final program on `/app/data` and report what it does and how it was checked.
++5. Run the final program on `/app/data`.
+@@ -215 +229 @@
+-fix_patch_sha256: b2b8ff3d74aeeb9293d883048d5bf53cf567d448fb9dfe8728f04b2bf11822bb  # sha256 of solution/solve.sh
++fix_patch_sha256: 7ad99fe6ac3736a59ec16c553bacadfc4f51f082f061f5a9382dcdd2e22fae28  # sha256 of solution/solve.sh
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/solution/solve.sh /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/solution/solve.sh
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/solution/solve.sh	2026-10-28 13:30:13
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/solution/solve.sh	2026-10-29 04:43:49
+@@ -432,2 +432,5 @@
+-    report("credit_cents of OWN-0301", north(got, "OWN-0301")["credit_cents"], 40)
+-    report("cap_binding_count", got["policy_audit.json"]["cap_binding_count"], 1)
++    credit, capped = north(got, "OWN-0301")["credit_cents"], got["policy_audit.json"]["cap_binding_count"]
++    report("credit_cents of OWN-0301", credit, 40)
++    print(f"check R3 {'ok' if credit == 40 else 'DIFFERS'}")
++    report("cap_binding_count", capped, 1)
++    print(f"check R12 {'ok' if capped == 1 else 'DIFFERS'}")
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/tests/judge.toml /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/tests/judge.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/tests/judge.toml	2026-10-28 13:30:33
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/tests/judge.toml	2026-10-29 05:09:48
+@@ -39,2 +39,2 @@
+-name = "r3_checks_a_composed_rate_above_cap_on_its_own_extract"
+-description = "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the credit_cents and cap_binding_count it reports against figures it worked out by hand."
++name = "r3_checks_composed_rate_credit_on_own_extract"
++description = "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the credit_cents it reports for that offer's event-region against a figure it worked out by hand."
+@@ -151,0 +152,13 @@
++importance = "important"
++
++[[criterion]]
++id = "R12"
++name = "r12_checks_composed_rate_cap_binding_on_own_extract"
++description = "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the cap_binding_count it reports against a count it worked out by hand."
++type = "binary"
++weight = 3
++
++[criterion.annotations]
++mode = "judged"
++type = "agent behavior"
++evaluation_target = "trajectory"
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/tests/reward.toml /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/tests/reward.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/tests/reward.toml	2026-10-28 07:53:28
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/tests/reward.toml	2026-10-29 04:43:44
+@@ -4 +4 @@
+-weights = { test_output = 0.002109704641350211, judge = 0.020833333333333332 }
++weights = { test_output = 0.002109704641350211, judge = 0.018518518518518517 }
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/3f737e9/district-heat-flex-procurement/tests/test_output.py	2026-10-28 07:53:28
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/a8e4f16/district-heat-flex-procurement/tests/test_output.py	2026-10-29 05:18:18
+@@ -51 +51,2 @@
+-                       "NODROP", "CLAIM0", "NOCARRY", "CHAIN0", "CHAIN1", "RELIEF"})
++                       "NODROP", "CLAIM0", "NOCARRY", "CHAIN0", "CHAIN1", "RELIEF", "UNIT10", "CODESHIP",
++                       "ADDmiss", "GAPdrop", "LEDwithin", "ALWge", "CLAIMlt"})
+@@ -166,2 +167,2 @@
+-    wh_tick = int(cfg["units"]["wh_per_tick"])
+-    mc_cent = int(cfg["units"]["millicents_per_cent"])
++    wh_tick = 10 if "UNIT10" in lazy else int(cfg["units"]["wh_per_tick"])
++    mc_cent = 1000 if "UNIT10" in lazy else int(cfg["units"]["millicents_per_cent"])
+@@ -169,0 +171,7 @@
++    if "CODESHIP" in lazy:
++        code_region = {c: r for r, codes in REGION_CODES.items() for c in codes}
++        code_segment = dict(SEGMENT_CODES)
++
++    def known(*codes: str) -> bool:
++        return "CODESHIP" not in lazy or (codes[0].upper() in code_region and
++                                          all(c.upper() in code_segment for c in codes[1:]))
+@@ -173,0 +182,2 @@
++    if "ADDmiss" in lazy:
++        adder_of = {"commercial": 0, "public": 750} | adder_of
+@@ -269,0 +280 @@
++    kept_rows: dict[str, set[int]] = {}
+@@ -293,0 +305 @@
++            kept_rows.setdefault(oid, set()).add(itv)
+@@ -308 +320 @@
+-            (tk(int(r["target_wh"])), int(r["shortfall_weight"])) for r in target_rows}
++            (tk(int(r["target_wh"])), int(r["shortfall_weight"])) for r in target_rows if known(r["region_code"])}
+@@ -311 +323 @@
+-    limit = {(a, code_region[b.upper()], int(c)): (tk(int(d)), tk(int(e))) for a, b, c, d, e in feeder}
++    limit = {(a, code_region[b.upper()], int(c)): (tk(int(d)), tk(int(e))) for a, b, c, d, e in feeder if known(b)}
+@@ -315 +327,2 @@
+-             (tk(int(f["floor_wh"])), int(f["priority_weight"])) for f in floor_list}
++             (tk(int(f["floor_wh"])), int(f["priority_weight"])) for f in floor_list
++             if known(f["region_code"], f["segment_code"])}
+@@ -318 +331 @@
+-    pool = {(a, code_region[b.upper()]): int(c) for a, b, c in pool_lines}
++    pool = {(a, code_region[b.upper()]): int(c) for a, b, c in pool_lines if known(b)}
+@@ -527,0 +541,2 @@
++        if "GAPdrop" in lazy and len(kept_rows.get(o["id"], ())) < len(o["r"]):
++            continue
+@@ -554 +569,2 @@
+-                cands = [o for o in every if sum(tk(x) for x in o["r"]) <= left[drawn_on(o["site"]["sid"])]]
++                cands = [o for o in every if sum(tk(x) for x in o["r"]) <= left[drawn_on(o["site"]["sid"])]
++                         and ("ALWge" not in lazy or sum(tk(x) for x in o["r"]) < left[drawn_on(o["site"]["sid"])])]
+@@ -559 +575 @@
+-            memo_key = (str(root), lazy & SEARCH_FLAGS, eid, region, tuple(o["id"] for o in cands))
++            memo_key = (str(root), lazy & (SEARCH_FLAGS | {"UNIT10"}), eid, region, tuple(o["id"] for o in cands))
+@@ -566 +582,5 @@
+-            drawn.extend(winner)
++            if "LEDwithin" in lazy:
++                for i in winner:
++                    left[drawn_on(offer[i]["site"]["sid"])] -= sum(tk(x) for x in offer[i]["r"])
++            else:
++                drawn.extend(winner)
+@@ -648 +668,2 @@
+-                if "CLAIM0" not in lazy and sum(claims.values()) <= funded:
++                if "CLAIM0" not in lazy and (sum(claims.values()) < funded if "CLAIMlt" in lazy
++                                             else sum(claims.values()) <= funded):
+@@ -782,4 +802,0 @@
+-def _code(region: str, salt: int) -> str:
+-    return REGION_CODES[region][salt % 2]
+-
+-
+@@ -789,3 +806,18 @@
+-    ini = f"[units]\nwh_per_tick = {spec.get('wh_per_tick', 10)}\nmillicents_per_cent = 1000\n\n[region_codes]\n"
+-    ini += "".join(f"{c} = {r}\n" for r, codes in REGION_CODES.items() for c in codes)
+-    ini += "\n[segment_codes]\n" + "".join(f"{k} = {v}\n" for k, v in SEGMENT_CODES.items())
++    # A spec may rename the codes: code_map lists the codes of each region, seg_map those of each segment code.
++    code_map = spec.get("code_map") or {r: list(codes) for r, codes in REGION_CODES.items()}
++    seg_map = spec.get("seg_map") or {k: [k] for k in SEGMENT_CODES}
++
++    def code(region: str, salt: int) -> str:
++        return code_map[region][salt % len(code_map[region])]
++
++    def site_code(canonical: str, salt: int) -> str:
++        region = _region_of_code(canonical)
++        return canonical if region is None or "code_map" not in spec else code(region, salt)
++
++    def seg(canonical: str, salt: int) -> str:
++        return seg_map[canonical][salt % len(seg_map[canonical])] if "seg_map" in spec else canonical
++
++    ini = (f"[units]\nwh_per_tick = {spec.get('wh_per_tick', 10)}\n"
++           f"millicents_per_cent = {spec.get('millicents_per_cent', 1000)}\n\n[region_codes]\n")
++    ini += "".join(f"{c} = {r}\n" for r, codes in code_map.items() for c in codes)
++    ini += "\n[segment_codes]\n" + "".join(f"{c} = {SEGMENT_CODES[k]}\n" for k, codes in seg_map.items() for c in codes)
+@@ -811 +843,2 @@
+-        [[s["event_id"], s["sid"], s["code"], s["seg"], s["ben"], "Y" if s["critical"] else "N"] for s in sites])
++        [[s["event_id"], s["sid"], site_code(s["code"], k), seg(s["seg"], k), s["ben"], "Y" if s["critical"] else "N"]
++         for k, s in enumerate(sites)])
+@@ -833 +866,3 @@
+-    profile_body = [[o["offer_id"], t + 1, o["r"][t], o["v"][t], o["m"][t]] for o in offers for t in range(len(o["r"]))]
++    gaps = spec.get("gaps", set())
++    profile_body = [[o["offer_id"], t + 1, o["r"][t], o["v"][t], o["m"][t]] for o in offers for t in range(len(o["r"]))
++                    if (o["offer_id"], t + 1) not in gaps]
+@@ -854,2 +889,2 @@
+-                target_body.append([e["event_id"], _code(region, t), t + 1, wh, weight])
+-                feeder.append(f"{e['event_id']:<10}{_code(region, t + 1):<4}{t + 1:>3}{relief_cap:>10}{recovery_cap:>10}")
++                target_body.append([e["event_id"], code(region, t), t + 1, wh, weight])
++                feeder.append(f"{e['event_id']:<10}{code(region, t + 1):<4}{t + 1:>3}{relief_cap:>10}{recovery_cap:>10}")
+@@ -858 +893 @@
+-    floors = [{"event_id": e, "region_code": _code(r, len(e)), "segment_code": g, "floor_wh": wh,
++    floors = [{"event_id": e, "region_code": code(r, len(e)), "segment_code": seg(g, len(e)), "floor_wh": wh,
+@@ -862 +897 @@
+-    pools += [f"{e:<10}{_code(r, 1):<4}{cents:>12}" for (e, r), cents in sorted(spec.get("pools", {}).items())]
++    pools += [f"{e:<10}{code(r, 1):<4}{cents:>12}" for (e, r), cents in sorted(spec.get("pools", {}).items())]
+@@ -1140 +1175 @@
+-def _composed_spec(tag: str, seed: int) -> dict[str, Any]:
++def _composed_spec(tag: str, seed: int, wh: int = 10) -> dict[str, Any]:
+@@ -1229 +1264 @@
+-        total = sum(_q(r * m, 10) for r, m in zip(o["r"], o["m"]))
++        total = sum(_q(r * m, wh) for r, m in zip(o["r"], o["m"]))
+@@ -1244,3 +1279,8 @@
+-# Hidden season extracts. H1 plants draws_from chains (two to five sites long) whose holder allowances bind;
+-# H2 has no draws_from rows, so its money rows depend on settlement and grants only. Both plant, in every region,
+-# one funded pool whose first largest-remainder share leaves some beneficiaries under minimum_grant_cents.
++# Hidden season extracts. Both draw their own wh_per_tick, millicents_per_cent and region and segment codes
++# (several codes per region, none of them the shipped ones). H1 plants draws_from chains (two to five sites long)
++# whose holder allowances bind, a profile row missing from a chosen offer, two sites of one event in two regions
++# drawing one allowance that holds either offer but not both, and an allowance left exactly equal to an offer's
++# relief ticks. H2 has no draws_from rows and no adder option for the public segment, so its money rows depend on
++# settlement and grants only. Both plant, in every region, one funded pool whose first largest-remainder share
++# leaves some beneficiaries under minimum_grant_cents; H2 also plants a later pool whose claims add up to exactly
++# the funded amount.
+@@ -1250 +1290,2 @@
+-           ("RELIEF", "credit_rows"), ("DH4seen", "quality_counts")),
++           ("RELIEF", "credit_rows"), ("DH4seen", "quality_counts"), ("UNIT10", "intervals"),
++           ("CODESHIP", "selection"), ("GAPdrop", "selection"), ("LEDwithin", "selection"), ("ALWge", "selection")),
+@@ -1252 +1293,2 @@
+-           ("NOCARRY", "funded_pool"), ("DH3", "funded_pool"), ("H4", "grants")),
++           ("NOCARRY", "funded_pool"), ("DH3", "funded_pool"), ("H4", "grants"), ("UNIT10", "credit_rows"),
++           ("CODESHIP", "credit_rows"), ("ADDmiss", "credit_rows"), ("CLAIMlt", "grants")),
+@@ -1262 +1304,3 @@
+-    spec = _composed_spec(tag, seed)
++    units = Rng(seed * 104729 + 31)
++    wh = units.pick([4, 5, 20, 25])
++    spec = _composed_spec(tag, seed, wh)
+@@ -1264,0 +1309,15 @@
++    spec["wh_per_tick"], spec["millicents_per_cent"] = wh, units.pick([400, 500, 2000])
++    taken = {c for codes in REGION_CODES.values() for c in codes} | {"Z9"}
++    spec["code_map"] = {}
++    for region in REGION_CODES:
++        spec["code_map"][region] = []
++        for _ in range(units.between(2, 3)):
++            drawn = "Z9"
++            while drawn in taken:
++                drawn = units.pick(list("ABDFGHJKLMQRTUVXY")) + str(units.between(1, 999))
++            taken.add(drawn)
++            spec["code_map"][region].append(drawn)
++    letters = list("BDFGHKMRTV")
++    units.shuffle(letters)
++    spec["seg_map"] = {"C": [letters.pop() for _ in range(units.between(1, 2))],
++                       "P": [letters.pop() for _ in range(units.between(1, 2))]}
+@@ -1267 +1326 @@
+-    spec["grants"] = (claim, claim * rng.between(80, 125) // 100)
++    spec["grants"] = (claim, claim * (rng.between(80, 125) if kind == "H1" else rng.between(105, 140)) // 100)
+@@ -1268,0 +1328,2 @@
++    if kind == "H2":
++        spec["adders"].pop("public", None)
+@@ -1290,0 +1352 @@
++        _plant_ledger(spec, rng, tag)
+@@ -1293,0 +1356,81 @@
++def _season(spec: dict[str, Any], tag: str) -> tuple[list[str], dict[tuple[str, str], list[str]]]:
++    """Event ids in season order and the reference's chosen offer ids per (event_id, region)."""
++    folder = _scratch() / f"season-{tag}"
++    if folder.exists():
++        shutil.rmtree(folder)
++    write_extract(folder, spec)
++    files = reference(folder, frozenset())
++    shutil.rmtree(folder)
++    starts = {e["event_id"]: datetime.fromisoformat(e.get("start") or f"2026-11-{1 + k // 24:02d}T{k % 24:02d}:00:00+01:00")
++              for k, e in enumerate(spec["events"])}
++    order = sorted(sorted(starts, reverse=True), key=lambda eid: starts[eid])
++    return order, {(e["event_id"], r): list(e["selected_offer_ids"]) for r in REGIONS
++                   for e in files[f"region_{r}.json"]["events"]}
++
++
++def _plant_ledger(spec: dict[str, Any], rng: Rng, tag: str) -> None:
++    """H1 plants: a missing profile row of a chosen offer, one allowance drawn in two regions of one event, and an
++    allowance whose remainder equals the relief ticks of the offer chosen against it."""
++    wh = spec["wh_per_tick"]
++    late = {x[0] for x in spec["late_profile_rows"]}
++    offer = {o["offer_id"]: o for o in spec["offers"]}
++    region_of = {(x["event_id"], x["sid"]): _region_of_code(x["code"]) for x in spec["sites"]}
++
++    def ticks(o: dict[str, Any]) -> int:
++        return sum(_q(r * m, wh) for t, (r, m) in enumerate(zip(o["r"], o["m"]))
++                   if (o["offer_id"], t + 1) not in spec.get("gaps", set()))
++
++    def free(sid: str) -> bool:
++        return sid in spec["allowances"] and sid not in spec["draws"] and sid not in spec["draws"].values()
++
++    def chosen_at(picks: dict, eid: str, sids: set[str]) -> list[dict[str, Any]]:
++        return [offer[i] for (e, _), ids in picks.items() if e == eid for i in ids if offer[i]["sid"] in sids]
++
++    def used_before(order: list[str], picks: dict, eid: str, sids: set[str]) -> int:
++        return sum(ticks(o) for e in order[:order.index(eid)] for o in chosen_at(picks, e, sids))
++
++    _, picks = _season(spec, tag)
++    usable = sorted(i for ids in picks.values() for i in ids if i not in late and any(offer[i]["r"]))
++    gaps: set[tuple[str, int]] = set()
++    for i in (rng.pick(usable) for _ in range(min(2, len(usable)))):
++        widest = max(range(len(offer[i]["r"])), key=lambda t: offer[i]["r"][t])
++        gaps.add((i, widest + 1))
++    spec["gaps"] = gaps
++    order, picks = _season(spec, tag)
++    pairs = []
++    for eid in order:
++        here = [o for o in chosen_at(picks, eid, set(spec["allowances"])) if free(o["sid"]) and ticks(o) > 0]
++        pairs += [(eid, x["sid"], y["sid"]) for x in here for y in here
++                  if region_of[(eid, x["sid"])] < region_of[(eid, y["sid"])]]
++    rng.shuffle(pairs)
++    for eid, holder, other in pairs[:6]:
++        keep = (spec["allowances"][holder], spec["allowances"][other])
++        spec["draws"][other] = holder
++        spec["allowances"][holder], spec["allowances"][other] = 10 ** 9, 0
++        order, picks = _season(spec, tag)
++        both = chosen_at(picks, eid, {holder, other})
++        if len({o["sid"] for o in both if ticks(o) > 0}) == 2:
++            spec["allowances"][holder] = (used_before(order, picks, eid, {holder, other})
++                                          + sum(ticks(o) for o in both) - 1)
++            order, picks = _season(spec, tag)
++            if len({o["sid"] for o in chosen_at(picks, eid, {holder, other}) if ticks(o) > 0}) == 2:
++                break
++        del spec["draws"][other]
++        spec["allowances"][holder], spec["allowances"][other] = keep
++    order, picks = _season(spec, tag)
++    singles = sorted({o["sid"] for ids in picks.values() for i in ids for o in [offer[i]] if free(o["sid"])})
++    rng.shuffle(singles)
++    for sid in singles[:6]:
++        keep = spec["allowances"][sid]
++        spec["allowances"][sid] = 10 ** 9
++        order, picks = _season(spec, tag)
++        first = next((e for e in order if any(ticks(o) > 0 for o in chosen_at(picks, e, {sid}))), None)
++        if first is not None:
++            spec["allowances"][sid] = used_before(order, picks, first, {sid}) + sum(
++                ticks(o) for o in chosen_at(picks, first, {sid}))
++            order, picks = _season(spec, tag)
++            if any(ticks(o) > 0 for o in chosen_at(picks, first, {sid})):
++                return
++        spec["allowances"][sid] = keep
++
++
+@@ -1338,0 +1482 @@
++                spec.setdefault("planted", {})[region] = eid
+@@ -1357,0 +1502,18 @@
++def _plant_exact_claims(spec: dict[str, Any], tag: str) -> int:
++    """Per region, the last event-region after the planted one whose weights include a claim under the minimum
++    gets the pool that makes its funded amount equal its claims. Returns the number of regions planted."""
++    claim, minimum = spec["grants"]
++    trace = _probe(spec, tag)
++    planted = 0
++    for region, after in spec.get("planted", {}).items():
++        rows = [t for t in trace if t[1] == region]
++        start = next(k for k, t in enumerate(rows) if t[0] == after) + 1
++        for eid, _, brought, credit, weights in reversed(rows[start:]):
++            pool = claim * sum(weights.values()) - brought + credit
++            if len(weights) >= 2 and min(weights.values()) * claim < minimum and pool >= 0:
++                spec["pools"][(eid, region)] = pool
++                planted += 1
++                break
++    return planted
++
++
+@@ -1388,0 +1551,2 @@
++                if kind == "H2" and _plant_exact_claims(spec, kind) == 0:
++                    continue
+@@ -1922 +2086,18 @@
+-@criterion(description="Run on the shipped extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them.")
++def tie_case_passes(workspace: Path) -> tuple[bool, str]:
++    """tie_decisions on the generated tie extract, whose expected entry list is not empty."""
++    root = case_root("tie")
++    want = _project("tie_decisions", expected(root))
++    if not want:
++        return False, "grader fault: the tie extract has no tied portfolio"
++    got = run_agent(workspace, root)
++    if got is None:
++        return False, _run_failed(root)
++    mine_ = _project("tie_decisions", got)
++    if mine_ is not None and canon(mine_) == canon(want):
++        return True, ""
++    if mine_ is None:
++        return False, "missing value: policy_audit.json tie_decisions is absent"
++    return False, "wrong value: " + _first_difference(mine_, want)
++
++
++@criterion(description="Run on a generated extract where two portfolios tie in one event region, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them.")
+@@ -1924 +2105 @@
+-    return _graded("tie_decisions_match", lambda: family_passes(workspace, "tie_decisions", False))
++    return _graded("tie_decisions_match", lambda: tie_case_passes(workspace))
+@@ -2343 +2524 @@
+-@criterion(description="The delivered program imports a third-party or network module.")
++@criterion(description="The delivered program imports a module outside the Python 3.12 standard library.")
+@@ -2345 +2526 @@
+-    # True means the cheat happened: a non-stdlib or network import in the program.
++    # True means the cheat happened: an import in the program of a module outside the standard library.
+@@ -2356,2 +2537 @@
+-        network = {"socket", "urllib", "http", "ftplib", "smtplib", "ssl", "xmlrpc"}
+-        return any(r in network or r not in sys.stdlib_module_names for r in roots)
++        return any(r not in sys.stdlib_module_names for r in roots)

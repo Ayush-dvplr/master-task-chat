@@ -1,0 +1,16 @@
+# progress v5 (b172987, recheck)
+- [x] S0 22:18 IST
+- [x] script 1 22:18 IST
+- [x] script 2 22:18 IST
+- [x] script 3 22:18 IST
+- [x] script 4 22:18 IST
+- [x] gate 01 22:20 IST
+- [x] gate 02 22:23 IST
+- [x] gate 03 22:24 IST
+- [x] gate 04 22:27 IST
+- [x] gate 05 22:27 IST
+- [x] QL table 22:28 IST
+- [x] Step 10 22:59 IST
+- [x] Step 11 22:59 IST
+- [x] final report 22:59 IST
+- [x] compare 23:00 IST

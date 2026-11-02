@@ -1,0 +1,204 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "recomputes_benefits_outside_program"
+description = "The agent independently recomputes the benefit of every planned VALUE audit row of the shipped book from the rate, risk and site tables outside its program and compares them with the program's output."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "recomputes_pair_sources_outside_program"
+description = "The agent independently recomputes the joining sources of every PAIR audit row of the shipped book from the crew, permit and exclusion files outside its program and compares them with the program's policy audit."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "recomputes_region_rollups_outside_program"
+description = "The agent independently recomputes the selected proposals and benefit of every region for every planned round of the shipped book from the chosen portfolios and the site and region tables outside its program and compares them with the program's region reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "recomputes_segment_rollups_outside_program"
+description = "The agent independently recomputes the selected proposals and benefit of every segment for every planned round of the shipped book from the chosen portfolios and the segment table outside its program and compares them with the program's segment reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "recomputes_small_round_portfolios_outside_program"
+description = "The agent independently recomputes the chosen portfolio of every planned round of the shipped book with at most 16 proposals by enumerating its portfolios outside its program and compares it with the program's summary."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "reruns_on_altered_copy"
+description = "The agent runs its program on a copy of the data whose contents it altered, beyond moving the files, and checks that the dependent round figures move."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "runs_program_on_crowded_shared_crew_book"
+description = "The agent runs its program on a book it built in which one crew of mode shared has more than four proposals in a planned round, and shows the portfolio the program chose for that round."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "shows_tied_round_choice"
+description = "The agent shows one round of the shipped book in which two or more portfolios reach the greatest total benefit, together with the id list its program chose for that round."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "times_program_on_largest_crowded_round"
+description = "The agent runs its program on a book it built with a planned round of 160 proposal rows in which one crew of mode shared has more than four proposals, and shows the wall time of that run. A code-based worst-case bound establishing that the exact program handles such a round within the stated wall-time limit makes the timed run unnecessary and also meets this criterion."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R10"
+name = "checks_crowded_round_by_second_method"
+description = "The agent compares the portfolio its program chose for a planned round of 160 proposal rows with a shared crew of more than four proposals against the result of a second exact method, such as a brute force over which of that crew's proposals to drop or an independent exact solver, and shows that the two agree. A correctness argument tied to the delivered code that proves exactness for these rounds, including the shared-crew limit and tie rule, makes a second implementation unnecessary and also meets this criterion."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "states_what_budget_expiry_returns"
+description = "The agent reads its program for code paths that return a portfolio before establishing it is the greatest, such as a fallback taken when a time budget or a search limit runs out, and for each such path names the function it sits in and states what that path returns. If its program has no such path, a statement made after reading the code that none exists meets this criterion."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "leaves_maintainable_program"
+description = "The agent leaves a /app/out/derive_report.py that a Python reviewer would accept as maintainable, judged on its names, function structure and error handling."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R13"
+name = "lists_rejected_rounds"
+description = "The response lists every round of the shipped book that the program rejects, each by its id."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R14"
+name = "claims_unrun_check_passed"
+description = "The response claims a check, test or re-run passed with no run after the agent's last edit to /app/out/derive_report.py in the trajectory that shows it passing."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R15"
+name = "names_round_the_program_kept"
+description = "The response names as rejected a round id that is absent from the rejected list of /app/out/data_quality.json."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"

@@ -1,0 +1,101 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/10694a0/slipway-overhaul-replan-repair/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/93c78b0/slipway-overhaul-replan-repair/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/10694a0/slipway-overhaul-replan-repair/solution/TRUTH.md	2026-11-01 18:13:53
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/93c78b0/slipway-overhaul-replan-repair/solution/TRUTH.md	2026-11-01 22:39:14
+@@ -62 +62 @@
+-seeds no cell is classified inert (the instruction), the round's weighted
++seeds no cell is classified inert (output_schema_reference.md), the round's weighted
+@@ -113,3 +113,5 @@
+-and any process of that user left behind are killed once it exits; the
+-reference of every round is built beforehand from a private copy the run user
+-cannot write.
++and any process of that user left behind are killed once it exits. The
++expected documents of every round are built beforehand from a private copy, in
++a directory only root can open, held in memory and removed before any engine
++run; the engine reads a sealed copy it cannot write, and its output is read
++back before the next run starts.
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/10694a0/slipway-overhaul-replan-repair/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/93c78b0/slipway-overhaul-replan-repair/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/10694a0/slipway-overhaul-replan-repair/tests/test_output.py	2026-11-01 18:04:48
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/93c78b0/slipway-overhaul-replan-repair/tests/test_output.py	2026-11-01 22:38:39
+@@ -5004,0 +5005,2 @@
++    """A directory the run user may write: the destination's parent and the
++    run's home. Nothing the verifier grades against is ever put in one."""
+@@ -5009,0 +5012,5 @@
++def _private(tag):
++    """A directory only the verifier can open (mkdtemp leaves it 0700)."""
++    return Path(tempfile.mkdtemp(prefix="slwopt-" + tag + "-"))
++
++
+@@ -5031,2 +5038,3 @@
+-    """The copy of a round the engine is pointed at."""
+-    root = _scratch(tag)
++    """The copy of a round the engine is pointed at. It is filled while
++    private and opened read only once it is whole."""
++    root = _private(tag)
+@@ -5051,3 +5059,9 @@
+-            out = _scratch("reference")
+-            ref_publish(_private_corpus(seed), out, rules)
+-            _CACHE[key] = {p.name: p.read_bytes() for p in sorted(out.iterdir())}
++            # the expected documents are written where the run user cannot
++            # look, held in memory, and removed before any run can start
++            out = _private("expected")
++            try:
++                ref_publish(_private_corpus(seed), out, rules)
++                _CACHE[key] = {p.name: p.read_bytes()
++                               for p in sorted(out.iterdir())}
++            finally:
++                shutil.rmtree(out, ignore_errors=True)
+@@ -5125 +5139 @@
+-            root = _scratch("engine")
++            root = _private("engine")
+@@ -5182,7 +5196,10 @@
+-    if proc.returncode != 0:
+-        raise AssertionError("the delivered engine exited "
+-                             + str(proc.returncode) + ": "
+-                             + stderr.strip()[-400:])
+-    if _tree_digest(data) != before:
+-        raise AssertionError("the delivered engine moved the paper directory")
+-    return {p.name: p.read_bytes() for p in sorted(out.iterdir())}
++        # read back while no process of the run user is alive and before the
++        # next run can start
++        if proc.returncode != 0:
++            raise AssertionError("the delivered engine exited "
++                                 + str(proc.returncode) + ": "
++                                 + stderr.strip()[-400:])
++        if _tree_digest(data) != before:
++            raise AssertionError("the delivered engine moved the paper"
++                                 " directory")
++        return {p.name: p.read_bytes() for p in sorted(out.iterdir())}
+@@ -5215,3 +5232,7 @@
+-            out = _scratch("held-reference")
+-            ref_publish(_private_corpus(seed, legacy), out, ())
+-            _CACHE[key] = {p.name: p.read_bytes() for p in sorted(out.iterdir())}
++            out = _private("expected")
++            try:
++                ref_publish(_private_corpus(seed, legacy), out, ())
++                _CACHE[key] = {p.name: p.read_bytes()
++                               for p in sorted(out.iterdir())}
++            finally:
++                shutil.rmtree(out, ignore_errors=True)
+@@ -5319,4 +5340,7 @@
+-    shipped = _scratch("shipped")
+-    with zipfile.ZipFile(_corpus(SAMPLE_SEED) / "project.zip") as archive:
+-        archive.extractall(shipped)
+-    carried = shipped / "tests" / "test_visible.py"
++    shipped = _private("shipped")
++    try:
++        with zipfile.ZipFile(_corpus(SAMPLE_SEED) / "project.zip") as archive:
++            archive.extractall(shipped)
++        carried = (shipped / "tests" / "test_visible.py").read_bytes()
++    finally:
++        shutil.rmtree(shipped, ignore_errors=True)
+@@ -5325,2 +5349 @@
+-    assert delivered.read_bytes() == carried.read_bytes(), \
+-        "the shipped suite was edited"
++    assert delivered.read_bytes() == carried, "the shipped suite was edited"
+@@ -5738 +5761,2 @@
+-    moved = _scratch("renamed") / "papers_under_another_name"
++    parent = _private("renamed")
++    moved = parent / "papers_under_another_name"
+@@ -5740 +5764 @@
+-    _seal(moved)
++    _seal(parent)

@@ -1,0 +1,16 @@
+# _progress_v3.md — flood-repair-portfolio — board 34968d5 — report v3.md
+- [x] S0 preconditions + carry-over 13:16 IST
+- [x] script 1 13:16 IST
+- [x] script 2 13:16 IST
+- [x] script 3 13:16 IST
+- [x] script 4 13:16 IST
+- [x] gate 01 13:27 IST
+- [x] gate 02 13:33 IST
+- [x] gate 03 13:34 IST
+- [x] gate 04 13:35 IST
+- [x] gate 05 13:37 IST
+- [x] QL table 13:38 IST
+- [x] Step 10 13:53 IST
+- [x] Step 11 13:53 IST
+- [x] final report 13:53 IST
+- [x] compare 13:55 IST

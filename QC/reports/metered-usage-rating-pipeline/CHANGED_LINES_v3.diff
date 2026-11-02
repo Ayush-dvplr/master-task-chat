@@ -1,0 +1,78 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/cc541be/metered-usage-rating-pipeline/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/cc541be/metered-usage-rating-pipeline/solution/TRUTH.md	2026-10-29 04:37:06
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/solution/TRUTH.md	2026-10-29 09:20:31
+@@ -113 +113 @@
+-The test channel has 109 positive checks with positive weight total 413 and
++The test channel has 111 positive checks with positive weight total 419 and
+@@ -142,0 +143,4 @@
++- `missing_references_first_in_list` (3): three reference files removed at once, the
++  earliest in list order not the first by name; `missing_collectors_first_in_list` (3):
++  two collectors removed at once. Each names only the earliest file in the list order and
++  prints no `missing input` line for a later removed file.
+@@ -186 +190 @@
+-test_output.py: d4c29edb14be838101f20a7ecb9b78175021d29c3b01354bb15653d05eaa2eea
++test_output.py: 42fc893fa97b400f4c67d170914515607c0b2ad8b6b1a68870c07caa79f3c53a
+@@ -188 +192 @@
+-reward.toml: f3507ecf28ba3644917f31de56a51f5c43826353f87994b2c2fe4f005e903b01
++reward.toml: c6e6b0af2e241f5b2c83aceef37169e5f1b97504ebc5a8b98ba303445e190d50
+@@ -288 +292 @@
+-  The test channel carries 109 positive checks worth 413 weight and 1
++  The test channel carries 111 positive checks worth 419 weight and 1
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/cc541be/metered-usage-rating-pipeline/tests/reward.toml /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/tests/reward.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/cc541be/metered-usage-rating-pipeline/tests/reward.toml	2026-10-29 04:20:25
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/tests/reward.toml	2026-10-29 09:15:41
+@@ -4 +4 @@
+-weights = { test_output = 0.0012106537530266344, judge = 0.01 }
++weights = { test_output = 0.0011933174224343676, judge = 0.01 }
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/cc541be/metered-usage-rating-pipeline/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/cc541be/metered-usage-rating-pipeline/tests/test_output.py	2026-10-29 04:20:04
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/92ee28b/metered-usage-rating-pipeline/tests/test_output.py	2026-10-29 09:15:36
+@@ -1434,0 +1435,34 @@
++def _named_missing(stderr: object) -> list[str]:
++    names = []
++    for line in str(stderr).splitlines():
++        at = line.find("missing input: ")
++        if at >= 0:
++            names.append(line[at + len("missing input: "):].strip())
++    return names
++
++
++def _check_several_missing(pool: list[str], count: int, seed: int, label: str, unsorted: bool) -> None:
++    _full_run_ok()
++    rng = random.Random(seed)
++    while True:
++        gone = sorted(rng.sample(pool, count), key=REF_INPUTS.index)
++        if not unsorted or gone[0] != min(gone):
++            break
++    files = {k: v for k, v in _hidden_files().items() if k not in gone}
++    run = _run(files, label)
++    assert run["returncode"] not in (0, None), "exit status %r with %s absent" % (run["returncode"], ", ".join(gone))
++    named = _named_missing(run["stderr"])
++    assert gone[0] in named, "with %s absent, stderr lacks 'missing input: %s'" % (", ".join(gone), gone[0])
++    later = [name for name in gone[1:] if name in named]
++    assert not later, "with %s absent, stderr also names later file %s" % (", ".join(gone), ", ".join(later))
++
++
++def _check_missing_references_order() -> None:
++    _check_several_missing([k for k in REF_INPUTS if k not in REF_FILES.values()], 3, HIDDEN_SEED + 7,
++                           "missing-references", True)
++
++
++def _check_missing_collectors_order() -> None:
++    _check_several_missing([REF_FILES[r] for r in REF_REGIONS], 2, HIDDEN_SEED + 8, "missing-collectors", False)
++
++
+@@ -1796,0 +1831,10 @@
++@criterion(description="The program completes the fresh month, and with three reference files removed at once it exits non-zero, names the one earliest in the contract's input list with 'missing input: <file name>' on stderr, and prints no 'missing input' line for the other two.")
++def missing_references_first_in_list(workspace: Path) -> bool:
++    return _holds(_check_missing_references_order)
++
++
++@criterion(description="The program completes the fresh month, and with two collector files removed at once it exits non-zero, names the one earliest in the contract's input list with 'missing input: <file name>' on stderr, and prints no 'missing input' line for the other one.")
++def missing_collectors_first_in_list(workspace: Path) -> bool:
++    return _holds(_check_missing_collectors_order)
++
++
+@@ -2098,0 +2143,2 @@
++criteria.missing_references_first_in_list(weight=3)
++criteria.missing_collectors_first_in_list(weight=3)

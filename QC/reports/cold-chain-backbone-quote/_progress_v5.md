@@ -1,0 +1,16 @@
+# Progress v5 (c75ddad, cold-chain-backbone-quote, recheck)
+- [x] S0 preconditions + carry-over 15:23 IST
+- [x] script 1 15:23 IST
+- [x] script 2 15:23 IST
+- [x] script 3 15:23 IST
+- [x] script 4 15:23 IST
+- [x] gate 01 15:26 IST
+- [x] gate 02 15:31 IST
+- [x] gate 03 15:32 IST
+- [x] gate 04 15:32 IST
+- [x] gate 05 15:35 IST
+- [x] QL table — 15:37 IST
+- [x] Step 10 — 16:51 IST
+- [x] Step 11 — 15:39 IST
+- [x] final report — 16:51 IST
+- [x] compare — 16:51 IST

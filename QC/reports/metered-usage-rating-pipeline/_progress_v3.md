@@ -1,0 +1,16 @@
+# _progress_v3.md — metered-usage-rating-pipeline (92ee28b), report v3.md
+- [x] S0 preconditions + carry-over
+- [x] script 1
+- [x] script 2
+- [x] script 3
+- [x] script 4
+- [x] gate 01
+- [x] gate 02
+- [x] gate 03
+- [x] gate 04
+- [x] gate 05 14:22
+- [x] QL table 14:26 (rows 7,15,18 finalised later)
+- [x] Step 10 18:03
+- [x] Step 11 14:28
+- [x] final report 18:05
+- [x] compare 18:07

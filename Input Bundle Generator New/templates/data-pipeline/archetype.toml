@@ -1,0 +1,22 @@
+name = "data-pipeline"
+summary = "Normalize heterogeneous local input files into canonical JSONL and aggregate summaries with a reusable stdlib pipeline."
+artifacts = ["/app/out/transform.py", "/app/out/normalized.jsonl", "/app/out/summary.json", "/app/out/data_quality.json", "/app/out/product_summary.json", "/app/out/region_central.json", "/app/out/region_east.json", "/app/out/region_north.json", "/app/out/region_south.json", "/app/out/region_west.json", "/app/out/segment_consumer.json", "/app/out/segment_corporate.json", "/app/out/segment_enterprise.json", "/app/out/segment_smb.json"]
+min_inputs = 10
+min_outputs = 10
+default_description = "Build a stdlib-only data normalization pipeline for heterogeneous local files, emit canonical outputs, and ship a reusable transform script that handles verifier-generated hidden cases."
+default_keywords = ["python", "data-pipeline", "etl", "jsonl", "stdlib"]
+
+# Which input files each file needs to be interpreted (documentation of the interlock).
+# Input directories under environment/ and where each lands in the agent image
+# (QC S4: every one is a COPY source in environment/Dockerfile).
+[[inputs]]
+dir = "data"
+mount = "/app/data"
+
+[dependencies]
+"sales.csv" = ["customers.csv", "product_catalog.csv", "inventory.csv", "regions.csv", "channels.csv", "fx_rates.csv", "calendar.csv"]
+"refunds.csv" = ["customers.csv", "product_catalog.csv", "inventory.csv", "regions.csv", "channels.csv", "fx_rates.csv", "calendar.csv"]
+"legacy.txt" = ["customers.csv", "product_catalog.csv", "inventory.csv", "regions.csv", "channels.csv", "fx_rates.csv", "calendar.csv"]
+"adjustments.jsonl" = ["customers.csv", "product_catalog.csv", "regions.csv", "fx_rates.csv", "calendar.csv"]
+"customers.csv" = ["regions.csv"]
+"inventory.csv" = ["regions.csv", "product_catalog.csv"]

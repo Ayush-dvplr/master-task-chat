@@ -1,0 +1,16 @@
+# Progress v11 (8d9c013)
+- [x] S0 preconditions + carry-over 19:41 IST
+- [x] script 1 19:41 IST
+- [x] script 2 19:41 IST
+- [x] script 3 19:41 IST
+- [x] script 4 19:41 IST
+- [x] gate 01 19:46 IST
+- [x] gate 02 19:47 IST
+- [x] gate 03 19:52 IST
+- [x] gate 04 19:50 IST
+- [x] gate 05 19:53 IST
+- [x] QL table 19:55 IST
+- [x] Step 10 19:55 IST
+- [x] Step 11 19:58 IST
+- [x] final report 20:00 IST
+- [x] compare 20:01 IST

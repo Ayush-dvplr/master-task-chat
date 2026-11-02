@@ -1,0 +1,27 @@
+name = "service-interaction"
+summary = "Drive a deterministic local service simulator through real CLI/API interactions and emit final state plus report artifacts."
+artifacts = ["/app/out/final_state.json", "/app/out/report.json", "/app/out/scenario_alpha.json", "/app/out/scenario_beta.json", "/app/out/scenario_mode.json", "/app/out/transcript_summary.json", "/app/out/summary.json"]
+min_inputs = 6
+min_outputs = 6
+default_description = "Operate a deterministic local service simulator offline through its CLI and HTTP API, then emit final state and a truthful interaction report."
+# files and their descriptions, so deleting it costs those checks plus the
+# summary (~0.4 of the test weight) rather than the whole run.
+datagen_input = "data"
+default_keywords = ["python", "service", "api", "cli", "stdlib"]
+
+# Input directories under environment/ and where each lands in the agent image
+# (QC S4: every one is a COPY source in environment/Dockerfile).
+[[inputs]]
+dir = "service"
+mount = "/app/service"
+
+[[inputs]]
+dir = "data"
+mount = "/app/data"
+
+# Which input files each file needs to be interpreted (documentation of the interlock).
+[dependencies]
+"request_log.jsonl" = ["approvals.csv", "auth_policy.json", "api_contract.md"]
+"service" = ["seed_config.json", "api_contract.md"]
+"scenarios.json" = ["request_log.jsonl"]
+"expected_schema.json" = ["seed_config.json"]

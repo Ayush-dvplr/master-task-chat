@@ -1,0 +1,16 @@
+# Progress v8 (d1dab52)
+- [x] S0 12:22
+- [x] script 1 12:22
+- [x] script 2 12:22
+- [x] script 3 12:22
+- [x] script 4 12:22
+- [x] gate 01 12:25
+- [x] gate 02 12:26
+- [x] gate 03 12:29
+- [x] gate 04 12:32
+- [x] gate 05 12:34
+- [x] QL table 12:35
+- [x] Step 10 12:36
+- [x] Step 11 12:37
+- [x] final report 12:38
+- [x] compare 12:38

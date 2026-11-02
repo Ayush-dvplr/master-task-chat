@@ -1,0 +1,17 @@
+# Progress — tariff-engine-audit-repair (04fcb4f), report v1.md, MODE full
+
+- [x] S0 preconditions (20:33 IST)
+- [x] script 1 (20:33 IST)
+- [x] script 2 (20:33 IST)
+- [x] script 3 (20:33 IST)
+- [x] script 4 (20:33 IST)
+- [x] gate 01 (20:44 IST)
+- [x] gate 02 (20:46 IST)
+- [x] gate 03 (20:49 IST)
+- [x] gate 04 (20:51 IST)
+- [x] gate 05 (20:56 IST)
+- [x] QL table (20:56 IST)
+- [x] Step 10 (20:57 IST)
+- [x] Step 11 (20:58 IST)
+- [x] final report (20:58 IST)
+- [x] compare (20:58 IST)

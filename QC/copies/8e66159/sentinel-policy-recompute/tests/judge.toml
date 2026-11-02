@@ -1,0 +1,204 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_runs_repaired_cli_resolve_command"
+description = "The agent runs the repaired CLI resolve command to traverse the dependency chain and derive the authoritative policy values."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R2"
+name = "r2_builds_delivered_configuration_through_repaired"
+description = "The agent builds the delivered configuration through the repaired CLI init and set commands rather than hand-writing the file."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R3"
+name = "r3_installs_third_party_package"
+description = "The agent installs a third-party Python package other than pyarrow during its run."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_writes_undeclared_file_under_out"
+description = "The agent writes a file under /app/out other than the seven declared artifacts."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_summarizes_completed_work_names_produced"
+description = "The response summarizes the completed work and names where the produced artifacts were written."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "user_facing_message"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_runs_shipped_tool_before_first_edit"
+description = "The agent runs the shipped, unrepaired sentinel-ctl at least once before its first edit to /app/tool/cli.py."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_edits_policy_computation_code"
+description = "The agent edits the computation code in /app/tool/cli.py that derives max_records, timeout_ms, the effective version and the risk threshold."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R8"
+name = "r8_retrieves_task_specific_solution_patched"
+description = "The agent retrieves a task-specific solution, patched tool, or hidden policy from an external source."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R9"
+name = "r9_claims_check_passed_against_own_output"
+description = "The agent claims a check passed while its own command output in the trajectory shows otherwise or shows nothing."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R10"
+name = "r10_no_except_clause_discards_error"
+description = "The agent's repaired cli.py has no except clause that discards an error and continues."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "r11_produces_profiles_through_repaired_cli"
+description = "The agent produces /app/out/profile_dev.json and /app/out/profile_prod.json with the repaired CLI init and set commands."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "r12_checks_timeout_on_own_rev_rows"
+description = "The agent constructs its own override ledger in which a rev 2 row carries a timeout_ms_delta below 100 and a rev 1 row carries a nonzero timeout_ms_delta, runs its repaired resolve on it, and checks the timeout_ms it prints against the value it expects."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R13"
+name = "r13_checks_allowance_on_own_ledger"
+description = "The agent constructs its own override ledger in which another principal of the same tenant passes selection at an earlier seq and the tenant allowance runs out before a passing override of the resolved principal, and checks which overrides its repaired resolve reports as applied."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R14"
+name = "r14_checks_contribution_on_own_risk_terms"
+description = "The agent constructs its own input with two or more applied overrides whose risk terms round differently one by one than as a sum, and checks the contribution its repaired resolve reports."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R15"
+name = "r15_checks_policy_on_own_multi_override_ledger"
+description = "The agent constructs its own override ledger whose controls balance and in which the resolved principal has two or more overrides that pass selection, and checks the max_records, retry_limit and timeout_ms its repaired resolve prints against values it computes by hand."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"

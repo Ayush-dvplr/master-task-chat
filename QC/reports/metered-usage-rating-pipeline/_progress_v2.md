@@ -1,0 +1,16 @@
+# Progress v2 (cc541be, recheck round 2)
+- [x] S0 preconditions + carry-over 06:18 IST
+- [x] script 1 06:18 IST
+- [x] script 2 06:18 IST
+- [x] script 3 06:18 IST
+- [x] script 4 06:18 IST
+- [x] gate 01 06:21 IST
+- [x] gate 02 06:24 IST
+- [x] gate 03 06:30 IST
+- [x] gate 04 06:34 IST
+- [x] gate 05 06:34 IST
+- [x] QL table 06:37 IST
+- [x] Step 10 08:07 IST
+- [x] Step 11 06:38 IST
+- [x] final report 08:09 IST
+- [x] compare 08:10 IST

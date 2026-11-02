@@ -1,0 +1,15 @@
+- [x] S0 2026-11-02 23:38 IST
+- [x] script 1 2026-11-02 23:40 IST
+- [x] script 2 2026-11-02 23:42 IST
+- [x] script 3 2026-11-02 23:40 IST
+- [x] script 4 2026-11-02 23:41 IST
+- [x] gate 01 2026-11-02 23:55 IST
+- [x] gate 02 2026-11-02 23:58 IST
+- [x] gate 03 2026-11-03 00:10 IST
+- [x] gate 04 2026-11-03 00:14 IST
+- [x] gate 05 2026-11-03 00:18 IST
+- [x] QL table 2026-11-03 00:21 IST
+- [x] Step 10 2026-11-03 00:24 IST
+- [x] Step 11 2026-11-03 00:29 IST
+- [x] final report 2026-11-03 00:32 IST
+- [x] compare 2026-11-03 00:30 IST

@@ -1,0 +1,16 @@
+# _progress_v3.md — warrant-asof-entitlement-compiler (ac04ee8), report v3.md
+- [x] S0 17:49 IST
+- [x] script 1 17:49 IST
+- [x] script 2 17:49 IST
+- [x] script 3 17:49 IST
+- [x] script 4 17:49 IST
+- [x] gate 01 17:54 IST
+- [x] gate 02 17:57 IST
+- [x] gate 03 17:59 IST
+- [x] gate 04 18:01 IST
+- [x] gate 05 18:02 IST
+- [x] QL table 18:04 IST
+- [x] Step 10 18:59 IST
+- [x] Step 11 18:59 IST
+- [x] final report 19:00 IST
+- [x] compare 19:00 IST

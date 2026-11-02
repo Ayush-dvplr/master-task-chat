@@ -1,0 +1,230 @@
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/instruction.md /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/instruction.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/instruction.md	2026-10-27 12:28:53
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/instruction.md	2026-10-27 23:00:09
+@@ -7 +7 @@
+-Record the resolved authoritative policy in `/app/out/validation_report.json`, including the resolved param key, tenant, effective version, and risk threshold. The report also records the threshold reconciliation iteration sequence and its converged value, and the resolution order of every file consumed and every superseded or legacy branch rejected. It must also cover every delivered artifact and the policy match. The exact field names for `validation_report.json`, `summary.json`, `profile_dev.json` and `profile_prod.json` are documented in `output_field_spec.txt` under the data directory, so match that field spec exactly. Record the real CLI command transcript, the delivered configuration digest, and the canonical trailer in `/app/out/report.json`. Deliver the repaired tool as a byte-deterministic archive at `/app/out/tool.zip` with the same member layout as `/app/data/tool.zip`. Produce the two environment profiles at `/app/out/profile_dev.json` and `/app/out/profile_prod.json`. Write `/app/out/summary.json` listing every input file present in the reference data, the profiles produced, and the artifacts written. Keep `config.json` and both profiles flat and scalar, keep every artifact deterministic across runs and free of timestamps, uuids, or seeds, and keep every JSON artifact free of network hosts and secrets. In your final response, summarize the completed work and state where each delivered artifact was written.
++Record the resolved authoritative policy in `/app/out/validation_report.json`, including the resolved param key, tenant, effective version, and risk threshold. The report also records the threshold reconciliation iteration sequence and its converged value, and the resolution order of every file consumed and every superseded or legacy branch rejected. It must also record whether every delivered artifact is present and whether the configuration matches the resolved policy. The exact field names for `validation_report.json`, `summary.json`, `profile_dev.json` and `profile_prod.json` are documented in `output_field_spec.txt` under the data directory, so match that field spec exactly. Record the real CLI command transcript, the delivered configuration digest, and the canonical trailer in `/app/out/report.json`. Deliver the repaired tool as a byte-deterministic archive at `/app/out/tool.zip` with the same member layout as `/app/data/tool.zip`. Produce the two environment profiles at `/app/out/profile_dev.json` and `/app/out/profile_prod.json`. Write `/app/out/summary.json` listing every input file present in the reference data, the profiles produced, and the artifacts written. Keep `config.json` and both profiles flat and scalar, keep every artifact deterministic across runs and free of timestamps, uuids, or seeds, and keep every JSON artifact free of network hosts and secrets. In your final response, summarize the completed work and state where each delivered artifact was written.
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/solution/TRUTH.md /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/solution/TRUTH.md	2026-10-27 12:27:56
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/solution/TRUTH.md	2026-10-27 23:06:38
+@@ -52 +52 @@
+-   in `effective_windows.xml` carries `timeout_pool`; `override_precedence.conf:7` says the
++   in `effective_windows.xml` carries `timeout_pool`; `override_precedence.conf:8` says the
+@@ -265 +265 @@
+-Channel A weight 0.5/145, Channel B weight 0.5/41.
++Channel A weight 0.5/146, Channel B weight 0.5/37.
+@@ -267 +267 @@
+-Channel A (`tests/test_output.py`) declares 39 checks, positive total 145, negative total -14:
++Channel A (`tests/test_output.py`) declares 40 checks, positive total 146, negative total -14:
+@@ -318,3 +318,4 @@
+-- `shipped_config_and_profiles_carry_policy_values` (5): config.json and both profiles are
+-  canonical and equal the shipped reference, and the delivered `init` and `set` fed the shipped
+-  reference values reproduce config.json byte for byte.
++- `shipped_config_carries_policy_values` (3): config.json is canonical and equals the
++  authoritative shipped config.
++- `shipped_profiles_carry_policy_deltas` (3): profile_dev.json and profile_prod.json are
++  canonical and each equals the shipped policy shifted by its profile deltas.
+@@ -341,2 +342,2 @@
+-Channel B (`tests/judge.toml`, batched) has 14 criteria, positive total 41, negative 11. The
+-probe band (R1 to R8, 30 of 41) grades acts in the trajectory: R1 runs the shipped
++Channel B (`tests/judge.toml`, batched) has 16 criteria, positive total 37, negative 11. The
++probe band (R1 to R11, 33 of 37, 3 each) grades acts in the trajectory: R1 runs the shipped
+@@ -346 +347 @@
+-with a changed `role_level` (R1 to R5, 3 each); R6, R7, R8 (5 each) recompute `timeout_ms`
++with a changed `role_level`; R6, R7, R8 recompute `timeout_ms`
+@@ -348,5 +349,9 @@
+-profile_prod.json outside the tool and compare. R9 names a defect of the shipped `cli.py`
+-before the first edit (3); R10 every exception handler in the repaired `cli.py` acts on the
+-error it catches (5); R11 the response lists every delivered artifact by path (3); R12 claims
+-a check passed with no run after the last edit (-3); R13 states a figure differing from the
+-delivered file (-5); R14 overstates the size of a check it ran after the last edit (-3).
++profile_prod.json outside the tool and compare; R9 names a defect of the shipped `cli.py`
++before the first edit; R10 reruns on a copy with a changed `effective_from` of the effective
++version in `policy_version_map.json` and shows the effective version change; R11 reruns on a
++copy with a changed `timeout_ms_delta` cutover in `units_reference.txt` and shows `timeout_ms`
++change. R12 the delivered `cli.py` is maintainable and stops on an unreadable or unparsable
++reference file with a message naming it (1); R13 the response lists every delivered artifact
++by path (3); R14 claims a check passed with no run after the last edit (-3); R15 states a
++figure differing from the delivered file (-5); R16 overstates the size of a check it ran
++after the last edit (-3).
+@@ -407 +412,2 @@
+-   handler acting on the error it catches (rubric R10); resolve
++   unreadable or unparsable reference file stopping the run with a message naming it
++   (rubric R12); resolve
+@@ -415,3 +421,3 @@
+-7. Probe the delivered tool on scratch corpora (rubrics R2 to R5) and recompute delivered
+-   values outside it (rubrics R6 to R8); claim nothing the output does not show (rubrics R12
+-   to R14), and close with a summary naming every artifact location (rubric R11).
++7. Probe the delivered tool on scratch corpora (rubrics R2 to R5, R10, R11) and recompute
++   delivered values outside it (rubrics R6 to R8); claim nothing the output does not show
++   (rubrics R14 to R16), and close with a summary naming every artifact location (rubric R13).
+@@ -439 +445 @@
+-  check, the rare state-pair check and the fresh state-corpora check (129/145).
++  check, the rare state-pair check and the fresh state-corpora check (130/146).
+@@ -442 +448 @@
+-  only: fails `hidden_unique_divisor_fit_hard`, the rare state-pair and fresh checks (132/145).
++  only: fails `hidden_unique_divisor_fit_hard`, the rare state-pair and fresh checks (133/146).
+@@ -444 +450 @@
+-  fails `hidden_curve_reset_hard`, the rare state-pair and fresh checks (132/145).
++  fails `hidden_curve_reset_hard`, the rare state-pair and fresh checks (133/146).
+@@ -446 +452 @@
+-  row: fails `hidden_reinstated_chain_hard`, the rare state-pair and fresh checks (132/145).
++  row: fails `hidden_reinstated_chain_hard`, the rare state-pair and fresh checks (133/146).
+@@ -448 +454 @@
+-  `max_records` sum then checked on timeout: wrong sets on every repair corpus (117/145). An
++  `max_records` sum then checked on timeout: wrong sets on every repair corpus (118/146). An
+@@ -450 +456 @@
+-  60 or more spare rows; a split into two halves likewise (117/145 each). Ties to the last set, raw
++  60 or more spare rows; a split into two halves likewise (118/146 each). Ties to the last set, raw
+@@ -452 +458 @@
+-  two whole-document checks and the rare repair-pair check (132/145).
++  two whole-document checks and the rare repair-pair check (133/146).
+@@ -457,2 +463,2 @@
+-- sha256 `solution/solve.py`: `d025c5d31081d778b3c040d86ab4874ce180e977c7da926c30752997c4de133c`
+-- sha256 `tests/test_output.py`: `1cc410d7ee131c236fb734922f64c9d20f3de9da703885e1966c5077402c498f`
++- sha256 `solution/solve.py`: `15ea5deaf73e2a885138a1bd25d4eaf9b41c34a7825c2c9ea040fdc7f82fd34b`
++- sha256 `tests/test_output.py`: `f1d9d572707987256d0d2e8a21d6dd7be412437fa765f937a00c07325769c6d5`
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/solution/solve.py /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/solution/solve.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/solution/solve.py	2026-10-27 12:27:24
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/solution/solve.py	2026-10-27 23:00:18
+@@ -1172,0 +1173,17 @@
++    corpus = scratch_corpus(root, "version-map")
++    edit_text(corpus / "policy_version_map.json", '"effective_from": 1700000000,\n      "version": "' + shipped["effective_version"] + '"',
++              '"effective_from": 1700000001,\n      "version": "' + shipped["effective_version"] + '"')
++    _, resolved, trace, _ = resolve_on(corpus)
++    if resolved["effective_version"] == shipped["effective_version"]:
++        raise SystemExit("version map change left the effective version unchanged")
++    print("check version map rerun ok  " + shipped["effective_version"] + " effective_from 1700000000 -> 1700000001: effective version "
++          + shipped["effective_version"] + " -> " + resolved["effective_version"] + ", applied " + json.dumps(trace["applied_overrides"]))
++
++    corpus = scratch_corpus(root, "unit-cutover")
++    edit_text(corpus / "units_reference.txt", "timeout_ms_delta cutover: 1650000000", "timeout_ms_delta cutover: 1750000000")
++    _, resolved, _, _ = resolve_on(corpus)
++    if resolved["timeout_ms"] == shipped["timeout_ms"]:
++        raise SystemExit("unit cutover change left timeout_ms unchanged")
++    print("check unit cutover rerun ok  timeout_ms_delta cutover 1650000000 -> 1750000000: timeout_ms " + str(shipped["timeout_ms"])
++          + " -> " + str(resolved["timeout_ms"]))
++
+@@ -1201 +1218 @@
+-    print("check exception handlers ok  " + str(len(handlers)) + " exception handlers in /app/tool/cli.py, each raises; malformed policy_version_map.json: returncode "
++    print("check unreadable input ok  malformed policy_version_map.json stops resolve naming the file; " + str(len(handlers)) + " exception handlers in /app/tool/cli.py, each raises; returncode "
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/tests/judge.toml /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/tests/judge.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/tests/judge.toml	2026-10-27 12:25:30
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/tests/judge.toml	2026-10-27 23:06:38
+@@ -81 +81 @@
+-weight = 5
++weight = 3
+@@ -87 +87 @@
+-importance = "critically_important"
++importance = "important"
+@@ -94 +94 @@
+-weight = 5
++weight = 3
+@@ -100 +100 @@
+-importance = "critically_important"
++importance = "important"
+@@ -107 +107 @@
+-weight = 5
++weight = 3
+@@ -113 +113 @@
+-importance = "critically_important"
++importance = "important"
+@@ -130,2 +130,2 @@
+-name = "r10_cli_handlers_act_on_errors"
+-description = "The agent leaves /app/tool/cli.py in which every exception handler acts on the error it catches by raising, logging and exiting non-zero, or recording it in an output."
++name = "r10_rerun_with_changed_version_map"
++description = "The agent runs the repaired sentinel-ctl resolve on a copy of the reference corpus in which it changed the effective_from of the resolved effective version in policy_version_map.json, and shows that the effective version resolve reports changed."
+@@ -133 +133 @@
+-weight = 5
++weight = 3
+@@ -138,2 +138,2 @@
+-evaluation_target = "state_change"
+-importance = "critically_important"
++evaluation_target = "trajectory"
++importance = "important"
+@@ -143 +143,27 @@
+-name = "r11_response_lists_every_artifact_path"
++name = "r11_rerun_with_changed_unit_cutover"
++description = "The agent runs the repaired sentinel-ctl resolve on a copy of the reference corpus in which it changed the timeout_ms_delta cutover in units_reference.txt, and shows that the timeout_ms resolve reports changed."
++type = "binary"
++weight = 3
++
++[criterion.annotations]
++mode = "judged"
++type = "agent behavior"
++evaluation_target = "trajectory"
++importance = "important"
++
++[[criterion]]
++id = "R12"
++name = "r12_cli_names_unreadable_reference_file"
++description = "The agent leaves a maintainable /app/tool/cli.py in which a reference file that is unreadable or unparsable stops the run with an error message naming that file."
++type = "binary"
++weight = 1
++
++[criterion.annotations]
++mode = "judged"
++type = "agent behavior"
++evaluation_target = "state_change"
++importance = "important"
++
++[[criterion]]
++id = "R13"
++name = "r13_response_lists_every_artifact_path"
+@@ -155,2 +181,2 @@
+-id = "R12"
+-name = "r12_claims_check_passed_with_no_run"
++id = "R14"
++name = "r14_claims_check_passed_with_no_run"
+@@ -168,2 +194,2 @@
+-id = "R13"
+-name = "r13_states_figure_differing_from_file"
++id = "R15"
++name = "r15_states_figure_differing_from_file"
+@@ -181,2 +207,2 @@
+-id = "R14"
+-name = "r14_overstates_check_size"
++id = "R16"
++name = "r16_overstates_check_size"
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/tests/reward.toml /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/tests/reward.toml
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/tests/reward.toml	2026-10-27 12:25:17
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/tests/reward.toml	2026-10-27 22:59:50
+@@ -4 +4 @@
+-weights = { test_output = 0.0034482758620689655, judge = 0.012195121951219513 }
++weights = { test_output = 0.003424657534246575, judge = 0.013513513513513514 }
+diff -U0 -r /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/tests/test_output.py /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/24b37c6/sentinel-policy-recompute/tests/test_output.py	2026-10-27 12:26:31
++++ /Users/mac/Desktop/Terminal Bench/QC/copies/f2a9c0b/sentinel-policy-recompute/tests/test_output.py	2026-10-27 22:59:23
+@@ -1677,4 +1677,3 @@
+-def test_shipped_config_and_profiles_carry_policy_values():
+-    """POSITIVE: config.json, profile_dev.json and profile_prod.json exist, are canonical JSON without dynamic keys, config.json equals the authoritative shipped config and the delivered init and set fed the shipped values reproduce it byte for byte, and each profile equals the shipped policy shifted by its profile deltas."""
+-    for path in (CONFIG_PATH, PROFILE_DEV_PATH, PROFILE_PROD_PATH):
+-        assert_artifact_file(path)
++def test_shipped_config_carries_policy_values():
++    """POSITIVE: config.json exists, is canonical JSON without dynamic keys, and equals the authoritative shipped config."""
++    assert_artifact_file(CONFIG_PATH)
+@@ -1682 +1681,4 @@
+-    assert rebuild_config("shipped").read_bytes() == CONFIG_PATH.read_bytes(), "config.json bytes differ from the init and set rebuild with the shipped values"
++
++
++def test_shipped_profiles_carry_policy_deltas():
++    """POSITIVE: profile_dev.json and profile_prod.json exist, are canonical JSON without dynamic keys, and each equals the shipped policy shifted by its profile deltas."""
+@@ -1684,0 +1687 @@
++        assert_artifact_file(path)
+@@ -1969,3 +1972,3 @@
+-@criterion(description="config.json and both profiles are canonical JSON without dynamic keys, config.json equals the authoritative shipped config and the delivered init and set fed the shipped values reproduce it byte for byte, and each profile equals the shipped policy shifted by its profile deltas.")
+-def shipped_config_and_profiles_carry_policy_values(workspace: Path) -> bool:
+-    return _passes("shipped_config_and_profiles_carry_policy_values", test_shipped_config_and_profiles_carry_policy_values)
++@criterion(description="config.json is canonical JSON without dynamic keys and equals the authoritative shipped config.")
++def shipped_config_carries_policy_values(workspace: Path) -> bool:
++    return _passes("shipped_config_carries_policy_values", test_shipped_config_carries_policy_values)
+@@ -1973,0 +1977,5 @@
++@criterion(description="profile_dev.json and profile_prod.json are canonical JSON without dynamic keys and each equals the shipped policy shifted by its profile deltas.")
++def shipped_profiles_carry_policy_deltas(workspace: Path) -> bool:
++    return _passes("shipped_profiles_carry_policy_deltas", test_shipped_profiles_carry_policy_deltas)
++
++
+@@ -2048 +2056,2 @@
+-criteria.shipped_config_and_profiles_carry_policy_values(weight=5)
++criteria.shipped_config_carries_policy_values(weight=3)
++criteria.shipped_profiles_carry_policy_deltas(weight=3)

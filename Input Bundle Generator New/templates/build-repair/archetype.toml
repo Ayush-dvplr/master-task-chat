@@ -1,0 +1,27 @@
+name = "build-repair"
+summary = "Repair a deliberately broken stdlib-only Python package and ship a verifiable source artifact."
+artifacts = ["/app/out/package.zip", "/app/out/selftest.json", "/app/out/build_report.json", "/app/out/module_core.json", "/app/out/module_metrics.json", "/app/out/dependency_resolution.json", "/app/out/summary.json"]
+min_inputs = 6
+min_outputs = 6
+default_description = "Repair a deliberately broken Python 3.12 package, preserve its meaningful tests, and ship an importable source archive with a truthful self-test report."
+# repaired package on verifier-generated manifests, which no sidecar can affect,
+# so deleting one sidecar costs only the checks that read it.
+default_keywords = ["python", "packaging", "build-repair", "debugging", "stdlib"]
+
+# Input directories under environment/ and where each lands in the agent image
+# (QC S4: every one is a COPY source in environment/Dockerfile).
+[[inputs]]
+dir = "data"
+mount = "/app/data"
+
+[[source_archives]]
+source = "environment/data/project"
+output = "environment/data/project.zip"
+
+# Which input files each file needs to be interpreted (documentation of the interlock).
+[dependencies]
+"project.zip" = ["dependency_manifest.json", "compiler_flags.json", "expected_targets.json", "report_contract.md"]
+"scoring_fixtures.jsonl" = ["project.zip"]
+"build.log" = ["project.zip"]
+"module_map.json" = ["project.zip"]
+"ci_config.yaml" = ["project.zip"]

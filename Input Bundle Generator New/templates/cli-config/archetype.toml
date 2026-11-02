@@ -1,0 +1,26 @@
+name = "cli-config"
+summary = "Repair and configure a local stdlib-only CLI, then emit deterministic flat configuration and report artifacts."
+artifacts = ["/app/out/config.json", "/app/out/report.json", "/app/out/tool.zip", "/app/out/profile_dev.json", "/app/out/profile_prod.json", "/app/out/validation_report.json", "/app/out/summary.json"]
+min_inputs = 6
+min_outputs = 6
+default_description = "Repair a local Python CLI, configure it offline for deterministic operation, and emit flat JSON configuration plus a truthful command report."
+default_keywords = ["python", "cli", "configuration", "debugging", "stdlib"]
+
+# Input directories under environment/ and where each lands in the agent image
+# (QC S4: every one is a COPY source in environment/Dockerfile).
+[[inputs]]
+dir = "data"
+mount = "/app/data"
+
+[[source_archives]]
+source = "environment/data/tool"
+output = "environment/data/tool.zip"
+
+# Which input files each file needs to be interpreted (documentation of the interlock).
+[dependencies]
+"change_journal.jsonl" = ["validation_rules.json", "config_contract.md"]
+"defaults.json" = ["config_schema.json"]
+"sample_config_dev.json" = ["defaults.json", "change_journal.jsonl"]
+"sample_config_prod.json" = ["defaults.json", "change_journal.jsonl"]
+"env_overrides.json" = ["defaults.json", "change_journal.jsonl"]
+"tool.zip" = ["config_schema.json"]

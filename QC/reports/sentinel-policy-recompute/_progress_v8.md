@@ -1,0 +1,16 @@
+# sentinel-policy-recompute f2a9c0b progress (v8.md)
+- [x] S0 02:57 IST
+- [x] script 1 02:57 IST
+- [x] script 2 02:57 IST
+- [x] script 3 02:57 IST
+- [x] script 4 02:57 IST
+- [x] gate 01 03:01 IST
+- [x] gate 02 03:07 IST
+- [x] gate 03 03:11 IST
+- [x] gate 04 03:16 IST
+- [x] gate 05 03:17 IST
+- [x] QL table 03:20 IST
+- [x] Step 10 03:20 IST
+- [x] Step 11 03:21 IST
+- [x] final report 03:21 IST
+- [x] compare 03:22 IST
