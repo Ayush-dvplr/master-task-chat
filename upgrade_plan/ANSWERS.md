@@ -174,3 +174,12 @@ ENTRY 17. 3 Nov 2026 04:08 IST, answers in chat (word for word)
 83. did not get it ask again in laymen terms"
 
 Recorded as: Q78 root today is "Terminal Bench", all sessions start there; Ayush plans a NEW root folder, because Terminal Bench holds many other folders and git cannot be kept clean there (FOLLOW UP Q84). Q79 kit change: only report; Ayush decides later in a session. Q80 the main knowledge source is teammate tasks; research must center on them (FOLLOW UP Q85). Q81 today: the master gives a prompt, makes an empty md file, Ayush pastes the response into it. Q82 yes: conflict review started (CONFLICT_REVIEW.md). Q83 asked again in plain words.
+
+ENTRY 18. 3 Nov 2026 04:13 IST, answers in chat (word for word)
+"83. I  will count as minor for this one also i will better name it QC like these happen very when its making the checks leninent because its making our job easir
+
+CR1, the first conflict (timeouts): So basically, I approved because in one or two tasks, I thought if it's working, then let it work. But if in all the tasks, I am using that single lever only, and if in QC or my PL flagged me, you are only dependent on this single lever, then that's not a good scenario, although it's not happened. And if I still keep doing this, it will not happen until anyone finds out, or if it's really very wrong. Till now, at this point, I don't know. Okay, so I decided to lower that specific lever, but in some emergency situation, I have to submit the task. I have used it, I'm being honest with you. So that's the scenario with this.
+
+and do you not need the the tasks folder of my teamates tasks ?"
+
+Recorded as: Q83 MINOR; Ayush wants a name for kit changes that only make checks more lenient (FOLLOW UP Q86). CR1: timeout losses may count (R0), but the timeout lever must not be the one lever every task relies on; use it less; it stays allowed in an emergency (FOLLOW UP CR1a). Teammate tasks: Ayush offers to push them (Q85 updated).

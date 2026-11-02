@@ -47,3 +47,6 @@ Name the task and the board sha; Claude reads the rest from the repo if it is th
 
 RQ7. One example of Docker waiting (OPEN)
 The line a waiting session printed (for example a dockfree START=no line or a queue message).
+
+RQ8. Teammate tasks (OPEN, Ayush offered 3 Nov)
+Push to main under teammate_tasks/<task name>/: the full bundle (instruction.md, task.toml, environment/, solution/, tests/) and, if you have them, each task's harness scores and QC result. Include the 10 tasks already studied in master_chat_work/20261102_test_design_study if possible, plus any others that scored under the gate. No personal data (emails, keys).

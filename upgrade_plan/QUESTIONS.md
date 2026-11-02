@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q83, Q84, Q85, CR1 (conflict review, CONFLICT_REVIEW.md).
+LIVE NOW: CR1a, Q84, Q85, Q86.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -132,9 +132,11 @@ Q80. S8, FLAG: your GOALS.md G8 already asks for dynamic ChatGPT idea prompts re
 Q81. S8: where do the ChatGPT and Gemini results go today, and how do they get back into the knowledge base (pasted into a session, saved as files, not saved)? [ANSWERED: the master writes a prompt and an empty md file; Ayush pastes the response there]
 Q82. Still open from before: shall the conflict review (5 most serious hardening conflicts) start now, or after the W1-005 kit result? [ANSWERED: yes, review started in CONFLICT_REVIEW.md]
 
-Q83. Kit change (W1-005): verdict MAJOR because of one change only (C6, one finding gets one check id). Do you agree with MAJOR, or do you count it MINOR because no bundle needs rework? [FOLLOW UP: asked again in plain words in chat 3 Nov]
+Q83. Kit change (W1-005): verdict MAJOR because of one change only (C6, one finding gets one check id). Do you agree with MAJOR, or do you count it MINOR because no bundle needs rework? [ANSWERED: MINOR; a name for lenient changes wanted (Q86)]
 
 Q84. New root folder: what should it hold (master_chat_tasks, master_chat_work, bundles, QC, _runs, the harness clone, the generator)? Should THIS git repo become that root? Where would the large folders (_runs has about 62 thousand files) live? [OPEN]
-Q85. Teammate tasks: where are they (Anubis_Tasks_Samples, Finalized_Tasks_RFP, a shared drive, the PL repo)? Can a helper read them (they are your teammates' work; are you allowed to study them)? This decides how S8 research prompts are built. [OPEN]
+Q85. Teammate tasks: where are they (Anubis_Tasks_Samples, Finalized_Tasks_RFP, a shared drive, the PL repo)? Can a helper read them (they are your teammates' work; are you allowed to study them)? This decides how S8 research prompts are built. [OPEN; Ayush offers to push them, ENTRY 18. Answer given in chat: yes, needed]
+
+Q86. Kit change classes: proposal LENIENT (a change that only makes QC easier for us; act on it freely), MINOR (a stricter or reworded rule that does not touch fix mapping or hiding), MAJOR (touches fix mapping, hiding or traps). Under this, W1-005's 8 changes are LENIENT and C6 is MAJOR or MINOR as you decide (you said MINOR). Is that what you meant by "better name it"? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
