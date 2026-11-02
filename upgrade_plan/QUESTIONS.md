@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q63 (secrets), Q64 (push list), Q65 (confirm answers from records).
+LIVE NOW: Q63 (secrets), Q64 (push list), Q65 (confirm answers from records), Q66 to Q71 (goal and new rules).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, Q35, Q39. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -101,5 +101,13 @@ AFTER HELPERS W1-002 AND W1-003 (3 Nov)
 Q63. Secrets: all 24 tracked wrapper.log files under master_chat_work (gate_run and traj folders) contain an OPENAI_API_KEY value. Is this repo private? Is that value a real OpenAI key or a local bridge token? Do you want it rotated, and masked in the repo after PROCEED? [OPEN]
 Q64. May I give you the push list from tmp/W1-003/MISSING.md (MUST items: QC/reports, the live QC kit Input_Bundle_QC, harness master_queue.py and .master-queue/state.json, blind program folders under _runs, opencode config without keys, the newest records and the 3 sessions running at copy time)? Never push: ~/.codex/auth.json, ~/.tb-master-key, ~/.ssh, oc-bridge secrets, ~/.local/share/opencode. [OPEN]
 Q65. Please confirm or correct the answers the records gave (short list in chat 3 Nov). In particular Q35: episode A (24 to 25 Oct, plan v1 plus habit levers, contract sentences stated the whole graded procedure) or episode B (31 Oct to 2 Nov, min plan v2 and route 1, misread rule levers lost to careful Opus)? [OPEN]
+
+GOAL AND NEW RULES (ENTRY 11, 3 Nov)
+Q66. FLAG: you wrote tests and rubric must not be above 80. The records (gate v3.7, state.json line 126) say tests under 85, rubric under 85, final under 40. Which is current: 80 or 85? [OPEN]
+Q67. FLAG: "my goal is not to make 100% genuine task". Your own records say difficulty must come from computation on hidden data, never from withheld rules (GOALS G11), and every graded fact needs a determinate source (route 1 R2). Which of those still hold? Concretely, what do you want to allow that a "genuine" task would not have? Claude's boundary is in README GOAL item 5. [OPEN]
+Q68. FLAG: GOALS G9 says uniqueness is checked only against your own registry ("No check against Anubis/Finalized needed"). Now a task must also differ from teammates' tasks. Where can the system see teammates' tasks to compare (Anubis_Tasks_Samples, Finalized_Tasks_RFP, something else)? Who flags a copy, and what counts as "the same task"? [OPEN]
+Q69. QC kit upstream: which repo does the PL push the kit to? The newest snapshot here is knowledge/fingerprints/qc.json, made 25 Oct at kit head 5574d77e, with 6 older archives. Has the kit changed since 25 Oct? How do you tell a major from a minor change today? [OPEN]
+Q70. QL queue: is QL_QUESTIONS.md the right place, and do you forward the questions to the QL by hand? Any format the QL prefers? [OPEN]
+Q71. AYUSH_SUGGESTIONS.md now holds S1 to S5 from this chat. Are there older suggestions in the records (for example in feedback.jsonl) that should be added too? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
