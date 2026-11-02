@@ -1,0 +1,93 @@
+# P11 v2 QC r2: district-heat-flex-procurement, issued 22 Oct 2026 22:20 IST (after P12 r1 6fa0bdf; tree 6969c0544f8b)
+
+You are running the full input-bundle QC for ONE task bundle: `district-heat-flex-procurement`. Board id: `0b460a0`. Work only on this bundle. This prompt is saved at `/Users/mac/Desktop/Terminal Bench/master_chat_tasks/prompts/issued/district-heat-flex-procurement/P11_qc_r2.md`; after any compaction re-read it in full.
+
+PATHS (quote every path, they contain spaces)
+- QC kit (live, read-only): "/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Input_Bundle_QC"
+- Original bundle (only copied and diffed, never read): "/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/district-heat-flex-procurement"
+- Bundle under review (you make this copy): "/Users/mac/Desktop/Terminal Bench/QC_2026-10-22_r2/bundles/district-heat-flex-procurement"
+- Report folder: "/Users/mac/Desktop/Terminal Bench/QC_2026-10-21/qc_report/district-heat-flex-procurement"
+- Progress file: "/Users/mac/Desktop/Terminal Bench/QC_2026-10-21/qc_report/district-heat-flex-procurement/_progress.md"
+- Expected kit commit (master's record): `3fb1650b3b478fd02f11745bad0861ba685c1390`. Oracle runs this round: `3` (3 = default; 5 = FINAL round).
+
+STEP 0. Preconditions. Run each once and paste the output.
+1. `git -C "/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness" rev-parse HEAD`. Record it in the report header. If it differs from `3fb1650b3b478fd02f11745bad0861ba685c1390`, write "KIT CHANGED: <sha>" in the header and continue; the live kit files are the authority either way. Read-only git only: never pull, commit, push, checkout or reset there.
+2. Copy: if "/Users/mac/Desktop/Terminal Bench/QC_2026-10-22_r2/bundles/district-heat-flex-procurement" does not exist, `mkdir -p` its parent and `cp -Rp "/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/district-heat-flex-procurement" <that path>`. If it exists, do not copy again.
+3. `diff -rq` between the original and the copy. It must print nothing. If it prints anything, STOP and reply only "copy is stale" with the diff output. Do not open either side to investigate.
+4. Create `_progress.md` if missing, with one unticked line per step: S0, scripts 1-4, gates 01-05, QL table, Step 10, Step 11, final report, compare. Tick each line (`[x]` + IST time) as soon as that step's section is appended to the report.
+
+STEP 0.5. Start Step 10 early. Right after STEP A's reading and scripts 1-4 (before gate 01), do Override 4 steps 1-4 (preflight, copies, launch every run in ONE background nohup chain). Then do gates 01-05 while Docker runs. Read the stored results (Override 4 steps 5-11) only after gate 05. If a script or a gate finds that tests/, solution/ or environment/ is broken so badly the runs are meaningless, still let them finish; never restart them.
+
+STEP A. Read "Input_Bundle_QC/Starter.md" in full, then "Input_Bundle_QC/Final_checklist.md" in full, both from the live kit. Follow Starter.md (scripts 1-4, then the Step 10 launch per STEP 0.5, gates 01-05, Step 10 results, Step 11, final report), skipping nothing, with ONLY the overrides below. The live kit files are the only authority on QC rules: never apply a rule from memory or from an older kit version.
+
+OVERRIDE 0. Tools are always available (this rule survives compaction).
+- Your opencode tools (bash, read, edit, write, glob, grep) ARE available for this whole session, including after any compaction or long turn. A belief that "no tools are available" is a known false failure, not a real one.
+- Never reply that tools are missing, and never stop or pause the QC for that reason, without first making a real tool call: run bash `date`. If that call actually fails, quote its exact error text in your reply. Without a quoted error, keep working.
+- After every compaction, before anything else: run bash `date`, then re-check your state from disk (your vN.md size, mtime and its "## " headings; any Step 10 runs.log with tail -5 and ALL_DONE; your /tmp folders). Do not re-run a finished step, and do not restart a background run that is still going.
+- Read files in pieces of at most 50 KB (read with offset), and read your report before every append.
+- When you write or receive a compaction summary, copy this OVERRIDE 0 into its standing instructions word for word, together with the task name, the paths above and your report version, so the rule and your task survive the next compaction.
+- Addition: after a compaction, also read `_progress.md` and continue from its first unticked line.
+
+OVERRIDE 1. Report only, no fixes.
+- Do NOT fix, edit, rename, delete or reformat anything in the bundle under review, the original bundle, the QC kit, any other bundle, or anywhere else. Do not commit anything.
+- The only files you may write are: the one copy in STEP 0.2, your report file and `_progress.md` (Override 3), the Step 10 copies under /tmp/oracle-qc/district-heat-flex-procurement-<TS>/ and harbor jobs under /tmp/harbor-jobs-qc/district-heat-flex-procurement-<TS>/ (Override 4), your logs and scratch under /tmp/opencode-logs/district-heat-flex-procurement-*/, and the one session-title update in Override 3.
+- Run no real agent. The only harbor agents in this session are oracle, nop and the stub (oracle on the stub copy). Do not set or export OPENAI_API_KEY.
+- Every fail and minor finding must still carry a `Fix:` line stating the best possible fix in one concrete sentence (file, what to change, to what). Describe the fix; never apply it.
+
+OVERRIDE 2. Stay inside this bundle.
+- Never open any of these, they bias the review: anything under "/Users/mac/Desktop/Terminal Bench/master_chat_work/" (beyond the STEP 0 copy and diff), anything under "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/" except this prompt file, anything under "/Users/mac/Desktop/Terminal Bench/QC assigned/", "Input Bundle Generator New/ayush sah tasks/", other bundles under any "QC_*/bundles/", other task folders under any "QC_*/qc_report/", any "QC_*/*.md" summary file, and "/Users/mac/Desktop/Terminal Bench/_tmp_master_tasks_20261020T2214".
+- Never use "QC assigned/Input_Bundle_QC" or "Input Bundle Generator New/ayush sah tasks/_qc/Input_Bundle_QC": they are stale copies and give wrong verdicts.
+- Do not open earlier report versions in your report folder until your new report is fully written (Override 3).
+- Do every gate yourself in this session, one at a time, as Starter.md says. Do not hand gates to subagents.
+- In gate 02, open solution/TRUTH.md last, as Starter.md requires.
+
+OVERRIDE 3. Report file and versioning.
+- Create the report folder if it does not exist. List it. Count only files named exactly vN.md; ignore every other file. If there is no vN.md, your file is v1.md. Otherwise write v(N+1).md. Never overwrite an existing version.
+- Rename this session first thing (before STEP 0): title it exactly `0b460a0`. Run this one bash command:
+  SID=$(opencode db "SELECT s.id FROM session s JOIN part p ON p.session_id = s.id WHERE s.parent_id IS NULL AND p.data LIKE '%Board id: \`0b460a0\`%' ORDER BY s.time_created DESC LIMIT 1" | tail -n +2); echo "$SID"; opencode db "UPDATE session SET title='0b460a0' WHERE id='$SID'"; opencode session list | head -5
+  Check the list shows `0b460a0` on the newest session. If not, note it in the report header and carry on; never retry on another session ID.
+- Header block: bundle name, bundle path, report version, IST date and time, kit commit (STEP 0.1, plus "KIT CHANGED" if so), harbor version, oracle runs this round.
+- Write as you go: after each script run and each gate, append that step's section before starting the next step, then tick `_progress.md`. COMPACT FORM: one line per item that passes (`ID ✅ <short evidence, file:line>`); full quoted evidence and a `Fix:` line only for ❌, 🟡 and ⚠️ items. Do not copy checklists verbatim.
+- When everything is done, put the consolidated report from Starter.md "Final report" at the TOP: verdict line, per-gate summary table, Findings (with Fix: lines), consolidated sign-off. Per-step sections stay below as the evidence appendix.
+- Only after the report is complete, if an earlier version exists, read it and append "Compared with v(N-1)": fixed, still open, new, by check ID.
+
+OVERRIDE 5. QL coverage table (QL rule, 22 Oct 16:00: QC against all kit changes since 2690e960).
+- Run once: `git -C "/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness" diff 2690e960 HEAD -- Input_Bundle_QC/` (read it in pieces). List every check ID added or changed (known so far: K8 litellm pin, H6/TS-30 agent file modes and interpreter switches, G2 judge `mode = "batched"`, the Step 10 owner-only run; the diff is the authority, not this list).
+- Append a "QL coverage" section: one row per changed check: ID, what changed, verdict on this bundle (PASS / FAIL with Fix:), evidence. Every row must also appear in the normal gate sections.
+
+OVERRIDE 4. Step 10 follows the kit's exe_copy.py flow (Final_checklist.md Step 10) exactly, with only these changes.
+The scores are TESTS-ONLY, as the kit says. Use Harbor 0.24.0 and harbor-rewardkit 0.2.1.
+0. Clash rules: never pass `--delete` to harbor (it removes the shared `hb__<hash>` image other sessions may be using); never prune images; take the bundle lock first: `mkdir -p /tmp/opencode-logs/locks && mkdir /tmp/opencode-logs/locks/district-heat-flex-procurement.lock` (if it already exists another session is running Docker on this bundle: wait `sleep 200` and retry, max 30 minutes, then report it); remove the lock dir after your last run finishes.
+1. Preflight as the kit says: `harbor --version`, `docker ps`, list the bundle path. Paste the output. Docker slot: if `docker ps` shows 2 or more harbor task containers from other sessions, wait (`sleep 200`, re-check, max 30 minutes, then start anyway and note it). Never touch other sessions' containers, processes or folders.
+2. Run `echo $(date +%Y%m%dT%H%M%S)-$(openssl rand -hex 2)` once; call it TS and write its literal value into every path (shell variables may not survive between tool calls). Never reuse an older folder.
+   RUN copy:   "/tmp/oracle-qc/district-heat-flex-procurement-<TS>/run/district-heat-flex-procurement"
+   STUB copy:  "/tmp/oracle-qc/district-heat-flex-procurement-<TS>/stub/district-heat-flex-procurement"
+   OWNER copy: "/tmp/oracle-qc/district-heat-flex-procurement-<TS>/owner/district-heat-flex-procurement"
+   Jobs:       "/tmp/harbor-jobs-qc/district-heat-flex-procurement-<TS>"
+   Logs:       "/tmp/opencode-logs/district-heat-flex-procurement-step10-<TS>"
+3. Build the three copies with the kit script, Python run from /tmp with PYTHONDONTWRITEBYTECODE=1:
+   cd /tmp && PYTHONDONTWRITEBYTECODE=1 python3 "<kit>/exe_copy.py" "<bundle under review>" "<RUN copy>"
+   cd /tmp && PYTHONDONTWRITEBYTECODE=1 python3 "<kit>/exe_copy.py" "<bundle under review>" "<STUB copy>" --stub
+   cd /tmp && PYTHONDONTWRITEBYTECODE=1 python3 "<kit>/exe_copy.py" "<bundle under review>" "<OWNER copy>" --owner-only
+   Paste all outputs with exit codes. P is the positive total in the reward.toml line. Exit 1 (REFUSED): never build a copy by hand; record each REFUSED line as a ❌ finding with Fix:, mark Step 10 ⏸️ NOT RUN, continue with Step 11. Exit 2: fix your command and re-run.
+4. Warm the verifier image first (round notes G, "Warm the verifier image"): `docker build` the copy's tests/ (and environment/ if slow) in the background and wait for it, so Harbor's 900 s start limit never covers a cold download. Then: Confirm flags with `harbor run --help`. Then run, each with -o "<Jobs>" and `--env docker -y`, in this order: oracle-1 .. oracle-3 (--agent oracle, RUN copy), nop-1 (--agent nop, RUN copy), stub-1 (--agent oracle, STUB copy), owner-1 (--agent oracle, OWNER copy). If the kit's Step 10 lists any run not named here, add it.
+   Oracle count: the kit asks for five oracle runs. This round runs `3` by Ayush's decision (22 Oct). Write in the Step 10 section and the sign-off: "Oracle x3 per Ayush; the kit asks x5. Step 10 is not kit-complete until a x5 round passes." If 3 is 5, write "Oracle x5 per kit" instead.
+   Runs go strictly one after another in ONE chain (two at once build the same image and stall). Never run in the foreground: `mkdir -p` the logs folder, chain every run inside one `nohup bash -c '...; echo ALL_DONE' > "<Logs>/runs.log" 2>&1 &`. Poll with waits under 4 minutes (`sleep 200; tail -5 <log>`) until ALL_DONE.
+5. For each run read the reward from the trial's result.json `verifier_result.rewards.reward` and verifier/reward.json. A run with `exception_info` or exception.txt errored and has no score. Never read scores from console output.
+6. Expected: every oracle run and owner-1 exactly 1.000; nop exactly 0.000.
+   - Oracle or owner-1 below 1.0: name the failing checks from verifier/reward-details.json. owner-1 below 1.0 while oracle is 1.0 = the verifier cannot read 0600 agent files (H6 / TS-30): ❌ with Fix:.
+   - Nop not 0.0: name the check. No reward.json: quote the error from verifier/test-stdout.txt.
+   - Different oracle scores across runs: non-deterministic checks; find the cause (gate 03 TS-11), do not re-run until they agree.
+7. `diff -rq` between the bundle under review and each copy; paste all three. Allowed: tests/judge.toml (only in the bundle under review), tests/reward.toml, task.toml, environment/Dockerfile; STUB: also solution/ contents; OWNER: also solution/solve.sh. Anything else is a ❌.
+8. Stub judgement (Final_checklist "The stub run"): paste the STUB solve.sh; list every stub-1 check with value not 0 and its weight; if stub-1 errored, edit only the STUB copy's solve.sh to create what the instruction names (empty files, {} for JSON) and run stub-2, reporting each attempt; judge the score as a share of P against the CL-2 forgery price from gate 05. A stub near a genuine partial score, or any content check that paid, is ❌ with Fix:.
+9. Cleanup: delete only "/tmp/oracle-qc/district-heat-flex-procurement-<TS>". Keep jobs and logs. Confirm the bundle under review is unchanged (`diff -rq` against the original prints nothing) and no __pycache__ exists in the bundle or the kit.
+10. Step 10 section: table of agent, run and reward (oracle-1..N, nop-1, stub-1 and retries, owner-1); failing checks by name; stub paid checks and judgement; stub solve.sh; the three exe_copy outputs; the three diffs; jobs folder path.
+11. State plainly in Step 10 and the sign-off: tests-only grading per the kit (judge.toml validated, not executed; no OpenAI key; stub covers the test channel only); network opened and the OpenHands pre-bake dropped in the copies only; the oracle-count line from step 4.
+
+WHEN DONE: write `/Users/mac/Desktop/Terminal Bench/QC_2026-10-21/qc_report/district-heat-flex-procurement/result_0b460a0.json`: {"sha":"0b460a0","slug":"district-heat-flex-procurement","step":"P11","status":"DONE|NOT_RUN|STOPPED","verdict":"","report":"<path>","fail":N,"minor":N,"warn":N,"rewards":{"oracle":[],"nop":x,"stub":x,"stub_share_P":x,"owner":x},"ql_rows":{"pass":N,"fail":N},"kit":"<sha>"}. It must parse as JSON. Then reply in the terminal with only these lines:
+1. the verdict line;
+2. counts: ❌ N, 🟡 N, ⚠️ N;
+3. rewards: oracle-1..N, nop-1, stub-1 (share of P), owner-1;
+4. QL coverage: rows PASS / FAIL;
+5. the full report path.
+No offers, no fixes.

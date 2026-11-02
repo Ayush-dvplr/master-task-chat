@@ -1,0 +1,29 @@
+{
+  "module": "core",
+  "changed_functions": [
+    "core.executor._arrive",
+    "core.executor.execute_plan",
+    "core.planner._better",
+    "core.planner._enumerate_paths",
+    "core.planner.plan_migration",
+    "core.records.FieldView.from_payload",
+    "core.records.fill_mode",
+    "core.records.null_counts_as",
+    "pipeline._Run._admit",
+    "pipeline._ordered",
+    "pipeline._receipt_mismatches",
+    "pipeline._replace_tokens"
+  ],
+  "notes": [
+    "core.records.FieldView.from_payload kept an explicit null out of the state map, so a null field looked absent (N1); it now maps null to the null state.",
+    "core.records.null_counts_as fell back to 'absent' for a field whose null_counts_as column is empty; N2 makes it fall back to [presence] explicit_null of null_semantics.ini.",
+    "core.records.fill_mode ignored the fill column of field_policy.tsv; N3 and N4 give that column priority over [fill] mode.",
+    "core.planner._enumerate_paths checked every prerequisite on the record as received, refused to revisit a schema and enumerated paths one by one; it is now a label-setting search over (schema, field state) that checks prerequisites on the state reached at that point of the plan (M6), may pass through a schema more than once (M7) and stays fast on graphs with astronomically many paths (K14).",
+    "core.planner._better broke a cost tie by plan length; M8 breaks it by comparing the lists of edge ids element by element.",
+    "core.executor.execute_plan applied every correction up front and never checked a prerequisite; corrections are now applied on the first arrival at their pinned schema (C4, new helper core.executor._arrive) and a failing prerequisite stops the run with status failed, code E_PREREQ_FAILED, the edge that failed and the steps completed (M11).",
+    "pipeline._ordered returned the feed order; K13 processes lines in the received_seq order of their batch, then by feed line number.",
+    "pipeline._Run._admit keyed the replay identity by the partner as written instead of the canonical id (K16, P4) and only made a record the holder of its identity when execution started; every record that passes the partner stage is now a candidate holder.",
+    "pipeline._replace_tokens compared payload values to the null tokens after trimming them; N6 asks for an exact match.",
+    "pipeline._receipt_mismatches skipped the fingerprint of a record rejected after the partner stage, so its batch receipt never matched; the XOR now covers every record of the batch, taken on the line as received (K13)."
+  ]
+}

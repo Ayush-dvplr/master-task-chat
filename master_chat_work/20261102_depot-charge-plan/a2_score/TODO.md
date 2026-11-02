@@ -1,0 +1,12 @@
+# TODO af2d811 depot-charge-plan a2 score (scratch: /Users/mac/Desktop/Terminal Bench/_runs/20261102/depot-charge-plan/a2score-20261102T0028)
+- [x] 0 rename session (opencode ses_e678610aeffenqPVaW5a8wu8TR listed)
+- [x] 1a OUT/TODO.md, tree sha 205cb85281c7 (matches)
+- [x] 1b copy a2 out -> OUT/a2_out + a2_out_sha256.txt
+- [x] 1c a2 on shipped data == solve.py on shipped data, 9/9 docs equal (and == delivered reports)
+- [x] 2 A2_RULES.md rule trace + a2 fuzz coverage (trajectory)
+- [x] 3a (ALL_DONE: 1500 MATCH) (running: scratch/run3a.sh pid in logs/run3a.pid; done when logs/fuzz_3a_summary.txt has ALL_DONE) fuzz a2 vs ref: shipped-like/hidden/hidden_reorder/large/uplift x300
+- [x] 3b (ALL_DONE: 780 MATCH, blank 20 DIFF ref bug, offgrid_first 12 MATCH) (running: scratch/run3b.sh pid logs/run3b.pid; done when logs/targeted_summary.txt has ALL_DONE) targeted.py 13 mutators x60 seeds + blank_lines x20 (smoke 28 folders: all MATCH except blank_lines = ref line-number bug)
+- [x] 4 DIFF reproducers (D1 blank_lines -> scratch/keep/blank_lines_1)
+- [x] 5 TIMELINE.md (judge 10/44 itemised)
+- [x] 6 A2_SCORE.md + result_af2d811.json
+- [x] 7 no child procs left, rename again done, final reply

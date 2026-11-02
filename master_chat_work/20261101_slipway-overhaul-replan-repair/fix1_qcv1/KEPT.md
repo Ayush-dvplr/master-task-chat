@@ -1,0 +1,8 @@
+# KEPT warns, slipway-overhaul-replan-repair, fix-v1 451146f
+
+Both warns stay by Ayush's route-1 choice of 1 Nov 17:38 ("A (recommended)": fix the 11 fails and 3 minors, keep TS-20 and TS-23 as warns).
+
+| finding | file:line now | kit line it rests on | reason kept |
+|---|---|---|---|
+| TS-20 (warn) | tests/test_output.py:6041-6052 (twelve `package_crosswalk_*_exact` registrations, weight 5 each; QC v1 cited :5836-5847 before the shift) | Input_Bundle_QC/03_Tests_QC.md:51 (TS-20, weights map to importance) and :135 ("warn: ... judgment calls"; QC v1 v1.md:66 "concentration is a design call for the tasker") | The crosswalk is the lever. spec_stage_p01_identifier_and_revision.md:19-21 says every job identifier, in whichever paper it stands, goes through identifier_crosswalk.tsv before anything else reads it, so the held-out crosswalk rounds grade a core rule of the deliverable's first stage. It now holds 60 of 112 positive points (53.6%, was 60/110 = 54.5%), still a weight-5 core outcome against weight-3 minted rounds. Ayush 17:38: keep. |
+| TS-23 (warn) | tests/test_output.py:6021-6069 (49 registrations: 32 positive weighing 112, 17 negative weighing -63) | Input_Bundle_QC/03_Tests_QC.md:62 (TS-23, "at most 35 (warn)") and :135 ("warn: ... TS-23 cap above 35") | The count rose from 47 to 49 because TS-13 asked for the package shape check to be split into its three observables (layout, unedited shipped suite, stdlib-only imports). All the fail-level parts of TS-23 still hold: 49 >= 10, both positive and negative checks exist, weights are not all the same, and 63 <= 112. Only the 35 cap warn remains. Ayush 17:38: keep. |

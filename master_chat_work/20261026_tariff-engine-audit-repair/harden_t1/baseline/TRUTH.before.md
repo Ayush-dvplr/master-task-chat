@@ -1,0 +1,216 @@
+# TRUTH.md - tariff-engine-audit-repair
+
+## Defect
+
+`/app/repo` holds `tariff`, a stdlib-only Python package that rates utility meter reads
+into invoices: it parses `meter_reads.jsonl`, checks each read, rates the accepted
+quantity of each meter through its plan's tiers, adds a standing line per meter, applies a
+commitment credit and renders one JSON document of invoices and exceptions.
+`/app/ci/api_contract.md` is the single document that states every rule. The shipped code
+drifted from it in twelve places, the packaging metadata disagrees with
+`/app/ci/package_manifest.json`, and two assertions in `/app/repo/tests/test_visible.py`
+were written against the drifted behaviour. The contract says that when the code, its
+docstrings, its README or its visible tests disagree with it, the contract wins. The
+deliverable is the repaired repository as `/app/out/patched-repo.zip` plus six JSON
+reports; every invoice figure is judged on the package inside the archive, run on the
+shipped files and on fresh corpora.
+
+1. (focal, lever N1) `billing_periods.csv` carries an `allowance` column that the shipped
+   package ignores. The Definitions entry "Energy share" gives each energy line of the
+   account an equal part of the allowance, capped at the line's exact value, and leaves
+   what a line cannot take unshared. A different paragraph, Amounts, shares the unshared
+   rest again in equal parts among the energy lines not yet at zero, as often as some
+   stays unshared. Shipped and regression allowances are always taken in the first share;
+   on half of the fresh, rescaled, relocated and rotated accounts the allowance needs at
+   least three shares, and stopping after one or two leaves a different cent.
+2. (focal, lever N2) `core.standing_line` divides by 30. The Definitions entry Month is a
+   calendar month, and the Standing lines paragraph sums `standing_charge` x active days
+   in each month / days in that month over every month holding an active day of the
+   billing period. Shipped periods are whole calendar months or lie inside one month, so
+   the calendar month of `start` gives the same figure there; fresh, rescaled and api
+   periods start mid-month and cross a month end (27, 29, 32, 33 or 34 days).
+3. (focal, lever N3) `core.rate_tiers` fills the tiers from zero for every meter. The
+   Definitions entry "Account position" numbers the account's accepted units over its
+   meters in ascending `meter` order, and the Energy lines paragraph places tiers on that
+   position, so a later meter starts where the earlier meters stopped. Every shipped and
+   regression account stays within tier 1 in total; relocated, rotated and api accounts
+   cross a tier boundary only through the sum of their meters.
+4. (focal, uncounted gate) `parser._quantity` turns a quoted integer such as `"37"` into
+   37 with `int(str(value).strip())`. The field block says `quantity` is a JSON integer,
+   0 or more, and `malformed_quantity` is a read whose quantity is not what that rule
+   allows. The Conventions trim rule covers text values; it never turns a string into a
+   number.
+5. (focal, uncounted gate) `core` works in binary floats, keeps line amounts unrounded and
+   rounds only the total. The contract computes from the decimal values as written,
+   rounds each line amount half to even to 0.01, and sums rounded lines. Every fresh
+   account that does not need a third share has at least three half-cent lines.
+6. (focal, uncounted gate) `report.build_invoices` builds the credit base from every
+   numeric quantity in the read file. The contract computes the credit on the subtotal.
+7. (focal) `core.rate_tiers` treats `up_to` as exclusive; the contract includes it.
+8. (focal) `parser.classify` never reports `outside_period`.
+9. (focal) exceptions are sorted by account then read id; the contract sorts by `read_id`.
+10. (focal) amounts are rendered as JSON numbers; the contract writes two-decimal strings.
+11. (focal) `python -m tariff` on a directory missing an input dies with a traceback; the
+    contract wants no stdout, `missing input: <file name>` on stderr, exit status 2.
+12. (focal) `tariff.VERSION` and `pyproject.toml` say `2.3.9`, `>=3.13` and depend on
+    `requests`; the manifest says `2.4.1`, `>=3.12` and stdlib only.
+13. (drift) The README and the `standing_line` docstring describe a 30-day month and a
+    credit on "metered consumption". Both are corrected with the code.
+14. (trap) `test_partial_period_standing_charge` asserts `8.68` for a 14-day stay in
+    February (18.60 x 14 / 30); the contract figure is `9.30`.
+    `test_commitment_credit_base` asserts credit `0.99` and total `47.75`; the contract
+    figures are credit `0.00` and total `48.74`. The contract says to correct the
+    assertions, keep every test function, and list them in `corrected_tests`.
+15. (focal, lever L11) `report.build_invoices` looks the plan up as
+    `card["plans"][period["plan"]]`. 503 of the 2000 shipped billing rows carry in `plan`
+    a code such as `T3415` that is no key of `rate_card.json`; each code is listed in the
+    `codes` list of exactly one plan (`rate_card.json` lines 7-10, 29-31, 50-53, 72-74, 93,
+    108-110, one listed code padded with a space). The contract defines Plan as the entry
+    named by the account's `plan` and has no sentence about codes; the shipped card is the
+    only thing that settles which entry a code names. The invoice `plan` field is the row's
+    trimmed `plan` value (contract invoice shape). Every hidden corpus plants fresh codes;
+    recoded and renamed accounts are named by code on at least 40% of their rows.
+
+## Load-bearing work
+
+- Read the whole contract, including the Definitions list, before touching code. Three
+  rules live in a definition and are applied in a later paragraph: Energy share and
+  Amounts, Month and Standing lines, Account position and Energy lines.
+- Share the allowance as a loop: equal parts capped at each line's remaining exact value,
+  repeated over the lines still above zero until nothing is left or no line remains.
+- Prorate standing per calendar month: split the meter's active days in the billing
+  period by month and divide each part by that month's length; round the sum once.
+- Resolve the plan: the entry whose key equals the trimmed `plan` value, else the one
+  entry whose trimmed `codes` list holds it; write the trimmed value as the invoice `plan`.
+- Carry the account position across the meters in `meter` order when placing tiers.
+- Re-type `quantity` strictly: `type(value) is int and value >= 0`.
+- Work in exact decimals or fractions, round each line half to even at 0.01.
+- Settle on the subtotal: total = subtotal x (1 - credit_rate) rounded half even.
+- Correct the two assertions, keep all 13 test functions, run the visible suite, replay
+  the 2000 dispute cases through the repaired package, and zip the repo per
+  `build_config.json` (stored, sorted members, no directory entries, timestamp
+  2015-08-24, mode 0664, no `__pycache__`).
+
+## Verification
+
+The test channel registers 37 positive checks worth 157 points and 2 negative checks,
+`negative_hardcoded_sample_answers` (-5) and `negative_visible_test_removed` (-3).
+Every check extracts `/app/out/patched-repo.zip` and runs the package inside it as
+`nobody` with `setpriv`.
+
+- Archive and metadata (3), delivered visible tests pass (3), corrected test names (3),
+  regression rows (3), module notes (1), summary (1), repair report and failing cases (1).
+- Shipped files: exceptions (3), standing lines (5), energy lines with subtotal, credit
+  and total (5).
+- Fresh corpus of 30 accounts (allowance re-shares and month-crossing periods), three of
+  them reusing shipped account ids: exceptions (3), energy lines, standing lines,
+  subtotals, credits and totals (5 each).
+- Rescaled (fresh rows shuffled, one plan's first rate times 1.0375): energy lines,
+  standing lines, subtotals, credits with totals (5 each).
+- Relocated (allowance re-shares and account tier crossings; repo and data in renamed
+  directories, `python -I` from a foreign working directory) and rotated (row order
+  rotated in three files): lines, subtotals, credits with totals (5 each).
+- Api (45 accounts through `tariff.build_invoices`, month-crossing periods and account
+  tier crossings): energy lines, standing lines, subtotals, credits with totals (5 each).
+- Recoded (30 accounts, codes freshly drawn and planted in the card; at least 40% of
+  rows name the plan by a code, one padded) and renamed (fresh codes in card and billing
+  together, plan order rotated, rows rotated): lines, subtotals, credits with totals
+  (5 each).
+- Missing input named (3) and two runs byte-identical (3).
+
+Every corpus generator asserts its input bounds before use: periods of 1 to 62 days that
+cross a month end or are whole calendar months, two-decimal commitments and allowances,
+allowances that need at least three shares where planted and 0.00 elsewhere, accounts
+that cross tier 1 only through their meters where planted and stay inside it elsewhere,
+at least three half-cent lines per account where no allowance is shared, a credit account
+whose subtotal ends in 25 or 75 cents, an account whose subtotal equals its commitment,
+a quoted quantity in every account, and in the recoded families unique codes disjoint
+from every key under case and punctuation folding, a plan with two codes, two plans whose
+codes share a three-character stem, a plan without codes and a padded code.
+
+Measured on real runs (test points of 157): the oracle scores 157. An unknown plan value
+falling to the first or the last plan scores 117; a key-only lookup crashes on the
+shipped data. Allowance shared in one or in two shares scores 97; allowance ignored 89;
+standing by the month of `start` 112; standing by the period length 99; tiers per meter
+112; a quoted-integer coercion 41. One energy line off by 0.01 on one recoded or fresh
+account scores 127; on one api account 142; on one shipped code-named account 152. The
+judge channel carries 14 criteria, 33 positive points.
+
+## Root cause
+
+The package was written against the sample month, where every period lies inside one
+calendar month, no account passes its first tier, every allowance is taken in one share
+and no line lands on a half cent. Each shortcut (a fixed 30-day month, tiers per meter,
+no allowance, floats rounded at the end, a credit base from the raw file, a lenient
+integer parse) gives figures that look plausible there. Visible tests were written from
+the code's own output, which froze two shortcuts into assertions.
+
+## Solution shape
+
+`solution/solve.py` writes corrected `parser.py`, `core.py`, `report.py`,
+`__main__.py` and `__init__.py`, fixes `pyproject.toml` and the README sentences, edits
+the two assertions by exact text replacement, runs the visible suite with
+`python -m unittest discover`, replays every dispute case, writes the archive and the six
+reports, and runs a self-check that recomputes every shipped invoice and exception with an
+independent `fractions.Fraction` model, probes a month-crossing period, a half-cent line,
+an altered data copy, an allowance that needs a third share and an account whose meters
+cross a tier together, scans the package for bare handlers and long functions, and prints
+`check R1 ok` through `check R8 ok`, `check R12 ok`, `check R13 ok` and `check R14 ok`
+(two own billing rows that name their plan by a listed code, one of them padded,
+recomputed and compared).
+
+## Ordered plan
+
+1. Read `/app/ci/api_contract.md` in full, then `tests/test_visible.py`,
+   `failing_tests.log`, `regression_cases.jsonl` and the package.
+2. Fix `parser`: strict quantity type, `outside_period` after `inactive_meter`,
+   duplicates against earlier accepted reads only.
+3. Fix `core`: exact arithmetic, account-position tiers with inclusive `up_to`, calendar
+   month standing, allowance sharing until nothing can be taken, per-line half-even
+   rounding, subtotal-based credit.
+4. Fix `report`: decimal loading including `allowance`, plan resolution by key or listed
+   code, accepted usage only, read-id sort, amount strings.
+5. Fix `__main__` missing-input handling, `VERSION`, `pyproject.toml`, README wording.
+6. Correct the two assertions; run the visible suite.
+7. Construct a month-crossing period, a half-cent line, a three-share allowance and a
+   two-meter tier crossing by hand and compare with an independent recompute.
+8. Replay the disputes, write the reports, zip the repo per `build_config.json`.
+9. Re-extract the archive and run it from a foreign directory before replying.
+
+## Pitfalls
+
+- Sharing the allowance once, or twice, instead of until nothing is left.
+- Dividing standing by the length of the start month or of the billing period.
+- Restarting the tiers for each meter.
+- Falling back to a default plan, or comparing codes untrimmed, when `plan` is no key.
+- Keeping `int(str(q).strip())` because of the trim rule; `isinstance(q, int)`.
+- `round(float, 2)`, `Decimal(float)` or `ROUND_HALF_UP`.
+- Rounding the credit and subtracting it from the subtotal.
+- Making the code match the two visible assertions.
+- Validating the working tree instead of the delivered archive.
+- Leaving `__pycache__` or a `.pyc` in the archive.
+
+## Provenance
+
+```yaml
+uuid: null  # task.toml carries no canary_guid or uuid field
+instance_id: tariff-engine-audit-repair
+task_name: terminal-bench/tariff-engine-audit-repair
+fix_patch_sha256: 25c71b6c701c5cdc752f2284c1d929d0ca149547952669c1fb7c8b4ac00dc680  # sha256 of solution/solve.sh
+solve_py_sha256: 3e5ba89d665eecc5ff9c04b1383e648c5e2523150e77dc1f057cd69cf1dec751  # sha256 of solution/solve.py
+language: python
+golden_score_measured: 1.0
+golden_score_channel_a_pct: 100.0
+golden_score_channel_b_pct: null
+golden_score_runs: 3
+golden_score_trial_id: plain__Ge4Csge
+golden_score_verified_by: >
+  harbor 0.24.0 oracle agent, three runs on 2026-10-25 (harden round 1),
+  tests channel reward 1.0 each; owner-only copy 1.0; nop agent reward 0.0.
+caveat: >
+  The test channel carries 37 positive checks worth 157 weight and 2 negative
+  checks worth -8 weight. The judged channel carries 14 criteria worth 33
+  positive points and 13 negative points. tests/reward.toml divides each
+  channel's weighted sum by its positive total and gives each half of the
+  reward.
+```

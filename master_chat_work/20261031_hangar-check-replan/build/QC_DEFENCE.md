@@ -1,0 +1,65 @@
+# QC_DEFENCE af5dddf hangar-check-replan
+
+One entry per lever and per cascade. Rule ids per entry; quoted live rule; why it passes; fallback (QC_FIX_PLAYBOOK_v3 row, DO column only).
+
+## R1 shared overtime pool + compression
+- Rule ids: IN-15, IN-16, IN-17, AL-1, AL-27, CL-4, TS-19, TS-20, AL-28.
+- Live rule (docs/overtime_policy.md): "The fleet has one overtime pool for the season: the overtime shifts of all compressed checks at all four bases together may not exceed `overtime_pool_shifts` in fleet_limits.toml." Compression: "A check may be shortened by up to `max_compress_days` of its type; each day taken off uses `overtime_shifts_per_day` shifts."
+- Why it passes: IN-15 the rule is stated in the governing file; IN-16 one reading (a sum over the fleet bounded by one number); IN-17 no sentence says the pool binds or that bases interact (the instruction states only the job); AL-1 no unstated deliverable property; AL-27 every hidden corpus plants a binding pool (BRANCH_FIRE); TS-19 hidden pools and compress limits stay inside the bounds stated in docs/data_conventions.md; CL-4 whole-document exactness is stated in instruction.md, exemption FC:491 "An instruction that states out loud that only an exact match counts has set that bar deliberately", one-fact-wrong score reported in COST_TABLE.
+- Fallback: IN-16 row DO: add one general settling clause to docs/overtime_policy.md ("the pool is shared by every base; shifts are counted once per compressed day"); AL-27 row DO: add a hidden corpus that constructs the binding case; never state that the pool binds.
+
+## R2 four-term order with the moved term
+- Rule ids: IN-15, IN-16, IN-17, AL-1, AL-27, CL-4, TS-13, TS-26.
+- Live rule (docs/planning_policy.md): "Plans are compared on these terms in order, and a plan is better when it is smaller on the first term where they differ: first, ...; second, ...; third, the number of moved requests, where a request is moved when it is scheduled with a start other than its published start in published_plan.csv, or deferred."
+- Why it passes: one reading (start equality with a named field); no sentence says early starts are allowed but costly; the shipped data has available_from equal to the published start, so the shipped input does not establish the branch and no IN-17 sentence announces it.
+- Fallback: IN-16 DO: REBUT quoting 01:46 with the 3-part check (one field, one comparison, one count); AL-1 (4b): EVIDENCE_MAP row naming published_plan.csv column `published_start`; never add an example where readings differ.
+
+## R3 deferral penalty and reasons
+- Rule ids: IN-15, IN-16, IN-17, AL-27, DS-25, CL-4.
+- Live rule (docs/deferral_policy.md): "Any open request may be deferred to next season instead of being scheduled. A deferred request adds the `deferral_penalty` of its class to the first term and counts as moved. Its reason is `no_slot` when the check cannot finish by season end at any compression on a line with no other check, and `plan_trade` otherwise."
+- Why it passes: DS-25 both literals are in the governing file; IN-16 the reason split is a determinate test on stated fields; AL-27 every hidden corpus plants a `plan_trade` deferral.
+- Fallback: AL-27 DO: add a hidden fixture that forces a `plan_trade`; IN-16 DO: REBUT with the 3-part check; never name which request is deferred.
+
+## S3 tie-break (supporting)
+- Rule ids: IN-16, DS-20, AL-27, CL-4.
+- Live rule (docs/planning_policy.md): "When plans tie on all three terms, compare the list of start days of every request in request_id order (a deferred request counts as the day after season end), followed by the list of finish days in the same order; the smaller list at the first difference wins."
+- Why it passes: a total order on distinct plans; DS-20 brute-force check over 400 tiny instances (proto/brute.py) and check_exact.py per-record diff.
+- Fallback: DS-20 DO: fix the oracle; IN-16 DO: REBUT (total order, one reading).
+
+## Cascade C1: one plan feeds every output (COUPLING)
+- Rule ids: TS-13, TS-26, CL-4, AL-28, G1a.
+- Live rule (docs/output_schema.md): "Every scheduled check, base total and fleet total is taken from the single season plan that is optimal under the stated order for the whole fleet, including the shared overtime limit."
+- Why it passes: TS-13 each check grades one view of one corpus (whole document per view, district-heat PASS); TS-26 the shared `fleet_overtime_used` copy is masked outside the summary owner, so no two checks read the same observable with the same logic; CL-4 FC:491 exemption.
+- Fallback: TS-13 DO: split the regions view into one check per base file; TS-26 DO: name the observable and narrow one check.
+
+## Cascade C2: rejects feed the planning set
+- Rule ids: DS-25, IN-16, TS-19.
+- Live rule (docs/data_conventions.md): reject reasons `unknown_tail`, `retired_tail`, `bad_date`, `bad_duration`, `unknown_base`, `unknown_check_type`, `duplicate_request`, `no_published_start`; first row of a duplicated request_id kept.
+- Why it passes: every literal stated; hidden generators draw rejects only from those forms; no contract sentence lists the malformed values of a typed field (LV-ENUM).
+- Fallback: TS-19 DO: add the grader check on the hidden forms; DS-25 DO: state the missing literal once in docs/data_conventions.md.
+
+## Judge (probe band)
+- Rule ids: JD-7, JD-8, JD-15, JD-18, AL-28.
+- Each probe is shown by a solve.sh self-check stage (`check <id> ok` + witness); JUDGE_MAP lists it. No criterion reads a test observable. One J4 conduct criterion. Negatives one act each, disjoint.
+- Fallback: JD-7 DO: add the self-check stage to solve.sh; JD-8 DO: delete the overlapping criterion and renumber; JD-15 DO: relabel type.
+
+## Lessons for the master
+- none yet | no change: design stage
+
+## Redesign 1 (Office package current text)
+- Governing text: docs/data_conventions.md "Word files" paragraph (ECMA-376 package; officeDocument relationship names the main part; w:del and w:moveFrom are not current text, w:ins and w:moveTo are; first mc:Choice whose Requires the reader understands, else mc:Fallback; reader understands `w` only). Each trap applies that stated contract; none relies on an unstated convention (C_qc FINDINGS: contract-grounded mechanisms pass QC).
+- Shipped packages plain; the profile sentence is the whole statement (no list of the trap kinds, no hint which corpora carry them; W1).
+- Grading stays per field and per family (CL-4 proportional): a slip loses the families its corpus's wrong number moves, never a whole-corpus cliff.
+- Every slip parses (digits split so each wrong reading is still a whole number), so losses are WRONG, not crash or timeout.
+
+## Build checks (route 1, 01 Nov): one row per new or changed check group
+
+| check group | rule ids | why it passes | safe fallback if QC objects |
+|---|---|---|---|
+| hN_settlement_per_check, hN_settlement_by_base_and_segment, hN_settlement_summary (h1..h6, w5) | IN-15, IN-16, IN-17, DS-21, TS-19, TS-23, TS-26, CL-2, CL-3 | settlement order, used vs granted, settled = cost minus credit are each one sentence in overtime_policy.md:12-27; shipped shows the field set (grants 74 exceed use 64, so the allowance covers every check's overtime and the stated sentence decides the binding cases); three checks read different output files and different fields (per row, per group file, summary object), so no two share an observable; per-field compare with first differing path, no whole-file hash | merge per-check and group checks of one corpus into one w5 check (lever share stays above 70%) |
+| hN_plan_fields (w3) | IN-15, DS-21, TS-23, CL-3 | plan rules stated in planning_policy.md, overtime_policy.md:3-10, deferral_policy.md; check_exact.py (every start day) agrees with the oracle on shipped; UNIQUENESS.md shows the order is total | lower to w1 each |
+| h1/h2 _base_and_segment_with_no_requests (w1) | IN-15, IN-17, CL-3, TS-26 | universe sentence output_schema.md:5-8 names zero counts and null first/last; graded only on the empty file and its summary rows, separate from live files | fold into hN_settlement_by_base_and_segment |
+| h1_data_quality (w3) | IN-15, DS-21, TS-26 | reasons, order and line numbering in data_conventions.md:29-46; shipped has one row of each reason; h3/h5 X1 reused id of an ignored row is planned per "earlier read row" (data_conventions.md:31-36) | drop X1 from h3/h5 (blind e8e9c82 keeps 129) |
+| changed_allowance_grants, revised_availability_removed (mutations, w3) | TS-19, TS-23, AL-2, CL-2 | each rewrites one shipped input and reruns; G6 counted only where the plain hidden exact also holds; both fail for the matching mutants (RULE_COVERAGE.md) | lower to w1 |
+| negative_hardcoded_sample_answers, negative_reads_check_files (-5 each) | AL-27, AL-28, JD-5, TS-16 | silent on oracle and on 17 honest wrong programs (SELF_CHECKS.md); distinct act from judge R14 (source text vs run-time opening) | keep only the validator-required hardcoded negative |
+| judge probes R1-R9, J4 R10, J6 R11, J10 R12, completion R13; negatives R14-R17 | JD-5, JD-8, AL-2 | every probe is shown by solve.sh `check Pn ok` with a witness line; none restates a test-graded field (R11 lists deferred ids, a final-answer act); probe share 69% | drop the probe QC names and rescale |

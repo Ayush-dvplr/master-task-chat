@@ -1,0 +1,35 @@
+cd /app/out && python3 -m py_compile transform.py && wc -l transform.py && grep -n "timedelta\|import" transform.py | head -20 && sed -n '455,475p' transform.py
+
+=== OBSERVATION ===
+632 transform.py
+4:import argparse
+5:import bisect
+6:import configparser
+7:import json
+8:import os
+9:import sys
+10:import xml.etree.ElementTree as ET
+11:from datetime import datetime, timezone
+12:from decimal import ROUND_HALF_EVEN, Decimal
+13:from fractions import Fraction
+    for line in accepted:
+        plan, segment = in_force(timelines, line["account_id"], line["timestamp"])
+        key = (groups[line["account_id"]], line["product"])
+        counter = counters.get(key, 0)
+        _tier_from, tier_number, rates = pick_tier(rate_tiers[line["product"]], counter)
+        rate = rates[segment]
+        counters[key] = counter + line["units"]
+        line["plan"] = plan
+        line["segment"] = segment
+        line["tier"] = tier_number
+        line["unit_rate"] = f"{rate:.4f}"
+        line["charge_cents"] = cents(
+            (Decimal(line["units"]) * rate).quantize(CENT, rounding=ROUND_HALF_EVEN)
+        )
+        line["credit_cents"] = 0
+        line["true_up_cents"] = 0
+
+    region_totals = {}
+    for region in REGIONS:
+        pool, minimum = pools[region]
+        pool_cents = cents(pool)

@@ -1,0 +1,41 @@
+cd /app/data && python3 - <<'EOF'
+import re, collections, json
+def show(name, accts, ids, ts):
+    print(name, 'accts weird:', collections.Counter(a for a in accts if not re.fullmatch(r'AC\d+', a.strip())).most_common(8))
+    print('  dups:', len(ids)-len(set(ids)), 'ts sample:', ts[:2])
+c=[l.split(',') for l in open('collector_central.csv',encoding='utf-8').read().splitlines()[1:]]
+show('central',[r[2] for r in c],[r[0] for r in c],[r[1] for r in c])
+e=[l.split('\t') for l in open('collector_east.tsv',encoding='utf-8').read().splitlines()[1:]]
+show('east',[r[2] for r in e],[r[0] for r in e],[r[1] for r in e])
+n=[json.loads(l) for l in open('collector_north.jsonl',encoding='utf-8')]
+show('north',[str(o['acct']) for o in n],[o['id'] for o in n],[o['at'] for o in n])
+s=open('collector_south.txt',encoding='latin-1').read().splitlines()
+show('south',[l[24:34] for l in s],[l[0:10] for l in s],[l[10:24] for l in s])
+w=open('collector_west.log',encoding='utf-8').read().splitlines()
+def kv(l):
+    d=dict(t.split('=',1) for t in l.split(' ')[1:] if '=' in t); d['ts']=l.split(' ')[0]; return d
+wd=[kv(l) for l in w]
+show('west',[d['acct'] for d in wd],[d['rec'] for d in wd],[d['ts'] for d in wd])
+print('west offsets', collections.Counter(re.search(r'([+-]\d\d:\d\d|Z)$',d['ts']).group(1) if re.search(r'([+-]\d\d:\d\d|Z)$',d['ts']) else d['ts'] for d in wd))
+print('north at formats', collections.Counter(re.sub(r'\d','9',o['at']) for o in n))
+print('central ts formats', collections.Counter(re.sub(r'\d','9',r[1]) for r in c))
+print('south ts formats', collections.Counter(re.sub(r'\d','9',l[10:24]) for l in s))
+print('east epoch weird', [r[1] for r in e if not r[1].strip().isdigit()][:5])
+EOF
+
+=== OBSERVATION ===
+central accts weird: []
+  dups: 32 ts sample: ['2026-08-30 01:50:37', '2026-08-30 02:02:16']
+east accts weird: []
+  dups: 32 ts sample: ['1788049772', '1788096870']
+north accts weird: []
+  dups: 32 ts sample: ['2026-08-30T04:48:22Z', '2026-08-30T07:12:42Z']
+south accts weird: []
+  dups: 32 ts sample: ['20260830024421', '20260830101404']
+west accts weird: []
+  dups: 32 ts sample: ['2026-09-01T06:00:55+09:00', '2026-09-01T02:32:56+05:30']
+west offsets Counter({'+01:00': 576, '+09:00': 560, '-04:00': 554, '-07:00': 535, '+05:30': 508, '+00:00': 499})
+north at formats Counter({'9999-99-99T99:99:99Z': 3232})
+central ts formats Counter({'9999-99-99 99:99:99': 3232})
+south ts formats Counter({'99999999999999': 3232})
+east epoch weird []

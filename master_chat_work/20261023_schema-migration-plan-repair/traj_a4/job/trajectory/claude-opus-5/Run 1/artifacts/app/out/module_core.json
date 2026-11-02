@@ -1,0 +1,33 @@
+{
+  "module": "core",
+  "changed_functions": [
+    "core.executor._arrive",
+    "core.executor.execute_plan",
+    "core.planner._Machine.__init__",
+    "core.planner._Machine._compile",
+    "core.planner._Machine._drop_caches",
+    "core.planner._Machine.advance",
+    "core.planner._Machine.mask",
+    "core.planner._Machine.node",
+    "core.planner._Machine.out",
+    "core.planner._Machine.state_of",
+    "core.planner._Machine.states_of",
+    "core.planner._machine_for",
+    "core.planner._path_of",
+    "core.planner.plan_migration",
+    "core.records.FieldView.from_payload",
+    "core.records.fill_mode",
+    "core.records.null_counts_as",
+    "pipeline._Run._admit",
+    "pipeline._ordered",
+    "pipeline._receipt_mismatches",
+    "pipeline._replace_tokens"
+  ],
+  "notes": [
+    "core/records.py kept explicit nulls out of the field view and let an empty null_counts_as or fill column fall back to the wrong default (N1 to N4).",
+    "core/planner.py enumerated simple paths, checked every prerequisite against the record's first state and tie-broke on plan length; it now searches (schema, field state) by cost level and tie-breaks on the edge id lists themselves (M6 to M9, K14). The shipped helpers _stand_in and _advance are the readable reference for the state transitions _Machine compiles.",
+    "The two helpers of the old path enumeration, core.planner._better and core.planner._enumerate_paths, are gone with it; they are not listed in changed_functions because they no longer exist.",
+    "core/executor.py applied every correction up front and never checked a prerequisite; corrections are now applied on first arrival at their pinned schema and a failing prerequisite stops the run (C4, M11).",
+    "pipeline.py processed the feed in line order, keyed replay identity on the raw partner value, trimmed payload strings before matching null tokens, only held an identity when execution started, and skipped the fingerprints of records that failed the partner stage in the batch receipts (K13, K16, N6)."
+  ]
+}

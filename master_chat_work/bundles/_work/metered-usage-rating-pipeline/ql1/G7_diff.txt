@@ -1,0 +1,251 @@
+--- ql1/before/tests/test_output.py	2026-10-31 12:33:27
++++ ../../metered-usage-rating-pipeline/tests/test_output.py	2026-10-31 12:36:27
+@@ -26,7 +26,7 @@
+     "region_west.json", "segment_consumer.json", "segment_corporate.json",
+     "segment_enterprise.json", "segment_smb.json",
+ ]
+-RUN_LIMIT_SEC = 15
++RUN_LIMIT_SEC = 20
+ # (collector rows, accounts, sub-resellers) of each long fresh month
+ LONG_SHAPES = ((13000, 76000, 11000), (14000, 80000, 11500), (15000, 84000, 12000))
+ # (collector rows, accounts, sub-resellers) of each fresh month with a long rate card
+@@ -1024,12 +1024,21 @@
+     "collector_controls.json": "eNp9js0KAjEMBu99ipJzLUsXBH0ZWWr8ozbQRldY+u42VTxtvc5kPrIoreFOkS+w1+AGt90MOzBCPYWAninlqpZKhGHkNAUBcLoGlOh3d/ha6/MTjIaEntJR6tGNrpjPBE6ZO70oy//iSKl9ulY3Z2+ZYugPZHp0B5qz/OJ+PmP3eVE20Hklrm1RRb0Bh9Nt6g==",
+ }
+ _CACHE: dict[str, object] = {}
++_KEY_LOCKS: dict[str, object] = {}
++_KEY_LOCKS_GUARD = threading.Lock()
++
++
++def _key_lock(key: str):
++    """One lock per cache key: rewardkit runs checks in threads, and each entry must be built exactly once."""
++    with _KEY_LOCKS_GUARD:
++        return _KEY_LOCKS.setdefault(key, threading.RLock())
+ 
+ 
+ def _shipped_files() -> dict[str, bytes]:
+     """The agent's /app/data, rebuilt here: the verifier container never has it."""
+-    if "shipped" not in _CACHE:
+-        _CACHE["shipped"] = {name: zlib.decompress(base64.b64decode(blob)) for name, blob in _SHIPPED_DATA.items()}
++    with _key_lock("shipped"):
++        if "shipped" not in _CACHE:
++            _CACHE["shipped"] = {name: zlib.decompress(base64.b64decode(blob)) for name, blob in _SHIPPED_DATA.items()}
+     return _CACHE["shipped"]
+ 
+ 
+@@ -1040,59 +1049,63 @@
+ 
+ def _hidden_files() -> dict[str, bytes]:
+     """A fresh month from the embedded seeded generator, at a different scale from the shipped one."""
+-    if "hidden" not in _CACHE:
+-        _CACHE["hidden"] = gen_month(HIDDEN_SEED, _hidden_month(), 1600, 1200, True, ref_compute)
++    with _key_lock("hidden"):
++        if "hidden" not in _CACHE:
++            _CACHE["hidden"] = gen_month(HIDDEN_SEED, _hidden_month(), 1600, 1200, True, ref_compute)
+     return _CACHE["hidden"]
+ 
+ 
+ def _long_files(k: int) -> dict[str, bytes]:
+     """Fresh month k from the same generator, longer, with one reseller over many sub-resellers."""
+     key = "long-%d" % k
+-    if key not in _CACHE:
+-        seed = HIDDEN_SEED * 31 + k
+-        rng = random.Random(seed)
+-        month = "%04d-%02d" % (rng.choice((2027, 2028, 2029)), rng.randint(1, 12))
+-        rows, accounts, resellers = LONG_SHAPES[k - 1]
+-        _CACHE[key] = gen_month(seed, month, rows, accounts, True, ref_compute, resellers=resellers)
++    with _key_lock(key):
++        if key not in _CACHE:
++            seed = HIDDEN_SEED * 31 + k
++            rng = random.Random(seed)
++            month = "%04d-%02d" % (rng.choice((2027, 2028, 2029)), rng.randint(1, 12))
++            rows, accounts, resellers = LONG_SHAPES[k - 1]
++            _CACHE[key] = gen_month(seed, month, rows, accounts, True, ref_compute, resellers=resellers)
+     return _CACHE[key]
+ 
+ 
+ def _ladder_files(k: int) -> dict[str, bytes]:
+     """Fresh month k from the same generator, long, with one reseller and a rate card of many tiers."""
+     key = "ladder-%d" % k
+-    if key not in _CACHE:
+-        seed = HIDDEN_SEED * 37 + k
+-        rng = random.Random(seed)
+-        month = "%04d-%02d" % (rng.choice((2027, 2028, 2029)), rng.randint(1, 12))
+-        rows, accounts, resellers = LADDER_SHAPES[k - 1]
+-        _CACHE[key] = gen_month(seed, month, rows, accounts, True, ref_compute, resellers=resellers,
+-                                ladder=LADDER_TIERS)
++    with _key_lock(key):
++        if key not in _CACHE:
++            seed = HIDDEN_SEED * 37 + k
++            rng = random.Random(seed)
++            month = "%04d-%02d" % (rng.choice((2027, 2028, 2029)), rng.randint(1, 12))
++            rows, accounts, resellers = LADDER_SHAPES[k - 1]
++            _CACHE[key] = gen_month(seed, month, rows, accounts, True, ref_compute, resellers=resellers,
++                                    ladder=LADDER_TIERS)
+     return _CACHE[key]
+ 
+ 
+ def _tier_scaled_files() -> dict[str, bytes]:
+     """Hidden month with every tier threshold above zero scaled by 1.0375 (rounded up) and collector rows shuffled."""
+-    if "scaled" not in _CACHE:
+-        import json as _json
+-        files = dict(_hidden_files())
+-        card = _json.loads(files["rate_card.json"].decode("utf-8"), parse_float=_RD)
+-        text = files["rate_card.json"].decode("utf-8")
+-        for code in sorted(card["products"]):
+-            for tier in card["products"][code]["tiers"]:
+-                old = int(tier["from"])
+-                if old:
+-                    new = -(-old * 10375 // 10000)
+-                    text = text.replace('"from": %d,' % old, '"from": %d,' % new, 1)
+-        files["rate_card.json"] = text.encode("utf-8")
+-        rng = random.Random(HIDDEN_SEED + 1)
+-        for region, name in REF_FILES.items():
+-            raw = files[name].decode("latin-1")
+-            rows = raw.splitlines(keepends=True)
+-            head = rows[:1] if region in ("central", "east") else []
+-            body = rows[len(head):]
+-            rng.shuffle(body)
+-            files[name] = "".join(head + body).encode("latin-1")
+-        _CACHE["scaled"] = files
++    with _key_lock("scaled"):
++        if "scaled" not in _CACHE:
++            import json as _json
++            files = dict(_hidden_files())
++            card = _json.loads(files["rate_card.json"].decode("utf-8"), parse_float=_RD)
++            text = files["rate_card.json"].decode("utf-8")
++            for code in sorted(card["products"]):
++                for tier in card["products"][code]["tiers"]:
++                    old = int(tier["from"])
++                    if old:
++                        new = -(-old * 10375 // 10000)
++                        text = text.replace('"from": %d,' % old, '"from": %d,' % new, 1)
++            files["rate_card.json"] = text.encode("utf-8")
++            rng = random.Random(HIDDEN_SEED + 1)
++            for region, name in REF_FILES.items():
++                raw = files[name].decode("latin-1")
++                rows = raw.splitlines(keepends=True)
++                head = rows[:1] if region in ("central", "east") else []
++                body = rows[len(head):]
++                rng.shuffle(body)
++                files[name] = "".join(head + body).encode("latin-1")
++            _CACHE["scaled"] = files
+     return _CACHE["scaled"]
+ 
+ 
+@@ -1118,18 +1131,20 @@
+ 
+ 
+ def _small_commitment_files() -> dict[str, bytes]:
+-    if "small" not in _CACHE:
+-        region = _mutation_regions()[0]
+-        base = _RD(_expected("hidden", _hidden_files)["region_%s.json" % region]["credit_base"])
+-        _CACHE["small"] = _recommitted(_hidden_files(), region, "1.00", str(base + 1))
++    with _key_lock("small"):
++        if "small" not in _CACHE:
++            region = _mutation_regions()[0]
++            base = _RD(_expected("hidden", _hidden_files)["region_%s.json" % region]["credit_base"])
++            _CACHE["small"] = _recommitted(_hidden_files(), region, "1.00", str(base + 1))
+     return _CACHE["small"]
+ 
+ 
+ def _near_base_files() -> dict[str, bytes]:
+-    if "near" not in _CACHE:
+-        region = _mutation_regions()[1]
+-        base = _RD(_expected("hidden", _hidden_files)["region_%s.json" % region]["credit_base"])
+-        _CACHE["near"] = _recommitted(_hidden_files(), region, str(base - _RD("0.01")), None)
++    with _key_lock("near"):
++        if "near" not in _CACHE:
++            region = _mutation_regions()[1]
++            base = _RD(_expected("hidden", _hidden_files)["region_%s.json" % region]["credit_base"])
++            _CACHE["near"] = _recommitted(_hidden_files(), region, str(base - _RD("0.01")), None)
+     return _CACHE["near"]
+ 
+ 
+@@ -1241,8 +1256,9 @@
+ 
+ 
+ def _cached_run(key: str, files_fn) -> dict[str, object]:
+-    if "run-" + key not in _CACHE:
+-        _CACHE["run-" + key] = _run(files_fn(), key)
++    with _key_lock("run-" + key):
++        if "run-" + key not in _CACHE:
++            _CACHE["run-" + key] = _run(files_fn(), key)
+     return _CACHE["run-" + key]
+ 
+ 
+@@ -1256,8 +1272,9 @@
+ 
+ 
+ def _expected(key: str, files_fn) -> dict[str, object]:
+-    if "expected-" + key not in _CACHE:
+-        _CACHE["expected-" + key] = ref_compute(files_fn())
++    with _key_lock("expected-" + key):
++        if "expected-" + key not in _CACHE:
++            _CACHE["expected-" + key] = ref_compute(files_fn())
+     return _CACHE["expected-" + key]
+ 
+ 
+@@ -1874,7 +1891,7 @@
+     return _holds(_check_restates_shipped)
+ 
+ 
+-@criterion(description='On long fresh month 1, the program exits 0 within 15 seconds and writes every output document.')
++@criterion(description='On long fresh month 1, the program exits 0 within 20 seconds and writes every output document.')
+ def long_1_finishes(workspace: Path) -> bool:
+     return _holds(_check_long_finishes, 1)
+ 
+@@ -1894,7 +1911,7 @@
+     return _holds(_check_long_document, 1, 'product_summary.json')
+ 
+ 
+-@criterion(description='On long fresh month 2, the program exits 0 within 15 seconds and writes every output document.')
++@criterion(description='On long fresh month 2, the program exits 0 within 20 seconds and writes every output document.')
+ def long_2_finishes(workspace: Path) -> bool:
+     return _holds(_check_long_finishes, 2)
+ 
+@@ -1914,7 +1931,7 @@
+     return _holds(_check_long_document, 2, 'product_summary.json')
+ 
+ 
+-@criterion(description='On long fresh month 3, the program exits 0 within 15 seconds and writes every output document.')
++@criterion(description='On long fresh month 3, the program exits 0 within 20 seconds and writes every output document.')
+ def long_3_finishes(workspace: Path) -> bool:
+     return _holds(_check_long_finishes, 3)
+ 
+@@ -1934,7 +1951,7 @@
+     return _holds(_check_long_document, 3, 'product_summary.json')
+ 
+ 
+-@criterion(description='On long-card fresh month 1, the program exits 0 within 15 seconds and writes every output document.')
++@criterion(description='On long-card fresh month 1, the program exits 0 within 20 seconds and writes every output document.')
+ def ladder_1_finishes(workspace: Path) -> bool:
+     return _holds(_check_ladder_finishes, 1)
+ 
+@@ -1974,7 +1991,7 @@
+     return _holds(_check_ladder_document, 1, 'segment_smb.json')
+ 
+ 
+-@criterion(description='On long-card fresh month 2, the program exits 0 within 15 seconds and writes every output document.')
++@criterion(description='On long-card fresh month 2, the program exits 0 within 20 seconds and writes every output document.')
+ def ladder_2_finishes(workspace: Path) -> bool:
+     return _holds(_check_ladder_finishes, 2)
+ 
+@@ -2014,7 +2031,7 @@
+     return _holds(_check_ladder_document, 2, 'segment_smb.json')
+ 
+ 
+-@criterion(description='On long-card fresh month 3, the program exits 0 within 15 seconds and writes every output document.')
++@criterion(description='On long-card fresh month 3, the program exits 0 within 20 seconds and writes every output document.')
+ def ladder_3_finishes(workspace: Path) -> bool:
+     return _holds(_check_ladder_finishes, 3)
+ 
+@@ -2054,7 +2071,7 @@
+     return _holds(_check_ladder_document, 3, 'segment_smb.json')
+ 
+ 
+-@criterion(description='On long-card fresh month 4, the program exits 0 within 15 seconds and writes every output document.')
++@criterion(description='On long-card fresh month 4, the program exits 0 within 20 seconds and writes every output document.')
+ def ladder_4_finishes(workspace: Path) -> bool:
+     return _holds(_check_ladder_finishes, 4)
+ 

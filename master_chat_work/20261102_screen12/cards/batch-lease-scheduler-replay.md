@@ -1,0 +1,9 @@
+# batch-lease-scheduler-replay
+
+- Paths: `B = master_chat_work/bundles/batch-lease-scheduler-replay`; `W = master_chat_work/bundles/_work/batch-lease-scheduler-replay`; `O = B/solution/solve.py`.
+- State: bundle yes, no paid run; three blind reads were 139/139, so the fully stated replay was parked (`master_chat_tasks/registry/tasks.json:767-772`, `W/DESIGN_SUMMARY.md:15-27`).
+- Careful program: **none on file** from blind reads. INFERRED carrier path from `replay_contract.md:9-26`: policy INI, pools JSON, workers/durations/dependencies CSV, jobs TSV, events JSONL, checkpoints text. `O:109-160,241-254` uses configparser, csv.DictReader and json; reference uses event heap and timeline replay (`O:301-336` onward), roughly O((events + state transitions) log events), while blind method is unknown.
+- Possible **(c), INFERRED only**: one hidden book with four sets, each near 160 jobs/1,200 events and time 5,000, is legal under `B/environment/data/replay_contract.md:28-30`. A unit-tick × job scanner could be O(T·J) against the heap reference, but no careful program line or measured >=240 s vs oracle <=15 s exists. Wrong-order and stale-token branches in `W/LEVERS.md:47-53` are misread-rule extras under R0.
+- QC: IN-16/DS-21 retain valid event IDs, dependency graph and worker state (`replay_contract.md:17-30`); TS-11 requires the 60 s/4×/quarter-limit measurement; TS-19/AL-27 need four fresh max-size books with branch fire; CL-4 whole documents are already in `B/instruction.md:9`, but no runtime loss is proven.
+- Work: 12-18 h to recover a blind, prototype legal size, rebuild tests, full QC and paid run; archived package must also pass relocation and as-other-user checks (`B/instruction.md:5-11`).
+- **Score 2/10**: no current R0 program witness despite a useful stated runtime bound.

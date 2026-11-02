@@ -1,0 +1,16 @@
+# TODO dbe00fc (P12 fix v5), started 31 Oct 13:00 IST
+- [x] T0 date, name_session (listed opencode ses_e6f228511ffetLCTICm1CysRxu), read rules, kit HEAD 5574d77e
+- [x] T1 backup BUNDLE -> WORK/qc5_7e457f09086a/ (tree 7e457f09086a)
+- [x] T2 Phase 0: xref_check 0 findings on current; trap baseline (reuse 841c07e numbers if tests unchanged)
+- [x] T3 Phase 1: recheck AL-27 + JD-5 (kit lines, evidence, noise diff), write RECHECK_FIX rows
+- [x] T4 study gen_extracts.py + solve.py settle_* ; design A excess_only log, B flat_10y log (+curve_marks if tied)
+- [x] T5 generate ext_v4 to scratch, unique-fit script, byte diff vs ext_v3
+- [x] T6 seal _EXPECTED_BLOB (Docker seal) + build_fixtures -> tests; G7 diff
+- [x] T7 hard-code mutant proof (pro_rata/duration_matched) loses A/B checks
+- [x] T8 JD-5 split R25, R34 -> per reading w1; reward.toml judge 0.5/P
+- [x] T9 RULE_COVERAGE, LEVERS, QC_DEFENCE, XREF update, xref 0
+- [x] T10 vacuity probe, trap survival, touched rules, stacking
+- [x] T11 replay score band before/after
+- [x] T12 TRUTH.md by script; precheck CLEAN
+- [x] T13 Docker gate oracle x3 owner nop
+- [x] T14 sync Tasks_INPUT, tree shas, deliverables (RECHECK_FIX, PL_NOTE, KEPT, result json)

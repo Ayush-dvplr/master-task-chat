@@ -1,0 +1,14 @@
+# LOG 5af6646
+- 00:20 IST date ok; name_session.py 5af6646 -> opencode match ses_e95e6b64fffe5v9Ct32LePg06T (codex: no match)
+- 00:22 read COMMON_RULES_v2, LEVER_RULES_v1, LEAK_LIBRARY, QC_RULINGS, master_process lessons
+- 00:22 IST resumed after compaction; Phase A items 1 (result/stdout) done
+- 00:25 IST resumed after 2nd compaction; next: test single-line variant of agent window to confirm root cause
+- 00:33 IST root cause confirmed: one-line variant (forge handle resolved on forge day) makes agent match grader on 9/10 hidden seasons; forge_a residual = allocator flow bug (scarce R02 escapes via shared guild-out edge; best_total({'RQ05':17}) 160 vs exact 156). Shipped run compared.
+- 00:36 IST shipped data: agent differs from oracle on 9/11 docs (credited 40 vs 37; oracle-only UNCREDITED L0124,L0127,L0195,L0252; agent-only SALVAGE_ALREADY_CREDITED L0124); forge-day variant IDENTICAL to oracle on shipped => shipped data already separates the two readings. Next: weigh visible text (S2 vs I1/I3), WORK docs, trajectory step 24.
+- 00:40 IST Older bundle copies (Anubis_Tasks_Samples/.../rulebook_identity.md, task-archive 20261021T173133) carry I3 closing sentence "Two entries filed under the same handle on either side of a rename or merge therefore belong to different canonical smiths." LEVERS.md 'Harden lp1 r1' + DESIGN.md:66 + QC_DEFENCE.md:100: "I3 closing sentence" removed as giveaway. Agent's own reporting (agent_settle.py:508) resolves on filing day (S007 and S007-x separate rows, match oracle) but window line 735 resolves on salvage day.
+- 00:44 IST work/score_prog.py (grader's own check functions, local, setpriv stubbed): agent 12/50 value +4 structure = 16/54 = 0.2963 (reproduces report.json exactly); forge-day variant 30/50 -> 34/54 = 0.6296 (fixes vault_audit, reconciliation, data_quality, live_window); oracle 50/50. Remaining 20 = allocator Q5 bug (forge_a).
+- 00:39 IST resumed after 4th compaction (LOG note: entries stamped 00:40/00:44 were written ahead of real clock; real times ~00:32-00:38). Gathering rule-map lines, then writing A/B/C.
+- 00:41 IST Phase A written (A_emberforge-vault-settlement.md): PARTLY; 20 genuine allocator + 18 IN-16 identity-day + 9 judge conduct; no artefact. Also found agent brute-force-checked allocator on small corpora (steps 30, 63, 60/60 match).
+- 00:44 IST Phase B written (B_emberforge-vault-settlement.md sections 1-8 + Lessons). Writing Phase C.
+- 00:44 IST Phase C written (GROUP_SUMMARY.md, result_5af6646.json parses). Final rename next.
+- 00:45 IST final rename OK (opencode ses_e95e6b64fffe5v9Ct32LePg06T). DONE.

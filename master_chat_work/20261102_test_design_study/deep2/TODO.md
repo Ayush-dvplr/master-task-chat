@@ -1,0 +1,14 @@
+# Deep study TODO
+- [x] 59417607 fresh extract
+- [x] a710b00e fresh extract (PARTIAL: 37 points unattributed)
+- [x] 18b5d99f fresh extract (PARTIAL: per-case failure branch unattributed)
+- [x] 1d61e794 carrier/source
+- [x] 5048c412 carrier/source
+- [x] 37a0c3d6 carrier/source (PARTIAL: first core mismatch unknown)
+- [x] aa314fee carried state
+- [x] 05550e00 carried state
+- [x] 80202e15 many sources (PARTIAL: 40 points unattributed)
+- [x] fabbe645 full-size
+- [x] Cross-task synthesis WHY.md
+- [x] Task-specific FIX_PLAN_v2.md
+- [x] REPORT.md and result JSON (PARTIAL; four cause cards remain unresolved)

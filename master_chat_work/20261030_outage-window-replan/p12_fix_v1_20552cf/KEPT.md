@@ -1,0 +1,7 @@
+# KEPT outage-window-replan (P12 fix v1, board 20552cf)
+
+| finding id | file:line | reason | kit line it rests on |
+|---|---|---|---|
+| TS-11 ⚠️ (QC v1:209) | instruction.md:15; tests/test_output.py:1227 `_RUN_SECONDS = 60` | Time-out as the source of difficulty was approved by Ayush on 30 Oct 04:40 (master_chat_tasks/decisions.jsonl:524, verbatim "(c) Allow bigger lanes with a shorter time limit. That makes time-outs the source of difficulty, which goes against the normal 30% limit on lost points from time-outs."). The limit is stated to the agent, tests and instruction now agree on 60 s, and the reference finishes each graded corpus in at most 2.66 s (h2 2.36 s, h3 2.66 s; WORK/qc1_kill.out) in Docker (>= 4x margin), so the bound only decides programs far from the reference speed | 03_Tests_QC.md:41 (TS-11: verdict must be deterministic; a stated limit with a measured wide margin is the evidence) |
+| Step 10 oracle x3 (QC v1:59-62) | n/a (process) | Ayush's rule is oracle x3; QC ran x3 = 1.0 and this fix re-ran x3 = 1.000 | Final_checklist.md:390 (five runs); kept by owner rule |
+| precheck `WARN JD-5 criterion R15: more than one sentence or clause` | tests/judge.toml:196 | Pre-existing, not a QC v1 finding (QC v1 JD-5 named R9 only). The second clause of R15 ("files under /app ... are never this act") narrows the one act, it adds no second act; precheck still ends PRECHECK CLEAN | 04_Judge_QC.md:71 |

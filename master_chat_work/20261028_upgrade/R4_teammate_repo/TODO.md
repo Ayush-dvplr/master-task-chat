@@ -1,0 +1,12 @@
+# R4 TODO (board 1d26a6e)
+- [x] Read P14 v1, P15 v1, LEVER_RULES_v3, README, peer_manifest check (all 90 NEW vs registry slugs)
+- [x] scripts/inventory.py -> inventory.csv/json (90 rows)
+- [x] Read LEAK_LIBRARY, KNOWLEDGE, COMMON_RULES Never 6/8/11, CHANGELOG (skim)
+- [x] scripts/losses.py: per-task failed checks + weights for 13 models (-> losses_13.json)
+- [x] Phase A genuineness for 13 (stdout, exception, failed-check reading) -> genuineness.md
+- [x] Cards OUT/cards/<id>.md for genuine models
+- [x] scripts/contrast.py: Easy vs Hard/Expert counts, confounds (author, domain)
+- [x] Lever candidates
+- [x] ANGLES.md + drafts/P15_research_angle_v2.md (+P14 v2 if needed)
+- [x] FINDINGS.md, result_1d26a6e.json, name_session last
+- note: KNOWLEDGE.md not read (time); LEAK_LIBRARY and COMMON_RULES Never 6/8/11 read

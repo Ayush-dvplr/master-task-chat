@@ -1,0 +1,550 @@
+44a45,46
+> _UPLIFT = {"u1": 11113, "u2": 22229, "u3": 33343, "u4": 44449, "u5": 55547, "u6": 66653, "u7": 77761,
+>            "u8": 88867, "u9": 99971}
+417a420,431
+> 
+> def uplift(seed, out):
+>     """The hidden folder of seed h (seed, or the first later seed whose cabinets leave room above the
+>     feeder limit), with one feeder derating line whose limit is above feeder_kwh_per_slot and a
+>     cluster of buses that can take that limit.  Every hidden row is kept; rows are only inserted.
+>     Returns (h, added) where added maps a file name to the lines inserted into it."""
+>     h = seed
+>     while True:
+>         inst = render(h, "hidden", out)
+>         urng = random.Random(h * 7919 + 3)
+>         feeder = inst["feeder"]
+>         base = max(set(feeder), key=feeder.count)
+418a433,510
+>         def read(name):
+>             with open(os.path.join(out, name)) as f:
+>                 return f.read()
+> 
+>         grid = dict(x.split(" = ") for x in read("grid.ini").splitlines() if " = " in x)
+>         t0 = datetime.strptime(grid["first_slot"], "%Y-%m-%dT%H:%M")
+>         pds = grid["plan_date"]
+>         assert int(grid["feeder_kwh_per_slot"]) == base
+> 
+>         def ts(s):
+>             return (t0 + timedelta(minutes=15 * s)).strftime("%Y-%m-%dT%H:%M")
+> 
+>         def slot(text):
+>             return int((datetime.strptime(text, "%Y-%m-%dT%H:%M") - t0).total_seconds()) // 900
+> 
+>         dep = json.loads(read("depots.json"))
+>         limit = {d["depot"]: [d["cabinets"] * dep["cabinet_kwh_per_slot"]] * S for d in dep["depots"]}
+>         notice = read("disruption_notice.md").splitlines()
+>         for line in notice:
+>             if line.startswith("- ") and " cabinets out of service from " in line:
+>                 p = line[2:].split()
+>                 for s in range(max(0, slot(p[7])), min(S, slot(p[9]))):
+>                     limit[p[0][:-1]][s] -= int(p[1]) * dep["cabinet_kwh_per_slot"]
+>         L = urng.randint(4, 8)
+>         starts = [u for u in range(4, S - L - 4) if all(feeder[s] == base for s in range(u, u + L))]
+> 
+>         def mcap(u, d):
+>             return max(0, min(limit[d][u:u + L]))
+> 
+>         u0 = max(starts, key=lambda u: (sum(mcap(u, d) for d in DEPOTS), -u))
+>         room = sum(mcap(u0, d) for d in DEPOTS)
+>         lim = min(int(base * urng.uniform(1.4, 1.9)), room) // 10 * 10
+>         if lim >= base + base // 5:
+>             break
+>         h += 1
+>     assert base < lim <= room and all(feeder[s] == base for s in range(u0, u0 + L)), (seed, h)
+>     pub_contracts = ["SCH-%02d" % i for i in range(1, 7)] + ["HSP-%02d" % i for i in range(1, 4)]
+>     com_contracts = ["COM-%02d" % i for i in range(1, 9)]
+>     seen = {r.split(",")[0] for r in read("fleet_register.csv").splitlines()[1:]}
+>     nd = (datetime.strptime(pds, "%Y-%m-%d") + timedelta(days=1)).date().isoformat()
+>     added = {"fleet_register.csv": [], "roster.csv": [], "trips.jsonl": [], "published_plan.csv": [],
+>              "disruption_notice.md": ["- from %s to %s: feeder limit %d kWh per slot" % (ts(u0), ts(u0 + L), lim)]}
+>     load = {d: 0 for d in DEPOTS}
+>     i = len(inst["buses"])
+>     while sum(min(load[d], mcap(u0, d)) for d in DEPOTS) < lim:
+>         d = urng.choice([d for d in DEPOTS if load[d] < mcap(u0, d)])
+>         tname, rate, res = TYPES[urng.choice("ABC")]
+>         load[d] += rate
+>         need = rate * L // 10 * 10
+>         bid = "B%04d" % (1000 + i * 3 + urng.randint(0, 2))
+>         while bid in seen:
+>             bid = "B%04d" % (int(bid[1:]) + 1)
+>         seen.add(bid)
+>         i += 1
+>         x = urng.randrange(0, 45, 5)
+>         con = urng.choice(pub_contracts) if urng.random() < 0.25 else urng.choice(com_contracts + [""])
+>         added["fleet_register.csv"].append("%s,%s,%s,active" % (bid, tname, d))
+>         added["roster.csv"].append("%s,%s,%s,%s,%s,%d,%s" % (pds, bid, d, ts(u0), ts(u0 + L), res + x, con))
+>         cut = urng.randrange(5, need + x, 5)
+>         for j, kwh in enumerate((cut, need + x - cut)):
+>             added["trips.jsonl"].append(json.dumps({"trip_id": "T%s-%d" % (bid[1:], j), "bus_id": bid,
+>                                                     "service_date": nd, "kwh": kwh}))
+>         added["published_plan.csv"].extend("%s,%s,%s,%d" % (pds, bid, ts(s), rate) for s in range(u0, u0 + L))
+>     for name, rows in added.items():
+>         lines = read(name).splitlines()
+>         if name == "disruption_notice.md":
+>             at = lines.index("## Extra trips") - 1
+>             while lines[at - 1].startswith("- from ") and lines[at - 1][7:23] > rows[0][7:23]:
+>                 at -= 1
+>             lines[at:at] = rows
+>         else:
+>             head = 0 if name.endswith(".jsonl") else 1
+>             for row in rows:
+>                 lines.insert(urng.randint(head, len(lines)), row)
+>         _w(os.path.join(out, name), "\n".join(lines) + "\n")
+>     return h, added
+> 
+> 
+3424a3517,3529
+> def _uplifted(key: str) -> dict:
+>     """Held-out folder whose notice lists one feeder limit above feeder_kwh_per_slot."""
+>     def build() -> dict:
+>         root = Path(tempfile.mkdtemp(prefix="inputs-"))
+>         uplift(_UPLIFT[key], str(root))
+>         docs = {name: raw for name, raw in _shipped_files().items() if name.startswith("docs/")}
+>         _write_tree(docs, root)
+>         _assert_contract_bounds(root)
+>         _seal(root)
+>         return {"expected": _expected(root), "run": _run_program(root)}
+>     return _memo(key, build)
+> 
+> 
+3665a3771,3776
+> 
+> 
+> def _check_uplift(key: str, name: str) -> None:
+>     if not SCRIPT.is_file():
+>         raise AssertionError("%s: not delivered" % SCRIPT)
+>     _check_run(_uplifted(key), name)
+3974a4086,4445
+> @criterion(description="On held-out data folder u1, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u1_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u1', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u1, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u1_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u1', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u1, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u1_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u1', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u1, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u1_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u1', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u1, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u1_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u1', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u1, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u1_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u1', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u1, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u1_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u1', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u1, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u1_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u1', 'summary.json')
+> 
+> 
+> @criterion(description="On held-out data folder u2, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u2_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u2', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u2, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u2_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u2', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u2, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u2_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u2', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u2, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u2_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u2', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u2, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u2_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u2', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u2, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u2_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u2', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u2, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u2_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u2', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u2, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u2_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u2', 'summary.json')
+> 
+> 
+> @criterion(description="On held-out data folder u3, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u3_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u3', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u3, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u3_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u3', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u3, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u3_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u3', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u3, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u3_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u3', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u3, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u3_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u3', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u3, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u3_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u3', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u3, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u3_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u3', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u3, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u3_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u3', 'summary.json')
+> 
+> 
+> @criterion(description="On held-out data folder u4, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u4_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u4', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u4, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u4_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u4', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u4, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u4_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u4', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u4, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u4_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u4', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u4, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u4_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u4', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u4, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u4_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u4', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u4, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u4_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u4', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u4, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u4_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u4', 'summary.json')
+> 
+> 
+> @criterion(description="On held-out data folder u5, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u5_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u5', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u5, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u5_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u5', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u5, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u5_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u5', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u5, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u5_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u5', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u5, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u5_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u5', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u5, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u5_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u5', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u5, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u5_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u5', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u5, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u5_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u5', 'summary.json')
+> 
+> 
+> @criterion(description="On held-out data folder u6, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u6_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u6', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u6, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u6_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u6', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u6, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u6_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u6', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u6, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u6_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u6', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u6, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u6_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u6', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u6, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u6_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u6', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u6, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u6_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u6', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u6, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u6_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u6', 'summary.json')
+> 
+> 
+> @criterion(description="On held-out data folder u7, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u7_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u7', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u7, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u7_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u7', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u7, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u7_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u7', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u7, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u7_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u7', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u7, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u7_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u7', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u7, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u7_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u7', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u7, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u7_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u7', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u7, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u7_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u7', 'summary.json')
+> 
+> 
+> @criterion(description="On held-out data folder u8, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u8_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u8', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u8, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u8_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u8', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u8, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u8_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u8', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u8, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u8_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u8', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u8, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u8_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u8', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u8, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u8_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u8', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u8, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u8_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u8', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u8, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u8_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u8', 'summary.json')
+> 
+> 
+> @criterion(description="On held-out data folder u9, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's policy_audit.json equals the per-bus policy audit derived from the written rules, as a whole document.")
+> def fresh_u9_policy_audit_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u9', 'policy_audit.json')
+> 
+> 
+> @criterion(description="On held-out data folder u9, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_North.json equals the North depot report derived from the written rules, as a whole document.")
+> def fresh_u9_region_north_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u9', 'region_North.json')
+> 
+> 
+> @criterion(description="On held-out data folder u9, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_South.json equals the South depot report derived from the written rules, as a whole document.")
+> def fresh_u9_region_south_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u9', 'region_South.json')
+> 
+> 
+> @criterion(description="On held-out data folder u9, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_West.json equals the West depot report derived from the written rules, as a whole document.")
+> def fresh_u9_region_west_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u9', 'region_West.json')
+> 
+> 
+> @criterion(description="On held-out data folder u9, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's region_East.json equals the East depot report derived from the written rules, as a whole document.")
+> def fresh_u9_region_east_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u9', 'region_East.json')
+> 
+> 
+> @criterion(description="On held-out data folder u9, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_commercial.json equals the commercial class report derived from the written rules, as a whole document.")
+> def fresh_u9_segment_commercial_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u9', 'segment_commercial.json')
+> 
+> 
+> @criterion(description="On held-out data folder u9, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's segment_public.json equals the public class report derived from the written rules, as a whole document.")
+> def fresh_u9_segment_public_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u9', 'segment_public.json')
+> 
+> 
+> @criterion(description="On held-out data folder u9, whose disruption notice lists a feeder limit above feeder_kwh_per_slot for some slots, the program's summary.json equals the summary derived from the written rules, as a whole document.")
+> def fresh_u9_summary_exact(workspace: Path) -> bool:
+>     return _holds(_check_uplift, 'u9', 'summary.json')
+> 
+> 
+4054a4526,4597
+> criteria.fresh_u1_policy_audit_exact(weight=5)
+> criteria.fresh_u1_region_north_exact(weight=5)
+> criteria.fresh_u1_region_south_exact(weight=5)
+> criteria.fresh_u1_region_west_exact(weight=5)
+> criteria.fresh_u1_region_east_exact(weight=5)
+> criteria.fresh_u1_segment_commercial_exact(weight=5)
+> criteria.fresh_u1_segment_public_exact(weight=5)
+> criteria.fresh_u1_summary_exact(weight=5)
+> criteria.fresh_u2_policy_audit_exact(weight=5)
+> criteria.fresh_u2_region_north_exact(weight=5)
+> criteria.fresh_u2_region_south_exact(weight=5)
+> criteria.fresh_u2_region_west_exact(weight=5)
+> criteria.fresh_u2_region_east_exact(weight=5)
+> criteria.fresh_u2_segment_commercial_exact(weight=5)
+> criteria.fresh_u2_segment_public_exact(weight=5)
+> criteria.fresh_u2_summary_exact(weight=5)
+> criteria.fresh_u3_policy_audit_exact(weight=5)
+> criteria.fresh_u3_region_north_exact(weight=5)
+> criteria.fresh_u3_region_south_exact(weight=5)
+> criteria.fresh_u3_region_west_exact(weight=5)
+> criteria.fresh_u3_region_east_exact(weight=5)
+> criteria.fresh_u3_segment_commercial_exact(weight=5)
+> criteria.fresh_u3_segment_public_exact(weight=5)
+> criteria.fresh_u3_summary_exact(weight=5)
+> criteria.fresh_u4_policy_audit_exact(weight=5)
+> criteria.fresh_u4_region_north_exact(weight=5)
+> criteria.fresh_u4_region_south_exact(weight=5)
+> criteria.fresh_u4_region_west_exact(weight=5)
+> criteria.fresh_u4_region_east_exact(weight=5)
+> criteria.fresh_u4_segment_commercial_exact(weight=5)
+> criteria.fresh_u4_segment_public_exact(weight=5)
+> criteria.fresh_u4_summary_exact(weight=5)
+> criteria.fresh_u5_policy_audit_exact(weight=5)
+> criteria.fresh_u5_region_north_exact(weight=5)
+> criteria.fresh_u5_region_south_exact(weight=5)
+> criteria.fresh_u5_region_west_exact(weight=5)
+> criteria.fresh_u5_region_east_exact(weight=5)
+> criteria.fresh_u5_segment_commercial_exact(weight=5)
+> criteria.fresh_u5_segment_public_exact(weight=5)
+> criteria.fresh_u5_summary_exact(weight=5)
+> criteria.fresh_u6_policy_audit_exact(weight=5)
+> criteria.fresh_u6_region_north_exact(weight=5)
+> criteria.fresh_u6_region_south_exact(weight=5)
+> criteria.fresh_u6_region_west_exact(weight=5)
+> criteria.fresh_u6_region_east_exact(weight=5)
+> criteria.fresh_u6_segment_commercial_exact(weight=5)
+> criteria.fresh_u6_segment_public_exact(weight=5)
+> criteria.fresh_u6_summary_exact(weight=5)
+> criteria.fresh_u7_policy_audit_exact(weight=5)
+> criteria.fresh_u7_region_north_exact(weight=5)
+> criteria.fresh_u7_region_south_exact(weight=5)
+> criteria.fresh_u7_region_west_exact(weight=5)
+> criteria.fresh_u7_region_east_exact(weight=5)
+> criteria.fresh_u7_segment_commercial_exact(weight=5)
+> criteria.fresh_u7_segment_public_exact(weight=5)
+> criteria.fresh_u7_summary_exact(weight=5)
+> criteria.fresh_u8_policy_audit_exact(weight=5)
+> criteria.fresh_u8_region_north_exact(weight=5)
+> criteria.fresh_u8_region_south_exact(weight=5)
+> criteria.fresh_u8_region_west_exact(weight=5)
+> criteria.fresh_u8_region_east_exact(weight=5)
+> criteria.fresh_u8_segment_commercial_exact(weight=5)
+> criteria.fresh_u8_segment_public_exact(weight=5)
+> criteria.fresh_u8_summary_exact(weight=5)
+> criteria.fresh_u9_policy_audit_exact(weight=5)
+> criteria.fresh_u9_region_north_exact(weight=5)
+> criteria.fresh_u9_region_south_exact(weight=5)
+> criteria.fresh_u9_region_west_exact(weight=5)
+> criteria.fresh_u9_region_east_exact(weight=5)
+> criteria.fresh_u9_segment_commercial_exact(weight=5)
+> criteria.fresh_u9_segment_public_exact(weight=5)
+> criteria.fresh_u9_summary_exact(weight=5)

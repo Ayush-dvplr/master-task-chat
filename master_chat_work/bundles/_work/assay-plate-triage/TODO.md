@@ -1,0 +1,14 @@
+# TODO assay-plate-triage 4f33c30 (fix round r1)
+- [x] 14:51 rename session, tree sha c94f802018b2 ok, kit 5574d77e
+- [x] read rules, report, bundle files
+- [ ] Phase 0: LEVERS.md, QC_DEFENCE.md, XREF.md (xref 0), trap baseline
+- [x] F1 measure per-bit digests (unprefixed, trial_), permutation probe
+- [ ] Phase 1 RECHECK rows
+- [x] F1 ship bits/ manifests + engine.md/instruction.md text
+- [x] F2 rewrite solve.py engine
+- [x] F4 exactness clause; M1 task.toml; M2 grown op; M3 comments; M4 judge; W2 launch; J3 judge negative; FC-S24 ENV HOME
+- [ ] EVIDENCE_MAP, RULE_COVERAGE (if needed), IN17 W9 pass
+- [ ] TRUTH.md rewrite by script (last edit)
+- [ ] precheck CLEAN, xref 0, stacking, trap survival
+- [ ] Docker block oracle x3 owner nop
+- [ ] deliverables RECHECK_FIX, PL_NOTE, result json

@@ -1,0 +1,11 @@
+# B: iterative-solver-reconciliation, design notes only (Phase A verdict ARTEFACT)
+
+Phase B is skipped by rule. These are the instruction and test design points worth keeping or avoiding.
+
+1. **The "visible" checks do not use the shipped data.** `_artifacts_match(SAMPLE_SEED, n_nodes=60)` (test_output.py L1055-1141) regenerates a 60-node corpus. The shipped corpus has 240 nodes, and every file differs. So none of the 67 test points grade the delivered `/app/out` files. Avoid this: it makes "visible" a misnomer and it hides oracle drift from authors, who never diff the oracle against what the agent saw.
+2. **Mutation tests are a good pattern (SAFE)**, provided the rule they move is stated. They change one governed constant (omega 1300 L1208-1223, Newton cap 12 L1226-1239, epoch 15000 L1242-1255) and require the outputs to track it. This catches programs that hard-code a value read once from the shipped data. Here they only failed because of the hidden override.
+3. **Every rule is paired with a "Trap (...)" paragraph that names the wrong route**, e.g. schema.md L73-77 (raw edge list), L131-133 (Jacobi), L160-162 (L2 norm), L201-202 (half-up), L228-230 (decoy cap). `known_pitfalls.md` lists them all again. The agent passed every one of these: `config_audit` active edges, evaluation order, eigen totals, Newton cap and damping all matched (local diff). This is the same leaked pattern as our DIAGNOSIS: a trap explained = a trap avoided.
+4. **The spec contradicts itself and the test silently picks a side.** L117 says `converge_iters = 8`, L133 mentions a "full 200-sweep budget", and xlsx B4 = 200. Both the reference and the agent chose 8, so this cost nothing. It is an IN-quality defect, not a lever.
+5. **`known_pitfalls.md` pads with filler.** After 8 real lines it has about 90 "audit reminder line N" lines. This padding is noise, not difficulty.
+6. **Judge R5 (controlled-variant conduct) is a useful idea for us if it is stated.** "Change one governed constant, rerun, show the figures move" is a good self-test conduct. It must be requested in the instruction to pass IN-15/JD-15.
+7. **Lesson for us (AL / oracle drift).** TRUTH.md (1150), the judge (B5) and the oracle (1205) disagree. Before shipping, our QC should run the oracle on shipped data and check that every TRUTH-stated constant appears in the oracle's outputs.

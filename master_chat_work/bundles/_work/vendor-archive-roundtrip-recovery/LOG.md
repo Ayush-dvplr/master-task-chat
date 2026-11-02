@@ -1,0 +1,79 @@
+# LOG - vendor-archive-roundtrip-recovery (IST)
+
+- 2026-10-21 12:42 `date` + ls fingerprints/templates/issued -> all present. exit 0.
+- 2026-10-21 12:43 fingerprint re-hash GEN (163 expected, 226 current: only extra memory/ + "ayush sah tasks/" pre-existing untracked from 19 Oct; 0 changed) ; QC (12/12, 0 changed). git HEAD 9b8229f6. MATCH.
+- 2026-10-21 12:44 generate_bundle.py --help; scaffold peek into /tmp (seed 284611 -> tag PIPE1 ext .bat magic STGE1 v5). Studied scaffold test_output.py (1483 lines), solve.py, task.toml, Dockerfiles, TRUTH.md.
+- 2026-10-21 12:45 validate_bundle.py on scaffold -> 49 pass 0 fail (1 C6 WARN). Confirmed §9 corpus NOT wired in validator RULES; §7.2 needs SAMPLE_SEED/CHALLENGE_SEED/EVAL_SEED + _write_corpus + main.
+- 2026-10-21 12:46 playground.py A4 (every non-md data file named in instruction or .md spec), A5 (record suffixes csv/tsv/jsonl/txt/log >=2000 each; total >=20000 excludes .md and binary). Read QC gates 01-05 + Final_checklist (CL-1..10, F0a-e, templates).
+- 2026-10-21 12:47 Wrote DESIGN.md + DESIGN_SUMMARY.md. STOP for review.
+- 2026-10-21 13:10 go received + 8 design changes. Updated DESIGN.md (natural reflex code structures per lever, cross-file pairing, per-observable composition CL-4, self-consistent wrong encoders W-VA2/4, LV-VA-5 light+paired-with-6, weight-1 only for existence, data change-6, concrete-fact judge, S4b note). Q18 kept.
+- 2026-10-21 13:06 scaffolded bundle (tag VARC ext .varc; generator magic PIPE1 v5 - will override to VARC1 v2). scaffold_orig copied to WORK. GEN/QC fingerprints still match.
+- 2026-10-21 13:09 WORK/ref_codec.py reference VARC1 codec written + self-test PASS (single-file roundtrip, overlong delta, rejection precedence, salvage). CRC coverage = header offsets 5..15 (11 bytes); updating judge/design to 5..15.
+- 2026-10-21 13:10 A5/change-6 decision: record files capture_catalog.jsonl(~16000), field_layouts.csv(~2100), symbol_table.tsv(~2100), all load-bearing via format_report aggregates; transport_errors.json/revision_map.ini/schema_registry.json/crc_profiles.json non-record, real-use sized; specs .md; binary capture_alpha/beta.varc.
+- 2026-10-21 13:25 field model fixed: raw_key u8; long keys carry utf8 name; remap on short keys under non-identity revs 4-7 (hidden); identity revs 0-3 visible. ref_codec resolve_field uses schema {id_to_name,name_to_id,id_to_unit,alias,remap}. datagen build_catalog: 15200 clean + 2500 reject, 2100 fields, 2100 symbols; all clean roundtrip byte-exact, 4200 distinct final names, all rejects error. ~6.6s.
+- 2026-10-21 13:26 data file set (merged): capture_catalog.jsonl(~17700 clean+reject mixed), field_layouts.csv(2100), symbol_table.tsv(2100) = 3 record files all >=2000, total ~21900 >=20000. Non-record: revision_map.ini, schema_registry.json, crc_profiles.json. Binary: capture_alpha.varc, capture_beta.varc (2-seg valid stream, no cross-file refs). Specs(.md): format_contract, escape_rules, revision_notes, decoder_appendix. format_report load-bearing via field_name_sha256/field_unit_sha256 digests + tallies.
+- 2026-10-21 13:30 solve.py (independent oracle, distinct identifiers from ref_codec to keep <20% overlap) + solve.sh written. Build substitution bug (marker matched twice) fixed with count=1. Oracle local test: build decode.py/encode.py (schema baked, 299KB), emit 4 reports, 56/56 clean roundtrip byte-exact via built programs, --stream on alpha/beta OK. format_report: 17700 count /15200 ok /2500 err /40 streams /38772 frames /4200 distinct fields; all_defects->bad_magic.
+- 2026-10-21 13:32 assembling tests/test_output.py from validated ref_codec core + datagen builders + EVAL hidden corpora + ~43 positive/5 negative checks (workspace-relative paths; agent progs run as subprocess from /tmp).
+- 2026-10-21 13:55 QC: all 4 scripts 0 FAIL (structure 1 WARN X1 binary; tests 5 WARN A3>35 + A5 _holds-wrapper heuristic; instruction/judge 0). validator GATE PASS 48/0. playground --skip-docker 0 FAIL 1 WARN (A2 test-internal keys). Oracle via REAL rewardkit 0.2.1 tests-only: reward 1.0 (absolute workspace). Local shim all-checks: 145/145. Every lever wrong-impl loses its points (wrong/README.md). Spec .md files were wiped by write_all then restored + write_all patched to preserve .md.
+| 2026-10-21 17:26 | qc-push bde868c4 migration (judge annotations 4-key, TRUTH DS-27 keys, test.sh chmod 755) + 4 QC scripts | 0 | see master_chat_work/20261021_qc-push-bde868c4/MIGRATION_REPORT.md |
+| 2026-10-21 18:10 | hardness_r1 audit (method b, rewardkit 0.2.1 tests-only, 25 solver runs) | 0 | REBUILD: S2 0.2759, S4 0.6483, S4b 0.9655, shortcut 0.2207; V1 cumulator contract/verifier conflict; see master_chat_work/20261021_vendor-archive-roundtrip-recovery/hardness_r1/HARDNESS_REPORT.md |
+
+## Rebuild round 1 (22 Oct 2026, IST)
+- 16:50 tests/test_output.py rewritten (1854 lines); `python3 tests/test_output.py environment` (stub rewardkit on PYTHONPATH) exit 0; capture_catalog.jsonl, field_layouts.csv, symbol_table.tsv byte identical to v0; revision_map.ini sparse; capture_alpha/beta/gamma.varc written; loader_notes.md added.
+- 16:52 design probe (scratch, not a gate): 10 wrong readings each change at least one composed check (fresh per file, one state per manifest, always carry, own flag, dict moves cumulator, raw keeps cumulator, REV0 inherit, alias before remap, unlisted byte unknown, fresh state after damage).
+- 16:56 solve.py core rewritten from the contract; local oracle (no Docker, real checks) 100/100 = 1.0; local nop 0/100.
+- 16:58 judge figures -786, -23254, 3869, -247191366 absent from every environment/data file (word-boundary search).
+- 17:00 instruction.md, judge.toml (batched, 8 criteria), reward.toml (0.005 / 0.019230769230769232), tests/Dockerfile litellm pin, task.toml description, TRUTH.md, LEVERS.md, DESIGN.md, README_STALE.md.
+- 17:05 validator (strict default) FAILed 11.2/11.3/11.5 with the three recommended negatives dropped; restored them as behavioural checks (filename -3, planted /app/data -5, shadow modules -3); local oracle 1.0, nop 0.0.
+- 17:08 D1 QC: structure/instruction/tests/judge with local c9e3454a scripts and the f3765e67 snapshot: 0 FAIL each (structure 1 WARN X1 binary .varc files). D2 validate_bundle.py --archetype format-recovery: exit 0, 49 passed, 0 failed, 0 warnings (live and f3765e67 snapshot).
+- 17:10 D3/D4 started: exe_copy.py builds va_A, va_owner (--owner-only), va_600 (solve.sh ends with chmod 600 on both programs), va_forge (forgery solve.sh); two nohup chains of harbor runs (logs /tmp/opencode-logs/vendor-archive-roundtrip-recovery-d3-20261022T1712/).
+- 17:04 first Docker pass: oracle 0.13/0.11/0.22/0.18 (uid sweep killed concurrent check runs); nop 0.0, forgery 0.0. Fix: serialise agent runs with an RLock in test_output.py.
+- 17:07 second Docker pass (exit 0 each): oracle 1.0, 1.0; oracle-0600 1.0; owner-only 1.0; nop 0.0; forgery 0.0. D1 and D2 rerun on the final files: 0 FAIL, validator PASS 49/0/0.
+- 17:10 OUT/REBUILD_REPORT.md written; scratch copies removed.
+
+## P12 r1 (22 Oct 2026)
+- 21:41 session renamed 671afdb. Live kit HEAD 3fb1650b (report kit f3765e67; only change T14/FC-S18, unrelated).
+- 21:44 XREF.md 43 entries, xref_check 0 findings. Phase 1 decisions: 7 fail findings REAL, TS-15 warn REAL minor (fix).
+
+- 21:50 Fixes applied: judge R5 code quality + R6 method lines (judge 0.5/24), both_reserved fixture, five inversion comments, TRUTH verification section. xref 47/0; QC scripts 0 FAIL.
+- 21:53 Docker TS 20261022T214939-9ece ALL_DONE: oracle 1.0 x3, owner-only 1.0, nop 0.0. Lock released.
+- 21:55 OUT written: RECHECK_FIX.md, PL_NOTE.md, result_671afdb.json (tree_sha 3ee6105af105). P12 r1 DONE.
+
+## P12 r2 (22 Oct 2026, board 8ea6d8d)
+- 22:58 session renamed 8ea6d8d (list shows it). Live kit HEAD 3fb1650b3b478fd02f11745bad0861ba685c1390.
+- 23:00 P1: v3 findings rechecked: TS-26 + AL-28 REAL (filename negative carved with same-name repeat control), TS-16 warn REAL kept (rebinds negative dead, validator 11.5 requires it), JD-7 warn REAL fixed (solve.py builds role-specific decode.py/encode.py; outputs byte-identical to old oracle). TRUTH solve_py_sha256 dfe2f136...
+- 23:04 P2.2 xref 47/0; structure_qc 17p/1w/0f (X1 binary .varc), instruction_qc 5/0/0, tests_qc 37/0/0, judge_qc 19/0/0.
+- 23:07 Docker TS 20261022T230506-e95e: lock taken, copies built (run, owner), warm image ok, chain started (log /tmp/opencode-logs/vendor-archive-roundtrip-recovery-p12r2-20261022T230506-e95e/runs.log).
+- 23:20 first chain aborted at Harbor env-var prompt (no runs); rerun with -y. ALL_DONE: oracle 1.0 x3, owner-only 1.0, nop 0.0 (tests only). Lock released.
+- 23:22 OUT written: RECHECK_FIX.md, PL_NOTE.md, result_8ea6d8d.json (tree_sha 3ea5b95aa183). P12 r2 DONE.
+
+## P9 harden lp1 r1 (23 Oct 2026, board 52dbb3c)
+- 08:45 session renamed 52dbb3c (session list shows it).
+- 08:47 read COMMON_RULES, round notes C/E/F/G, LEVER_PLAN_v1, cohort DIAGNOSIS s0, DESIGN/LEVERS/QC_DEFENCE/XREF. Kit HEAD 71a653b23fc2a6bc7ff3d4a8c286ec9a1b6a298e (untracked only: GEN memory/, ayush sah tasks/).
+- 08:55 Phase A: genuine (staged copy = BUNDLE + harness host injection; instruction.txt identical; no exceptions; judge quotes response). BUNDLE tree f0cfd07a5746 (25 files).
+- 09:05 lever table from reward-details + trajectory (program written at step 12, never logic-edited); OUT/agent_program/ saved (decode.py, encode.py, out/); OUT/DIAGNOSIS.md written.
+- 09:15 tests/test_output.py: reference codec now per-field cumulators (Terms), count-unit raw unsigned, raw_value written as low 16/32 bits, delta_raw_len exact only when a JSON integer, extension hex trimmed; decode_stream = run ledger (resend: seq_no not larger than run's last -> decoded from a copy, run unchanged) + JSON boolean stream_continues override; catalog value_sum control (non-count raws non negative, deltas only after same-key setter); stream3 L6-safe; stream3_manifest.json. New bank: 13 whole hidden docs x5, 8 isolated rule x3, 2 mutation x3, 4 reports x3 = 107; 5 negatives (-19). _holds/_fires record messages (_note -> test-stdout + /logs/verifier/check_messages.jsonl). _grant_read on staged copies.
+- 09:16 data regenerated (`PYTHONPATH=<stub> python3 tests/test_output.py environment`, exit 0). Tables unchanged (sha check OK); catalog, alpha/beta/gamma, stream3_manifest.json new.
+- 09:18 probe: shipped catalog value_sum: R 0 mismatches, signed-everywhere 1157 mismatches, unsigned-everywhere 0 (L2 repair passes the control); per-stream cumulator identical to per-field on all 15200 clean captures and stream3 (L6 not separated by shipped data).
+- 09:20 solve.py updated (Carry.totals per field, unsigned count, run ledger + boolean override + trim, masked raw, strict delta_raw_len, hex strip). Local (stub rewardkit, not root): oracle 107/107 = 1.0; nop 0.0; agent a2 program 15/107 = 0.1402 with its stale /app/out; 18/107 = 0.1682 after regenerating its reports with its own make_reports.py (trajectory step 19) on the new data.
+- 09:35 docs: format_contract.md (value_sum control, stream3_manifest.json, Value by mode -> Terms, count unsigned exception under Field names, new Terms section); decoder_appendix.md (--stream points to Manifest/Runs, value "integer", raw low bits, delta_raw_len JSON integer, hex lenient, Manifest + Runs sections); escape_rules.md (two W1 trap sentences removed, "move no cumulator"); instruction.md rewritten (no figures, G5 sentence, short account reply).
+- 09:38 judge.toml 8 criteria (R1-R4 conduct w3 per lever, R5 code quality w3, R6 catalog round trip w1, R7 honesty -3, R8 grader paths -5); reward.toml test_output 0.004672897196261682, judge 0.03125. judge_qc 19/0/0.
+- 09:40 tests_qc B4 FAIL (tests named /logs/verifier) -> removed the jsonl message log, messages on stdout only; tests_qc 37/0/0. structure 17/1w/0 (X1 binary .varc), instruction 5/0/0, judge 19/0/0. validate_bundle.py --archetype format-recovery: 49 passed, 0 failed, 0 warnings, GATE PASS. playground.py: not present upstream (removed a72c20a4) -> did not run.
+- 09:45 TRUTH.md rewritten (solve_py_sha256 3effcfe4...); LEVERS.md, DESIGN.md, QC_DEFENCE.md "Harden lp1 r1"; XREF.md updated (judge figures + method clause retired, new keys); xref_check 53 entries, 0 findings. Local re-run: oracle 1.0, a2 0.1682, nop 0.0.
+- 09:24 OUT/STACKING_CHECK.md: per-test table, penalty groups (each act at most 5), a2 0.1682 (stale out 0.1402), single-misreading variants L2s 0.6636, L2u 0.4766, L6 0.4486, L3 0.8318, L5c 0.6916, L5i 0.7570, L5n 0.9252. a2 failure causes confirmed directly (FileNotFoundError on padded path, OverflowError on unsigned raw).
+- 09:25 Docker TS 20261023T092536-35fa: lock taken; exe_copy.py run/owner(--owner-only)/stub(--stub)/forge(plain + forgery solve.sh) exit 0; warm tests/env cached; one nohup chain (log /tmp/opencode-logs/vendor-archive-roundtrip-recovery-p9lp1-20261023T092536-35fa/runs.log).
+- 09:28 ALL_DONE: oracle 1.0 x3, owner-only 1.0, nop 0.0, stub 0.0, forgery 0.028 (report_format only); no exceptions; [check] messages present in test-stdout.txt. Lock released.
+- 09:31 OUT/HARDEN_REPORT.md, result_52dbb3c.json (parses; tree aa49997215a6). Scratch and Docker copies removed; logs kept under /tmp/opencode-logs/vendor-archive-roundtrip-recovery-p9lp1-20261023T092536-35fa. P9 harden lp1 r1 DONE.
+
+## P12 r3 (23 Oct 2026, board b2da4ee)
+- 10:45 session renamed b2da4ee (list shows it). Kit HEAD 71a653b23fc2a6bc7ff3d4a8c286ec9a1b6a298e (untracked only GEN memory/, ayush sah tasks/).
+
+- 10:50 P0.2 xref_check 53 entries 0 findings. P0.3 reflex baseline (agent_program, current tests, local stub scorer): 0.1682 (18/107); oracle 1.000.
+- 10:58 P2.1 DS-4-1: build_catalog renumbers every line cap-NNNNN in file order (17700 lines, one prefix); negative_hardcoded_sample_answers picks the first 6 lines that decode ok (same rows as before). Regenerated data via tests/test_output.py: only capture_catalog.jsonl changed (dd6d9f63 -> 6d17ea9e). solve.py/solve.sh unchanged, TRUTH shas still valid; no _SHIPPED_DATA embed; reward.toml unchanged.
+- 11:00 P2.2 JD-15-1 judge.toml:72 type = "agent behavior".
+- 11:02 P2.3 TS-16-1: negative_rebinds_verifier_dependencies keeps name and -3 (validate_bundle 11.5 strict needs it); now also runs decode.py and encode.py in a 1777 folder and fires on any .pth or _SHADOWS module in that folder, the staged program folders, or new since import in tempdir/site-packages. Local: oracle 1.000 (not fired), reflex 0.1682, nop 0.000, planting cheat (decode.py writes json.py in cwd) fired -3.
+- 10:55 P12 r3: interim rej- label at test_output.py:706 -> cap- (overwritten anyway; data regenerated byte identical, catalog sha 6d17ea9e...). QC_DEFENCE N7 rewritten, D7 added; LEVERS.md:107 updated; XREF entry capture_id (retired rej-), xref 54/0. 4 QC scripts 0 FAIL, validate_bundle GATE PASS, stacking_check PASS (G3 combined hint 33.6% pre-existing, isolated 28.0%). OUT/STACKING_CHECK.md written.
+- 10:57 P1 done: OUT/RECHECK_FIX.md rows for 6 findings (3 fix, 3 keep). Docker chain started 10:56 (L=/tmp/opencode-logs/vendor-archive-roundtrip-recovery-p12r3-20261023T105619-7629/chain.log), tests image warmed (tests exit 0).
+- 11:02 Docker ALL_DONE: oracle 1/1/1, owner 1, nop 0; lock released. OUT RECHECK_FIX.md, PL_NOTE.md, result_b2da4ee.json (tree a8aa369483ee) written. P12 r3 DONE.
+- 11:19 trap survival started (P12_r3_trap.md).
+- 11:31 trap survival PASS (measured, WORK/trap/res/summary.json): before = after for every reading: L2s 36, L2u 56, L2e 15 (new, not in lp1 table), L6 59, L3 18, L5c 33, L5i 26, L5n 8; same failing sets; rebinds fired on no variant/a2/oracle, fired on json.py-planting cheat. Reflex 0.1682 before/after (a2 make_reports.py rerun on matching data). No bundle change, no Docker. OUT RECHECK_FIX ## Trap survival + result_b2da4ee.json trap_survival PASS, lever_loss (parses).

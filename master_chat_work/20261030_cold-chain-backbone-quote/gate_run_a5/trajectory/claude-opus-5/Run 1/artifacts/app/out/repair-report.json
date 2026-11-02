@@ -1,0 +1,52 @@
+{
+  "defects": [
+    {
+      "file": "src/task/core.py",
+      "summary": "best_network only approximated the cheapest network: it joined the depot and the cold rooms by cheapest paths, ran a Kruskal tree over the sites those paths touched and trimmed loose ends, so it quoted non-minimal networks, and it had no tie rule at all. Replaced by an exact node-weighted Steiner tree over the depot and the cold rooms (the Dreyfus-Wagner subset dynamic programme, merge plus Dijkstra spread), with every link cost and activation charge ranked as cost * 2**open_links + the bit of the link's place in ascending link id order, so the one run minimises the quote first and the contract's indicator vector second."
+    },
+    {
+      "file": "src/task/core.py",
+      "summary": "site_lines added the end site's activation charge once per link booked to it, so any site holding two or more booked links was charged twice or more, and it gave no line at all to an activated site with no link booked to it (a cold room or depot whose links all run to a larger corridor position). Every activated site now has exactly one line, its charge plus the costs of the links booked to it, which also corrects quote_of and every reported total."
+    },
+    {
+      "file": "src/task/parser.py",
+      "summary": "load_book never looked at the [closed] links list of access_rules.toml, so closed links were priced into networks and projects whose cold rooms are only reachable over closed links were accepted instead of rejected E_NO_NETWORK. Closed links are now dropped before the endpoint and reachability rules are applied, while the stats keep counting all of the project's rows in links.jsonl under 'links' and the remaining ones under 'open_links'."
+    },
+    {
+      "file": "src/task/parser.py",
+      "summary": "The layout.tsv slot was kept as the text read from the file, so corridor positions were ranked by string order ('10' before '9') whenever a project's slots had different digit counts, which shifted every position, every link booking and every corridor total. The slot is now read as a whole number."
+    },
+    {
+      "file": "src/task/parser.py",
+      "summary": "activation.ini was read with configparser's default key folding, which lower-cases option names, so the '<project>/<site>' keys of [overrides] never matched the exact spelling and case the contract requires and no override was ever applied. The reader now keeps keys verbatim (optionxform = str)."
+    },
+    {
+      "file": "src/task/parser.py",
+      "summary": "load_book never raised MissingBookFile, so an absent book file surfaced as an unhandled FileNotFoundError or KeyError traceback instead of the contract's 'E_MISSING_FILE <name>' line. load_book now checks the five book files in the order of BOOK_FILES and raises MissingBookFile for the first one absent, before reading anything, so no document is written."
+    },
+    {
+      "file": "src/task/report.py",
+      "summary": "share_bp divided in floating point and rounded to the nearest whole number, so shares were one basis point too high half of the time. It now computes total * 10000 // quote, rounded down as the contract states, in whole-number arithmetic."
+    },
+    {
+      "file": "pyproject.toml",
+      "summary": "The project metadata disagreed with the package manifest and the runtime: version 0.0.0 instead of 2.18.5, requires-python >=3.13 instead of >=3.12, a third-party 'requests' dependency although the package is standard library only, and package-dir pointing at a non-existent 'lib' directory instead of 'src'."
+    },
+    {
+      "file": "src/task/__init__.py",
+      "summary": "The package exported no VERSION, although it is part of the public API and has to equal the manifest's version. VERSION = \"2.18.5\" was added."
+    }
+  ],
+  "checks": [
+    "PYTHONPATH=src python3 -m unittest discover -s tests -v in the repaired repository: all 6 visible tests pass, including the 4 that failed before (test_activation_override, test_closed_link_is_dropped, test_share_rounds_down, test_slot_order_is_numeric).",
+    "Exhaustive check of the quoting rule: for all 2400 cases of /app/ci/regression_cases.jsonl, every subset of the case's links was enumerated, the connected ones scored by the contract's quote and ordered by (quote, indicator vector); the winner's quote, and the rejection code where a case is rejected, agree with the repaired package on all 2400 cases.",
+    "Cross-check of the book documents against an independent second implementation written from the contract alone (its own readers for the five book files, a state-space Dijkstra Steiner solver instead of the subset dynamic programme, and its own line, corridor, share and summary arithmetic): it reproduces /app/out/module_core.json, module_parser.json, module_report.json and summary.json for /app/ci exactly, including the 6 rejections and all 90 quotes, networks, activated site lists and share_bp values.",
+    "Independent confirmation of the tie rule on four projects of /app/ci by greedy link exclusion: taking the links in ascending id order and excluding each one whenever the optimum quote is still reachable without it yields the same minimum-cost network as the ranked-weight dynamic programme.",
+    "Rejection order: the three rejected codes of /app/ci were re-derived by hand from the book files (P2495, P4774, P6086 have a site id on two rows; P6881 and P8710 each have an open link with an end outside the project; P7680 has a cold room unreachable from the depot over the open links).",
+    "Missing book file: removing each of sites.csv, layout.tsv, links.jsonl, access_rules.toml and activation.ini in turn from a copy of the book makes the command print 'E_MISSING_FILE <name>' to standard error, exit with status 2 and create no output directory; with two files absent the name reported is the first one of the contract's list.",
+    "Reproducibility: the command run from / against a read-only copy of the repository writes documents byte-identical to those written from /tmp against the writable repository, and /app/ci is unchanged afterwards (no file added, removed or modified).",
+    "Archive: /app/out/patched-repo.zip was unpacked into an empty directory and checked to hold 8 members sorted by name, with no directory entry, no __pycache__ or .pyc member, every timestamp 2016-11-20 00:00:00, ZIP_STORED compression and unix mode 0644; the unit tests pass against the unpacked copy and the command run from it reproduces the four documents of /app/ci exactly, and 'import task; task.VERSION' gives 2.18.5.",
+    "Edge cases on a hand-built book: a project with only a depot and no cold room is quoted at its depot's activation charge with an empty network, an empty corridors object and an empty sites object; a project whose cold room sits at a lower corridor position than its only neighbour books that link to the neighbour and still gives the cold room its own line.",
+    "Timing: the 96-project book in /app/ci is quoted in about 6.5 seconds, the slowest single project (10 cold rooms, 52 sites, 88 open links) taking 0.6 seconds, well inside the limit of 10 seconds of start-up plus 4 seconds per project."
+  ]
+}

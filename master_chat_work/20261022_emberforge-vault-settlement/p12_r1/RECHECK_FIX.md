@@ -1,0 +1,28 @@
+# P12 r1 recheck and fix: emberforge-vault-settlement (board b81fe22)
+
+QC report: `QC_2026-10-21/qc_report/emberforge-vault-settlement/v2.md` (FAIL: 1 fail, 2 minor, 4 warns).
+Kit: live HEAD 3fb1650b; report kit f3765e67. The only commit between them (FC-S18, author name spelling) touches Final_checklist.md and structure_qc.py; no rule cited below changed ID or wording.
+Defence notes: `_work/emberforge-vault-settlement/QC_DEFENCE.md` (D1 to D12). XREF: `_work/emberforge-vault-settlement/XREF.md`.
+
+## Findings
+
+| ID | Label | Live rule (file:line) | Evidence (file:line) | Decision | Effect | Files changed |
+|---|---|---|---|---|---|---|
+| AL-2 ❌ | REAL | 05_Alignment_Integrity_QC.md:22 "AL-2 Everything promised is graded. For each instruction requirement: point to the test (or criterion) that checks it." | instruction.md:13 "Your final message must state, for this season, ... the closing vault balance of every scarce reagent"; reagent_registry.csv marks R04, R05, R11 scarce; old judge.toml had R3 (R04) and R4 (R11) only. Oracle closes R05 at 270 (vault_audit: opening 132, acquired 217, returned 17, consumed 96). | FIX: appended R12 `r12_states_closing_balance_r05` "The response states the vault's closing balance of reagent R05 as 270 units." (w3, task completion, final_answer, important). Appended rather than inserted so R1 to R11 keep their IDs (judge_qc J2 wants R1..Rn in order). reward.toml judge weight 0.5/23. | harder (one more figure the agent must state correctly) | tests/judge.toml:155-166, tests/reward.toml:4, solution/TRUTH.md:128-134 |
+| TS-19 🟡 | REAL, minor | 03_Tests_QC.md:50 "do not demand that a test cover every promise: a promise may legitimately be graded by a judged criterion instead... Flag a promise nothing grades at all, never one the judged channel handles." | instruction.md:11 "A record counts only when it matches the settled season exactly"; shipped season records checked for presence and form at tests/test_output.py:2919, 2926, 2959; every record type is value-checked on reseeded seasons; the headline shipped figures go through judge R1 to R5 and R12. | KEEP: deliberate (QC_DEFENCE D7). A full value check of the shipped season would put the shipped answer in the grader and turn it into a target, against round notes B.7 and B.11 (at most 5% of weight on shipped-output checks). QC itself calls it "mostly redundant". | none | none |
+| JD-6 🟡 | REAL | 04_Judge_QC.md:72 "JD-6 Self-contained: the judge sees the trajectory and artifacts, not your head." | Old R6 "each settlement stage in a named function of its own"; "stage" is defined in no shipped file. | FIX: R6 now names the three parts: "recovering the council's draw, settling the ledger entries and allocating the requisitions are each done in a different named function or method." Name and weight unchanged. | none | tests/judge.toml:79 |
+| W-01-1 ⚠️ | FALSE_POSITIVE | 01_Instruction_QC.md:19 "Layout is the author's choice: headings, lists, tables and code blocks are all fine." (IN-L1 :67, IN-L3 :69) | instruction.md:7 "What must be true when you stop." and :13 "Rules of engagement." are run-in paragraph leads, plain English; QC v2 L206 itself says "readable, not slop". | REBUT, keep text (QC_DEFENCE D12). | none | none |
+| W-03-1 ⚠️ | REAL | Gate 03 code hygiene warn (no rule ID in the report) | old tests/test_output.py:2196 `_AGENT_TIMEOUT = 180`, rebound at old :2791 before its only use. | FIX: dead binding deleted; only `_AGENT_TIMEOUT = TIME_LIMIT_SECONDS` (now :2790) remains, used at :2313. Behaviour identical. | none | tests/test_output.py, solution/TRUTH.md (test_output sha256) |
+| W-03-2 ⚠️ | REAL | Gate 03 description wording warn | old tests/test_output.py:3239, 3244, 3254 "... matches the settled season." with plural subjects. | FIX: "matches" -> "match" in the three descriptions (now :3238, :3243, :3253). Text only. | none | tests/test_output.py |
+| JD-16 ⚠️ | REAL, warn | 04_Judge_QC.md:93-97 "When a constraint criterion enforces a rule a test could have checked and no test checks it, say so ... Warn rather than fail: the criterion is valid and what suffers is signal quality" | tests/judge.toml:129-131 R10 "The agent delivers a program that opens a network connection while it settles a season." | KEEP: the rule says the criterion is valid. A sound test would need a runtime socket audit hook inside the agent's interpreter; a static import scan would false-positive on harmless imports such as `http.HTTPStatus` (QC_DEFENCE D10, INFERRED). Network is also off in the agent environment. | none | none |
+
+Counts: REAL 6, FALSE_POSITIVE 1, UNSURE 0. Fixed 4 (AL-2, JD-6, W-03-1, W-03-2). Kept minor 2 (TS-19, JD-16). Rebutted 1 (W-01-1). Paused none.
+Nothing got easier: the only scoring change adds a criterion, so no compensation was needed.
+
+## Gate results
+
+- XREF: `xref_check.py` on BUNDLE with WORK/XREF.md: 56 entries, 0 findings (before changes: 51 entries, 0 findings).
+- QC scripts (live kit, outputs in `qc/`): structure_qc 17 pass 0 warn 0 fail; instruction_qc 5/0/0; tests_qc 37/0/0; judge_qc 19/0/0 (G6 positive total 23, negative -11). 0 FAIL.
+- Manual: no en or em dashes, no CR, no TODO/FIXME/XXX/PLACEHOLDER in changed files; TRUTH.md sha256 lines match the files.
+- Docker (tests only, copies from live exe_copy.py): oracle x3 = 1.000, 1.000, 1.000; owner-only x1 = 1.000; nop x1 = 0.000; 0 exceptions. Logs /tmp/opencode-logs/emberforge-vault-settlement-p12-20261022T214838-ca8b/try2/ef-*.log, jobs /tmp/emberforge-vault-settlement-p12-run-20261022T214838-ca8b/jobs2. First chain attempt aborted at harbor's env-var confirm prompt before any trial ran; relaunched with -y.
+- tree_sha (sha256 over sorted relative paths and contents of BUNDLE, first 12): 9b7c97ff5828

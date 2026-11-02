@@ -1,0 +1,16 @@
+# TODO aee9e0a (g2)
+- [x] setup: rename session (opencode ses_e882ed05 matched), date, repo HEAD a7d269df
+- [x] read our map (LEVER_RULES_v2, QC_RULINGS, QC_FIX_PLAYBOOK_v2, LEAK_LIBRARY, DELIVERY_LEARNINGS, SYNTHESIS)
+- [x] QC report search (b625f36e, 3def42a3, daaca581): none found; 37a0c3d6/9125255a have Poonam_Chourey QC reports
+- [x] A_b625f36e (PARTLY: hidden merge-loop rule + cascade; judge R2 ambiguous)
+- [x] A_3def42a3 (GENUINE: value failures in all-or-nothing families; judge R5 relocated-copy rerun not done)
+- [x] A_daaca581 (GENUINE: value failures; run variance on identical data; judge R5)
+- [x] A_37a0c3d6 (PARTLY: stated _full_core spine gate zeroes 64/70; core miss unlocated INFERRED held-out; judge R11 strict intermediate value)
+- [x] A_9125255a (GENUINE: ~18 items wrongly eligible cascade + hidden dispositions; judge R3 negative fired on honest mismatch report, retained reading graded correct)
+- [x] C_b625f36e
+- [x] C_3def42a3 (GENUINE; per-row ownership grading, partial-authority decoys, rule-count lever)
+- [x] C_daaca581_DIFF (hidden-only tie-break fixtures + shape test; gap = run variance)
+- [x] C_37a0c3d6 (PARTLY; stated spine; per-branch toy example + hidden-only branch; metamorphic reruns; flip-equal negatives)
+- [x] C_9125255a (GENUINE; L1 control upstream of eligibility; judge R3 self-consistency negative on honest disclosure)
+- [x] GROUP_SUMMARY
+- [x] result_aee9e0a.json

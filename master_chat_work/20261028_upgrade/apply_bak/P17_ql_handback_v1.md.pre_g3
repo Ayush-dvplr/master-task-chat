@@ -1,0 +1,58 @@
+# P17 QL zip handback, template v1 (from R1 086e1b4 draft; added 29 Oct 2026, upgrade board 3d3a74a)
+
+Master: use this when the QL hands back a zip (bundle, with or without trajectories/) and asks for one of: trajectory only, regrade only, lower the score, QC + fix his changes. Before issuing:
+1. Copy the zip to `master_chat_work/_ql/[[SLUG]]/[[TS]]_zip/` and write its sha256 next to it.
+2. Write his request verbatim into `REQUEST.md` in the same folder.
+3. Fill every `[[...]]`, set `[[REQUEST]]` to one of `trajectory_only | regrade_only | lower_score | qc_fix`, and check the prompt against `knowledge/PROMPT_CHECKLIST.md`.
+4. Issue it with `tools/issue.py [[SLUG]] ql <draft> <OUT>`.
+
+This session only takes in, diffs and routes. It never edits BUNDLE, Tasks_INPUT or Output_RFP, and it never runs the harness or regrade. The next prompt (P9 v4 / P13 v2 / P11 v3 / P12 v4 / regrade worker) is issued by the master from its ROUTE.md.
+
+=== PASTE BELOW ===
+
+You are taking in a task zip that our QL handed back for one Harbor 0.24 bundle, and you show exactly what he changed. Board id: `[[SHA]]`. This prompt is saved at `[[PROMPT_PATH]]`.
+
+## Rules that survive compaction (copy word for word into any compaction summary)
+- First thing and last thing: `python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/name_session.py" [[SHA]]`.
+- Tools work in every turn. Get IST time with `TZ=Asia/Kolkata date`. After compaction: run date, re-read this prompt, then `OUT/TODO.md`, and continue from the first unticked item.
+- Read in full first: `master_chat_tasks/prompts/templates/_COMMON_RULES_v5.md`, plus `knowledge/LEVER_RULES_v3.md` sections Law-1 and freeze.
+- READ ONLY everywhere. Write only in OUT and `/tmp/ql-[[SLUG]]-<TS>/`. Use read-only git only. No Docker, no harness, no regrade, nothing paid.
+- Keep `OUT/TODO.md` and `OUT/LOG.md` (IST time, command, result) current. Read at most 50 KB per read. List trajectory steps with python or jq; never print a whole trajectory.
+- Every claim cites file:line or command output. Mark guesses INFERRED and unchecked items UNVERIFIED.
+
+## Inputs
+- ZIP: `[[ZIP_PATH]]` (sha256 `[[ZIP_SHA]]`). REQUEST: `[[REQUEST]]` (his words: `[[REQUEST_PATH]]`)
+- FROZEN tree sha: `[[TREE_SHA]]`. TASKS_INPUT: `Terminal_2.0_Harbor_Harness/Tasks_INPUT/[[SLUG]]/`. OUTPUT_RFP: `Terminal_2.0_Harbor_Harness/Output_RFP/[[SLUG]]/`. BUNDLE: `master_chat_work/bundles/[[SLUG]]/`
+- LAST_QC_COPY: `[[LAST_QC_COPY]]`. PENDING our-side fixes not yet pushed: `[[PENDING_DIFF_OR_NONE]]`
+- OUT: `[[OUT]]`
+
+## Phase 0: safe unpack
+1. Run `unzip -l` first. STOP `BLOCKED: unsafe zip` if any entry is absolute, holds `..`, or is a symlink.
+2. Unzip into `/tmp/ql-[[SLUG]]-<TS>/x/`. Find the bundle root: the folder holding task.toml.
+3. Write `OUT/INVENTORY.md` with every file's path, size and sha256. Add the bundle tree sha excluding trajectories/ (method: `cd <DIR>; find . -type f | LC_ALL=C sort | xargs -I{} shasum -a 256 "{}" | shasum -a 256 | cut -c1-12` (for Output_RFP add `-not -path './trajectories/*'` to find)), whether `trajectories/` exists, which `<model>/run_N` it holds, and any extra files that the Output_RFP layout does not have.
+
+## Phase 1: what changed
+1. Run `diff -rq` and `diff -U0 -r` of the zip bundle (excluding trajectories/) against TASKS_INPUT, OUTPUT_RFP (excluding trajectories/) and LAST_QC_COPY. Save each diff into OUT.
+2. Write `OUT/CHANGES.md`: `| file | hunk lines | layer (instruction/tests/judge/reward/data/solution/env/meta) | what it means, one line | origin: QL edit / our newer bytes / packaging only |`. A file counts as "our newer bytes" when his copy equals an older copy of ours (LAST_QC_COPY or an Output_RFP backup) and differs from TASKS_INPUT.
+3. If trajectories/ exists, run `python3 master_chat_tasks/tools/trajectory_readout.py "<zip>/trajectories/<model>/run_N" --out OUT/TRIP_ql.md` for each run. Say which bytes the run was made on (compare `run_N/config.json` task checksum or path with the trees above).
+
+## Phase 2: conflicts (each one found = stop row, ASK)
+- His edit states a hidden rule or explains why a trap exists (W1 / IN-17), changes the rules of engagement (IN-15), or adds difficulty that strong solvers lose only by timeout or crash on shipped data (Law-1).
+- His edit and a PENDING fix of ours touch the same file. Do a 3-way diff (frozen, ours, his) and list the overlapping hunks.
+- His base is older than our newest bytes (rows "our newer bytes").
+- Any change in tests/ or tests/judge.toml or reward.toml: this voids the pushed run, so a new run is needed. The new paid run needs Ayush's OK each time and sits outside the daily cap (Ayush Q5 a).
+
+## Phase 3: route (write `OUT/ROUTE.md`, do not execute)
+- `trajectory_only`: TRIP summary plus the gate result (tests < 85, rubric < 85, final < 40, gate v3.7). If he edited bytes, say that the trajectory does not cover them.
+- `regrade_only`: list the regrade inputs. These are the staged task (TASKS_INPUT plus his clean edits plus the run's staging lines), the source trial `jobs/[[SLUG]]/trajectory/<model>/Run N`, and the Output_RFP files the regrade would replace. Allowed only when no tests/ file changed.
+- `lower_score` (ASK Ayush first, Q2 a; the new run must meet final < 40): with trajectories, P9 v4 from TRIP_ql.md. Without trajectories, 3 × P13 v2 blind, then P9 v4, then P11 v3 full, freeze, ASK, 1 run.
+- `qc_fix`: P11 v3 MODE recheck with PREV_COPY = LAST_QC_COPY, then P12 v4.
+For each route, give the next prompt to issue and the bundle bytes it should start from: which of his hunks to take, and which to drop with a reason.
+
+## Deliverables in OUT
+INVENTORY.md, CHANGES.md, TRIP_ql.md (if trajectories), CONFLICTS.md (`| conflict | file:line | rule file:line | what Ayush must decide |`), ROUTE.md, `## Lessons for the master` at the end of ROUTE.md (at most 5 lines), and `result_[[SHA]].json`: `{"sha","slug","step":"ql-handback","status":"DONE|BLOCKED|ASK","request","zip_sha","zip_tree_sha","has_trajectories":bool,"changed_files":n,"tests_or_judge_change":bool,"conflicts":n,"route","report"}`. It must parse.
+
+## Stops
+`BLOCKED: unsafe zip`, `BLOCKED: no task.toml in zip`, `ASK: conflicts` (after CONFLICTS.md is written).
+
+Final reply: at most 8 lines. Give the changed-file count, the conflicts, the route, and end with `done: <OUT>/ROUTE.md`.

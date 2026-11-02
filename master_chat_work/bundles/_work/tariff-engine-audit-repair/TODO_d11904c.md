@@ -1,0 +1,24 @@
+# TODO d11904c (wave 1 harden, P-1 computational core rebuild of statements optimum)
+
+- [x] P1 rename session d11904c (opencode listed ses_e841ecdc1ffetLZZHhvl5h21Vi; no explicit d11904c)
+- [x] P1 read COMMON_RULES_v4, LEVER_RULES_v3, LEAK_LIBRARY, QC_RULINGS, QC_FIX_PLAYBOOK_v2, sentinel r3, tariff r3, blind r3 report
+- [x] P1 read WORK DESIGN/LEVERS/QC_DEFENCE/XREF, contract statements section, test statement checks; QC HEAD
+- [x] P1 phase A diff (probe staged tests/ environment/ vs BUNDLE)
+- [x] P1 diagnosis table (probe trajectory + loss.py)
+- [x] P1 design lever (coupling constraint), reference solver
+- [x] P1 proto hidden instances WORK/proto/; kill-test solvers (blind r3, bitset, dict table, MITM, Pareto, B&B, greedy, naive) in Docker
+- [x] P1 WORK/KILL_TEST.md + OUT/DESIGN.md; STOP "DESIGN READY"
+- [x] WAIT for master "go" (go received 12:18; items 1-7, item 7 = shipped small two-group account)
+- [x] P2 backup src/solve/vouchers/TRUTH before edit (t4 copies)
+- [x] P2 test_output.src.py: _redeem_split + _ledger_once/_ledger_texts/_ledger_run/_ledger_want/checks + 21 criteria (3/5/5) appended; r3 code byte-unchanged
+- [x] P2 solve.py REPORT_SRC _redeem -> split algorithm (exact, general)
+- [x] P2 item 7 shipped account two-group small scale (append rows to ci/vouchers.csv); list changed expected values
+- [x] P2 G12: generator 300 seeds, bounds + branch plants asserted; balances 3e10-1e11
+- [x] P2 embed.py regen (rule 6), byte-diff r3 sections, reward.toml weights
+- [x] P2 kill test on final generator output (dump corpora) Docker; COST_TABLE (all-but-one, first write, blind r3, lever share)
+- [x] P2 LEVERS/COST_TABLE/QC_DEFENCE/DESIGN(Wave 1)/XREF/TRUTH; xref_check 0
+- [x] P3 stacking_check -> OUT/STACKING_CHECK.md
+- [x] P3 precheck CLEAN + 4 QC scripts + validator 0 FAIL
+- [x] P3 Docker oracle x3/owner/nop/stub/forgery (exe_copy.py), ALL_DONE
+- [x] P3 Tasks_INPUT sync + diff -rq empty
+- [x] P3 HARDEN_REPORT.md + result_d11904c.json; final reply BUILD READY

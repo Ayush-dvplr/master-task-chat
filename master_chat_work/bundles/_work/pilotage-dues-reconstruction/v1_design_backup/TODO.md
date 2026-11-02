@@ -1,0 +1,36 @@
+# TODO 44635de pilotage-dues-reconstruction
+
+- [x] name session (opencode match ses_e87d39d2affenbjSDFAyLycN6w; codex no match)
+- [x] read rules docs 1-5 in order (common, lever, leak, rulings, playbook, knowledge, checks.json)
+- [x] fingerprints pl_generator + qc re-hashed: 0 diffs
+- [x] Phase 0: PREMORTEM.md
+- [x] Phase 0: DESIGN.md
+- [x] Phase 0: BRANCH_FIRE.md
+- [x] Phase 0: QC_DEFENCE.md
+- [x] Phase 0: DESIGN_SUMMARY.md (<=40 lines); STOP "DESIGN READY"; wait for go
+- [x] Phase 0b-a: apply master go changes 1-6 to DESIGN.md / BRANCH_FIRE.md
+- [x] Phase 0b-b: draft docs + instruction under design_blind
+- [x] Phase 0b-c1: gen_proto.py (shipped + seeds 1101-1106 pass)
+- [x] Phase 0b-c2: solve_proto.py (correct + reflex variants) run on shipped + 1101,1103,1104
+- [x] Phase 0b-d: BRANCH_FIRE measured; EVIDENCE_MAP + UNIQUENESS rows; STOP "DESIGN BLIND READY"
+- [x] Phase 0b: WAIT for master blind program path, then DESIGN_BLIND.md diff (blind exact on shipped + 1101-1106 -> redesign)
+- [x] Redesign v2: DESIGN.md s11, PREMORTEM addendum, BRANCH_FIRE v2 planned, QC_DEFENCE v2 rows, DESIGN_SUMMARY v2; STOP "DESIGN READY"
+- [x] WAIT for master go on v2 (go 21:26 with changes 1-6: breadth >=35 plain, >=8 quiet, COST_TABLE, second blind read)
+- [x] v2-a: DESIGN.md s12 (v2-go rules Q1-Q9, N1-N4, test plan 34 checks P=112)
+- [x] v2-b: proto docs v2 (14 files: circular, exemption_policy, output_contract, rule_register, station_notices, certificates.json)
+- [x] v2-c: gen_proto.py v2 (joint fit roles, allowance, quiet plants) shipped + 1101-1106 pass
+- [x] v2-d: solve_proto.py v2 + reflex variants + proto scorer -> COST_TABLE.md
+- [x] v2-e: BRANCH_FIRE measured v2, EVIDENCE_MAP (draw-order row), UNIQUENESS v2, design_blind refresh (instruction + 14 files)
+- [x] v2-f: STOP "DESIGN BLIND READY" (second blind read; if exact everywhere stop and report, no third redesign)
+- [x] WAIT for master: second blind read result (P13); if exact everywhere stop and report, no third redesign
+- [x] Read 2 diff: blind exact on shipped + 6 seeds; 3 risks settled (docs + generator asserts); EVIDENCE_MAP rows; DESIGN_BLIND.md read 2
+- [ ] STOPPED at DESIGN BLIND EXACT: wait for Ayush decision before Phase 1
+- [ ] Phase 1 scaffold
+- [ ] Phase 2 datagen
+- [ ] Phase 3 solve + check_exact
+- [ ] Phase 4 tests + lever docs
+- [ ] Phase 5 judge
+- [ ] Phase 6 instruction
+- [ ] Phase 7 TRUTH
+- [ ] Phase 8 gates
+- [ ] Phase 9 report + result json

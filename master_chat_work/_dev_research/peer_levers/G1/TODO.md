@@ -1,0 +1,12 @@
+# TODO 98fa054 G1 (anubis HEAD 19cdf6989906385943b9ca00acaadcae204b29e8)
+- [x] setup: session renamed 98fa054 (shown in list), HEAD recorded, OUT created
+- [x] A gm-arena-ladder-payout-reconciliation-forge
+- [x] A h3-fleet-migration-scheduler-nk-20260907
+- [x] A lane-dispatch-optimisation
+- [x] A project-schedule-feasibility
+- [x] B gm-arena-ladder-payout-reconciliation-forge
+- [x] B h3-fleet-migration-scheduler-nk-20260907
+- [x] B lane-dispatch-optimisation
+- [x] B project-schedule-feasibility
+- [x] C GROUP_SUMMARY.md
+- [x] C result_98fa054.json

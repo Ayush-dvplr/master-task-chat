@@ -1,0 +1,19 @@
+# P12 v3 r2 TODO (0bf6688). Prior rounds: TODO_P12r1.md, TODO_P9.md
+- [x] P0.0 rename session (opencode ses_e9307f06cffeGEHL0AThJ3rczG listed); date; tree sha 69504156ee8f match; lock taken
+- [x] P0.1 rules read (COMMON v3, round notes C/E/F/G, LEVER_RULES, QC_RULINGS, PLAYBOOK v2); fingerprints QC 12/12 GEN 160/160; kit HEAD 71a653b2
+- [x] P0.2 read QC v2 report, p12_r1 RECHECK_FIX, QC_DEFENCE, XREF, local_score.py, single_lever.py
+- [x] P0.3 xref_check 0 findings (before)
+- [x] P0.4 copy tests/solution/environment -> WORK/trap/before_v3r2 (read-only)
+- [x] P0.5 lever baseline BEFORE: oracle, v0 agent adapted, 5 variants, carry_eleven -> trap/scores_before_v3r2
+- [x] P1 recheck F1 F2 W1 W2 W3 rows -> OUT/RECHECK_FIX.md
+- [x] P2.1 F1 grammar recipes in calibration.md (from _peel/control_figures/Unwinder.rung)
+- [x] P2.2 F1 WORK/grammar_check.py: 11/11 shipped + held-out seed
+- [x] P2.3 F1 re-embed _SHIPPED_DATA if needed; QC_DEFENCE D10, DESIGN line
+- [x] P2.4 F2 r11 code-quality criterion; oracle solve.py meets it
+- [x] P2.5 W2 record_derivation_matches w1->3; reward.toml
+- [x] P2.6 W3 hyphenation instruction.md + data md
+- [x] P2.7 variants with grammar; AFTER scoring; COST_TABLE.md; trap survival
+- [x] P2.8 TRUTH.md by script (+ remove :282 fix_patch_sha256), XREF, xref_check 0
+- [x] P2.9 side-effect rechecks, precheck CLEAN, structure_qc exit 0, stacking_check -> OUT
+- [x] P2.10 Docker block (warm, oracle x3, owner, nop, stub)
+- [x] P3 reports (RECHECK_FIX, PL_NOTE, result json), tree sha, pycache, unlock, rename

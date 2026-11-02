@@ -1,0 +1,12 @@
+# R1 QL loop TODO (board 086e1b4)
+- [x] name_session first
+- [x] Read _COMMON_RULES_v5
+- [x] Read KNOWLEDGE.md, INDEX.md
+- [x] Read QC_FIX_PLAYBOOK_v3, QC_RULINGS, FP_DOSSIER (absent), LEVER_RULES_v3 (Law-1, freeze, push), PROMPT_CHECKLIST
+- [x] Read templates P7v2 P8v2 P9v4 P11v3 P12v4 P13v2 CHANGELOG
+- [x] Read tools intake, trajectory_readout, status, issue, precheck, board, auto.py harness, master_queue, package_rfp_bundles
+- [x] Precedents: sentinel regrade, district harden, jsonl grep QL
+- [x] FINDINGS.md
+- [x] drafts: P16, P17, QL_REPLY_TEMPLATE, MASTER_STEPS, tool specs
+- [x] result_086e1b4.json
+- [x] name_session last

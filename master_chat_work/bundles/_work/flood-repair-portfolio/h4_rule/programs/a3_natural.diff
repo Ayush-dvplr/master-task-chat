@@ -1,0 +1,21 @@
+148a149,150
+> 
+> SHARED_CAP = 4
+306a309,325
+>         # A shared crew can work on at most four proposals of a portfolio: while
+>         # some shared crew has more than four picks, rule out its least valuable
+>         # pick and plan the round again.
+>         banned = set()
+>         while True:
+>             over = defaultdict(list)
+>             for pid in chosen:
+>                 if self.book.crews[self.crew[pid]] == "shared":
+>                     over[self.crew[pid]].append(pid)
+>             extra = [ps for ps in over.values() if len(ps) > SHARED_CAP]
+>             if not extra:
+>                 break
+>             for ps in extra:
+>                 banned.add(min(ps, key=lambda p: (self.benefit[p], [-ord(c) for c in p])))
+>             keep = [p for p in self.ids if p not in banned]
+>             sub = dict((p, adj[p] - banned) for p in keep)
+>             total, chosen = max_weight_independent_set(keep, sub, self.benefit)

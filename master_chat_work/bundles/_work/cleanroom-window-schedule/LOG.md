@@ -1,0 +1,24 @@
+# LOG 3040f47
+
+- 16:57 python3 name_session.py 3040f47 -> codex: no match; opencode: ['ses_e8d2efcd2ffeDEglLpM8uaaTYq']
+- 16:58 read rule files in order (common, lever rules, leak library, QC rulings, playbook, knowledge, idea)
+- 16:58 created TODO.md, LOG.md
+- 17:02 fingerprints GEN 160/160 match (head 5574d77e harness), QC 12/12 match; checks.json read via digest WORK/checks_digest.txt (302 checks)
+- 17:26-17:31 proto/book.py survey seeds 666278, 777, 31337 (output proto/book_out.txt): every baseline fails every hidden book; counts 1 on 54/57 nights (1 count 2, 2 count 0 -> generator redraws); ref 0.05-0.33 s/night; raw-end-time exact DP 1-25 s, >30 s on some largest nights
+- 17:32 wrote PREMORTEM.md, DESIGN.md, QC_DEFENCE.md, DESIGN_SUMMARY.md; STOP for design review (waiting for go)
+- 17:36 go received (MASTER_REVIEW_1736.md, 12 points)
+- 17:44 P1 generate_bundle.py (no --force) -> BUNDLE scaffold; copied to WORK/scaffold_orig/
+- 17:58 P2 bookgen.py (seeded xorshift generator, to be embedded in tests), datagen.py (415 nights, 12 defect nights, 3 empty, redraw to unique optimum, thresholds 75/1500), contract.md written at environment/data/contract.md; data 21437 lines
+- 18:00 P3 solve.py fixed tie_key line; tmp/cmp_solve.py: solve.py 1.41 s on shipped book, plans equal cw.solve_night on 403/403 accepted nights, 12 rejections with expected codes; flags mix 171 none/141 crew/73 margin/30 both
+- 18:03 P3 check_exact.py (enumeration <=12 jobs, top-down memo recursion >12, counts==1 asserted, per-record diff + invariants): all 9 json docs same (78 s). Naive collapse differs on 30 shipped nights <=12 jobs (point 5 covered by enumeration). Override-removal probe: no footnote/erratum mechanism in this task (N/A)
+- 18:02 P4 hidden_build.py -> hidden_meta.json ALL_DONE (H1 91001, H2 92001, H3 93002; every variant differs on >=1 night per book; crossing nights 3/1/1); bookgen.py bound asserts added (G12)
+- 18:15 P4 tests_template.py + assemble_tests.py -> tests/test_output.py (1260 lines, 29 criteria, pos 98); run_tests.py local runner (stub rewardkit): oracle 98/98 = 1.0, negative False; shipped run 1.3 s
+- 18:15 P4 mutants.py wrote 11 wrong programs (greedy, greedy_ls, lane_by_lane, flow_relax, no_crew, naive_collapse, reset_nightly, no_initial, touching_only, raw_tuned, raw_exact); cost runs started -> tmp/cost/all.log
+- 18:22 P6 instruction.md rewritten (contract path once, 9 output paths, exactness sentence verbatim, final reply lists rejected nights, 7200 s, online sentence). contract.md Program: 'nine output documents', stdlib sentence moved there.
+- 18:30 P4/P8 cost + rule mutant runs ALL_DONE (tmp/cost, tmp/rule). Docker timing (pinned python:3.12-slim, 2 cpus 4g): reference worst night 0.38 s (H1 71 jobs), whole book H1 1.31 s, H2 0.28 s, H3 1.33 s. Per-night limit set to 2 s (smallest whole seconds with 0.38 <= 2/4); contract.md:19, tests SECONDS_PER_NIGHT=2, run_tests.py budget 2x415; tests reassembled.
+- 18:30 output_paths_lowercase rule mutant scored 98/98 locally because macOS APFS is case-insensitive; rerun it on Linux (Docker) for RULE_COVERAGE.
+- 18:36 P8 start: QC scripts structure 17/0/0, instruction 5/0/0, judge 19/0/0; tests_qc B4 fail (regex named /logs/verifier) -> negative now anchored to quoted /tests only. Validator §7.4 needed negative_hardcoded_sample_answers -> added (-3; trigger >=3 shipped night ids or shipped total net in /app/out *.py), backed by contract.md:13 clause "every figure it writes comes from the files it reads" (same line, no line shift). TRUTH negatives updated. Validator 41/0/0 PASS, tests_qc 37/0/0. raw optimiser cost rerun at 2 s/night started (tmp/cost2).
+- 18:41 Docker timing ALL_DONE x3 (raw_tuned H1 capped 20 s/night whole 53.5 s killed; H2 worst 1.20 s whole 4.04 s; H3 nights 12.88/6.88/>20 s whole 140.6 s killed). Oracle shipped book in pinned image 1.66/1.63/1.61 s -> TRUTH. Local oracle 98/98 with new negative; cheat program (3 night ids + '/tests/x') fires both negatives (90/98). raw_tuned at 2 s/night local 48/98.
+- 18:50 P8 Harbor oracle x3 = 0.2041 each (20/98): tests _write_book chmod'ed the 0o777 temp root to 755 so user nobody could not create the output folder; fixed in tests_template.py (stop below temp root), reassembled; verifier image debug run as root+setpriv: all hidden/mutation checks pass. Harbor rerun started. COST_TABLE.md, STACKING_CHECK.md (OUT) written; LEVERS.md updated (LV-CW-1 86/98 incl. runtime).
+- 18:52 P8 Harbor rerun ALL_DONE: oracle 1.0 x3 (trials pdFMHnu, kZj4BpP, vokYLRF; verifier 20.4-20.7 s of 2700 s), nop 0.0 (SqLgND9). QC scripts 17/5/37/19 pass 0 fail, validator 41/0/0 GATE PASS, TRUTH golden fields filled, sha_truth rerun, PRECHECK CLEAN (30 tests, 9 criteria).
+- 18:58 P9 BUILD_REPORT.md, result_3040f47.json (tree_sha 33829b0096c2), UNIQUENESS.md written; /tmp/oracle-qc copy and temp files removed. BUILD READY.

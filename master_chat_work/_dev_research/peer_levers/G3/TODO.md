@@ -1,0 +1,12 @@
+# TODO 118ec8a (G3)
+- [x] Setup: session renamed 118ec8a (ses_e9970c2aeffeYgB2VZbbs90Q7j, list shows it); anubis HEAD 19cdf6989906385943b9ca00acaadcae204b29e8; read DIAGNOSIS s0
+- [x] A pretraining-token-ledger-closeout (GENUINE, A_ file written)
+- [x] A sentinel-fraud-training-release (GENUINE)
+- [x] A slo-credit-closeout (GENUINE)
+- [x] A survey-raking-disclosure-audit (GENUINE; single band-fallback misread, proven by 1-branch patch reproducing all 22 oracle files)
+- [x] B pretraining-token-ledger-closeout
+- [x] B sentinel-fraud-training-release
+- [x] B slo-credit-closeout
+- [x] B survey-raking-disclosure-audit
+- [x] C GROUP_SUMMARY.md
+- [x] C result_118ec8a.json

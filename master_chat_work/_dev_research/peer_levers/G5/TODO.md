@@ -1,0 +1,13 @@
+# G5 TODO (board 06193bc)
+- [x] setup: rename session (list did not show 06193bc; SID ses_e9970702affewHuLJLu4CT8icU), anubis HEAD 19cdf6989906385943b9ca00acaadcae204b29e8
+- [x] read DIAGNOSIS section 0 + lever table
+- [x] A cli-config-01
+- [x] A policy-convergence-dataproc-21
+- [x] A sec-firewall-policy-converge
+- [x] A sec-sealed-posture-compile-forge
+- [x] B cli-config-01
+- [x] B policy-convergence-dataproc-21
+- [x] B sec-firewall-policy-converge
+- [x] B sec-sealed-posture-compile-forge
+- [x] C GROUP_SUMMARY.md
+- [x] C result_06193bc.json

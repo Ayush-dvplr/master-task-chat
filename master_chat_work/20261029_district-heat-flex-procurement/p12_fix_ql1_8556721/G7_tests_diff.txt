@@ -1,0 +1,517 @@
+# G7 byte diff tests/ before (pushed_e9d91966ed25) vs after
+
+Dockerfile before=09dc7fb726b1 after=09dc7fb726b1 SAME
+judge.toml before=6a6e1df7e9b5 after=c21fc21318e9 CHANGED
+reward.toml before=cdd21d5d1d6d after=7faf836a7b75 CHANGED
+test.sh before=5302b9b87341 after=5302b9b87341 SAME
+test_output.py before=8609f5b2bcb3 after=097367249278 CHANGED
+
+# test_output.py is generated from test_output.src.py by embed.py; its hunks are shown on the source.
+--- /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/district-heat-flex-procurement/pushed_e9d91966ed25/tests/judge.toml
++++ /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/district-heat-flex-procurement/tests/judge.toml
+@@ -36,8 +36,8 @@
+ 
+ [[criterion]]
+ id = "R3"
+-name = "r3_checks_a_composed_rate_above_cap_on_its_own_extract"
+-description = "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the credit_cents and cap_binding_count it reports against figures it worked out by hand."
++name = "r3_checks_composed_rate_credit_on_own_extract"
++description = "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the credit_cents it reports for that offer's event-region against a figure it worked out by hand."
+ type = "binary"
+ weight = 3
+ 
+@@ -150,3 +150,16 @@
+ type = "agent behavior"
+ evaluation_target = "state_change"
+ importance = "important"
++
++[[criterion]]
++id = "R12"
++name = "r12_checks_composed_rate_cap_binding_on_own_extract"
++description = "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the cap_binding_count it reports against a count it worked out by hand."
++type = "binary"
++weight = 3
++
++[criterion.annotations]
++mode = "judged"
++type = "agent behavior"
++evaluation_target = "trajectory"
++importance = "important"
+
+--- /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/district-heat-flex-procurement/pushed_e9d91966ed25/tests/reward.toml
++++ /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/district-heat-flex-procurement/tests/reward.toml
+@@ -1,7 +1,7 @@
+ [[reward]]
+ name = "reward"
+ aggregation = "weighted-sum"
+-weights = { test_output = 0.002109704641350211, judge = 0.020833333333333332 }
++weights = { test_output = 0.002109704641350211, judge = 0.018518518518518517 }
+ 
+ [scoring.test_output]
+ aggregation = "weighted-sum"
+
+--- /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/district-heat-flex-procurement/p12/src_before_8556721.py
++++ /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/district-heat-flex-procurement/test_output.src.py
+@@ -48,7 +48,8 @@
+                        "DH4dup", "DH4range", "DH4seen", "DH4unknown", "DH5raw", "C34", "C45", "C5drop", "W0LIST",
+                        "MULT0", "MULTtick", "OVR0", "OVRrate", "ADD0", "CAPpre", "UPL0", "R7offer", "R7up",
+                        "R7offer_even", "LEDnone", "LEDstatic", "LEDid", "LEDstr", "LEDtie", "REENTRY", "DROPLEFT",
+-                       "NODROP", "CLAIM0", "NOCARRY", "CHAIN0", "CHAIN1", "RELIEF"})
++                       "NODROP", "CLAIM0", "NOCARRY", "CHAIN0", "CHAIN1", "RELIEF", "UNIT10", "CODESHIP",
++                       "ADDmiss", "GAPdrop", "LEDwithin", "ALWge", "CLAIMlt"})
+ # Wrong readings that change which offers the search picks (the others only change what is reported).
+ SEARCH_FLAGS = frozenset({"DH2", "H2", "C34", "C45", "C5drop", "DH4dup", "DH4range", "DH4unknown", "MULT0",
+                           "MULTtick"})
+@@ -146,14 +147,23 @@
+     can prove that it separates the two readings."""
+     cfg = configparser.ConfigParser()
+     cfg.read_string((root / "program.ini").read_text(encoding="utf-8"))
+-    wh_tick = int(cfg["units"]["wh_per_tick"])
+-    mc_cent = int(cfg["units"]["millicents_per_cent"])
++    wh_tick = 10 if "UNIT10" in lazy else int(cfg["units"]["wh_per_tick"])
++    mc_cent = 1000 if "UNIT10" in lazy else int(cfg["units"]["millicents_per_cent"])
+     code_region = {k.upper(): v for k, v in cfg["region_codes"].items()}
+     code_segment = {k.upper(): v for k, v in cfg["segment_codes"].items()}
++    if "CODESHIP" in lazy:
++        code_region = {c: r for r, codes in REGION_CODES.items() for c in codes}
++        code_segment = dict(SEGMENT_CODES)
++
++    def known(*codes: str) -> bool:
++        return "CODESHIP" not in lazy or (codes[0].upper() in code_region and
++                                          all(c.upper() in code_segment for c in codes[1:]))
+     region_names = sorted(set(code_region.values()))
+     segment_names = sorted(set(code_segment.values()))
+     adder_of = {k.lower(): int(v) for k, v in cfg["segment_rate_adders"].items()} \
+         if cfg.has_section("segment_rate_adders") else {}
++    if "ADDmiss" in lazy:
++        adder_of = {"commercial": 0, "public": 750} | adder_of
+ 
+     def tk(wh: int) -> int:
+         return _q(wh, wh_tick)
+@@ -250,6 +260,7 @@
+     count["profiles.tsv"] = len(profile_rows)
+     lost_profiles = out_of_range = repeats = 0
+     seen: set[tuple[str, int]] = set()
++    kept_rows: dict[str, set[int]] = {}
+     listed_seen: set[tuple[str, int]] = set()
+     for r in profile_rows:
+         oid, itv = r["offer_id"], int(r["interval"])
+@@ -274,6 +285,7 @@
+                 continue
+             seen.add((oid, itv))
+         if oid in offer:
++            kept_rows.setdefault(oid, set()).add(itv)
+             mult = int(r["register_multiplier"])
+             for slot, column in (("r", "relief_wh"), ("v", "recovery_wh")):
+                 reading = int(r[column])
+@@ -288,17 +300,18 @@
+     target_rows = _records(root / "targets.tsv", "\t")
+     count["targets.tsv"] = len(target_rows)
+     goal = {(r["event_id"], code_region[r["region_code"].upper()], int(r["interval"])):
+-            (tk(int(r["target_wh"])), int(r["shortfall_weight"])) for r in target_rows}
++            (tk(int(r["target_wh"])), int(r["shortfall_weight"])) for r in target_rows if known(r["region_code"])}
+     feeder = _columns(root / "feeder_limits.txt", [(1, 10), (11, 14), (15, 17), (18, 27), (28, 37)])
+     count["feeder_limits.txt"] = len(feeder)
+-    limit = {(a, code_region[b.upper()], int(c)): (tk(int(d)), tk(int(e))) for a, b, c, d, e in feeder}
++    limit = {(a, code_region[b.upper()], int(c)): (tk(int(d)), tk(int(e))) for a, b, c, d, e in feeder if known(b)}
+     floor_list = json.loads((root / "segment_floors.json").read_text(encoding="utf-8"))["floors"]
+     count["segment_floors.json"] = len(floor_list)
+     floor = {(f["event_id"], code_region[f["region_code"].upper()], code_segment[f["segment_code"].upper()]):
+-             (tk(int(f["floor_wh"])), int(f["priority_weight"])) for f in floor_list}
++             (tk(int(f["floor_wh"])), int(f["priority_weight"])) for f in floor_list
++             if known(f["region_code"], f["segment_code"])}
+     pool_lines = _columns(root / "pools.txt", [(1, 10), (11, 14), (15, 26)])
+     count["pools.txt"] = len(pool_lines)
+-    pool = {(a, code_region[b.upper()]): int(c) for a, b, c in pool_lines}
++    pool = {(a, code_region[b.upper()]): int(c) for a, b, c in pool_lines if known(b)}
+ 
+     def label(s: dict[str, Any]) -> str:
+         signed_ok = s["signed"] == "Y" or ("SIGNEDY" in lazy and s["signed"] == "")
+@@ -508,6 +521,8 @@
+     pool_of: dict[tuple[str, str], list[dict[str, Any]]] = {}
+     unauth = 0
+     for o in offer.values():
++        if "GAPdrop" in lazy and len(kept_rows.get(o["id"], ())) < len(o["r"]):
++            continue
+         if o["site"]["auth"]:
+             pool_of.setdefault((o["site"]["event_id"], o["site"]["region"]), []).append(o)
+         else:
+@@ -534,19 +549,24 @@
+             if "LEDnone" in lazy:
+                 cands = list(every)
+             else:
+-                cands = [o for o in every if sum(tk(x) for x in o["r"]) <= left[drawn_on(o["site"]["sid"])]]
++                cands = [o for o in every if sum(tk(x) for x in o["r"]) <= left[drawn_on(o["site"]["sid"])]
++                         and ("ALWge" not in lazy or sum(tk(x) for x in o["r"]) < left[drawn_on(o["site"]["sid"])])]
+             blocked += len(every) - len(cands)
+             goals = [goal.get((eid, region, t + 1), (0, 0)) for t in range(width)]
+             caps = [limit.get((eid, region, t + 1), (0, 0)) for t in range(width)]
+             floors_here = {g: floor.get((eid, region, g), (0, 0)) for g in segment_names}
+-            memo_key = (str(root), lazy & SEARCH_FLAGS, eid, region, tuple(o["id"] for o in cands))
++            memo_key = (str(root), lazy & (SEARCH_FLAGS | {"UNIT10"}), eid, region, tuple(o["id"] for o in cands))
+             if memo_key not in _SEARCH_MEMO:
+                 solver = search if lazy & SEARCH_FLAGS else bounded
+                 _SEARCH_MEMO[memo_key] = solver(cands, goals, caps, floors_here, int(ev["objective"]["cost_weight"]),
+                                                 int(ev["objective"]["recovery_weight"]), width)
+             winner, tied = _SEARCH_MEMO[memo_key]
+             picks[(eid, region)] = (cands, winner, tied)
+-            drawn.extend(winner)
++            if "LEDwithin" in lazy:
++                for i in winner:
++                    left[drawn_on(offer[i]["site"]["sid"])] -= sum(tk(x) for x in offer[i]["r"])
++            else:
++                drawn.extend(winner)
+         if "LEDstatic" not in lazy:
+             for i in drawn:
+                 left[drawn_on(offer[i]["site"]["sid"])] -= sum(tk(x) for x in offer[i]["r"])
+@@ -628,7 +648,8 @@
+             else:
+                 positive = {b: w for b, w in heft.items() if w}
+                 claims = {b: w * claim_rate for b, w in positive.items()}
+-                if "CLAIM0" not in lazy and sum(claims.values()) <= funded:
++                if "CLAIM0" not in lazy and (sum(claims.values()) < funded if "CLAIMlt" in lazy
++                                             else sum(claims.values()) <= funded):
+                     cut = dict(claims)
+                 else:
+                     cut, spare, ties = _apportion(funded, positive, "H4" in lazy)
+@@ -762,16 +783,27 @@
+         return _CACHE[key]
+ 
+ 
+-def _code(region: str, salt: int) -> str:
+-    return REGION_CODES[region][salt % 2]
+-
+-
+ def write_extract(folder: Path, spec: dict[str, Any]) -> Path:
+     """Write every input file of the contract for a spec built by the case helpers."""
+     folder.mkdir(parents=True)
+-    ini = f"[units]\nwh_per_tick = {spec.get('wh_per_tick', 10)}\nmillicents_per_cent = 1000\n\n[region_codes]\n"
+-    ini += "".join(f"{c} = {r}\n" for r, codes in REGION_CODES.items() for c in codes)
+-    ini += "\n[segment_codes]\n" + "".join(f"{k} = {v}\n" for k, v in SEGMENT_CODES.items())
++    # A spec may rename the codes: code_map lists the codes of each region, seg_map those of each segment code.
++    code_map = spec.get("code_map") or {r: list(codes) for r, codes in REGION_CODES.items()}
++    seg_map = spec.get("seg_map") or {k: [k] for k in SEGMENT_CODES}
++
++    def code(region: str, salt: int) -> str:
++        return code_map[region][salt % len(code_map[region])]
++
++    def site_code(canonical: str, salt: int) -> str:
++        region = _region_of_code(canonical)
++        return canonical if region is None or "code_map" not in spec else code(region, salt)
++
++    def seg(canonical: str, salt: int) -> str:
++        return seg_map[canonical][salt % len(seg_map[canonical])] if "seg_map" in spec else canonical
++
++    ini = (f"[units]\nwh_per_tick = {spec.get('wh_per_tick', 10)}\n"
++           f"millicents_per_cent = {spec.get('millicents_per_cent', 1000)}\n\n[region_codes]\n")
++    ini += "".join(f"{c} = {r}\n" for r, codes in code_map.items() for c in codes)
++    ini += "\n[segment_codes]\n" + "".join(f"{c} = {SEGMENT_CODES[k]}\n" for k, codes in seg_map.items() for c in codes)
+     ini += ("\n# Rate adders, in mill-cents per kWh, by segment name. The value of an option is added to the\n"
+             "# rate of every site row whose segment is that name.\n[segment_rate_adders]\n")
+     ini += "".join(f"{g} = {v}\n" for g, v in sorted(spec.get("adders", {"commercial": 0, "public": 0}).items()))
+@@ -791,7 +823,8 @@
+ 
+     sites = spec["sites"]
+     tsv("sites.csv", ",", ["event_id", "site_id", "region_code", "segment_code", "beneficiary_id", "critical"],
+-        [[s["event_id"], s["sid"], s["code"], s["seg"], s["ben"], "Y" if s["critical"] else "N"] for s in sites])
++        [[s["event_id"], s["sid"], site_code(s["code"], k), seg(s["seg"], k), s["ben"], "Y" if s["critical"] else "N"]
++         for k, s in enumerate(sites)])
+     (folder / "site_state.jsonl").write_text("".join(json.dumps(
+         {"event_id": s["event_id"], "site_id": s["sid"], "dispatch_authorized": s["auth"], "safety_hold": s["hold"],
+          "cooldown": s["cool"]}) + "\n" for s in sites), encoding="utf-8")
+@@ -813,7 +846,9 @@
+     offers = list(spec["offers"])
+     offer_body = [[o["offer_id"], o["event_id"], o["sid"], "SETBACK_2C", o["cost"]] for o in offers]
+     offer_body += [list(x) for x in spec.get("orphan_offer_rows", [])]
+-    profile_body = [[o["offer_id"], t + 1, o["r"][t], o["v"][t], o["m"][t]] for o in offers for t in range(len(o["r"]))]
++    gaps = spec.get("gaps", set())
++    profile_body = [[o["offer_id"], t + 1, o["r"][t], o["v"][t], o["m"][t]] for o in offers for t in range(len(o["r"]))
++                    if (o["offer_id"], t + 1) not in gaps]
+     profile_body += [list(x) + [1] * (5 - len(x)) for x in spec.get("orphan_profile_rows", [])]
+     if spec.get("reverse"):
+         offer_body.reverse()
+@@ -834,15 +869,15 @@
+             for t in range(e["n"]):
+                 wh, weight = goals[t] if t < len(goals) else (0, 1)
+                 relief_cap, recovery_cap = limits[t] if t < len(limits) else (0, 0)
+-                target_body.append([e["event_id"], _code(region, t), t + 1, wh, weight])
+-                feeder.append(f"{e['event_id']:<10}{_code(region, t + 1):<4}{t + 1:>3}{relief_cap:>10}{recovery_cap:>10}")
++                target_body.append([e["event_id"], code(region, t), t + 1, wh, weight])
++                feeder.append(f"{e['event_id']:<10}{code(region, t + 1):<4}{t + 1:>3}{relief_cap:>10}{recovery_cap:>10}")
+     tsv("targets.tsv", "\t", ["event_id", "region_code", "interval", "target_wh", "shortfall_weight"], target_body)
+     (folder / "feeder_limits.txt").write_text("\n".join(feeder) + "\n", encoding="utf-8")
+-    floors = [{"event_id": e, "region_code": _code(r, len(e)), "segment_code": g, "floor_wh": wh,
++    floors = [{"event_id": e, "region_code": code(r, len(e)), "segment_code": seg(g, len(e)), "floor_wh": wh,
+                "priority_weight": pw} for e, r, g, wh, pw in spec.get("floors", [])]
+     (folder / "segment_floors.json").write_text(json.dumps({"floors": floors}), encoding="utf-8")
+     pools = ["# event_id  code   pool_cents"]
+-    pools += [f"{e:<10}{_code(r, 1):<4}{cents:>12}" for (e, r), cents in sorted(spec.get("pools", {}).items())]
++    pools += [f"{e:<10}{code(r, 1):<4}{cents:>12}" for (e, r), cents in sorted(spec.get("pools", {}).items())]
+     (folder / "pools.txt").write_text("\n".join(pools) + "\n", encoding="utf-8")
+     _write_receipt(folder)
+     _seal(folder)
+@@ -1120,7 +1155,7 @@
+             spec.setdefault(key, {}).update(extra.get(key, {}))
+ 
+ 
+-def _composed_spec(tag: str, seed: int) -> dict[str, Any]:
++def _composed_spec(tag: str, seed: int, wh: int = 10) -> dict[str, Any]:
+     """A seeded extract that exercises every rule of the contract at once, with all stated limits respected."""
+     mix = MIXES[tag]
+     rng = Rng(seed * 7919 + ord(tag))
+@@ -1209,7 +1244,7 @@
+     # Allowances: for most sites a share of what the site's largest offers of the season would draw.
+     widest: dict[str, int] = {}
+     for o in spec["offers"]:
+-        total = sum(_q(r * m, 10) for r, m in zip(o["r"], o["m"]))
++        total = sum(_q(r * m, wh) for r, m in zip(o["r"], o["m"]))
+         key = (o["sid"], o["event_id"])
+         widest[key] = max(widest.get(key, 0), total)
+     demand: dict[str, int] = {}
+@@ -1224,15 +1259,22 @@
+     return spec
+ 
+ 
+-# Hidden season extracts. H1 plants draws_from chains (two to five sites long) whose holder allowances bind;
+-# H2 has no draws_from rows, so its money rows depend on settlement and grants only. Both plant, in every region,
+-# one funded pool whose first largest-remainder share leaves some beneficiaries under minimum_grant_cents.
++# Hidden season extracts. Both draw their own wh_per_tick, millicents_per_cent and region and segment codes
++# (several codes per region, none of them the shipped ones). H1 plants draws_from chains (two to five sites long)
++# whose holder allowances bind, a profile row missing from a chosen offer, two sites of one event in two regions
++# drawing one allowance that holds either offer but not both, and an allowance left exactly equal to an offer's
++# relief ticks. H2 has no draws_from rows and no adder option for the public segment, so its money rows depend on
++# settlement and grants only. Both plant, in every region, one funded pool whose first largest-remainder share
++# leaves some beneficiaries under minimum_grant_cents; H2 also plants a later pool whose claims add up to exactly
++# the funded amount.
+ SHAPES = ((1, 1), (1, 2), (2, 3), (1, 3), (2, 5), (1, 4))
+ HIDDEN_GUARDS: dict[str, tuple[tuple[str, str], ...]] = {
+     "H1": (("CHAIN1", "selection"), ("CHAIN0", "selection"), ("LEDid", "selection"), ("REENTRY", "grants"),
+-           ("RELIEF", "credit_rows"), ("DH4seen", "quality_counts")),
++           ("RELIEF", "credit_rows"), ("DH4seen", "quality_counts"), ("UNIT10", "intervals"),
++           ("CODESHIP", "selection"), ("GAPdrop", "selection"), ("LEDwithin", "selection"), ("ALWge", "selection")),
+     "H2": (("REENTRY", "grants"), ("DROPLEFT", "grants"), ("NODROP", "grants"), ("RELIEF", "credit_rows"),
+-           ("NOCARRY", "funded_pool"), ("DH3", "funded_pool"), ("H4", "grants")),
++           ("NOCARRY", "funded_pool"), ("DH3", "funded_pool"), ("H4", "grants"), ("UNIT10", "credit_rows"),
++           ("CODESHIP", "credit_rows"), ("ADDmiss", "credit_rows"), ("CLAIMlt", "grants")),
+ }
+ 
+ 
+@@ -1242,13 +1284,32 @@
+ 
+ def _hidden_spec(kind: str, seed: int) -> dict[str, Any]:
+     tag = "ABCD"[seed % 4]
+-    spec = _composed_spec(tag, seed)
++    units = Rng(seed * 104729 + 31)
++    wh = units.pick([4, 5, 20, 25])
++    spec = _composed_spec(tag, seed, wh)
+     if "rejected" not in PLANTED[tag]:
+         _plant(spec, ("rejected",))
++    spec["wh_per_tick"], spec["millicents_per_cent"] = wh, units.pick([400, 500, 2000])
++    taken = {c for codes in REGION_CODES.values() for c in codes} | {"Z9"}
++    spec["code_map"] = {}
++    for region in REGION_CODES:
++        spec["code_map"][region] = []
++        for _ in range(units.between(2, 3)):
++            drawn = "Z9"
++            while drawn in taken:
++                drawn = units.pick(list("ABDFGHJKLMQRTUVXY")) + str(units.between(1, 999))
++            taken.add(drawn)
++            spec["code_map"][region].append(drawn)
++    letters = list("BDFGHKMRTV")
++    units.shuffle(letters)
++    spec["seg_map"] = {"C": [letters.pop() for _ in range(units.between(1, 2))],
++                       "P": [letters.pop() for _ in range(units.between(1, 2))]}
+     rng = Rng(seed * 104729 + (11 if kind == "H1" else 23))
+     claim = rng.between(30, 80)
+-    spec["grants"] = (claim, claim * rng.between(80, 125) // 100)
++    spec["grants"] = (claim, claim * (rng.between(80, 125) if kind == "H1" else rng.between(105, 140)) // 100)
+     spec["draws"] = {}
++    if kind == "H2":
++        spec["adders"].pop("public", None)
+     if kind == "H1":
+         by_region: dict[str, list[str]] = {}
+         for x in spec["sites"]:
+@@ -1271,7 +1332,89 @@
+                 spec["allowances"][chain[0]] = sum(demand[x] for x in chain) * rng.pick([35, 50, 65, 80, 100]) // 100
+                 for x in chain[1:]:
+                     spec["allowances"][x] = 0
++        _plant_ledger(spec, rng, tag)
+     return spec
++
++
++def _season(spec: dict[str, Any], tag: str) -> tuple[list[str], dict[tuple[str, str], list[str]]]:
++    """Event ids in season order and the reference's chosen offer ids per (event_id, region)."""
++    folder = _scratch() / f"season-{tag}"
++    if folder.exists():
++        shutil.rmtree(folder)
++    write_extract(folder, spec)
++    files = reference(folder, frozenset())
++    shutil.rmtree(folder)
++    starts = {e["event_id"]: datetime.fromisoformat(e.get("start") or f"2026-11-{1 + k // 24:02d}T{k % 24:02d}:00:00+01:00")
++              for k, e in enumerate(spec["events"])}
++    order = sorted(sorted(starts, reverse=True), key=lambda eid: starts[eid])
++    return order, {(e["event_id"], r): list(e["selected_offer_ids"]) for r in REGIONS
++                   for e in files[f"region_{r}.json"]["events"]}
++
++
++def _plant_ledger(spec: dict[str, Any], rng: Rng, tag: str) -> None:
++    """H1 plants: a missing profile row of a chosen offer, one allowance drawn in two regions of one event, and an
++    allowance whose remainder equals the relief ticks of the offer chosen against it."""
++    wh = spec["wh_per_tick"]
++    late = {x[0] for x in spec["late_profile_rows"]}
++    offer = {o["offer_id"]: o for o in spec["offers"]}
++    region_of = {(x["event_id"], x["sid"]): _region_of_code(x["code"]) for x in spec["sites"]}
++
++    def ticks(o: dict[str, Any]) -> int:
++        return sum(_q(r * m, wh) for t, (r, m) in enumerate(zip(o["r"], o["m"]))
++                   if (o["offer_id"], t + 1) not in spec.get("gaps", set()))
++
++    def free(sid: str) -> bool:
++        return sid in spec["allowances"] and sid not in spec["draws"] and sid not in spec["draws"].values()
++
++    def chosen_at(picks: dict, eid: str, sids: set[str]) -> list[dict[str, Any]]:
++        return [offer[i] for (e, _), ids in picks.items() if e == eid for i in ids if offer[i]["sid"] in sids]
++
++    def used_before(order: list[str], picks: dict, eid: str, sids: set[str]) -> int:
++        return sum(ticks(o) for e in order[:order.index(eid)] for o in chosen_at(picks, e, sids))
++
++    _, picks = _season(spec, tag)
++    usable = sorted(i for ids in picks.values() for i in ids if i not in late and any(offer[i]["r"]))
++    gaps: set[tuple[str, int]] = set()
++    for i in (rng.pick(usable) for _ in range(min(2, len(usable)))):
++        widest = max(range(len(offer[i]["r"])), key=lambda t: offer[i]["r"][t])
++        gaps.add((i, widest + 1))
++    spec["gaps"] = gaps
++    order, picks = _season(spec, tag)
++    pairs = []
++    for eid in order:
++        here = [o for o in chosen_at(picks, eid, set(spec["allowances"])) if free(o["sid"]) and ticks(o) > 0]
++        pairs += [(eid, x["sid"], y["sid"]) for x in here for y in here
++                  if region_of[(eid, x["sid"])] < region_of[(eid, y["sid"])]]
++    rng.shuffle(pairs)
++    for eid, holder, other in pairs[:6]:
++        keep = (spec["allowances"][holder], spec["allowances"][other])
++        spec["draws"][other] = holder
++        spec["allowances"][holder], spec["allowances"][other] = 10 ** 9, 0
++        order, picks = _season(spec, tag)
++        both = chosen_at(picks, eid, {holder, other})
++        if len({o["sid"] for o in both if ticks(o) > 0}) == 2:
++            spec["allowances"][holder] = (used_before(order, picks, eid, {holder, other})
++                                          + sum(ticks(o) for o in both) - 1)
++            order, picks = _season(spec, tag)
++            if len({o["sid"] for o in chosen_at(picks, eid, {holder, other}) if ticks(o) > 0}) == 2:
++                break
++        del spec["draws"][other]
++        spec["allowances"][holder], spec["allowances"][other] = keep
++    order, picks = _season(spec, tag)
++    singles = sorted({o["sid"] for ids in picks.values() for i in ids for o in [offer[i]] if free(o["sid"])})
++    rng.shuffle(singles)
++    for sid in singles[:6]:
++        keep = spec["allowances"][sid]
++        spec["allowances"][sid] = 10 ** 9
++        order, picks = _season(spec, tag)
++        first = next((e for e in order if any(ticks(o) > 0 for o in chosen_at(picks, e, {sid}))), None)
++        if first is not None:
++            spec["allowances"][sid] = used_before(order, picks, first, {sid}) + sum(
++                ticks(o) for o in chosen_at(picks, first, {sid}))
++            order, picks = _season(spec, tag)
++            if any(ticks(o) > 0 for o in chosen_at(picks, first, {sid})):
++                return
++        spec["allowances"][sid] = keep
+ 
+ 
+ def _separating_pools(weights: dict[str, int], claim: int, minimum: int) -> list[int]:
+@@ -1319,6 +1462,7 @@
+                     if (prior[0], region) in spec["pools"]:
+                         spec["pools"][(prior[0], region)] = 0
+                 spec["pools"][(eid, region)] = funded + credit
++                spec.setdefault("planted", {})[region] = eid
+                 planted += 1
+                 break
+             target = next((t for t in rows if len(t[4]) >= 2), None)
+@@ -1338,6 +1482,24 @@
+     return planted
+ 
+ 
++def _plant_exact_claims(spec: dict[str, Any], tag: str) -> int:
++    """Per region, the last event-region after the planted one whose weights include a claim under the minimum
++    gets the pool that makes its funded amount equal its claims. Returns the number of regions planted."""
++    claim, minimum = spec["grants"]
++    trace = _probe(spec, tag)
++    planted = 0
++    for region, after in spec.get("planted", {}).items():
++        rows = [t for t in trace if t[1] == region]
++        start = next(k for k, t in enumerate(rows) if t[0] == after) + 1
++        for eid, _, brought, credit, weights in reversed(rows[start:]):
++            pool = claim * sum(weights.values()) - brought + credit
++            if len(weights) >= 2 and min(weights.values()) * claim < minimum and pool >= 0:
++                spec["pools"][(eid, region)] = pool
++                planted += 1
++                break
++    return planted
++
++
+ def _assert_bounds(spec: dict[str, Any]) -> None:
+     """Every drawn value stays inside what schema.md states (G12)."""
+     claim, minimum = spec["grants"]
+@@ -1368,6 +1530,8 @@
+                 if not within_contract(spec):
+                     continue
+                 if _plant_grants(spec, seed, kind) < len(REGION_CODES):
++                    continue
++                if kind == "H2" and _plant_exact_claims(spec, kind) == 0:
+                     continue
+                 _assert_bounds(spec)
+                 folder = write_extract(_scratch() / f"hidden-{kind}-{step}", spec)
+@@ -1902,9 +2066,26 @@
+     return _graded("intervals_match_hard", lambda: family_passes(workspace, "intervals", True))
+ 
+ 
+-@criterion(description="Run on the shipped extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them.")
++def tie_case_passes(workspace: Path) -> tuple[bool, str]:
++    """tie_decisions on the generated tie extract, whose expected entry list is not empty."""
++    root = case_root("tie")
++    want = _project("tie_decisions", expected(root))
++    if not want:
++        return False, "grader fault: the tie extract has no tied portfolio"
++    got = run_agent(workspace, root)
++    if got is None:
++        return False, _run_failed(root)
++    mine_ = _project("tie_decisions", got)
++    if mine_ is not None and canon(mine_) == canon(want):
++        return True, ""
++    if mine_ is None:
++        return False, "missing value: policy_audit.json tie_decisions is absent"
++    return False, "wrong value: " + _first_difference(mine_, want)
++
++
++@criterion(description="Run on a generated extract where two portfolios tie in one event region, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them.")
+ def tie_decisions_match(workspace: Path) -> bool:
+-    return _graded("tie_decisions_match", lambda: family_passes(workspace, "tie_decisions", False))
++    return _graded("tie_decisions_match", lambda: tie_case_passes(workspace))
+ 
+ 
+ @criterion(description="Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them.")
+@@ -2323,9 +2504,9 @@
+         return False
+ 
+ 
+-@criterion(description="The delivered program imports a third-party or network module.")
++@criterion(description="The delivered program imports a module outside the Python 3.12 standard library.")
+ def negative_external_dependency_or_network(workspace: Path) -> bool:
+-    # True means the cheat happened: a non-stdlib or network import in the program.
++    # True means the cheat happened: an import in the program of a module outside the standard library.
+     try:
+         tree = _program_tree(workspace)
+         if tree is None:
+@@ -2336,8 +2517,7 @@
+                 roots.update(a.name.split(".")[0] for a in node.names)
+             elif isinstance(node, ast.ImportFrom) and node.module and not node.level:
+                 roots.add(node.module.split(".")[0])
+-        network = {"socket", "urllib", "http", "ftplib", "smtplib", "ssl", "xmlrpc"}
+-        return any(r in network or r not in sys.stdlib_module_names for r in roots)
++        return any(r not in sys.stdlib_module_names for r in roots)
+     except Exception:
+         return False
+ 
+

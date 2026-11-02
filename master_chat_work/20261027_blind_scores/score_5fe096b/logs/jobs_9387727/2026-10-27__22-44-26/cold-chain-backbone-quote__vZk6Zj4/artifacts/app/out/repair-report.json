@@ -1,0 +1,21 @@
+{"defects": [
+{"file": "pyproject.toml", "summary": "Package metadata was wrong: version 0.0.0 instead of 2.18.5 from package_manifest.json, requires-python >=3.13, an [REDACTED] 'requests' dependency, and package-dir pointing at 'lib' instead of 'src'."},
+{"file": "src/task/__init__.py", "summary": "VERSION was missing; added VERSION = \"2.18.5\"."},
+{"file": "src/task/parser.py", "summary": "configparser lowercased activation.ini keys, so per-project/per-site overrides (e.g. P1236, S100) never matched; set optionxform=str."},
+{"file": "src/task/parser.py", "summary": "Slots/positions were compared as strings (lexicographic order); now compared as integers."},
+{"file": "src/task/parser.py", "summary": "Links listed as closed were never removed; closed links are now dropped before costing and rejection checks."},
+{"file": "src/task/parser.py", "summary": "A missing book file was not detected; the first missing file in contract order now gives E_MISSING_FILE <name> on stderr, exit 2, and no documents."},
+{"file": "src/task/parser.py", "summary": "Depot lookup and reachability were wrong; added Project.depot and a breadth-first reachability check from the depot, with ids coerced to strings."},
+{"file": "src/task/core.py", "summary": "The network was built by a shortest-path tree heuristic plus trimming, which is not optimal; replaced by an exact node-weighted Steiner tree search (subset dynamic programme with Dijkstra) and a weight perturbation that applies the contract tie rule."},
+{"file": "src/task/core.py", "summary": "Site lines charged a site's activation once per booked link and skipped sites with no booked link; each activated site now has one line: its charge plus the links booked to it, and the depot line carries its charge."},
+{"file": "src/task/report.py", "summary": "share_bp used round(); the contract requires floor (total*10000//quote). The depot is now taken from project.depot."},
+{"file": "src/task/__main__.py", "summary": "Running the command wrote __pycache__ files; set sys.dont_write_bytecode so the run leaves the repository and the book untouched."}
+],
+"checks": [
+"Built out/patched-repo.zip per build_config.json and checked it: sorted members, stored, fixed timestamp, mode 0644, no directories or __pycache__, pyproject and VERSION both 2.18.5.",
+"Ran PYTHONPATH=out/patched-repo.zip/src python3 -m task --book ci --out out: exit 0, 2.00 s, four documents written; the book's sha1 sums were unchanged after the run.",
+"Ran the same command from the read-only source tree: outputs byte-identical to the archive run, no __pycache__ created.",
+"Brute-forced every subset for all 2110 accepted regression cases and compared quote and links with the repaired package: 0 mismatches.",
+"Cross-checked the four documents: 90 quoted and 6 rejected projects, all 96 covered, site lines sum to each quote, corridor totals plus depot equal the quote, share_bp floored, summary totals match.",
+"Ran with a book directory missing sites.csv: stderr E_MISSING_FILE sites.csv, exit 2, no output directory created."
+]}

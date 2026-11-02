@@ -1,0 +1,19 @@
+# ChatGPT research brief r2 (practical angle): designing interacting difficulty mechanisms that stay fair. Issued 23 Oct 2026 09:12 IST
+
+Paste everything below the line into ChatGPT (deep research or the strongest reasoning mode). Save its whole answer as `/Users/mac/Desktop/Terminal Bench/master_chat_work/_dev_research/chatgpt_r2/REPORT.md` (an empty file is already there).
+
+---
+
+I design evaluation tasks for autonomous coding agents in the style of Terminal-Bench (Harbor 0.24 task format). The agent (frontier model, e.g. Claude Opus class, shell + file editor, no internet) gets a plain-language instruction plus files in a Docker container and must produce output files or a program. Grading: (1) deterministic pytest checks on outputs, including hidden regenerated inputs, (2) an LLM judge scoring the trajectory and final reply against a rubric. Fairness constraints: every graded rule is fully stated in visible files with exactly one reading; no hidden rules; no difficulty from volume, arithmetic, puzzles or formatting; a human expert with the same files can score 100%.
+
+What we measured (23 Oct 2026): our tasks scored 100/100/100 on real runs. In every run (ours and 20 peer tasks) the agent read all files, wrote its program once 6-10 minutes in, never changed the logic, and self-tested only on shipped data, invariants (totals, determinism) or tiny examples it made up. Peer tasks that genuinely beat it used: (a) a shipped control (counts/sums) that stays green while graded values are wrong, (b) a tempting repair that makes a control pass but breaks a stated reading rule, (c) an ordered stream where an early decision consumes a cap or budget later records read, (d) one value composed from 3-5 files, (e) a strict type rule beside a global normalise rule. The biggest losses (100-200 test points) came where these mechanisms INTERACT. Our current plan uses 4 such mechanisms per task.
+
+Practical questions (concrete, buildable answers; no hidden rules, no ambiguity):
+1. Is 4 mechanisms per task enough? Reason it out: for an agent that writes once and self-tests on shipped data and invariants, how many interacting mechanisms are needed to push a careful run below 70% overall and below 20% on hidden-input tests? Give your reasoning and a recommended number with a range.
+2. Give 8 concrete patterns for making two mechanisms INTERACT in a data-reconciliation task (cohort retention, vendor archive round-trip, district-heat flex procurement). For example, a stateful stream feeding a control check, or a strict type rule changing which rows reach a budgeted stream. For each: the rule text style, the shipped data shape, the hidden test case, why the agent's self-test misses it, and how one mistake fails several different graded documents without two tests reading the same observable.
+3. How do you write each rule so it is fully stated with one reading, yet not reflexively solvable? Give 10 writing techniques, each with a short neutral example sentence.
+4. Judge rubric: 6 criteria patterns that reward the verification behaviour this agent skips (constructing its own adversarial input, checking against an independent derivation), stated so a correct reference solution also meets them.
+5. Failure modes: 8 ways such designs backfire (leaks, ambiguity a reviewer would flag, double-counting penalties, over-weighting one mechanism), each with the check that prevents it.
+6. A cheap pre-test, before spending a real agent run: how to estimate whether a design will hold, using a "reflex" solver that reads the files once and self-tests on shipped data.
+
+Output format (needed for merging with two other reports): numbered sections 1-6, each starting with a 3-line answer. Then a final table: pattern | mechanisms combined | expected effect | risk | prevention check.

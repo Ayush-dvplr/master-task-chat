@@ -1,0 +1,12 @@
+# G4 TODO (board 6c051f3)
+- [x] Setup: session rename (verified via db: title=6c051f3; not in `session list | head -5` top rows), anubis HEAD 19cdf6989906385943b9ca00acaadcae204b29e8, DIAGNOSIS read
+- [x] A clinical-assay-qc-recalibration-forge (PARTLY)
+- [x] A 6090aa67-183f-5d64-955f-8fb51ecb043e (PARTLY)
+- [x] A collateral-gated-settlement-ladder (GENUINE)
+- [x] A iterative-solver-reconciliation (ARTEFACT)
+- [x] B clinical-assay-qc-recalibration-forge
+- [x] B 6090aa67-183f-5d64-955f-8fb51ecb043e
+- [x] B collateral-gated-settlement-ladder
+- [x] B iterative-solver-reconciliation (design notes only)
+- [x] C GROUP_SUMMARY.md
+- [x] C result_6c051f3.json

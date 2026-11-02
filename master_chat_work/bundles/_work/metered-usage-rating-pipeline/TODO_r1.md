@@ -1,0 +1,26 @@
+# TODO 3106c16 metered-usage-rating-pipeline harden r1 (prompt: master_chat_tasks/prompts/issued/metered-usage-rating-pipeline/20261024T2024_harden.md)
+(Build b5f7557 TODO all ticked; superseded by this list.)
+- [x] Session rename (list showed ses_e919672efffeDk1K2Q7SqC1jYm, not 3106c16; noted, not retried)
+- [x] Required reading: COMMON_RULES_v3, round notes C/E/F/G, LEVER_RULES_v1, LEAK_LIBRARY, QC_RULINGS, QC_FIX_PLAYBOOK_v2, DESIGN, LEVERS
+- [x] Read QC_DEFENCE, XREF, baselines.json, bundle files (instruction, contract, tests, solve)
+- [x] P1.1 Phase A genuine check (diff copy vs bundle, result.json, verifier errors)
+- [x] P1.2 Root causes 1-4
+- [x] P1.3 Lever table from reward-details + trajectory
+- [x] P1.4 Trajectory autopsy
+- [x] P1.5 Save agent program to OUT/agent_program/
+- [x] P1.6 LEAK_LIBRARY rows + what-trips table + Phase 2 lever plan
+- [x] P1.7 Write OUT/DIAGNOSIS.md, STOP "DIAGNOSIS READY"
+- [x] Master go 21:00 (points 1-9)
+- [x] P2.1 Read WORK scripts (datagen, assemble, gen_core, ref_core, cost_table, check_exact, tests_template)
+- [x] P2.2 rating_contract.md edits (LV-MU-1 bare, LV-MU-3 committed account, LV-MU-5 billing group, delete invariant)
+- [x] P2.3 gen_core.py: parent column, hidden groups, shipped non-separating plan changes, committed-account pools/ties
+- [x] P2.4 ref_core.py + solve.py for new rules; check_exact OK
+- [x] P2.5 datagen (rule 6 re-embed) + assemble tests + oracle local 1.0
+- [x] P2.6 judge R15/R16 + solve.sh check lines + JUDGE_MAP
+- [x] P2.7 cost_table re-measure (LV-MU-1/3/5) + rule_coverage 0 uncovered
+- [x] P2.8 DESIGN/LEVERS/QC_DEFENCE/XREF/TRUTH(last); xref_check 0
+- [x] P3.1 stacking_check -> OUT/STACKING_CHECK.md
+- [x] P3.2 agent_program on AFTER tests (advisory)
+- [x] P3.3 QC scripts + precheck CLEAN + no pycache
+- [x] P3.4 Docker chain oracle x3/owner/nop/stub/forgery ALL_DONE
+- [x] P3.5 HARDEN_REPORT + result_3106c16.json

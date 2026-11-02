@@ -1,0 +1,13 @@
+# TODO af78147 (g4)
+- [x] Setup: read map files (LEVER_RULES_v2, QC_RULINGS, LEAK_LIBRARY, DELIVERY_LEARNINGS, SYNTHESIS); prior cards read at C_8d3e20fb step
+- [x] QC report search (once): none for all 4
+- [x] A_4e2f6925
+- [x] A_8764bfdd
+- [x] A_8d3e20fb
+- [x] A_80877080
+- [x] C_4e2f6925
+- [x] C_8764bfdd
+- [x] C_8d3e20fb (NEW only vs 4ee62df1/af6f42c3)
+- [x] C_80877080
+- [x] GROUP_SUMMARY.md
+- [x] result_af78147.json

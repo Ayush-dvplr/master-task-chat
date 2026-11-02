@@ -1,0 +1,29 @@
+# Log
+
+- 20 Oct 21:19 IST: records created. Skill loaded. Found generator + one prior bundle (district-heat-flex-procurement); no skill memory folder.
+- 20 Oct 21:25 IST: interview answered; 6 decisions recorded. Location and chat names deferred.
+- 20 Oct 22:14 IST: temp workspace _tmp_master_tasks_20261020T2214 created (Ayush). Plan in its state.json.
+- 20 Oct 22:40 IST: 3 analysis prompts written (prompts/01-03). Paths confirmed. QC A3 cap is WARN only.
+- 20 Oct 22:30 IST: Ayush ran prompts 01-03 in parallel (Opus 5.5). Waiting for reports.
+- 20 Oct 22:38 IST: handover read; digest at intake/handover_digest.json. Bundle unchanged since v1.
+- 20 Oct 22:42 IST: answers recorded (PL QC, park district-heat, any archetype, tests<0.20).
+- 20 Oct 22:44 IST: open_questions.json created (Q1 deferred to post-beta report, Q2 open with PL/QL).
+- 20 Oct 22:52 IST: CORRECTION: clone QC md is stale, not the _qc copy. Ecosystem map at intake/ecosystem.json.
+- 20 Oct 22:56 IST: Finalized_Tasks_RFP added to allowed repos (read only). Runs: 1 while building, 8 on final approval.
+- 20 Oct 22:58 IST: pipeline corrected (QC fix loop before 1 run). Gaps list added to open_questions.json (G1).
+- 20 Oct 23:05 IST: prompts 04 (research kit) and 05 (web hardness research) written. Q9/Q11 hold points 1/2.
+- 20 Oct 23:15 IST: reports 01-03 verified; synthesis at reports/SYNTHESIS_01-03.json. Prompt 06 (QC delta). Q13 DS-27 conflict, Q14 gate.
+- 20 Oct 23:07 IST: Q1, Q13, Q14 deferred to a later discussion; Q1 options A-G saved.
+- 20 Oct 23:07 IST: prompts 04, 05, 06 running in Ayush sessions.
+- 20 Oct 23:15 IST: rules added (hardness in instruction, failable rubric, QC FAIL recheck). QL oracle/nop procedure saved to intake/.
+- 20 Oct 23:38 IST: reports 04-06 verified; SYNTHESIS.json updated. Q15/Q16 closed (stub if possible; FAIL recheck in a separate session). Clone at 9b8229f6.
+- 20 Oct 23:40 IST: Q17 closed: follow our QC (partial credit).
+- 20 Oct 23:52 IST: Q3, Q7, Q9, Q11 closed; Q4/Q5/Q6 at end.
+- 20 Oct 23:56 IST: PL S9 Dockerfile procedure saved to intake/. Lesson: reviewer 3/10 != trajectory <50.
+- 21 Oct 00:22 IST: GOALS.md registered; all 6 reports read; KNOWLEDGE.md written. Discussion round 1 started.
+- 21 Oct 00:15 IST: D1-D7 decided (conflicts to Ayush, generator-first, A+B hardness, outcome judge, 3 oracle, cap 70/70, trajectory format TBD).
+- 21 Oct 00:26 IST: E1-E3 decided; goals G8-G10 added (ChatGPT prompts, uniqueness, task registry).
+- 21 Oct 00:30 IST: G8-G11 refined; Q19 closed.
+- 21 Oct 00:32 IST: lever measurement + anti-repetition rule added (G8, G9).
+- 21 Oct 00:33 IST: lever novelty: several new per task is the norm, 1 is a logged exception.
+- 21 Oct 00:40 IST: PLAN.md v1 written; awaiting approval.

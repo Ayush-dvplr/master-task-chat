@@ -1,0 +1,20 @@
+# P12 v3 r3 TODO (878a0e4). Prompt: master_chat_tasks/prompts/issued/match-replay-desync-audit/20261024T1732_fix.md. Prior: TODO_P12v3r2.md
+- [x] P0.0 rename (opencode ses_e920b0237ffeMYXqDE0nownLxJ listed); date; tree sha 666226360826 match; kit HEAD 976c1666
+- [x] P0.1 rules read (COMMON v3, round notes C/E/F/G, LEVER_RULES, PLAYBOOK v2, QC_RULINGS grep)
+- [x] P0.2 read QC v3 findings, prev RECHECK_FIX r2, QC_DEFENCE, XREF, local_score.py, single_lever.py
+- [x] P0.3 xref_check 0 findings (before)
+- [x] P0.4 copy tests/solution/environment -> WORK/trap/before_v3r3
+- [x] P0.5 probe diagnosis: recover agent program, score on BEFORE tests, classify 17 lost tests -> WORK/PROBE_DIAGNOSIS.md
+- [x] P0.6 BEFORE variant scores (L3 x3, L4, reversal LIFO, CTRL slips) -> trap/scores_before_v3r3
+- [x] P1 recheck F1 F2 F3 F4 M1 W1 -> OUT/RECHECK_FIX.md
+- [x] P2.0 lock taken 18:58
+- [x] P2.1 F1 solve.py 4 CTRL rules (+ verifier ref check); shipped outputs byte-identical proof
+- [x] P2.2 F1 hidden cases for 4 rules (in bounds, G12) + WORK/RULE_COVERAGE.md mutants
+- [x] P2.3 F4 trap_* partition (under-allowance or decode-only fields)
+- [x] P2.4 F3 solve.sh self-check stage R7-R9 + JUDGE_MAP.md
+- [x] P2.5 M1 R11 reword
+- [x] P2.6 F2 TRUTH.md wording + solve.py comment; TRUTH counts/sha by script (last)
+- [x] P2.7 AFTER variants, COST_TABLE.md, one-fact-wrong, probe program after, trap survival
+- [x] P2.8 side-effect rechecks, NEW-CHECK hygiene, xref 0, precheck CLEAN, structure_qc 0, stacking -> OUT
+- [x] P2.9 Docker block (warm, oracle x3, owner, nop, stub)
+- [x] P3 reports (RECHECK_FIX, PL_NOTE, result json), tree sha, pycache, unlock, rename

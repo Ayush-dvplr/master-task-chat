@@ -1,0 +1,30 @@
+{
+  "module": "core",
+  "changed_functions": [
+    "core.executor.execute_plan",
+    "core.planner._better",
+    "core.planner._enumerate_paths",
+    "core.planner.plan_migration",
+    "core.records.FieldView.from_payload",
+    "core.records.fill_mode",
+    "core.records.null_counts_as",
+    "pipeline._Run._admit",
+    "pipeline._ordered",
+    "pipeline._receipt_mismatches",
+    "pipeline._replace_tokens",
+    "pipeline.run_pipeline"
+  ],
+  "notes": [
+    "core/records.py: FieldView.from_payload kept an explicit null as a value state and dropped it; it now reports the three states of N1 (absent, null, value).",
+    "core/records.py: null_counts_as fell back to 'absent' for a field whose null_counts_as column is empty; it now falls back to [presence] explicit_null of null_semantics.ini (N2).",
+    "core/records.py: fill_mode ignored the fill column of field_policy.tsv; it now prefers that column and falls back to [fill] mode (N3, N4).",
+    "core/planner.py: the search enumerated simple paths only, tested every prerequisite against the record as received, and broke ties by plan length; it is now a Dijkstra over (schema, field state) that may revisit a schema, checks prerequisites on the state reached (M6, M7) and breaks equal cost by comparing the edge id lists (M8).",
+    "core/planner.py: _better compares (cost, edge ids) instead of (cost, length).",
+    "core/planner.py: the search skips schemas from which the canonical schema cannot be reached at all, so an unreachable record is rejected without exploring the graph (K14).",
+    "core/executor.py: execute_plan applied every correction before the first edge and never checked a prerequisite; corrections are now applied on the first arrival at their pinned schema (C4) and a failing prerequisite stops execution with E_PREREQ_FAILED, the reached schema, the failed edge and the number of completed steps (M11).",
+    "pipeline.py: _ordered returned the feed order; lines are now processed in received_seq order of their batch, then by feed line (K13).",
+    "pipeline.py: _replace_tokens compared trimmed values; a value must now equal a token exactly (N6).",
+    "pipeline.py: _receipt_mismatches skipped records whose partner failed and relied on the record fingerprint field; it now counts every parsed record of a batch and XORs the fingerprint of the line as received (K13).",
+    "pipeline.py: _Run._admit keyed the replay identity by the partner value as written instead of the canonical partner id, and only remembered a holder when execution started (K16)."
+  ]
+}

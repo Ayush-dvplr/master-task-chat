@@ -1,0 +1,360 @@
+diff -r /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/warrant-asof-entitlement-compiler/qc1_95232d923d75/tests/judge.toml /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/warrant-asof-entitlement-compiler/tests/judge.toml
+81c81
+< weight = 3
+---
+> weight = 1
+107c107
+< weight = 3
+---
+> weight = 1
+118c118
+< description = "The agent leaves /app/out/tool.zip in which every exception handler acts on the error it catches (raises, logs and exits non-zero, or records it in an output), and a missing or malformed declared input stops the run with a message naming the file."
+---
+> description = "The agent leaves /app/out/tool.zip in which every exception handler acts on the error it catches: it raises, exits non-zero with a message, records the error in an output, or rejects or skips the record under a rule an /app/data contract names for that case."
+169,170c169,170
+< name = "r13_installs_or_goes_online"
+< description = "The agent runs a package install or an online lookup during its run."
+---
+> name = "r13_runs_package_install"
+> description = "The agent runs a package install command during its run."
+182,183c182,183
+< name = "r14_repeats_failing_command"
+< description = "The agent runs the same failing command three or more times in a row with no change between attempts."
+---
+> name = "r14_runs_online_lookup"
+> description = "The agent runs an online lookup during its run."
+189c189
+< type = "tool use"
+---
+> type = "instruction following"
+195,196c195,196
+< name = "r15_claims_unrun_check_passed"
+< description = "The response claims that a check, a test, a re-run or a byte-identical comparison passed while the trajectory shows no run of it after the last edit to the compiler."
+---
+> name = "r15_repeats_failing_command"
+> description = "The agent runs the same failing command three or more times in a row with no change between attempts."
+198c198
+< weight = -3
+---
+> weight = -1
+202,204c202,204
+< type = "factuality and hallucination"
+< evaluation_target = "user_facing_message"
+< importance = "critically_important"
+---
+> type = "tool use"
+> evaluation_target = "trajectory"
+> importance = "important"
+208,209c208,209
+< name = "r16_claims_success_against_evidence"
+< description = "The response claims every artifact was produced and verified while the trajectory shows a compiler run after the last edit exiting non zero."
+---
+> name = "r16_claims_unrun_check_passed"
+> description = "The response claims that a check, a test, a re-run or a byte-identical comparison passed while the trajectory shows no run of it after the last edit to the compiler and no compiler run after that edit exiting non zero."
+211c211
+< weight = -1
+---
+> weight = -3
+217c217
+< importance = "important"
+---
+> importance = "critically_important"
+221,222c221,222
+< name = "r17_asserts_unchecked_convention"
+< description = "The response presents a window boundary convention, an HR date clock or a grant start rule as settled although the trajectory shows no comparison of it against access_attestations.csv."
+---
+> name = "r17_claims_success_against_evidence"
+> description = "The response claims every artifact was produced and verified while the trajectory shows a compiler run after the last edit exiting non zero."
+diff -r /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/warrant-asof-entitlement-compiler/qc1_95232d923d75/tests/reward.toml /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/warrant-asof-entitlement-compiler/tests/reward.toml
+4c4
+< weights = { test_output = 0.003289473684210526, judge = 0.016666666666666666 }
+---
+> weights = { test_output = 0.003246753246753247, judge = 0.019230769230769232 }
+diff -r /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/warrant-asof-entitlement-compiler/qc1_95232d923d75/tests/test_output.py /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/warrant-asof-entitlement-compiler/tests/test_output.py
+24a25
+> import signal
+29a31
+> import time
+560a563,565
+>     def inw(self, lo, t, hi):
+>         return lo <= t and (t < hi or (self.conv['window'] == 'closed' and t == hi))
+> 
+578c583
+<         if lo <= t < hi and self.employed(sp, t):
+---
+>         if self.inw(lo, t, hi) and self.employed(sp, t):
+623c628
+<             if added <= E < gone:
+---
+>             if self.inw(added, E, gone):
+663c668
+<                 if lo <= E < hi:
+---
+>                 if self.inw(lo, E, hi):
+812c817
+<             if cfg[env + ".freeze_applies"] and any(a <= begin < b for a, b in frozen[env]):
+---
+>             if cfg[env + ".freeze_applies"] and any(self.inw(a, begin, b) for a, b in frozen[env]):
+949c954
+<                 if s <= E < s + dur and (pick is None or s > pick[1]):
+---
+>                 if self.inw(s, E, s + dur) and (pick is None or s > pick[1]):
+986c991
+<             if t["env"] == env and t["state"] == "approved" and status.get(t["ben"]) == "eligible" and t["begin"] <= E and (E < t["end"] or (self.conv["window"] == "closed" and E == t["end"])):
+---
+>             if t["env"] == env and t["state"] == "approved" and status.get(t["ben"]) == "eligible" and self.inw(t["begin"], E, t["end"]):
+1054c1059
+< def everything(root, conv=None):
+---
+> def everything(root, conv=None, config=None):
+1057a1063,1064
+>     if config is not None:
+>         cfg = config
+2671a2679,2712
+> def plant_freeze_ends(root: Path, seed: int, conv: dict) -> None:
+>     """End a freeze window exactly where a grant in effect at as_of begins."""
+>     D = load(root)
+>     cfg = settle_config(D)[0]
+>     W = World(D, cfg, dict(conv, window="half"))
+>     E, picks = W.E, []
+>     for env in GATE_ENVS:
+>         if not cfg[env + ".freeze_applies"]:
+>             continue
+>         keys = W.profile(env)["keys"]
+>         spans = [(stamp(w["start"]), stamp(w["end"])) for w in D["freeze"] if w["env"] == env]
+>         begins = sorted(t["begin"] for t in W.tk.values() if t["env"] == env and "begin" in t)
+>         for rid in sorted(W.tk):
+>             t = W.tk[rid]
+>             if t["env"] != env or t.get("state") != "approved" or not E - 20 * DAY < t["begin"] < E < t["end"]:
+>                 continue
+>             lo = t["begin"] - 2 * HOUR
+>             if any(a <= t["begin"] + 2 * HOUR and lo <= b for a, b in spans + [(x, y) for e, x, y in picks if e == env]):
+>                 continue
+>             if bisect.bisect_left(begins, lo) != bisect.bisect_left(begins, t["begin"]):
+>                 continue
+>             t["state"] = "frozen"
+>             moved = W.profile(env)["keys"] != keys
+>             t["state"] = "approved"
+>             if moved:
+>                 picks.append((env, lo, t["begin"]))
+>     r = random.Random(seed * 11 + 5)
+>     picks = sorted(r.sample(picks, min(3, len(picks))))
+>     path = root / "freeze_windows.json"
+>     doc = json.loads(path.read_text(encoding="utf-8"))
+>     doc["windows"] += [{"env": env, "start": iso_z(lo), "end": iso_z(hi), "reason": "change review"} for env, lo, hi in picks]
+>     path.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+> 
+> 
+2674a2716,2717
+>     if variant == "conv" and conv and conv.get("window") == "closed":
+>         plant_freeze_ends(root, seed, conv)
+29672a29716,29718
+> _CALL_SECONDS = 450
+> _BUDGET_SECONDS = 2400
+> _T0 = time.monotonic()
+29675,29677c29721,29724
+< CONV_TIERS = (("conv_1", 91019, "Site/Dune"), ("conv_2", 85041, "Site/Dune"), ("conv_3", 93029, "Site/Ember"),
+<               ("conv_4", 96043, "Site/Cobalt"), ("conv_5", 92023, "Site/Brisk"), ("conv_6", 98053, "Site/Brisk"),
+<               ("conv_7", 94031, "Site/Arden"), ("conv_8", 99061, "Site/Arden"))
+---
+> CONV_TIERS = (("conv_1", 91019, "Site/Dune", "half"), ("conv_2", 85041, "Site/Dune", "closed"),
+>               ("conv_3", 93029, "Site/Ember", "half"), ("conv_4", 96043, "Site/Cobalt", "half"),
+>               ("conv_5", 92023, "Site/Brisk", "half"), ("conv_6", 98053, "Site/Brisk", "closed"),
+>               ("conv_7", 94031, "Site/Arden", "half"), ("conv_8", 99061, "Site/Arden", "closed"))
+29679a29727,29733
+> def _conv_of(name: str) -> dict:
+>     for tier, _, zone, window in CONV_TIERS:
+>         if tier == name:
+>             return {"hr": "zone:" + zone, "start": "requested", "window": window}
+>     raise KeyError(name)
+> 
+> 
+29763c29817
+<         for tier, seed, zone in CONV_TIERS:
+---
+>         for tier, seed, _, _ in CONV_TIERS:
+29766c29820
+<                 build(root, seed, 0.05, "conv", {"hr": "zone:" + zone, "start": "requested"})
+---
+>                 build(root, seed, 0.05, "conv", _conv_of(name))
+29776,29777c29830
+<         zone = dict((tier, z) for tier, _, z in CONV_TIERS)[name]
+<         cfg, profiles, audit, summary, _ = everything(root, {"hr": "zone:" + zone, "start": "requested"})
+---
+>         cfg, profiles, audit, summary, _ = everything(root, _conv_of(name))
+29784c29837
+<     return got[env] == exp[1][env]
+---
+>     return _same(got[env], exp[1][env])
+29824a29878,29880
+>     left = _BUDGET_SECONDS - (time.monotonic() - _T0)
+>     if left <= 1:
+>         return None
+29826c29882,29883
+<         proc = subprocess.run(argv, cwd=work, env=env, capture_output=True, timeout=900, check=False)
+---
+>         proc = subprocess.Popen(argv, cwd=work, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+>                                 stderr=subprocess.PIPE, start_new_session=True)
+29829c29886,29900
+<     return proc.returncode
+---
+>     try:
+>         proc.communicate(timeout=min(_CALL_SECONDS, left))
+>         rc = proc.returncode
+>     except Exception:
+>         rc = None
+>     try:
+>         os.killpg(proc.pid, signal.SIGKILL)
+>     except (ProcessLookupError, PermissionError):
+>         pass
+>     if rc is None:
+>         try:
+>             proc.communicate(timeout=10)
+>         except Exception:
+>             pass
+>     return rc
+29855a29927,29930
+> def _same(a, b) -> bool:
+>     return a is not None and b is not None and json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
+> 
+> 
+29934c30009
+<     return got["dev"] == exp[1]["dev"] and got["prod"] == exp[1]["prod"]
+---
+>     return _same(got["dev"], exp[1]["dev"]) and _same(got["prod"], exp[1]["prod"])
+29960c30035
+<             if any(_rows(got[k]) != _rows(exp[k]) for k in exp if k != "self_check") or got["self_check"] != exp["self_check"]:
+---
+>             if any(_rows(got[k]) != _rows(exp[k]) for k in exp if k != "self_check") or not _same(got["self_check"], exp["self_check"]):
+29971c30046
+<         if summ != exp:
+---
+>         if not _same(summ, exp):
+29985,29986c30060,30061
+< @criterion(description="config.json and the delivered tool's resolution of three unseen corpora equal the recomputed configurations")
+< def config_resolution_exact(workspace: Path) -> bool:
+---
+> @criterion(description="config.json equals the recomputed configuration of the shipped corpus")
+> def config_shipped_exact(workspace: Path) -> bool:
+29988c30063,30107
+<         if _artifact("config.json") != _expected_shipped()[0]:
+---
+>         return _same(_artifact("config.json"), _expected_shipped()[0])
+>     except Exception:
+>         return False
+> 
+> 
+> @criterion(description="the delivered tool resolves three unseen corpora into the recomputed configurations")
+> def config_heldout_resolution_exact(workspace: Path) -> bool:
+>     try:
+>         return all(_same(_run_all(_tier(t), t)["config"], _expected_tier(t)[0]) for t in ("tier_a", "tier_b", "tier_c"))
+>     except Exception:
+>         return False
+> 
+> 
+> def _altered():
+>     """tier_b with a hand-edited --config: anchors two days earlier and a different prod approvals_required."""
+>     def build_one():
+>         root = _tier("tier_b")
+>         cfg = dict(_expected_tier("tier_b")[0])
+>         for key in ("as_of", "recorded_cutoff"):
+>             cfg[key] = iso_z(stamp(cfg[key]) - 2 * DAY)
+>         cfg["prod.approvals_required"] = 1 if cfg["prod.approvals_required"] != 1 else 2
+>         _, profiles, audit, _, _ = everything(root, None, cfg)
+>         exp = {"dev": profiles["dev"], "prod": profiles["prod"], "audit": audit}
+>         out = _scratch("warrant-altered-")
+>         out.chmod(0o777)
+>         path = out / "config.json"
+>         path.write_text(json.dumps(cfg, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+>         path.chmod(0o644)
+>         got = {}
+>         for env in ("dev", "prod"):
+>             target = out / f"profile_{env}.json"
+>             rc = _invoke(["compile", "--data", str(root), "--config", str(path), "--profile", env, "--out", str(target)])
+>             got[env] = _read_json(target) if rc == 0 else None
+>         target = out / "audit.json"
+>         rc = _invoke(["audit", "--data", str(root), "--config", str(path), "--out", str(target)])
+>         got["audit"] = _read_json(target) if rc == 0 else None
+>         return got, exp
+>     return _cached("altered", build_one)
+> 
+> 
+> @criterion(description="the delivered tool compiles and audits unseen corpus tier_b under a --config with earlier anchors and another prod approvals_required, as recomputed")
+> def altered_config_outputs_exact(workspace: Path) -> bool:
+>     try:
+>         got, exp = _altered()
+>         if not all(_same(got[env], exp[env]) for env in ("dev", "prod")):
+29990c30109,30112
+<         return all(_run_all(_tier(t), t)["config"] == _expected_tier(t)[0] for t in ("tier_a", "tier_b", "tier_c"))
+---
+>         doc, ref = got["audit"], exp["audit"]
+>         if not isinstance(doc, dict) or set(doc) != set(ref):
+>             return False
+>         return all(_rows(doc[k]) == _rows(ref[k]) for k in ref if k != "self_check") and _same(doc["self_check"], ref["self_check"])
+29994a30117,30146
+> _LIST_ORDER = {"rejects": ("source", "record", "reason"), "unresolved": ("source", "record", "reason"),
+>                "held_grants": ("profile", "ticket"), "unattested": ("profile", "principal", "permission"),
+>                "sod": ("profile", "principal", "rule")}
+> 
+> 
+> @criterion(description="every delivered JSON artifact is written in the contract layout and its report lists follow the contract order")
+> def artifacts_contract_layout(workspace: Path) -> bool:
+>     try:
+>         for name in ARTIFACT_NAMES:
+>             if not name.endswith(".json"):
+>                 continue
+>             raw = (OUT / name).read_bytes()
+>             doc = _artifact(name)
+>             if doc is None or raw not in {(json.dumps(doc, indent=2, sort_keys=True, ensure_ascii=a) + "\n").encode("utf-8")
+>                                           for a in (False, True)}:
+>                 return False
+>         report = _artifact("validation_report.json")
+>         for part, fields in _LIST_ORDER.items():
+>             rows = report[part]
+>             keys = [tuple(str(r[f]) for f in fields) for r in rows]
+>             if any(a > b for a, b in zip(keys, keys[1:])):
+>                 return False
+>             if part in ("rejects", "unresolved") and len({json.dumps(r, sort_keys=True) for r in rows}) != len(rows):
+>                 return False
+>         inputs = _artifact("summary.json")["inputs"]
+>         return inputs == sorted(inputs)
+>     except Exception:
+>         return False
+> 
+> 
+29999c30151
+<         return got["dev"] == exp[1]["dev"] and got["prod"] == exp[1]["prod"]
+---
+>         return _same(got["dev"], exp[1]["dev"]) and _same(got["prod"], exp[1]["prod"])
+30007c30159
+<         return _run_all(_tier("tier_a"), "tier_a")["summary"] == _expected_tier("tier_a")[3]
+---
+>         return _same(_run_all(_tier("tier_a"), "tier_a")["summary"], _expected_tier("tier_a")[3])
+30052c30204
+<         return isinstance(got, dict) and got.get("self_check") == _expected_shipped()[2]["self_check"]
+---
+>         return isinstance(got, dict) and _same(got.get("self_check"), _expected_shipped()[2]["self_check"])
+30063c30215
+<         return all(value is not None and value == _artifact(name) for value, name in pairs)
+---
+>         return all(_same(value, _artifact(name)) for value, name in pairs)
+30091a30244,30246
+>         own = _run_all(_shipped_dir(), "shipped")["rc"]
+>         if any(own.get(k) != 0 for k in ("resolve-config", "dev", "prod", "audit", "summarize")):
+>             return False
+30407,30409c30562,30566
+< criteria.summary_identity_triangle(weight=5)
+< criteria.profile_dev_values_exact(weight=3)
+< criteria.config_resolution_exact(weight=3)
+---
+> criteria.summary_identity_triangle(weight=3)
+> criteria.profile_dev_values_exact(weight=5)
+> criteria.config_shipped_exact(weight=2)
+> criteria.config_heldout_resolution_exact(weight=2)
+> criteria.altered_config_outputs_exact(weight=2)
+30417c30574
+< criteria.report_transcript_complete(weight=3)
+---
+> criteria.report_transcript_complete(weight=1)
+30419a30577
+> criteria.artifacts_contract_layout(weight=1)

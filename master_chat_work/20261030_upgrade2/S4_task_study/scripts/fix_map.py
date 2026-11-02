@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+"""Curated, evidence-linked fix transitions from git and QC comparison sections."""
+import csv, pathlib
+O=pathlib.Path(__file__).resolve().parents[1]
+R='/Users/mac/Desktop/Terminal Bench/'
+rows=[
+('65ba10c2','a167c187: change Docker base and replace recorded Opus grading','Opus tests 16.42 to 69.12; final 48.91 to 78.52','No isolated causal result: recorded run artifacts and score changed together; no broken check established','git -C anubis-stage-2 show --stat a167c187; git show a167c187^ and a167c187 :65ba10c2.../trajectories/claude-opus-5/pass_summary.json'),
+('cf9b2067','a167c187: revise test corpus, judge mode and oracle; replace recorded trajectories','Recorded Opus final 65.59 to 34.11; tests 84.52 to 36.96','The revision lost 47.56 test points and 15.42 rubric points in the recorded replacement; attribution to any single edit UNVERIFIED','git -C anubis-stage-2 show --stat a167c187; git show a167c187^ and a167c187 :cf9b2067.../trajectories/claude-opus-5/pass_summary.json'),
+('80202e15','bb643ddd: refresh embedded generator slice and hash in test_output.py','Embedded generator hash synchronized with changed slice','Recorded Opus final remains 34.52; no later scored run shown','git -C anubis-stage-2 diff --numstat bb643ddd^ bb643ddd -- 80202e15.../tests/test_output.py; pass_summary at bb643ddd^ and bb643ddd'),
+('9cc598a9','b6b17b08: replace /home/shared with /mnt/shared in unsafe-path generator','Path fixture changed to masking-compatible value (INFERRED)','Recorded Opus final remains 35.33; no later scored run shown','git -C anubis-stage-2 diff b6b17b08^ b6b17b08 -- 9cc598a9.../tests/test_output.py; pass_summary at both revisions'),
+('multiple stage2','60e65cd1: make solve.sh and test.sh executable','File modes repaired for affected tasks','No changed pass summary in that commit; score impact UNVERIFIED','git -C anubis-stage-2 show --stat 60e65cd1'),
+('cold-chain-backbone-quote','v5: correct TRUTH corridor span and add wide checks','v4 G05-M1 AL-18 fixed; CL-4 one-fact loss 96/109 to 187/200','New TRUTH 30/31 cold-room contradiction; 54 checks exceeds 35 warning cap','QC/reports/cold-chain-backbone-quote/v5.md:387-397'),
+('cohort-retention-reconciliation','v4/v5: revise solve.py and TRUTH provenance, add separating fixtures','v5 provenance sha fixed; several AL-27 mutants caught','New TRUTH refund wording mismatch; new AL-27 holes found; same DS-22 ID stays open','QC/reports/cohort-retention-reconciliation/v5.md:377-395'),
+('schema-migration-plan-repair','v14: replace summed child timeouts with shared 3000 s budget','AL-17 verifier timeout bound fixed','New TS-11 scheduling-dependent score after budget exhaustion','QC/reports/schema-migration-plan-repair/v14.md:348-353'),
+('district-heat-flex-procurement','v10: narrow import negative to third-party modules','Avoids flagging stdlib imports (INFERRED from changed check)','New TS-14 warning: name still says _or_network','QC/reports/district-heat-flex-procurement/v10.md:389-393'),
+('b7c42a8f','v2: fix 20+ QC findings including instruction and test scope','v1 fails 25 to v2 fails 13','New counterfactual-label, null-sort and fixture findings; some on changed lines','QC/reports/b7c42a8f-6d19-4e35-9f82-5a3c1d7e8042/v2.md:360-374'),
+('tariff-engine-audit-repair','v3: harden after v2 QC pass','Additional harder hidden and judge checks (INFERRED)','QC pass to fail: one new fail and three warnings; stale TRUTH statement and unlocked memo surfaced','QC/reports/tariff-engine-audit-repair/v3.md:268-273'),
+]
+with (O/'FIX_MAP.csv').open('w',newline='') as f:
+    w=csv.writer(f);w.writerow(['task','fix','fixed','broke','evidence']);w.writerows(rows)
+print('fix map rows',len(rows))

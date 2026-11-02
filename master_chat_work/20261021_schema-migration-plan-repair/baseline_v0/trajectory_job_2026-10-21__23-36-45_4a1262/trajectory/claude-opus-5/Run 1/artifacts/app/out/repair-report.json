@@ -1,0 +1,407 @@
+{
+  "package": "migrakit",
+  "fixes": [
+    "core.records.FieldView.from_payload: keep an explicit null as its own field state instead of discarding the key, so absent and null stay distinct in signatures, prerequisites, renames and fills (N1).",
+    "core.records.null_counts_as: honour the per-domain, per-field null_counts_as column of field_policy.tsv before falling back to [presence] explicit_null (N2).",
+    "core.records.fill_mode: honour the per-domain, per-field fill column of field_policy.tsv before falling back to [fill] mode (N3, N4).",
+    "core.planner.plan_migration: check each edge's prerequisites against the record state at that point of the plan rather than the record as first received, and allow a plan to pass through a schema more than once (M6, M7).",
+    "core.planner: break ties between equal-cost plans by the smallest list of edge ids compared element by element, not by the shorter plan (M8).",
+    "core.planner: replace exhaustive path enumeration with a search over (schema, field state) nodes, so a plan is found within the K14 time limit even when the graph holds far too many paths to list.",
+    "core.executor.execute_plan: apply each correction on the first arrival at its pinned schema in log order, counting the source schema as an arrival before the first edge, and apply nothing on a later arrival (C3, C4).",
+    "core.executor.execute_plan: re-check the prerequisites before every edge and stop with status failed, code E_PREREQ_FAILED, the failing edge, the steps completed, the schema reached and a null payload (M11).",
+    "pipeline._ordered: process the admitted lines in the received_seq order of their batch in replay_manifest.csv, then by feed line number (K13).",
+    "pipeline._Run._admit: key replay identity on the canonical partner id instead of the partner value as written (K16, P4).",
+    "pipeline._Run._admit: take the replay fingerprint on the line as received, before null-token replacement and before migration, and decide replay, conflict and supersession before the record is migrated (K16).",
+    "parser.identity.resolve_partner: follow the whole merge chain to the partner merged into no other partner, and raise E_ALIAS_CYCLE when it returns to a partner already visited (P2, P3).",
+    "parser.contracts._token_lists: let a partner's own token line replace the default list entirely, so an empty line means no tokens, instead of merging it into the default (N7).",
+    "parser.feed.read_feed: report a line that is not JSON as a parse problem instead of raising, so it is rejected with E_PARSE and the run continues (K15).",
+    "cli._resolve: take relative command-line paths from the caller's working directory instead of the package folder (K10).",
+    "src/migrakit/__main__.py: added the missing module entry point so python -m migrakit run ... and python -m migrakit --help work (K10).",
+    "report.classify.classify_result: take the status and code from the execution result instead of reporting migrated whenever a plan existed (K13, K17).",
+    "report.summary.build_summary: build by_category by mapping each record through report_taxonomy.json, listing every category including the ones with no records (T1, T2).",
+    "report.summary.build_summary: order the partners list by partner_order.tsv rank, then the unranked partners by id (T3).",
+    "parser.contracts.load_contracts: fail fast when one of the seven contract files is missing, and tolerate absent or empty optional columns in the CSV and TSV readers (K2)."
+  ],
+  "checks": [
+    {
+      "name": "M8 equal cost prefers the smallest edge id list over the shorter plan",
+      "passed": true
+    },
+    {
+      "name": "M8 the cheapest total cost wins",
+      "passed": true
+    },
+    {
+      "name": "M8 parallel equal-cost edges resolve to the smaller edge id",
+      "passed": true
+    },
+    {
+      "name": "M7 a plan may pass through a schema more than once",
+      "passed": true
+    },
+    {
+      "name": "C4 the source schema counts as an arrival before the first edge",
+      "passed": true
+    },
+    {
+      "name": "C4 a later arrival at the same schema applies nothing",
+      "passed": true
+    },
+    {
+      "name": "execute_plan does not change its correction arguments",
+      "passed": true
+    },
+    {
+      "name": "C4 corrections pinned to one schema are applied in log order",
+      "passed": true
+    },
+    {
+      "name": "M11 a failed prerequisite stops execution with the right report",
+      "passed": true
+    },
+    {
+      "name": "N2 null_counts_as=absent beats [presence] explicit_null=present",
+      "passed": true
+    },
+    {
+      "name": "N2 null_counts_as=present beats [presence] explicit_null=absent",
+      "passed": true
+    },
+    {
+      "name": "N1 an explicit null counting as present fails lacks:f",
+      "passed": true
+    },
+    {
+      "name": "N4 fill=absent_or_null from the policy column fills an explicit null",
+      "passed": true
+    },
+    {
+      "name": "N4 fill=absent_only leaves an explicit null alone",
+      "passed": true
+    },
+    {
+      "name": "N4 add fills an absent field from its default",
+      "passed": true
+    },
+    {
+      "name": "N4 add leaves an existing value alone",
+      "passed": true
+    },
+    {
+      "name": "N5 a rename moves an explicit null and leaves no source key",
+      "passed": true
+    },
+    {
+      "name": "M4 a rename of an absent field changes nothing",
+      "passed": true
+    },
+    {
+      "name": "M10 state_signature reports absent, null and value by sorted field name",
+      "passed": true
+    },
+    {
+      "name": "K11 state_signature raises E_UNKNOWN_SCHEMA for an unknown schema",
+      "passed": true
+    },
+    {
+      "name": "M5 casts convert, leave booleans and nulls alone and skip bad strings",
+      "passed": true
+    },
+    {
+      "name": "P2 a merge chain is followed to the partner merged into nothing",
+      "passed": true
+    },
+    {
+      "name": "P3 a merge cycle is rejected with E_ALIAS_CYCLE",
+      "passed": true
+    },
+    {
+      "name": "P1 an unknown partner value is rejected with E_UNKNOWN_PARTNER",
+      "passed": true
+    },
+    {
+      "name": "N7 a partner without a line uses the default token list",
+      "passed": true
+    },
+    {
+      "name": "N7 an empty partner line means no tokens at all",
+      "passed": true
+    },
+    {
+      "name": "N7 a partner line replaces the default list instead of extending it",
+      "passed": true
+    },
+    {
+      "name": "K4 record_fingerprint matches the documented canonical JSON sha256",
+      "passed": true
+    },
+    {
+      "name": "K15 a non-JSON line, a bad shape and an unknown batch are all E_PARSE",
+      "passed": true
+    },
+    {
+      "name": "K15 a rejected line carries batch, partner, key and schema null",
+      "passed": true
+    },
+    {
+      "name": "K16 the fingerprint is null until the partner stage passes",
+      "passed": true
+    },
+    {
+      "name": "K13 the run continues after every rejection",
+      "passed": true
+    },
+    {
+      "name": "K16/P4 replay identity uses the canonical partner id",
+      "passed": true
+    },
+    {
+      "name": "K16 the fingerprint is taken on the line as received",
+      "passed": true
+    },
+    {
+      "name": "N6/N8 a null token becomes an explicit null after the fingerprint",
+      "passed": true
+    },
+    {
+      "name": "K13 the batch received_seq decides which record holds an identity",
+      "passed": true
+    },
+    {
+      "name": "C7 a REISSUE prefix supersedes the holder and migrates the new record",
+      "passed": true
+    },
+    {
+      "name": "T1/T2 superseded and migrated land in their taxonomy categories",
+      "passed": true
+    },
+    {
+      "name": "C8 a REISSUE that matched a fingerprint is not invalid",
+      "passed": true
+    },
+    {
+      "name": "C8 invalid corrections are exactly the malformed, unresolved, unused and unmatched ones",
+      "passed": true
+    },
+    {
+      "name": "C8 E_INVALID_CORRECTION never becomes a record code",
+      "passed": true
+    },
+    {
+      "name": "C3 a SET correction reaches the record of the same canonical partner and key",
+      "passed": true
+    },
+    {
+      "name": "T3 partners are ranked by partner_order.tsv, then the unranked sorted by id",
+      "passed": true
+    },
+    {
+      "name": "K18 each partner entry counts its records, migrations and failures",
+      "passed": true
+    },
+    {
+      "name": "K7 plan_migration and execute_plan leave the caller's payload untouched",
+      "passed": true
+    },
+    {
+      "name": "M7 a record at the canonical schema has the empty plan",
+      "passed": true
+    },
+    {
+      "name": "M7 no plan means E_UNREACHABLE",
+      "passed": true
+    },
+    {
+      "name": "one record per feed line in line order",
+      "passed": true
+    },
+    {
+      "name": "every record carries exactly the K17 keys",
+      "passed": true
+    },
+    {
+      "name": "every status is a K17 status",
+      "passed": true
+    },
+    {
+      "name": "every code is null or a K12 code",
+      "passed": true
+    },
+    {
+      "name": "no record carries E_INVALID_CORRECTION",
+      "passed": true
+    },
+    {
+      "name": "migrated records end at the canonical schema with a payload",
+      "passed": true
+    },
+    {
+      "name": "failed records report E_PREREQ_FAILED, a failed edge and no payload",
+      "passed": true
+    },
+    {
+      "name": "replayed, superseded and rejected records carry no payload",
+      "passed": true
+    },
+    {
+      "name": "superseded records keep their plan and code null",
+      "passed": true
+    },
+    {
+      "name": "fingerprint is null exactly before the partner stage passes",
+      "passed": true
+    },
+    {
+      "name": "every fingerprint is 64 lowercase hex characters",
+      "passed": true
+    },
+    {
+      "name": "rejected parse records have batch, partner, key and schema null",
+      "passed": true
+    },
+    {
+      "name": "no plan exceeds 80 edges",
+      "passed": true
+    },
+    {
+      "name": "by_status totals the record count",
+      "passed": true
+    },
+    {
+      "name": "by_category totals the record count",
+      "passed": true
+    },
+    {
+      "name": "by_category lists every taxonomy category, zeros included",
+      "passed": true
+    },
+    {
+      "name": "by_code counts exactly the records carrying a code",
+      "passed": true
+    },
+    {
+      "name": "attempted counts the records whose execution started",
+      "passed": true
+    },
+    {
+      "name": "partners lists each canonical partner with at least one record",
+      "passed": true
+    },
+    {
+      "name": "partner counts agree with the records",
+      "passed": true
+    },
+    {
+      "name": "partners are ordered by partner_order rank, then the unranked by id",
+      "passed": true
+    },
+    {
+      "name": "every listed partner is a canonical id",
+      "passed": true
+    },
+    {
+      "name": "build_summary alone reproduces the pipeline summary",
+      "passed": true
+    },
+    {
+      "name": "invalid_corrections is sorted and free of duplicates",
+      "passed": true
+    },
+    {
+      "name": "a second run gives the same records and summary",
+      "passed": true
+    },
+    {
+      "name": "plan_migration and execute_plan leave the payload untouched",
+      "passed": true
+    },
+    {
+      "name": "execute_plan returns the M12 keys",
+      "passed": true
+    },
+    {
+      "name": "state_signature keys are the domain's prerequisite fields, sorted",
+      "passed": true
+    },
+    {
+      "name": "python -m migrakit run exits 0 and writes its output folder",
+      "passed": true
+    },
+    {
+      "name": "records.jsonl matches run_pipeline",
+      "passed": true
+    },
+    {
+      "name": "run_summary.json matches run_pipeline",
+      "passed": true
+    },
+    {
+      "name": "every K1 member exists in the repaired repository",
+      "passed": true
+    },
+    {
+      "name": "the repository holds no file outside the K1 layout",
+      "passed": true
+    },
+    {
+      "name": "the archive holds exactly the K1 layout at its root",
+      "passed": true
+    },
+    {
+      "name": "the archive holds no directory entry",
+      "passed": true
+    },
+    {
+      "name": "no member name is absolute or walks out of the archive",
+      "passed": true
+    },
+    {
+      "name": "the archive reads back without a CRC error",
+      "passed": true
+    },
+    {
+      "name": "the extracted archive passes every visible test",
+      "passed": true
+    },
+    {
+      "name": "unittest discover succeeds inside the extracted archive",
+      "passed": true
+    },
+    {
+      "name": "the before and after runs cover the same test methods",
+      "passed": true
+    },
+    {
+      "name": "no visible test regressed from pass to fail",
+      "passed": true
+    },
+    {
+      "name": "every function listed for core exists in the repaired package",
+      "passed": true
+    },
+    {
+      "name": "the core function list is sorted and non-empty",
+      "passed": true
+    },
+    {
+      "name": "every function listed for parser exists in the repaired package",
+      "passed": true
+    },
+    {
+      "name": "the parser function list is sorted and non-empty",
+      "passed": true
+    },
+    {
+      "name": "every function listed for report exists in the repaired package",
+      "passed": true
+    },
+    {
+      "name": "the report function list is sorted and non-empty",
+      "passed": true
+    },
+    {
+      "name": "summary.json holds the K18 keys",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,307 @@
+# Re-grade f272f70 slo-credit-closeout (host Python, no Docker)
+# Why host: 'docker ps' at 12:04 and 12:09 IST showed containers I did not start (fdsent-verifier:d930be0 'bash /tests/test.sh' fdsent-rg-agent / fdsent-rg-oracle) -> rule: no containers.
+# venv: S/venv (uv, Python 3.12.15) with tests/Dockerfile pins (harbor-rewardkit 0.2.1, openpyxl 3.1.5, python-docx 1.1.2, lxml 5.3.0, pypdf 5.1.0, pdfplumber 0.11.4, pyarrow 17.0.0, PyYAML 6.0.3, icalendar 6.0.1, tomli 2.0.1, reportlab 4.2.5).
+# S = /tmp/fd-slo-credit-closeout-20261024T1156 ; bundle copy S/bundle/<id> made without trajectories/
+# Host patches to a COPY of tests/test_output.py (S/hostgrade/test_output_host.py): OUT and SHARED from env SLOCC_OUT/SLOCC_SHARED; setpriv uid-65534 prefix removed; os.chown dropped.
+# driver.py stubs rewardkit (criterion returns fn), replaces _readonly_tree (chmod only) and _kill_agent_processes (no /proc on macOS); runs every registered criterion with its weight.
+# Host limits: negative_reads_training_corpus_at_runtime needs to plant /app/data -> cannot on macOS -> cannot fire on host. No uid isolation.
+
+## 0. Masking defect: generator SHA pin
+tests/test_output.py:5842-5846 _generator_ok hashes GENERATOR_SOURCES vs GENERATOR_SHA256. mask_map: tests/test_output.py slug->masked id x5 (docstrings :59,:206,:546,:4115,:4458).
+result: pin 8b5cf995a11eba15 masked 5b551b5ff3cb7160 ; after restoring slug: unmasked 8b5cf995a11eba15 True
+=> in the DELIVERED bundle the next-month generator never runs (eval.FAILED); 3 eval tests (13 pts) cannot pass and no negative can fire.
+
+## 1. Oracle on DELIVERED (masked) tests
+$ cd S/hostgrade; SLOCC_OUT=S/oracle_out SLOCC_SHARED=S/cache_oracle ../venv/bin/python driver.py ''
+outputs_have_documented_shape                 w=  1 PASS 0.3s
+outputs_use_documented_encoding               w=  1 PASS 0.4s
+concept_ingestion_exact                       w=  5 PASS 0.0s
+concept_time_exact                            w=  5 PASS 0.0s
+concept_schema_exact                          w=  5 PASS 0.0s
+concept_eligibility_exact                     w=  5 PASS 0.0s
+concept_attribution_exact                     w=  5 PASS 0.0s
+concept_entities_exact                        w=  5 PASS 0.1s
+concept_credits_exact                         w=  5 PASS 0.2s
+concept_controls_exact                        w=  5 PASS 0.0s
+decoy_d01_lb_errors_east_replay               w=  5 PASS 0.7s
+decoy_d02_svc_metrics_compacted               w=  5 PASS 0.0s
+decoy_d03_client_sdk_dedup                    w=  5 PASS 0.0s
+decoy_d04_sla_policy_v4_draft                 w=  5 PASS 0.0s
+decoy_d05_credit_tiers_2026                   w=  5 PASS 0.0s
+decoy_d06_incident_register_preliminary       w=  5 PASS 0.0s
+decoy_d07_account_snapshot_legacy             w=  5 PASS 0.0s
+decoy_d08_fx_rates_unofficial                 w=  5 PASS 0.0s
+decoy_d09_uptime_dashboard_snapshot           w=  5 PASS 0.0s
+decoy_d10_sla_report_draft                    w=  5 PASS 0.0s
+decoy_d11_collector_schema_proposed           w=  5 PASS 0.0s
+decoy_d12_probe_results_mirror                w=  5 PASS 0.0s
+decoy_d13_ingest_reprocess                    w=  5 PASS 0.0s
+decoy_d14_claims_crm_legacy                   w=  5 PASS 0.0s
+decoy_d15_region_groups_2025                  w=  5 PASS 0.0s
+slice_t10_encodings_line_ends                 w=  5 PASS 0.0s
+slice_t11_boundaries                          w=  5 PASS 0.0s
+slice_t12_rounding                            w=  5 PASS 0.0s
+slice_t13_referential_breaks                  w=  5 PASS 0.0s
+slice_t14_prose_overrides                     w=  5 PASS 0.0s
+slice_t15_statistical_bait                    w=  5 PASS 0.0s
+slice_t16_decoy_agreement                     w=  5 PASS 0.0s
+slice_t1_near_duplicate_keys                  w=  5 PASS 0.0s
+slice_t2_unit_scale                           w=  5 PASS 0.0s
+slice_t3_time_zones_epochs                    w=  5 PASS 0.0s
+slice_t4_locale_numerics                      w=  5 PASS 0.0s
+slice_t5_sentinels                            w=  5 PASS 0.0s
+slice_t6_voids_reversals                      w=  5 PASS 0.0s
+slice_t7_supersession                         w=  5 PASS 0.0s
+slice_t8_header_drift                         w=  5 PASS 0.0s
+slice_t9_record_framing                       w=  5 PASS 0.0s
+eval_next_month_records_exact                 w=  5 fail 0.0s
+eval_next_month_state_exact                   w=  5 fail 0.0s
+eval_held_close_exact                         w=  3 fail 0.0s
+negative_hardcoded_sample_answers             w= -5 fail 0.0s
+negative_filename_dependent_behaviour         w= -5 fail 0.0s
+negative_reads_training_corpus_at_runtime     w= -5 fail 0.0s
+negative_nondeterministic_output              w= -3 fail 0.0s
+positive 197/210 negatives 0 total 197/210 = 93.81%
+
+## 2. Oracle with pin restored (S/hostgrade_um = masked id -> slug in the 5 docstrings, nothing else)
+# oracle outputs: cp solution/solve.py S/oracle_out/transform.py; time venv/bin/python oracle_out/transform.py <bundle>/environment/data oracle_out -> real 60.13 s
+S=/tmp/fd-slo-credit-closeout-20261024T1156
+cd $S/hostgrade_um
+date
+SLOCC_OUT=$S/oracle_out SLOCC_SHARED=$S/cache_oracle ../venv/bin/python driver.py "" > full_oracle.txt 2>&1
+date
+cp -R $S/cache_oracle/eval $S/cache_oracle/eval.DONE $S/cache_agent/
+SLOCC_OUT=$S/agent_out SLOCC_SHARED=$S/cache_agent ../venv/bin/python driver.py "" > full_agent.txt 2>&1
+date
+echo ALLDONE
+outputs_have_documented_shape                 w=  1 PASS 0.2s
+outputs_use_documented_encoding               w=  1 PASS 0.3s
+concept_ingestion_exact                       w=  5 PASS 0.0s
+concept_time_exact                            w=  5 PASS 0.0s
+concept_schema_exact                          w=  5 PASS 0.0s
+concept_eligibility_exact                     w=  5 PASS 0.0s
+concept_attribution_exact                     w=  5 PASS 0.0s
+concept_entities_exact                        w=  5 PASS 0.0s
+concept_credits_exact                         w=  5 PASS 0.0s
+concept_controls_exact                        w=  5 PASS 0.0s
+decoy_d01_lb_errors_east_replay               w=  5 PASS 0.3s
+decoy_d02_svc_metrics_compacted               w=  5 PASS 0.0s
+decoy_d03_client_sdk_dedup                    w=  5 PASS 0.0s
+decoy_d04_sla_policy_v4_draft                 w=  5 PASS 0.0s
+decoy_d05_credit_tiers_2026                   w=  5 PASS 0.0s
+decoy_d06_incident_register_preliminary       w=  5 PASS 0.0s
+decoy_d07_account_snapshot_legacy             w=  5 PASS 0.0s
+decoy_d08_fx_rates_unofficial                 w=  5 PASS 0.0s
+decoy_d09_uptime_dashboard_snapshot           w=  5 PASS 0.0s
+decoy_d10_sla_report_draft                    w=  5 PASS 0.0s
+decoy_d11_collector_schema_proposed           w=  5 PASS 0.0s
+decoy_d12_probe_results_mirror                w=  5 PASS 0.0s
+decoy_d13_ingest_reprocess                    w=  5 PASS 0.0s
+decoy_d14_claims_crm_legacy                   w=  5 PASS 0.0s
+decoy_d15_region_groups_2025                  w=  5 PASS 0.0s
+slice_t10_encodings_line_ends                 w=  5 PASS 0.0s
+slice_t11_boundaries                          w=  5 PASS 0.0s
+slice_t12_rounding                            w=  5 PASS 0.0s
+slice_t13_referential_breaks                  w=  5 PASS 0.0s
+slice_t14_prose_overrides                     w=  5 PASS 0.0s
+slice_t15_statistical_bait                    w=  5 PASS 0.0s
+slice_t16_decoy_agreement                     w=  5 PASS 0.0s
+slice_t1_near_duplicate_keys                  w=  5 PASS 0.0s
+slice_t2_unit_scale                           w=  5 PASS 0.0s
+slice_t3_time_zones_epochs                    w=  5 PASS 0.0s
+slice_t4_locale_numerics                      w=  5 PASS 0.0s
+slice_t5_sentinels                            w=  5 PASS 0.0s
+slice_t6_voids_reversals                      w=  5 PASS 0.0s
+slice_t7_supersession                         w=  5 PASS 0.0s
+slice_t8_header_drift                         w=  5 PASS 0.0s
+slice_t9_record_framing                       w=  5 PASS 0.0s
+eval_next_month_records_exact                 w=  5 PASS 62.6s
+eval_next_month_state_exact                   w=  5 PASS 0.0s
+eval_held_close_exact                         w=  3 PASS 21.7s
+negative_hardcoded_sample_answers             w= -5 fail 0.6s
+negative_filename_dependent_behaviour         w= -5 fail 84.8s
+negative_reads_training_corpus_at_runtime     w= -5 fail 0.0s
+negative_nondeterministic_output              w= -3 fail 0.0s
+positive 210/210 negatives 0 total 210/210 = 100.00%
+
+## 3. Agent outputs (RUN/artifacts/app/out copied to S/agent_out), pin restored
+outputs_have_documented_shape                 w=  1 PASS 0.5s
+outputs_use_documented_encoding               w=  1 PASS 0.7s
+concept_ingestion_exact                       w=  5 fail 0.0s
+concept_time_exact                            w=  5 fail 0.1s
+concept_schema_exact                          w=  5 fail 0.1s
+concept_eligibility_exact                     w=  5 fail 0.1s
+concept_attribution_exact                     w=  5 fail 0.1s
+concept_entities_exact                        w=  5 fail 0.1s
+concept_credits_exact                         w=  5 fail 0.1s
+concept_controls_exact                        w=  5 fail 0.0s
+decoy_d01_lb_errors_east_replay               w=  5 fail 0.6s
+decoy_d02_svc_metrics_compacted               w=  5 fail 0.0s
+decoy_d03_client_sdk_dedup                    w=  5 fail 0.0s
+decoy_d04_sla_policy_v4_draft                 w=  5 fail 0.0s
+decoy_d05_credit_tiers_2026                   w=  5 fail 0.0s
+decoy_d06_incident_register_preliminary       w=  5 fail 0.0s
+decoy_d07_account_snapshot_legacy             w=  5 fail 0.0s
+decoy_d08_fx_rates_unofficial                 w=  5 fail 0.0s
+decoy_d09_uptime_dashboard_snapshot           w=  5 fail 0.0s
+decoy_d10_sla_report_draft                    w=  5 fail 0.0s
+decoy_d11_collector_schema_proposed           w=  5 fail 0.0s
+decoy_d12_probe_results_mirror                w=  5 fail 0.0s
+decoy_d13_ingest_reprocess                    w=  5 fail 0.0s
+decoy_d14_claims_crm_legacy                   w=  5 fail 0.0s
+decoy_d15_region_groups_2025                  w=  5 fail 0.0s
+slice_t10_encodings_line_ends                 w=  5 fail 0.0s
+slice_t11_boundaries                          w=  5 fail 0.0s
+slice_t12_rounding                            w=  5 fail 0.0s
+slice_t13_referential_breaks                  w=  5 fail 0.0s
+slice_t14_prose_overrides                     w=  5 fail 0.0s
+slice_t15_statistical_bait                    w=  5 fail 0.0s
+slice_t16_decoy_agreement                     w=  5 fail 0.0s
+slice_t1_near_duplicate_keys                  w=  5 fail 0.0s
+slice_t2_unit_scale                           w=  5 fail 0.0s
+slice_t3_time_zones_epochs                    w=  5 fail 0.0s
+slice_t4_locale_numerics                      w=  5 fail 0.0s
+slice_t5_sentinels                            w=  5 fail 0.0s
+slice_t6_voids_reversals                      w=  5 fail 0.0s
+slice_t7_supersession                         w=  5 fail 0.0s
+slice_t8_header_drift                         w=  5 fail 0.0s
+slice_t9_record_framing                       w=  5 fail 0.0s
+eval_next_month_records_exact                 w=  5 fail 32.5s
+eval_next_month_state_exact                   w=  5 fail 0.0s
+eval_held_close_exact                         w=  3 PASS 21.2s
+negative_hardcoded_sample_answers             w= -5 fail 0.4s
+negative_filename_dependent_behaviour         w= -5 fail 74.4s
+negative_reads_training_corpus_at_runtime     w= -5 fail 0.0s
+negative_nondeterministic_output              w= -3 fail 0.0s
+positive 5/210 negatives 0 total 5/210 = 2.38%
+# recorded verifier/ctrf.json: tests 48 passed 3 failed 45 weighted_percentage 2.381 (passed: outputs_have_documented_shape, outputs_use_documented_encoding, eval_held_close_exact) -> MATCH
+
+## 4. nop (empty out dir), pin restored
+outputs_have_documented_shape                 w=  1 fail 0.0s
+outputs_use_documented_encoding               w=  1 fail 0.0s
+concept_ingestion_exact                       w=  5 fail 0.0s
+concept_time_exact                            w=  5 fail 0.0s
+concept_schema_exact                          w=  5 fail 0.0s
+concept_eligibility_exact                     w=  5 fail 0.0s
+concept_attribution_exact                     w=  5 fail 0.0s
+concept_entities_exact                        w=  5 fail 0.0s
+concept_credits_exact                         w=  5 fail 0.0s
+concept_controls_exact                        w=  5 fail 0.0s
+decoy_d01_lb_errors_east_replay               w=  5 fail 0.0s
+decoy_d02_svc_metrics_compacted               w=  5 fail 0.0s
+decoy_d03_client_sdk_dedup                    w=  5 fail 0.0s
+decoy_d04_sla_policy_v4_draft                 w=  5 fail 0.0s
+decoy_d05_credit_tiers_2026                   w=  5 fail 0.0s
+decoy_d06_incident_register_preliminary       w=  5 fail 0.0s
+decoy_d07_account_snapshot_legacy             w=  5 fail 0.0s
+decoy_d08_fx_rates_unofficial                 w=  5 fail 0.0s
+decoy_d09_uptime_dashboard_snapshot           w=  5 fail 0.0s
+decoy_d10_sla_report_draft                    w=  5 fail 0.0s
+decoy_d11_collector_schema_proposed           w=  5 fail 0.0s
+decoy_d12_probe_results_mirror                w=  5 fail 0.0s
+decoy_d13_ingest_reprocess                    w=  5 fail 0.0s
+decoy_d14_claims_crm_legacy                   w=  5 fail 0.0s
+decoy_d15_region_groups_2025                  w=  5 fail 0.0s
+slice_t10_encodings_line_ends                 w=  5 fail 0.0s
+slice_t11_boundaries                          w=  5 fail 0.0s
+slice_t12_rounding                            w=  5 fail 0.0s
+slice_t13_referential_breaks                  w=  5 fail 0.0s
+slice_t14_prose_overrides                     w=  5 fail 0.0s
+slice_t15_statistical_bait                    w=  5 fail 0.0s
+slice_t16_decoy_agreement                     w=  5 fail 0.0s
+slice_t1_near_duplicate_keys                  w=  5 fail 0.0s
+slice_t2_unit_scale                           w=  5 fail 0.0s
+slice_t3_time_zones_epochs                    w=  5 fail 0.0s
+slice_t4_locale_numerics                      w=  5 fail 0.0s
+slice_t5_sentinels                            w=  5 fail 0.0s
+slice_t6_voids_reversals                      w=  5 fail 0.0s
+slice_t7_supersession                         w=  5 fail 0.0s
+slice_t8_header_drift                         w=  5 fail 0.0s
+slice_t9_record_framing                       w=  5 fail 0.0s
+eval_next_month_records_exact                 w=  5 fail 0.0s
+eval_next_month_state_exact                   w=  5 fail 0.0s
+eval_held_close_exact                         w=  3 fail 0.0s
+negative_hardcoded_sample_answers             w= -5 fail 0.0s
+negative_filename_dependent_behaviour         w= -5 fail 0.0s
+negative_reads_training_corpus_at_runtime     w= -5 fail 0.0s
+negative_nondeterministic_output              w= -3 fail 0.0s
+positive 0/210 negatives 0 total 0/210 = 0.00%
+
+## 5. Patch proofs (agent transform.py patched, rerun on visible data, visible tier = 41 tests 197 pts; hidden eval with pin restored)
+### patch/res_fixABC.txt
+slice_t7_supersession                         w=  5 PASS 0.0s
+slice_t8_header_drift                         w=  5 PASS 0.0s
+slice_t9_record_framing                       w=  5 PASS 0.0s
+positive 137/197 negatives 0 total 137/197 = 69.54%
+### patch/res_fixM1.txt
+slice_t7_supersession                         w=  5 fail 0.0s
+slice_t8_header_drift                         w=  5 fail 0.0s
+slice_t9_record_framing                       w=  5 fail 0.0s
+positive 57/197 negatives 0 total 57/197 = 28.93%
+### patch/res_fixM1M2.txt
+slice_t7_supersession                         w=  5 fail 0.0s
+slice_t8_header_drift                         w=  5 PASS 0.0s
+slice_t9_record_framing                       w=  5 PASS 0.0s
+positive 102/197 negatives 0 total 102/197 = 51.78%
+### patch/res_fixM2.txt
+slice_t7_supersession                         w=  5 fail 0.0s
+slice_t8_header_drift                         w=  5 fail 0.0s
+slice_t9_record_framing                       w=  5 fail 0.0s
+positive 7/197 negatives 0 total 7/197 = 3.55%
+### patch/fixABC.log
+### patch/fixM1.log
+### patch/fixM1M2.log
+### patch/fixM2.log
+### patch/full_fixABC_eval.txt
+negative_hardcoded_sample_answers             w= -5 fail 0.3s
+negative_nondeterministic_output              w= -3 fail 25.1s
+positive 3/13 negatives 0 total 3/13 = 23.08%
+DONE
+### patch/full_fixABCD_eval.txt
+negative_hardcoded_sample_answers             w= -5 fail 0.3s
+negative_filename_dependent_behaviour         w= -5 fail 48.9s
+negative_nondeterministic_output              w= -3 fail 0.0s
+positive 3/13 negatives 0 total 3/13 = 23.08%
+
+## 6. Single-mistake injection into ORACLE outputs (S/inj/make.py), visible tier
+### inj/res_M1_fx_on_MET.txt
+positive 32/197 negatives 0 total 32/197 = 16.24%
+### inj/res_M2_internal_alias.txt
+positive 102/197 negatives 0 total 102/197 = 51.78%
+### inj/res_M3_missed_claim.txt
+positive 137/197 negatives 0 total 137/197 = 69.54%
+### inj/res_M4_spurious_claim.txt
+positive 167/197 negatives 0 total 167/197 = 84.77%
+### inj/res_M5_bad_windows.txt
+positive 142/197 negatives 0 total 142/197 = 72.08%
+### inj/res_agent_fixM1.txt
+positive 57/197 negatives 0 total 57/197 = 28.93%
+### inj/res_agent_recordsfixed.txt
+positive 177/197 negatives 0 total 177/197 = 89.85%
+
+## 7. fixABCD visible tier (all four patches A+B+C+D)
+positive 197/197 negatives 0 total 197/197 = 100.00%
+# fixABCD hidden eval (pin restored) = 3/13 (records, state fail; held pass) -> full 200/210; only Sept diff SUB-025753 (mistake E)
+
+## 8. The complete patch (diff agent_out/transform.py patch/fixABCD/transform.py, changed lines)
+1272c1272,1274
+<         return account in self.internal
+---
+>         if not hasattr(self, '_int_res'):  # PATCH M2
+>             self._int_res = {self.resolve_account(a) or a for a in self.internal}
+>         return account in self._int_res
+1739c1741
+<                 self.account_site.setdefault(account, site)
+---
+>                 self.account_site[self.resolve_account(rget(r, "account_id")) or account] = site  # PATCH C
+2491c2493
+<             wave = clean_text(rget(r, "wave"))
+---
+>             wave = clean_text(rget(r, "wave")).upper()
+2517c2519
+<             wave = clean_text(rget(r, "wave"))
+---
+>             wave = clean_text(rget(r, "wave")).upper()
+2930a2933,2934
+>         if credit_pct == 0:
+>             rate = None  # PATCH M1

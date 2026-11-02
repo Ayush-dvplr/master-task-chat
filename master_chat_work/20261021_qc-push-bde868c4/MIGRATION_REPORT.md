@@ -1,0 +1,329 @@
+# QC push bde868c4 migration report
+
+Harness HEAD: bde868c46994f4916e245b40d14f302b1341244a (checked 21 Oct 2026 17:18 IST).
+
+## Result (21 Oct 2026 17:25 IST)
+
+| bundle | criteria migrated | keys deleted | judge | structure | tests | instruction | validate_bundle | files changed |
+|---|---|---|---|---|---|---|---|---|
+| vendor-archive-roundtrip-recovery | 12 of 12 | 60 (category 12, kind 12, evidence 12, residue 12, serves 12) | 0 FAIL | 0 FAIL, 1 WARN | 0 FAIL, 5 WARN | 0 FAIL | GATE PASS (48/0/0), `--archetype format-recovery` | judge.toml, TRUTH.md, test.sh |
+| schema-migration-plan-repair | 17 of 17 | 73 (category 17, kind 17, evidence 17, residue 17, serves 3, contract_sentence 1, contract_file 1) | 0 FAIL | 0 FAIL, 1 WARN | 0 FAIL, 1 WARN | 0 FAIL | GATE FAIL (38 pass, 2 fail), `--archetype repo-patch`; see Blocker | judge.toml, TRUTH.md, test.sh |
+| district-heat-flex-procurement | 0 of 17 (already conformant) | 0 | 0 FAIL | 0 FAIL | 0 FAIL, 1 WARN | 0 FAIL | not required | TRUTH.md, test.sh |
+| emberforge-vault-settlement | 9 of 9 | 44 (category 9, kind 9, evidence 9, residue 9, serves 2, contract_sentence 3, contract_file 3) | 0 FAIL | 0 FAIL | 0 FAIL, 1 WARN | 0 FAIL | not required | judge.toml, TRUTH.md, test.sh |
+
+WARNs are pre-existing and come from files this session did not touch: A3 (check count above 35), A5 (vendor, 4 checks without try/except), X1 (binary files skipped).
+Logs: `/tmp/opencode-logs/qc-push-bde868c4-20261021T1718/`.
+
+### Change 1: judge.toml
+- Every criterion in the three migrated bundles had a `category`, so `type` = old `category` everywhere. No type was chosen by judgement.
+- Every old `kind = "constraint"` criterion (schema R16; emberforge R6, R7, R8) was already `instruction following`. No outcome or conduct criterion carries it.
+- importance vs |weight| and the description opening vs evaluation_target were already consistent (judge_qc J9 and J13 pass), so no evaluation_target or description was changed.
+- `[judge]`, `[scoring]` and the `[[criterion]]` fields were left as they were.
+
+### Change 2: TRUTH.md
+- vendor: removed `authored_by: harbor-generator` and `status: generated_reference`. Line 5 changed from "The defect in the archetype sense is a" to "The defect is a", because the validator's DS-27 narration regex matches the word `archetype`.
+- schema: removed `authored_by`, `status`, `archetype`, `generator_seed` and `trailer_token`. Removed the sentence "This instance was scaffolded by generate_bundle.py from the repo-patch archetype and has not been through an oracle / nop / agent calibration sweep." from `golden_score_verified_by`. Changed the comment on `golden_score_measured` from "# not measured for this generated instance" to "# not measured".
+- district: removed `authored_by: null` and `status: reference`.
+- emberforge: removed `status: complete`.
+- No sha256 value changed. No TRUTH.md lists its own digest. The digests of solve.sh, solve.py and test_output.py still match (validator §15.7 PASS where it ran).
+
+### Change 3: test.sh
+On line 7 of all four bundles, `chmod 700 /logs/verifier` became `chmod 755 /logs/verifier`. Nothing else changed in test.sh.
+
+### Blocker: schema-migration-plan-repair fails validate_bundle (not caused by this session)
+- FAIL §1.4: `environment/` must contain `repo/` and `ci/`, but it has `data/`.
+- FAIL §5.5: the Dockerfile COPY lines must be exactly `COPY repo /app/repo` and `COPY ci /app/ci`, but the file has `COPY data /app/data`.
+- Cause: upstream commit f0579497 ("multi input dirs") changed the repo-patch archetype.toml from `[[source_archives]] environment/data/repo.zip` to `[[inputs]] repo -> /app/repo, ci -> /app/ci`. Both checks read only `environment/`, which is byte identical before and after this session (see the trees). The fix means re-laying out environment/, the Dockerfile, the instruction paths, the tests and the solution, which is outside this session's scope.
+
+### Stale sources in _work/
+`_work/<slug>/` still holds the generator sources that wrote these files (schema: make_judge.py, make_truth.py, TRUTH.src.md; district: judge_build.py, TRUTH.src.md; emberforge: TRUTH.src.md). They were not edited. Running them again would bring back the old annotation keys and provenance keys.
+
+
+## sha256 tree BEFORE edits
+
+### vendor-archive-roundtrip-recovery
+
+```
+b8d1049089ae52a3814d6657d7c41be5f552e0033fd5188b85d4e02eeb121f23  environment/Dockerfile
+28f6dd94cd6cc347e2ba576e805160407c5f726a206e538f6ed01593a8cd74f4  environment/data/capture_alpha.varc
+641942c481eb3acffb25173ee9a565c11a585660683904fbba478215102503cf  environment/data/capture_beta.varc
+cdadd60314fa3fb987e278a0fb6e562e3bd809e7b94996a42c76db60041849dc  environment/data/capture_catalog.jsonl
+d159c3347e0c57818e3a4163ba67030ef9f9c02af609d382ecb0341b2a507238  environment/data/crc_profiles.json
+6c129d413e9a2f982aa7aac91b3f5e8a10a18677b22654d2748d81019750124b  environment/data/decoder_appendix.md
+a6aba6482398d832092adbd2d50ffc743707958e84dcbfb1c82b4c5758fd17de  environment/data/escape_rules.md
+c5db3c1be52f8d54f2c02ec289f7cecf1bea323be78f52f1716857fb288ea918  environment/data/field_layouts.csv
+5d4f0edf0d1be03a8d5f5d31fa0c2c54e2ed8d2c30d6074e7fb41a019d48a7a6  environment/data/format_contract.md
+92678d9549a5fe73da1be704f64a9304813830ac9e466b73f392bbd7d9b85802  environment/data/revision_map.ini
+07a1996d09972e537fa12fa890526a665d9ec092308d9a1a3e6bcc410fbdd950  environment/data/revision_notes.md
+a05467b0656649dd6a1ae36b7dae3bc0ec695a801ce1e4eb6b7c86b3c8233d02  environment/data/schema_registry.json
+e2aeb357f2bd5cb5a127180cf1f879200923c1236ff75da985b06130127ed620  environment/data/symbol_table.tsv
+e5e540bf100ffcbb23338a23fb4e1bb19ec24fbeb60494f0f2cdb05be1b8a993  instruction.md
+8ffa40383c96831d9103fa9740b613413c4b7db875075b7c5ea0e88fe2a3a27b  solution/TRUTH.md
+a280fbb62d92e6fd8917071065607b8729a26fdcc95ab31c092a2c9391c0adbc  solution/solve.py
+062f6c746aef8ffdeb026e9a5baaffcd61d8d306ec3b75740e683da5919d9097  solution/solve.sh
+410a67d749e45b6d1f57bcf1b94ed6be8eea2f8f320d6baab26a39d7d1158707  task.toml
+409c7974a4b5013400ae44f21aa6967eb5cda869b37157816fd479d5fbf8c079  tests/Dockerfile
+0ed57425379117743c9935f51dd91e2234426c69ea48b438032c283ac25bdab0  tests/judge.toml
+e0616d78bc348601208621adb2f00e0160cdf27d7d5c4228ea15058c1203bb99  tests/reward.toml
+d96ac9fe1bc6b60d4f7152215a170d3d133b591252a938f0930007aa26554eb5  tests/test.sh
+4f3b6ee37f0886cd7fb42f434575aff6d7fe6e7c7ccbe60766cfa5e1c0dc5d73  tests/test_output.py
+```
+
+### schema-migration-plan-repair
+
+```
+4e471787048f5bec58beedba9ff577d4b3976f13e92b41837bb12023f3b058f0  environment/Dockerfile
+823b91abcdecfa1d4e02db10bf358d2cb3ab55998a9c0e297f084a4d49b5a1b8  environment/data/correction_log.txt
+85644eff35bc54040e4b088270e927788c23c6065bbc0f06d7d2faba45b0c92a  environment/data/field_policy.tsv
+6f1fa1fda00031fa3b7a06270561fc5acdc2a779f0f815be1b65896a46009ea8  environment/data/migration_edges.csv
+a958fa94f7142bbfed9e0324b723ace5cef86726f8434598f38a4829d2f60037  environment/data/migration_semantics.md
+ad53a2cda766c68775da00e29f5856ab57a35a1efe58ca20d2339084ee3e0780  environment/data/null_semantics.ini
+428e2558c1742ee6004bda20c86ac59301fc3a85f3d0e2a08c50d5435667adda  environment/data/partner_aliases.xml
+46ebdab918c671df35c6ebe6dac9c718bb6aa4a40daa9e3d98c18d32504b36e2  environment/data/partner_batches.jsonl
+a7ee3f464fd8d317dd47ec2f74d33a6bf4a37a39f08358bcb9d18a6295bfe1b7  environment/data/partner_order.tsv
+38c93f25aff45e00053a126a2a09a5d5ae1a5be3aa0850942b32343f36515c86  environment/data/replay_manifest.csv
+ec266925d62a92d84a2d323b41eefeaa1d4429710d0e8ee4b9df879cb539bfd2  environment/data/repo.zip
+4f81e4252a1e577702771e80fb0c7cc55eb76291ebeaa0a66a638f5473cfe152  environment/data/report_taxonomy.json
+2685ff227bb7ea601fc00915fa4dd6393d2e96a3fb3d6acaa795345773276509  environment/data/repository_contract.md
+108df03f0f2b1f0068db63ecf7014c53f02fd18538b70da298706abc276d950b  environment/data/schema_versions.json
+ddfed7004bf736b176329dcca549d22785786a9d744385e66f4cd6a29aba8d03  instruction.md
+5a6f3a8f688d12d7b29de0e6dc626838989282a78aedb4579a84930985068dbe  solution/TRUTH.md
+677904c5ec6219fd0033c1485ef64be9ef03c3b1ab8bc71646a1f6ad03779e76  solution/solve.py
+25c71b6c701c5cdc752f2284c1d929d0ca149547952669c1fb7c8b4ac00dc680  solution/solve.sh
+9cb65977e5b5a9837726e867f7f1c2492c6dbfb8d9517837f5df8a6e86c975d1  task.toml
+409c7974a4b5013400ae44f21aa6967eb5cda869b37157816fd479d5fbf8c079  tests/Dockerfile
+0ac13ee2cd3ef2973a1c55f486579e7fb98ac8f11b140da04c7c5128648acb88  tests/judge.toml
+61c858141dc9babe82f68887af3fa41b490312373097be8e802811512fb6bc31  tests/reward.toml
+d96ac9fe1bc6b60d4f7152215a170d3d133b591252a938f0930007aa26554eb5  tests/test.sh
+466376b913620587597d6785ba4155e479e55ead6a88acf925a28e66a02ac718  tests/test_output.py
+```
+
+### district-heat-flex-procurement
+
+```
+455d8b6d06659b15cc6b23377fea194e4f3fcf680b92789c86c92693e7c03804  environment/Dockerfile
+6cedb722e743d00d9db45e1367e15d7f91e0fec2e3385260b01637d9d15e2ae5  environment/data/continuity_waivers.csv
+395d964fca89c5f4aa28fd88caaee4a02888e7adbfa0076c1d7860fbffb3ceb4  environment/data/events.json
+d82473796af286f633df870bfb0bfcc0f341181f8879815ad756988fde43f26c  environment/data/feeder_limits.txt
+0d13712a6b3d59c299c31708ee47c01f0bea551b569934ecdea7ba880d0b8d00  environment/data/offers.csv
+f4f4f7b92ccb9d1d6a06227a693a1e8bcea570b126e4a388ea284da0d592d739  environment/data/pools.txt
+93b5e349477aae19adb9396ea274fb7810f9d66fe497726e6c507db509482ed8  environment/data/profiles.tsv
+475eda876e37ded93f58be304c186de924afab087bf82dd691e70a3433002434  environment/data/program.ini
+d72318efbbd9363e546a835533984752b62dfdb4b668be5ae1ac40ed27842384  environment/data/rate_cards.xml
+988d2d4b156e641ea528f87e73cc239ec78057f3336807e668fddd561148d2cf  environment/data/recipient_weights.tsv
+24883e0604200effbd63d89398e266fc63a89f71f7e5f10c4363f0f4a3f35cba  environment/data/schema.md
+5b4c56e781392221d2a673325b49aab6fe2bb717cfce365a6904c4cca46ea12c  environment/data/segment_floors.json
+3e490bc95c9bbd5190935800e8e911865250afea5a607e3a26305d5fb18760a5  environment/data/site_state.jsonl
+f02d56b112abbe221f757152be184c2bda5ac329839ea6a0f07070a79ed90221  environment/data/sites.csv
+a61b3acd1d8c791a014caa6ecb3e0d9ca4cf7f6fd95f6dbbe066961a5e4928ba  environment/data/targets.tsv
+e8e29d78e6a6cf9557385975677274d97cd36a1e72d8fa08ccb14a24f46af82d  instruction.md
+c9900166ea65042879b55c3ee1e9e4de262502a768c1311651754680e38071d8  solution/TRUTH.md
+ef7f677bf1baba14bddb2b994c52471286147e5bf4bb7b4fa4302c42e0462f37  solution/solve.py
+44b69de8729373024f622ac80e2b8b3ca922382596235799a85a7b037f00c222  solution/solve.sh
+9c2d50b1cc093c35b2ab887efaadd594d4870e1a953b6427ae1bb59ab7b52810  task.toml
+409c7974a4b5013400ae44f21aa6967eb5cda869b37157816fd479d5fbf8c079  tests/Dockerfile
+be9360706de9f6e5fc55d01219b8d550d1800a7a9653551bed5c769a66fa7757  tests/judge.toml
+d10106fff45a663c1ea37727407211f584a1b159ca3d57e2a56a25f9b949cb94  tests/reward.toml
+d96ac9fe1bc6b60d4f7152215a170d3d133b591252a938f0930007aa26554eb5  tests/test.sh
+16227ed3007f16c7511e5843397ed419c52f01e647980c43b382e7e178ec1c06  tests/test_output.py
+```
+
+### emberforge-vault-settlement
+
+```
+531d05de28a230486485c9efef7d46f36c5cf00113f893c19ec3f58574f548a8  environment/Dockerfile
+4211b47c4b24dc95ddab272f46a429e27f2f44b866115caf0037adc7d5ae37c8  environment/data/artifact_catalogue.csv
+39f18fd22a44178a78df8a1c43be65b0f66dcf0a24ebfd10613b588ee73726d9  environment/data/calibration_artifact_catalogue.csv
+248bf22e03c10d64b4e4ac5ba89e7dcf0da435a5bfb5cf477d7d4c875475d17a  environment/data/calibration_controls.json
+805a193598d39f421ccc8f779fc2f60dd2387590e4856e58489693fb7a6120a5  environment/data/calibration_crafting_ledger.csv
+12e74b522614f4e294b685f89c47e4d6d8bb6bf67216f3747bc73914bf1f97d1  environment/data/calibration_patch_calendar.csv
+54ae17e50dc9e30399c71b2c94cc753701bea5a9de30393d47ea59b7863d03fa  environment/data/calibration_reagent_acquisitions.csv
+d156f596c913e46f7a534e5807baa62491ddd223fa378adac4196e6595f4c305  environment/data/calibration_reagent_registry.csv
+826a1f864654fa186de4c20d10b6b57ecf7abeabc1a738d88b00964c0304f92b  environment/data/calibration_recipe_editions.csv
+9918b98e64c0b8194efc6f7908d2dce3782825d97f878b6145eecef5da6ec58b  environment/data/calibration_requisitions.json
+94394b2eeaedce914b19f6224811580b0ceb84db91b417e81132cbcf00b93d67  environment/data/calibration_season_charter.json
+3772658d9898971356bd38587a28e59d9d68934e017408bb5437fed7910c302d  environment/data/calibration_slice.md
+50dc1a808e8c3c854cb5ff14d55115426ba67b3cb4a96dec5a57c6e87894f9a1  environment/data/calibration_smith_identity_events.csv
+ec6f69bb7806aa3910386b15748a8eaf30514c6e7ecef4e4c7ace07de980cdbb  environment/data/calibration_vault_opening.csv
+a1f6cea7848ed7317ea7b13d97124bc9ce3cbfdd418ab4ca0e221b753d246011  environment/data/calibration_workshop_registry.csv
+79788afc1603270df5a496fb5b836f4d86cc65cfcb28a10471815d31619e8750  environment/data/convention_register.md
+60893fe4d8e58ecd37dfc861aed17a9595949f03c5726d15b1857f9b49f5e46a  environment/data/crafting_ledger.csv
+439acb4e276b376d324e79515206142bb7775381c28dc28eb3f903314e0540e7  environment/data/example_workshop_report.json
+d57d6601c6145cf7345ae2552e1515ec492301816928eb4be7a53ecd9db1e7fa  environment/data/finding_codes.md
+c2a535978037cbec6767d08a1bc8213ddf3d3b67ad6af90c07975426ac081c3e  environment/data/invariants.md
+8a3b36d06cdf3a5c534b504f8037e107ef33521274f20f5cc3917fd66b7b92e5  environment/data/patch_calendar.csv
+2b645439441f3d0497a2cf9a73e4d36ba4dd290beb2b3bd8579c799025e0b802  environment/data/reagent_acquisitions.csv
+2d1aa117415cf54749930335c812988cbb532b5c6255de87e28fb23b06efdff2  environment/data/reagent_registry.csv
+77ae0adf0a3cbb09342d734981521b29cb54dff41ab2a5d18311a01218e1b7c4  environment/data/recipe_editions.csv
+b976202c9825c060122fa81499a08950d21770edbd48b2fbfbc421fdca6f74da  environment/data/record_shapes.md
+cc501654202fcfe1eb27a56a14dcc7a29522e6a80efe3a72bdf176711e64a91f  environment/data/requisitions.json
+be5cf8c1df0f60a748f9f55c233888fc11fa7eb60763fcd644c84f118546264f  environment/data/rulebook_admission.md
+48aed5b5953b082dcbcb67f5efad25bbef9247d4ac4ef3407a912c6d0b6830be  environment/data/rulebook_charge.md
+63bd2c7dc073fd12dbbcbfafed973770b77f4777a1fb7afea97c2ff2119fa6e7  environment/data/rulebook_editions.md
+5cd5bd4617186eb76ecca2845dc105baa95ce66a72cd719ea47f3cd4e1c2718d  environment/data/rulebook_identity.md
+aab892d4299fa2e797a66e3a9ace7c0f7e461602e5dd386df08a7099b8e4b421  environment/data/rulebook_requisitions.md
+d0e36d4c6e541d718c559cd0865ff9a7154ed7c8eed6afaa67ce4201e34a8455  environment/data/rulebook_salvage.md
+a071de1a7a80ee0ea0fb42373b7c6c261481eaaf96b69fccae1e69316b5af4d9  environment/data/rulebook_scarcity.md
+e13e4823ffd14f9c54cc3f00bb0048fd971a1e0146338671d751a8e9b24f9090  environment/data/season_charter.json
+33266d0e73085308c881d8072aefbe8bc60c8e3eab9a18eb308f87977ad18f7c  environment/data/smith_identity_events.csv
+e83ceb72c0ae7a416a1df42514376fb2870402c77f5bc0f8051e655280979fad  environment/data/vault_opening.csv
+73c582f600a0a56654a38a3e5b7be30fc9b0aca4b6f6e583adef1c807e06c650  environment/data/workshop_registry.csv
+5fe048e14c4ce16923cdb9fdc5116892d60fcaa8de9e84fa3586cf034a4d7d29  instruction.md
+7c2ce4cc10e44041e9b901bc76b18e4ff5d29864857dfb2951465e74b82f27d2  solution/TRUTH.md
+043fa52706174134f09173ba0e6d5b54e654fa2131bd2a8c282a0c72f5701df8  solution/solve.py
+3262872864a3241fcfb2ce6658d428b59896659bb467b5404e116927dc1c436d  solution/solve.sh
+c61bb13e214b0c021e52a8fabe0de967ac4cf516a6bcecef0c7ddfcb211da780  task.toml
+316446d8a73f5656c18abab9f22c2d450ab82cf7e0db56141cc6f13fe564b7d5  tests/Dockerfile
+0887e68d50f8e59a990c586aad63aff65ebfb2b390607403a12c0e88519568f3  tests/judge.toml
+27609fe43ed7d6e88e9fcdb5405c0c6edc00120d4286899107383fe1889c0d33  tests/reward.toml
+d96ac9fe1bc6b60d4f7152215a170d3d133b591252a938f0930007aa26554eb5  tests/test.sh
+13dfb9f9570404ec5141685f01bf77e5fbb010250beba9bc45de2518ac81d916  tests/test_output.py
+```
+
+## sha256 tree AFTER edits
+
+### vendor-archive-roundtrip-recovery
+
+```
+b8d1049089ae52a3814d6657d7c41be5f552e0033fd5188b85d4e02eeb121f23  environment/Dockerfile
+28f6dd94cd6cc347e2ba576e805160407c5f726a206e538f6ed01593a8cd74f4  environment/data/capture_alpha.varc
+641942c481eb3acffb25173ee9a565c11a585660683904fbba478215102503cf  environment/data/capture_beta.varc
+cdadd60314fa3fb987e278a0fb6e562e3bd809e7b94996a42c76db60041849dc  environment/data/capture_catalog.jsonl
+d159c3347e0c57818e3a4163ba67030ef9f9c02af609d382ecb0341b2a507238  environment/data/crc_profiles.json
+6c129d413e9a2f982aa7aac91b3f5e8a10a18677b22654d2748d81019750124b  environment/data/decoder_appendix.md
+a6aba6482398d832092adbd2d50ffc743707958e84dcbfb1c82b4c5758fd17de  environment/data/escape_rules.md
+c5db3c1be52f8d54f2c02ec289f7cecf1bea323be78f52f1716857fb288ea918  environment/data/field_layouts.csv
+5d4f0edf0d1be03a8d5f5d31fa0c2c54e2ed8d2c30d6074e7fb41a019d48a7a6  environment/data/format_contract.md
+92678d9549a5fe73da1be704f64a9304813830ac9e466b73f392bbd7d9b85802  environment/data/revision_map.ini
+07a1996d09972e537fa12fa890526a665d9ec092308d9a1a3e6bcc410fbdd950  environment/data/revision_notes.md
+a05467b0656649dd6a1ae36b7dae3bc0ec695a801ce1e4eb6b7c86b3c8233d02  environment/data/schema_registry.json
+e2aeb357f2bd5cb5a127180cf1f879200923c1236ff75da985b06130127ed620  environment/data/symbol_table.tsv
+e5e540bf100ffcbb23338a23fb4e1bb19ec24fbeb60494f0f2cdb05be1b8a993  instruction.md
+ff98d785a237aaf3189049b5a027eb981f53411e9bf175e6597d5f2689019cb6  solution/TRUTH.md
+a280fbb62d92e6fd8917071065607b8729a26fdcc95ab31c092a2c9391c0adbc  solution/solve.py
+062f6c746aef8ffdeb026e9a5baaffcd61d8d306ec3b75740e683da5919d9097  solution/solve.sh
+410a67d749e45b6d1f57bcf1b94ed6be8eea2f8f320d6baab26a39d7d1158707  task.toml
+409c7974a4b5013400ae44f21aa6967eb5cda869b37157816fd479d5fbf8c079  tests/Dockerfile
+98955e04629be29d14ecea3927a8855c271fb6502d6a250e2500401c8024be5e  tests/judge.toml
+e0616d78bc348601208621adb2f00e0160cdf27d7d5c4228ea15058c1203bb99  tests/reward.toml
+5302b9b87341ed25694888cd4c3392a46a6bd25b6f1a31fd1c6e9e109d46efd8  tests/test.sh
+4f3b6ee37f0886cd7fb42f434575aff6d7fe6e7c7ccbe60766cfa5e1c0dc5d73  tests/test_output.py
+```
+
+### schema-migration-plan-repair
+
+```
+4e471787048f5bec58beedba9ff577d4b3976f13e92b41837bb12023f3b058f0  environment/Dockerfile
+823b91abcdecfa1d4e02db10bf358d2cb3ab55998a9c0e297f084a4d49b5a1b8  environment/data/correction_log.txt
+85644eff35bc54040e4b088270e927788c23c6065bbc0f06d7d2faba45b0c92a  environment/data/field_policy.tsv
+6f1fa1fda00031fa3b7a06270561fc5acdc2a779f0f815be1b65896a46009ea8  environment/data/migration_edges.csv
+a958fa94f7142bbfed9e0324b723ace5cef86726f8434598f38a4829d2f60037  environment/data/migration_semantics.md
+ad53a2cda766c68775da00e29f5856ab57a35a1efe58ca20d2339084ee3e0780  environment/data/null_semantics.ini
+428e2558c1742ee6004bda20c86ac59301fc3a85f3d0e2a08c50d5435667adda  environment/data/partner_aliases.xml
+46ebdab918c671df35c6ebe6dac9c718bb6aa4a40daa9e3d98c18d32504b36e2  environment/data/partner_batches.jsonl
+a7ee3f464fd8d317dd47ec2f74d33a6bf4a37a39f08358bcb9d18a6295bfe1b7  environment/data/partner_order.tsv
+38c93f25aff45e00053a126a2a09a5d5ae1a5be3aa0850942b32343f36515c86  environment/data/replay_manifest.csv
+ec266925d62a92d84a2d323b41eefeaa1d4429710d0e8ee4b9df879cb539bfd2  environment/data/repo.zip
+4f81e4252a1e577702771e80fb0c7cc55eb76291ebeaa0a66a638f5473cfe152  environment/data/report_taxonomy.json
+2685ff227bb7ea601fc00915fa4dd6393d2e96a3fb3d6acaa795345773276509  environment/data/repository_contract.md
+108df03f0f2b1f0068db63ecf7014c53f02fd18538b70da298706abc276d950b  environment/data/schema_versions.json
+ddfed7004bf736b176329dcca549d22785786a9d744385e66f4cd6a29aba8d03  instruction.md
+92e230c8582cf5d0ea337cba62e052632da9758ea7e94143270d7605bf38e005  solution/TRUTH.md
+677904c5ec6219fd0033c1485ef64be9ef03c3b1ab8bc71646a1f6ad03779e76  solution/solve.py
+25c71b6c701c5cdc752f2284c1d929d0ca149547952669c1fb7c8b4ac00dc680  solution/solve.sh
+9cb65977e5b5a9837726e867f7f1c2492c6dbfb8d9517837f5df8a6e86c975d1  task.toml
+409c7974a4b5013400ae44f21aa6967eb5cda869b37157816fd479d5fbf8c079  tests/Dockerfile
+72cd2d11146b111cf338bfd2856ac3691043d54cefaa0f2def94e114ccea5087  tests/judge.toml
+61c858141dc9babe82f68887af3fa41b490312373097be8e802811512fb6bc31  tests/reward.toml
+5302b9b87341ed25694888cd4c3392a46a6bd25b6f1a31fd1c6e9e109d46efd8  tests/test.sh
+466376b913620587597d6785ba4155e479e55ead6a88acf925a28e66a02ac718  tests/test_output.py
+```
+
+### district-heat-flex-procurement
+
+```
+455d8b6d06659b15cc6b23377fea194e4f3fcf680b92789c86c92693e7c03804  environment/Dockerfile
+6cedb722e743d00d9db45e1367e15d7f91e0fec2e3385260b01637d9d15e2ae5  environment/data/continuity_waivers.csv
+395d964fca89c5f4aa28fd88caaee4a02888e7adbfa0076c1d7860fbffb3ceb4  environment/data/events.json
+d82473796af286f633df870bfb0bfcc0f341181f8879815ad756988fde43f26c  environment/data/feeder_limits.txt
+0d13712a6b3d59c299c31708ee47c01f0bea551b569934ecdea7ba880d0b8d00  environment/data/offers.csv
+f4f4f7b92ccb9d1d6a06227a693a1e8bcea570b126e4a388ea284da0d592d739  environment/data/pools.txt
+93b5e349477aae19adb9396ea274fb7810f9d66fe497726e6c507db509482ed8  environment/data/profiles.tsv
+475eda876e37ded93f58be304c186de924afab087bf82dd691e70a3433002434  environment/data/program.ini
+d72318efbbd9363e546a835533984752b62dfdb4b668be5ae1ac40ed27842384  environment/data/rate_cards.xml
+988d2d4b156e641ea528f87e73cc239ec78057f3336807e668fddd561148d2cf  environment/data/recipient_weights.tsv
+24883e0604200effbd63d89398e266fc63a89f71f7e5f10c4363f0f4a3f35cba  environment/data/schema.md
+5b4c56e781392221d2a673325b49aab6fe2bb717cfce365a6904c4cca46ea12c  environment/data/segment_floors.json
+3e490bc95c9bbd5190935800e8e911865250afea5a607e3a26305d5fb18760a5  environment/data/site_state.jsonl
+f02d56b112abbe221f757152be184c2bda5ac329839ea6a0f07070a79ed90221  environment/data/sites.csv
+a61b3acd1d8c791a014caa6ecb3e0d9ca4cf7f6fd95f6dbbe066961a5e4928ba  environment/data/targets.tsv
+e8e29d78e6a6cf9557385975677274d97cd36a1e72d8fa08ccb14a24f46af82d  instruction.md
+50ef69ae8688c3476315490e31becdfae53b4f61f2504dc564fb5bb903fa31af  solution/TRUTH.md
+ef7f677bf1baba14bddb2b994c52471286147e5bf4bb7b4fa4302c42e0462f37  solution/solve.py
+44b69de8729373024f622ac80e2b8b3ca922382596235799a85a7b037f00c222  solution/solve.sh
+9c2d50b1cc093c35b2ab887efaadd594d4870e1a953b6427ae1bb59ab7b52810  task.toml
+409c7974a4b5013400ae44f21aa6967eb5cda869b37157816fd479d5fbf8c079  tests/Dockerfile
+be9360706de9f6e5fc55d01219b8d550d1800a7a9653551bed5c769a66fa7757  tests/judge.toml
+d10106fff45a663c1ea37727407211f584a1b159ca3d57e2a56a25f9b949cb94  tests/reward.toml
+5302b9b87341ed25694888cd4c3392a46a6bd25b6f1a31fd1c6e9e109d46efd8  tests/test.sh
+16227ed3007f16c7511e5843397ed419c52f01e647980c43b382e7e178ec1c06  tests/test_output.py
+```
+
+### emberforge-vault-settlement
+
+```
+531d05de28a230486485c9efef7d46f36c5cf00113f893c19ec3f58574f548a8  environment/Dockerfile
+4211b47c4b24dc95ddab272f46a429e27f2f44b866115caf0037adc7d5ae37c8  environment/data/artifact_catalogue.csv
+39f18fd22a44178a78df8a1c43be65b0f66dcf0a24ebfd10613b588ee73726d9  environment/data/calibration_artifact_catalogue.csv
+248bf22e03c10d64b4e4ac5ba89e7dcf0da435a5bfb5cf477d7d4c875475d17a  environment/data/calibration_controls.json
+805a193598d39f421ccc8f779fc2f60dd2387590e4856e58489693fb7a6120a5  environment/data/calibration_crafting_ledger.csv
+12e74b522614f4e294b685f89c47e4d6d8bb6bf67216f3747bc73914bf1f97d1  environment/data/calibration_patch_calendar.csv
+54ae17e50dc9e30399c71b2c94cc753701bea5a9de30393d47ea59b7863d03fa  environment/data/calibration_reagent_acquisitions.csv
+d156f596c913e46f7a534e5807baa62491ddd223fa378adac4196e6595f4c305  environment/data/calibration_reagent_registry.csv
+826a1f864654fa186de4c20d10b6b57ecf7abeabc1a738d88b00964c0304f92b  environment/data/calibration_recipe_editions.csv
+9918b98e64c0b8194efc6f7908d2dce3782825d97f878b6145eecef5da6ec58b  environment/data/calibration_requisitions.json
+94394b2eeaedce914b19f6224811580b0ceb84db91b417e81132cbcf00b93d67  environment/data/calibration_season_charter.json
+3772658d9898971356bd38587a28e59d9d68934e017408bb5437fed7910c302d  environment/data/calibration_slice.md
+50dc1a808e8c3c854cb5ff14d55115426ba67b3cb4a96dec5a57c6e87894f9a1  environment/data/calibration_smith_identity_events.csv
+ec6f69bb7806aa3910386b15748a8eaf30514c6e7ecef4e4c7ace07de980cdbb  environment/data/calibration_vault_opening.csv
+a1f6cea7848ed7317ea7b13d97124bc9ce3cbfdd418ab4ca0e221b753d246011  environment/data/calibration_workshop_registry.csv
+79788afc1603270df5a496fb5b836f4d86cc65cfcb28a10471815d31619e8750  environment/data/convention_register.md
+60893fe4d8e58ecd37dfc861aed17a9595949f03c5726d15b1857f9b49f5e46a  environment/data/crafting_ledger.csv
+439acb4e276b376d324e79515206142bb7775381c28dc28eb3f903314e0540e7  environment/data/example_workshop_report.json
+d57d6601c6145cf7345ae2552e1515ec492301816928eb4be7a53ecd9db1e7fa  environment/data/finding_codes.md
+c2a535978037cbec6767d08a1bc8213ddf3d3b67ad6af90c07975426ac081c3e  environment/data/invariants.md
+8a3b36d06cdf3a5c534b504f8037e107ef33521274f20f5cc3917fd66b7b92e5  environment/data/patch_calendar.csv
+2b645439441f3d0497a2cf9a73e4d36ba4dd290beb2b3bd8579c799025e0b802  environment/data/reagent_acquisitions.csv
+2d1aa117415cf54749930335c812988cbb532b5c6255de87e28fb23b06efdff2  environment/data/reagent_registry.csv
+77ae0adf0a3cbb09342d734981521b29cb54dff41ab2a5d18311a01218e1b7c4  environment/data/recipe_editions.csv
+b976202c9825c060122fa81499a08950d21770edbd48b2fbfbc421fdca6f74da  environment/data/record_shapes.md
+cc501654202fcfe1eb27a56a14dcc7a29522e6a80efe3a72bdf176711e64a91f  environment/data/requisitions.json
+be5cf8c1df0f60a748f9f55c233888fc11fa7eb60763fcd644c84f118546264f  environment/data/rulebook_admission.md
+48aed5b5953b082dcbcb67f5efad25bbef9247d4ac4ef3407a912c6d0b6830be  environment/data/rulebook_charge.md
+63bd2c7dc073fd12dbbcbfafed973770b77f4777a1fb7afea97c2ff2119fa6e7  environment/data/rulebook_editions.md
+5cd5bd4617186eb76ecca2845dc105baa95ce66a72cd719ea47f3cd4e1c2718d  environment/data/rulebook_identity.md
+aab892d4299fa2e797a66e3a9ace7c0f7e461602e5dd386df08a7099b8e4b421  environment/data/rulebook_requisitions.md
+d0e36d4c6e541d718c559cd0865ff9a7154ed7c8eed6afaa67ce4201e34a8455  environment/data/rulebook_salvage.md
+a071de1a7a80ee0ea0fb42373b7c6c261481eaaf96b69fccae1e69316b5af4d9  environment/data/rulebook_scarcity.md
+e13e4823ffd14f9c54cc3f00bb0048fd971a1e0146338671d751a8e9b24f9090  environment/data/season_charter.json
+33266d0e73085308c881d8072aefbe8bc60c8e3eab9a18eb308f87977ad18f7c  environment/data/smith_identity_events.csv
+e83ceb72c0ae7a416a1df42514376fb2870402c77f5bc0f8051e655280979fad  environment/data/vault_opening.csv
+73c582f600a0a56654a38a3e5b7be30fc9b0aca4b6f6e583adef1c807e06c650  environment/data/workshop_registry.csv
+5fe048e14c4ce16923cdb9fdc5116892d60fcaa8de9e84fa3586cf034a4d7d29  instruction.md
+a201631bbd6123cda33ea70061c2f89f30bb7ce54992c6f578cd7f60ea1e809a  solution/TRUTH.md
+043fa52706174134f09173ba0e6d5b54e654fa2131bd2a8c282a0c72f5701df8  solution/solve.py
+3262872864a3241fcfb2ce6658d428b59896659bb467b5404e116927dc1c436d  solution/solve.sh
+c61bb13e214b0c021e52a8fabe0de967ac4cf516a6bcecef0c7ddfcb211da780  task.toml
+316446d8a73f5656c18abab9f22c2d450ab82cf7e0db56141cc6f13fe564b7d5  tests/Dockerfile
+f128ad11a3582a2ac989d82feb1951276ef84dc2783621d0aed228c01d8e9518  tests/judge.toml
+27609fe43ed7d6e88e9fcdb5405c0c6edc00120d4286899107383fe1889c0d33  tests/reward.toml
+5302b9b87341ed25694888cd4c3392a46a6bd25b6f1a31fd1c6e9e109d46efd8  tests/test.sh
+13dfb9f9570404ec5141685f01bf77e5fbb010250beba9bc45de2518ac81d916  tests/test_output.py
+```
+
+## Changed files (diff of the two trees)
+
+- vendor-archive-roundtrip-recovery: `solution/TRUTH.md`, `tests/judge.toml`, `tests/test.sh`
+- schema-migration-plan-repair: `solution/TRUTH.md`, `tests/judge.toml`, `tests/test.sh`
+- district-heat-flex-procurement: `solution/TRUTH.md`, `tests/test.sh`
+- emberforge-vault-settlement: `solution/TRUTH.md`, `tests/judge.toml`, `tests/test.sh`

@@ -1,0 +1,29 @@
+diff -r /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/tariff-engine-audit-repair/p12v3/g7_before_tests/test_output.py /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/tariff-engine-audit-repair/tests/test_output.py
+15a16
+> import threading
+5503a5505,5506
+> _MEMO_LOCKS: dict[str, Any] = {}
+> _MEMO_GUARD = threading.Lock()
+5587c5590,5595
+<     """Compute once per verifier run; a failure is remembered and raised again."""
+---
+>     """Compute once per verifier run; a failure is remembered and raised again.
+> 
+>     rewardkit runs checks on several threads, so each key has its own lock: the
+>     first caller builds (one child process per corpus) and the others wait for
+>     that one result instead of starting their own copy of the same child.
+>     """
+5589,5592c5597,5604
+<         try:
+<             _MEMO[key] = (True, build())
+<         except Exception as error:  # remembered so each dependent check fails alike
+<             _MEMO[key] = (False, error)
+---
+>         with _MEMO_GUARD:
+>             lock = _MEMO_LOCKS.setdefault(key, threading.RLock())
+>         with lock:
+>             if key not in _MEMO:
+>                 try:
+>                     _MEMO[key] = (True, build())
+>                 except Exception as error:  # remembered so each dependent check fails alike
+>                     _MEMO[key] = (False, error)

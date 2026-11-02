@@ -1,0 +1,4 @@
+# Decisions for Ayush
+
+1. **Which stage-2 pattern should tomorrow's build copy?** Recommended: copy contract-grounded fresh inputs with per-report credit (billing, dispatch, spectrum's scenario design after splitting its checks). Alternative: pursue broker/foundry inverse tasks only after a uniqueness proof and IN-8/AL-1 repair. Evidence: `PATTERNS.md:11-31`; `cards/8defd7be-eb46-5779-a556-aec18521635e.md`; `cards/aa314fee-a873-5778-9d55-e8892e6d7cda.md`.
+2. **Should our build rule be stricter than CL-4's exact-output exception?** Recommended: require per-report or per-field credit even when the instruction says byte-exact, unless one whole object is the natural unit of correctness. Alternative: retain the current exception unchanged. Evidence: `Terminal_2.0_Harbor_Harness/Input_Bundle_QC/Final_checklist.md:491`; `PATTERNS.md:15-17`.

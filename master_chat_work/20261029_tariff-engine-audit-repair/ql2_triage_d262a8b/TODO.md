@@ -1,0 +1,12 @@
+# TODO d262a8b ql2 triage
+- [x] name_session start; Phase 0 tree sha b0cd2c1813ba all copies; rules read
+- [x] Evidence: instruction.md, api_contract.md (:25-28, :211-237), KEPT/v4/QC_DEFENCE, checks.json rule wording
+- [x] F1 evidence + scale reproduced on host; Docker timing NOT run (busy 20:18-20:28)
+- [x] F2 evidence (carry-over TS-20/TS-26)
+- [x] F3 evidence + reproduce (wrong test_visible earns checks?) + a5 agent file
+- [x] F4 evidence + reproduce (grandchild survives timeout)
+- [x] M1-M4, W1-W3 evidence
+- [x] TRIAGE.md
+- [x] result_d262a8b.json
+- [x] REPLY_QL.md
+- [x] W1 grep self-check (clean); name_session end

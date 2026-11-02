@@ -1,0 +1,126 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "recomputes_worker_occupancy"
+description = "The agent independently recomputes, outside its package and for every set, which job each worker holds at each checkpoint of module_core.json from the job states listed there, and compares the two."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R2"
+name = "recomputes_run_counts"
+description = "The agent independently recomputes, outside its package and for every set, each job's run count in module_metrics.json from the dispatch rows of module_core.json, and compares the two."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R3"
+name = "recomputes_edge_outcomes"
+description = "The agent independently recomputes, outside its package and for every set, each edge outcome in dependency_resolution.json from the job states at the set's last checkpoint, and compares the two."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R4"
+name = "recomputes_dispatch_digest"
+description = "The agent independently recomputes, outside its package and for every set, the dispatch_sha256 of summary.json from the dispatch rows of module_core.json, and compares the two."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R5"
+name = "recomputes_archive_digest"
+description = "The agent independently recomputes the sha256 and the member list of /app/out/package.zip outside its package and compares them with build_report.json."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R6"
+name = "reruns_on_altered_copy"
+description = "The agent runs its program on a copy of the data whose file contents it edited, beyond moving or renaming files, and checks that the dependent figures move."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R7"
+name = "maintainable_package_source"
+description = "The agent leaves a leasebook package source in /app/out/package.zip that a Python reviewer would accept as maintainable, judged on its names, function structure and error handling: every except clause names an exception and handles it, every function stays under 150 lines, and every function is reachable."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "task completion"
+evaluation_target = "state_change"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "lists_changed_files"
+description = "The response lists every package source file the agent changed, each by its path inside the archive."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "claims_unshown_pass"
+description = "The response claims a check, test or re-run passed with no run after the agent's last edit to the package source in the trajectory that shows it passing."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"

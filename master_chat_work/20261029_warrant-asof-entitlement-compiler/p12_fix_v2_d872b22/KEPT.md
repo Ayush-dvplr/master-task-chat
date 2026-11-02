@@ -1,0 +1,6 @@
+| finding id | file:line | reason | kit line it rests on |
+|---|---|---|---|
+| CL-4 (REBUT) | instruction.md:7; tests/test_output.py `_tier_profiles_match`, `_conv_profile_match` | The instruction states out loud that a profile, a list, the self check, the configuration and the summary each count only when every unit is exact. Each conv tier env is its own check at 5/155, so one wrong convention on one tier costs one part, not the task. | Final_checklist.md:491 ("An instruction that states out loud that only an exact match counts has set that bar deliberately"); QC_RULINGS Q3 |
+| X1 (warn, KEEP) | environment/data/tool.zip | Binary skipped by structure_qc; it is a real zip archive of the legacy tool the task repairs, not a text file. | structure_qc.py:71 ("binary-skipped files warn") |
+| TS-23 / A3 (warn, KEEP) | tests/test_output.py registrations (47 checks) | No count cap held (Ayush 24 Oct 12:50, option A 27 Oct). The 16 conv checks are distinct corpora and envs; the P12 splits (config shipped vs held-out, altered config, contract layout) are separate properties. Count 47. | 03_Tests_QC.md:62 ("at most 35 (warn)") |
+| Step 10 oracle x3 (KEEP) | gate run p12_fix_v1_4989b35 | Ayush's rule is oracle x3, not x5. | Ayush rule (oracle x3) |

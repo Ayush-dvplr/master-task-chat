@@ -1,0 +1,46 @@
+{
+  "r1_checks_a_drawn_allowance_on_its_own_extract": {
+    "score": 1,
+    "reasoning": "The synthetic extract gives S1 a 100-tick allowance and makes S2 draw from S1. Earlier event E2 selects O2 for 100 ticks, exhausting the shared allowance; later event E1's O5 is consequently unavailable. The test explicitly asserts E1 has candidate_offer_count == 0."
+  },
+  "r2_checks_start_order_on_its_own_extract": {
+    "score": 0,
+    "reasoning": "Although the synthetic extract has the greater event_id E2 before E1 in season order and uses offsets, its dispatch_start text also sorts E2 before E1: 2027-01-01... precedes 2027-01-02.... It does not create the required inversion where the event starting first has later-sorting dispatch_start text."
+  },
+  "r3_checks_a_composed_rate_above_cap_on_its_own_extract": {
+    "score": 1,
+    "reasoning": "Chosen offer O3 uses an override of 4000, event uplift of 1000, and public-segment adder of 750, giving a hand-composed pre-cap rate of 5750 above its 3000 cap. The synthetic test checks O3's event-region credit_cents == 2 and policy_audit cap_binding_count == 1."
+  },
+  "r4_checks_two_half_cent_interval_amounts_on_its_own_extract": {
+    "score": 0,
+    "reasoning": "The synthetic extract exercises half-even rounding, but it does not give one chosen offer two exact half-cent interval amounts with different lower-neighbor parity. O2 has two 1.5-cent amounts, while O8 has two 0.5-cent amounts; neither single offer contains both parity cases."
+  },
+  "r5_exact_arithmetic_for_reported_figures": {
+    "score": 1,
+    "reasoning": "Reported arithmetic uses integers throughout, including explicit integer implementations of half-up and half-even rounding, integer tick sums, divmod-based largest remainder, and integer basis-point calculations. No binary floating-point arithmetic is used for reported figures."
+  },
+  "r6_final_run_after_last_edit": {
+    "score": 1,
+    "reasoning": "The last edit to derive_report.py occurred at step 13. It was subsequently run successfully on /app/data at steps 14 and 28; the final run completed normally and regenerated all report files."
+  },
+  "r7_claims_a_check_its_output_contradicts": {
+    "score": 1,
+    "reasoning": "The final response claims that every export-manifest record count and field checksum was reproduced exactly, but the trajectory only computes source-file sums in step 20 and does not show a comparison against the manifest values. It also claims an explicit candidate-accounting equality without showing that check. Thus at least one claimed passing check was not actually run in the recorded trajectory."
+  },
+  "r8_reruns_with_a_pool_too_small_for_the_claims": {
+    "score": 0,
+    "reasoning": "The agent tests small pools in a separately constructed synthetic extract, but it never copies /app/data, lowers a pool there, reruns derive_report.py, and compares the affected grants with an external recomputation."
+  },
+  "r9_reruns_with_an_allowance_below_a_chosen_offer": {
+    "score": 0,
+    "reasoning": "There is no rerun on a copy of /app/data after lowering the allowance used by one of the shipped data's chosen offers."
+  },
+  "r10_reruns_with_an_uplift_that_lifts_a_rate_above_its_cap": {
+    "score": 0,
+    "reasoning": "The synthetic extract covers a composed rate above a cap, but the agent does not copy /app/data, raise a shipped event's uplift, rerun the program, and externally recompute the affected event-region credit."
+  },
+  "r11_derive_report_is_maintainable": {
+    "score": 1,
+    "reasoning": "The final program is organized into focused loading, optimization, apportionment, document-building, and output functions, with descriptive names, constants for repeated field sets, a clear command-line entry point, and fail-fast parsing behavior. Despite its size, it is reasonably structured and reviewable."
+  }
+}

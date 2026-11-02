@@ -1,0 +1,12 @@
+# TODO verify 5125258
+- [x] 1 Citations
+- [x] 2 Statistics (R3 s05/s08, R4 contrast re-run in /tmp/V1-verify-5125258)
+- [x] 3 Arithmetic
+- [x] 4 Answers fit
+- [x] 5 Rules fit
+- [x] 6 Executable
+- [x] 7 Order
+- [x] 8 Gaps
+- [x] 9 DOCKER_STEPS.md
+- [x] outputs: VERIFY_REPORT.md, UPGRADE_PLAN_v2.md, result_5125258.json
+- [x] name_session at end

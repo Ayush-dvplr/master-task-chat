@@ -1,0 +1,26 @@
+{
+  "changed_functions": [
+    "core.executor.execute_plan",
+    "core.planner._cost_to_target",
+    "core.planner._field_cost_to_target",
+    "core.planner._only",
+    "core.planner.plan_migration",
+    "core.records.FieldView.from_payload",
+    "core.records.fill_mode",
+    "core.records.null_counts_as",
+    "pipeline._Run._admit",
+    "pipeline._ordered",
+    "pipeline._receipt_mismatches",
+    "pipeline._replace_tokens"
+  ],
+  "module": "core",
+  "notes": [
+    "core.records: FieldView keeps an explicit null as its own state, so the state signature, the planner and the operations all see it (N1).",
+    "core.records: presence and fill read the per-field policy column first; an empty null_counts_as column falls back to null_semantics.ini [presence], not to absent (N2, N3, N4).",
+    "core.planner: search over (schema, field states) with a heap ordered by (cost, edge-id list); prerequisites are checked on the record after the previous step and schemas may repeat (M6 to M8, K14).",
+    "core.executor: corrections apply on first arrival at their pinned schema and every edge's prerequisites are re-checked; a failing edge ends the record as failed with E_PREREQ_FAILED (C4, M11).",
+    "pipeline: replay identity keyed on the canonical partner, and a record holds its identity once it passes the partner stage even if planning then fails; lines processed in received_seq order (K13, K16).",
+    "pipeline: a payload string becomes null only when it equals a null token exactly (N6).",
+    "pipeline: the batch receipt covers the records whose batch is set and takes the K4 fingerprint of each such line as received, including lines rejected at the partner stage (K13, K15, K17)."
+  ]
+}

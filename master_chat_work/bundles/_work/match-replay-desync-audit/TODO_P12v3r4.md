@@ -1,0 +1,17 @@
+# P12 v3 r4 TODO (c958296). Prompt: master_chat_tasks/prompts/issued/match-replay-desync-audit/20261024T2059_fix.md. Prior: TODO_P12v3r3.md
+- [x] P0.0 rename (opencode ses_e9172c0e5ffeLOWE4Qwn1bX19x listed); date 21:05; tree sha 7b0bc6233c65 match; kit HEAD 976c1666; lock taken
+- [x] P0.1 rules read (COMMON v3, round notes C/E/F/G, LEVER_RULES 1/1b/3/4, PLAYBOOK v2, FIX_SIDE_EFFECTS, QC_RULINGS grep)
+- [x] P0.2 read QC v4 findings, prev RECHECK_FIX r3, QC_DEFENCE, XREF, single_lever.py
+- [x] P0.3 xref_check 0 findings (before): 28 entries, 0 findings
+- [x] P0.4 copy tests/solution/environment -> trap/before_v3r4; oracle outputs on shipped corpus + hidden corpora saved
+- [x] P1 recheck F1 DS-22, M1 IN-16, M2 TS-14, M3 AL-7, W1 DS-20, W2 TS-23 -> OUT/RECHECK_FIX.md rows
+- [x] P2.1 M1 engine-rules.md sentence (then re-embed _SHIPPED_DATA? check whether docs are embedded)
+- [x] P2.2 M2 test descriptions + docstrings
+- [x] P2.3 W1 solve.py Fraction; outputs identical proof
+- [x] P2.4 M3 TRUTH column delete; grep overall scores
+- [x] P2.5 F1 TRUTH sentence + grep compare sentences; TRUTH sha by script LAST
+- [x] P2.6 test-logic diff; single_lever re-run; one-fact-wrong compare
+- [x] P2.7 side effects recheck; xref; precheck CLEAN; kit scripts exit 0; pycache none
+- [x] P2.8 stacking_check -> OUT/STACKING_CHECK.md
+- [x] P2.9 Docker block (warm, oracle x3, owner x1, nop x1, stub x1) ALL_DONE
+- [x] P3 reports (RECHECK_FIX, PL_NOTE, result_c958296.json); cleanup; lock release; rename

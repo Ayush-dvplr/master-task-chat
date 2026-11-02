@@ -1,0 +1,14 @@
+# TODO f272f70 slo-credit-closeout (scratch /tmp/fd-slo-credit-closeout-20261024T1156)
+- [x] 0 name_session, date, docker ps (no containers running -> docker allowed)
+- [x] P1.1 mapping/author/category/QL; older copies search + diff
+- [x] P1.2 masking residue grep
+- [x] P1.3 env leak grep
+- [x] P2.1 precheck on copy w/o trajectories -> precheck.txt
+- [x] P2.2 compare with team QC report; our-rule breaks
+- [x] P3.1 recompute combined; reward mismatch
+- [x] P3.2 loss table -> loss_table.md
+- [x] P3.3 regrade agent / oracle / nop -> regrade.txt
+- [x] P4 trajectory timeline, per-loss cause, 5 mistakes, patch proofs, did-it-read
+- [x] P5 design anatomy
+- [x] P6 adopt table + template edits; peer mining agree/disagree
+- [x] Deliverables ANALYSIS.md, result.json; name_session again; cleanup docker

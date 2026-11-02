@@ -1,0 +1,4 @@
+# Decisions for Ayush
+
+1. **Which oracle count should final QC use?** Recommended: five fresh oracle runs, as the live kit requires (`Terminal_2.0_Harbor_Harness/Input_Bundle_QC/Final_checklist.md:354-390`), and keep three only as an earlier build smoke test. Alternative: keep three and explicitly mark Step 10 incomplete before shipping; current P2/P12 ask for three (`master_chat_tasks/prompts/templates/P2_build_v5.md:132`; `P12_recheck_fix_v4.md:67`).
+2. **Should a small, honest file-presence score count as a vacuity failure?** Recommended: no; fail when content checks pay without content or a forgery earns genuine-partial credit, while reporting every paying check and its weight (`Final_checklist.md:489,412-420`). Alternative: keep the stricter house “any pass = fail” rule in P2/P12/playbook and label it as house policy (`P2_build_v5.md:137`; `P12_recheck_fix_v4.md:62`; `QC_FIX_PLAYBOOK_v3.md:68`).

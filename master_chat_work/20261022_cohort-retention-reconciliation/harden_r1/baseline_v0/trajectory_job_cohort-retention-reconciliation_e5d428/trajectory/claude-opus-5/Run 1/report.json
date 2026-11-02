@@ -1,0 +1,348 @@
+{
+  "model": "claude-opus-5",
+  "run_index": 1,
+  "include_multimodal": false,
+  "pytest": {
+    "passed": 15,
+    "failed": 13,
+    "exit_code": 1,
+    "reward": 0.4235,
+    "tests": [
+      {
+        "name": "artifact_set_exists_and_parses",
+        "weight": 1.0,
+        "passed": true
+      },
+      {
+        "name": "cohorts_schema_is_exact",
+        "weight": 3.0,
+        "passed": false
+      },
+      {
+        "name": "visible_cohorts_match_reference",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "visible_retention_matches_reference",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "visible_survival_matches_reference",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "visible_revenue_matches_reference",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "visible_segments_match_reference",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "visible_data_quality_matches_reference",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "per_cohort_artifacts_match_reference",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "merge_and_dedup_effects_are_applied",
+        "weight": 5.0,
+        "passed": false
+      },
+      {
+        "name": "pre_cohort_activity_is_excluded_from_the_matrix",
+        "weight": 5.0,
+        "passed": false
+      },
+      {
+        "name": "exclusions_apply_to_the_resolved_account",
+        "weight": 5.0,
+        "passed": false
+      },
+      {
+        "name": "merge_history_resolves_to_the_final_account",
+        "weight": 3.0,
+        "passed": false
+      },
+      {
+        "name": "cleaning_drops_off_calendar_repeats_and_unknown_accounts",
+        "weight": 3.0,
+        "passed": false
+      },
+      {
+        "name": "minimum_value_gates_qualifying_events",
+        "weight": 3.0,
+        "passed": false
+      },
+      {
+        "name": "offset_zero_flag_reports_the_shortfall",
+        "weight": 3.0,
+        "passed": false
+      },
+      {
+        "name": "study_audit_matches_reference",
+        "weight": 1.0,
+        "passed": true
+      },
+      {
+        "name": "hidden_seeded_outputs_match_reference",
+        "weight": 5.0,
+        "passed": false
+      },
+      {
+        "name": "second_seeded_case_matches_reference",
+        "weight": 5.0,
+        "passed": false
+      },
+      {
+        "name": "exact_rate_formatting",
+        "weight": 3.0,
+        "passed": false
+      },
+      {
+        "name": "canonical_serialization_and_sorted_keys",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "reusable_script_is_deterministic",
+        "weight": 3.0,
+        "passed": false
+      },
+      {
+        "name": "rerun_reproduces_shipped_artifacts_byte_for_byte",
+        "weight": 3.0,
+        "passed": false
+      },
+      {
+        "name": "negative_hardcoded_sample_answers",
+        "weight": -5.0,
+        "passed": true
+      },
+      {
+        "name": "negative_reads_tests_or_reward_files",
+        "weight": -5.0,
+        "passed": true
+      },
+      {
+        "name": "negative_external_dependency_or_network",
+        "weight": -3.0,
+        "passed": true
+      },
+      {
+        "name": "negative_filename_dependent_behaviour",
+        "weight": -5.0,
+        "passed": true
+      },
+      {
+        "name": "negative_reads_training_corpus_at_runtime",
+        "weight": -5.0,
+        "passed": true
+      }
+    ]
+  },
+  "rubric": [
+    {
+      "number": 1,
+      "criterion": "The agent opens /app/data/schema.md before the first command that writes /app/out/derive_report.py.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 2,
+      "criterion": "The agent produces the shipped study reports by running the delivered program on the shipped data directory during the working session.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 3,
+      "criterion": "The agent checks the deduplication stage on a case where a raw repeat and a merged legacy event share a date and type, and compares the duplicate count with a count made by hand.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The agent checked a raw duplicate in both the shipped and synthetic extracts, but it did not test a collision where a raw repeat and an event from a merged legacy account resolve to the same account, date, and type. Therefore, it also did not compare the resulting duplicate count for that specific collision case against a hand-calculated count."
+    },
+    {
+      "number": 4,
+      "criterion": "The agent locates each out-of-calendar event in events.csv by hand and compares that count with the program's out_of_calendar_event_count.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 5,
+      "criterion": "The agent checks the merge fold on one event dated before a merge's effective_from and one dated on or after it, and confirms each lands on the expected account.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 6,
+      "criterion": "The agent confirms that the events of a legacy id merging into an excluded account, such as a901 into a900, are absent from the cleaned set.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 7,
+      "criterion": "The agent works out the cohort of at least two accounts by hand from events.csv and qualifying_rules.json and compares them with cohorts.json.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 8,
+      "criterion": "The agent checks one account with activity before its own cohort period and confirms that activity is counted in pre_cohort_activity_count and kept out of the matrix.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 9,
+      "criterion": "The agent checks the survival series on a cohort whose activity count rises after a lower value, and confirms the survival rate stays at the lower value.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 10,
+      "criterion": "The agent computes the three conservation residuals from the cohort, segment and revenue totals it derived.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 11,
+      "criterion": "The agent writes derive_report.py with its logic in named functions called from one entry point rather than one top-level block.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 12,
+      "criterion": "The response states that an artifact was written by running derive_report.py on /app/data when the trajectory shows no run of the program producing it.",
+      "type": "binary",
+      "evaluation_target": "final_answer",
+      "importance": "important",
+      "score": -3.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 13,
+      "criterion": "The response states that a verification passed when the trajectory shows that verification's last run failing or shows no run of it.",
+      "type": "binary",
+      "evaluation_target": "final_answer",
+      "importance": "critically_important",
+      "score": -5.0,
+      "is_positive": false,
+      "passed": false,
+      "justification": "The final response claims the synthetic extract's outputs \u201call matched an independent trace,\u201d but the trajectory only runs the program and prints those outputs; it never runs an independent expected-output comparison or records such a trace. Thus it reports an unrun verification as passed. Other checks, such as deterministic reruns and trailing newlines, were actually run successfully."
+    },
+    {
+      "number": 14,
+      "criterion": "The agent inspects the flat input files, including events.csv and account_merges.csv, before the first command that writes /app/out/derive_report.py.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 15,
+      "criterion": "The agent leaves a bare except clause in the final /app/out/derive_report.py.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": -1.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 16,
+      "criterion": "The agent leaves a debug print in the final /app/out/derive_report.py.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": -1.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 17,
+      "criterion": "The agent leaves a dead branch in the final /app/out/derive_report.py.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": -1.0,
+      "is_positive": false,
+      "passed": false,
+      "justification": "The final program retains unreachable defensive logic in rate(): the `if denominator == 0` branch cannot occur because rates are only calculated for cohorts created from at least one qualifying account, so every cohort size denominator is positive."
+    },
+    {
+      "number": 18,
+      "criterion": "The agent leaves an unused import in the final /app/out/derive_report.py.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": -1.0,
+      "is_positive": false,
+      "passed": true
+    }
+  ],
+  "final_reward": 58.67,
+  "test_weights_percentage": 42.35,
+  "rubric_weights_percentage": 75.0,
+  "judge_model": "gpt-5.6-sol",
+  "judge_usage": {
+    "input_tokens": 257047,
+    "output_tokens": 1438,
+    "requests": 18,
+    "estimated": true
+  }
+}

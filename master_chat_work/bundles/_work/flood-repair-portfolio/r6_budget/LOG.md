@@ -1,0 +1,14 @@
+# r6_budget LOG
+- 18:38 start; rename: opencode ses_e63a05cb5ffeTxsiYtxSaU7SDb matched. tree sha start 7d68065946fd
+- 18:50 2c baseline docker started (r6base), log /Users/mac/Desktop/Terminal Bench/_runs/20261102/flood-repair-portfolio/r6-20261102T1838/baseline.log; P_x4/P_inf copies + diffs in r6_budget/programs
+- 18:58 2c baseline ALL_DONE: ref 2.5575/2.5924/1.819, P 11.5397/8.5548/7.3766, P_inf 10.4693/8.3627/9.4707 all equal reference (baseline_results.json). gen_r6.py written (crowd k=10 on lattice n=150)
+- 18:48 3a gen books K=6 ALL_DONE (gen_books.log): 103 rounds, max props 160, max records 510/510/488, 6 crowd rounds k=10 per book. probe.py written
+- 18:50 probe P_inf H1 one crowd round R23779 (n160): 33.858 s (probe_h1_one.log). measure_r6.py written; launching H1 measure
+- 18:56 H1 measure partial: oracle EXACT verifier 236.9 s (oracle _capped 210 combos x _portfolio full lattice; verifier timeout_sec 2700 task.toml:22); paid_a4 WRONG 13.68 s 6/25 (feasible+data_quality kept), p_x4 WRONG 52.41 s 6/25; first diff R11123
+- 18:59 H1 measure ALL_DONE (measure_H1.log, results_H1.json): ref 2.6915, P WRONG 13.68 6/25 (48 wrong rounds, first R11123), P_x4 WRONG 52.41 6/25 (22 wrong rounds), P_inf EXACT 149.27, b1 EXACT 6.80, b2 WRONG 6/25, first_write/all_but_one TIMEOUT, lever_aware EXACT 1.81, ref busy 1.52. Launch H2
+- 19:07 TRIP.md written; H2 partial: oracle EXACT verifier 242.1 s ref 2.3949; P WRONG 14.21 6/25 first R18482; P_x4 WRONG 53.14 6/25; P_inf EXACT 122.61; b1 EXACT 7.70
+- 19:08 H2 measure ALL_DONE (results_H2.json): ref 2.3949 verifier 242.1; P WRONG 14.21 6/25 first R18482; P_x4 WRONG 53.14 6/25; P_inf EXACT 122.61; b1 EXACT 7.70; b2 WRONG 15.54 6; first_write/all_but_one TIMEOUT; lever_aware EXACT 3.77; busy 2.2565. Launch H3
+- 19:37 witness ALL_DONE (witness.log, r6_budget/witness/): 3-round book, crowd R39321 k=10 on 150 lattice; ref 0.6852 s, oracle==ref (31.7 s), P 4.25 s total 63929 vs 73387; trace capped_dp Timeout 4.006 s -> greedy(160) (P:355-356). H3 measure running
+- 19:41 shape300 ALL_DONE (shape300.log): SEEDS 300 errors 0 (reduced spec, 2 crowd rounds each, contract asserts). H3 partial: oracle EXACT verifier 223.1, ref 3.2346, P WRONG 13.61 6/25
+- 19:45 H3 measure ALL_DONE: ref 3.2346 verifier 223.1; P WRONG 13.61 6/25 first R17164 (34 rounds); P_x4 WRONG 52.61 6/25 (33); P_inf EXACT 104.25; b1 EXACT 5.82; b2 WRONG 9.39 6; fw/abo TIMEOUT; lever_aware EXACT 2.04; busy 2.482. SHIPPED: ref 0.5309, oracle 0.82, P EXACT 0.6519, busy 0.3743
+- 19:46 DESIGN.md, MEASURE_REPORT.md, result_2939ad0.json written; tree sha end 7d68065946fd; no r6 containers or children left; final rename next

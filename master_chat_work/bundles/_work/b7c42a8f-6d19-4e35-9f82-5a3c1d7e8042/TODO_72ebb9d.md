@@ -1,0 +1,20 @@
+# TODO 72ebb9d (P12 fix v2 b7c42a8f)
+- [x] name_session (opencode ses_e728f3bd5ffe4k6PH9fx7U9qwO listed), rule files read
+- [x] backup BUNDLE -> WORK/qc2_595cfde13e3f (tree 595cfde13e3f); kit HEAD 5574d77eb9f22c207ba05fd8f9ac31d42ba45271 (unchanged)
+- [x] read QC v2 report in full (13F/7m/1w)
+- [x] fingerprints check: GEN 0 changed (new untracked under ayush sah tasks/ only), QC 0 changed
+- [x] Phase 0: update QC_DEFENCE.md, XREF.md (xref 0 before changes), trap baseline on current tests (runs/trap_v2_before)
+- [x] Phase 1: recheck each v2 finding -> OUT/RECHECK_FIX.md
+- [x] Phase 2a: G05-2 accident year from claim_master (solve.py + chain_ladder_rules.md:33)
+- [x] Phase 2b: G02-4 seed development (generator), G05-3 retraction for unresolved reinsurer in one extract
+- [x] docs: G01-1 instruction:9, G02-1 attachment/alae, G02-2 errata id, G05-1 null-first, G02-3 attachment_windows.csv dropped (57 files)
+- [x] Phase 2c: tests: delete ten-docs check, retire 3 redundant checks, other test fixes; walk_attachment_graph delete
+- [x] Phase 2d: judge: R33, R35, others; R1-R14 from oracle run
+- [x] regen extracts + sealed blob; G7 byte diff
+- [x] vacuity probe (PASS); xref 0; precheck CLEAN; stacking run (touched-rules table goes into RECHECK_FIX)
+- [x] trap survival
+- [x] Docker block 1 (TS 20261030T212453-5f14): oracle 1.0 x3, owner 1.0, nop 0.0, replay AFTER 0.125, BEFORE 0.1159
+- [x] AL-28 edit 21:35 (output_independent silenced when embedded fires): rerun TRUTH, precheck, stacking, Docker block 2 (oracle x3, owner, nop, replay AFTER)
+- [x] TRUTH.md by script (write_truth.py, 80 lines; rerun only if solution/tests change)
+- [x] OUT: RECHECK_FIX, PL_NOTE, KEPT, result json, STACKING_CHECK
+- [x] Tasks_INPUT sync + tree shas

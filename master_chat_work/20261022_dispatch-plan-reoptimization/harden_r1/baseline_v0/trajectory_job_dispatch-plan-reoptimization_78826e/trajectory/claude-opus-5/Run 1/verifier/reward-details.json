@@ -1,0 +1,481 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6419,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.00641025641025641,
+        "detail": {
+          "score": 77.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_discovers_export_set_through_sources",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent discovers the export set through the sources table of the manifest database rather than by guessing from file names.",
+              "reasoning": "The agent explicitly queried the manifest database's `sources` table (steps 10 and 12) to map all 55 exports to their roles, formats, record counts, and authority. The delivered solver also discovers the manifest by locating a SQLite database containing the `sources` table and builds its source/role mapping from those rows rather than inferring roles from filenames."
+            },
+            {
+              "id": "R2",
+              "name": "r2_modifies_export_under_app_data",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -3.0,
+              "description": "The agent creates, edits, moves or deletes a path under /app/data.",
+              "reasoning": "The trajectory only reads and verifies files under /app/data. All created, edited, and deleted paths are under /app/out or /tmp, and the MD5 checks confirm /app/data remained unchanged."
+            },
+            {
+              "id": "R3",
+              "name": "r3_solves_capital_selection_exact_bounded",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent solves the capital selection as an exact bounded selection over the capital grid.",
+              "reasoning": "The solver models eligible retrofit projects as binary bounded choices and uses an exact 0/1 knapsack dynamic program under the funded capital envelope. Its DP indexes exact reachable capital amounts using the GCD of the budget and project costs\u2014which equals or refines the applicable capital grid\u2014and exhaustively compares feasible selections by value, then cost and the contract\u2019s indicator tie-break. It does not use the incumbent\u2019s greedy ratio policy."
+            },
+            {
+              "id": "R4",
+              "name": "r4_computes_objective_from_registers",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent computes the corrected objective from the registers rather than taking it from solver_run_report.json.",
+              "reasoning": "The solver rebuilds coefficients and decisions from the authoritative registers, then computes `total_objective` as the sum of production, setup, holding, handling, shortfall penalty, and selected capex. It writes that computed value to `objective.json`. `solver_run_report.json` is read only for the incumbent baseline and comparison artifacts, not as the corrected objective source."
+            },
+            {
+              "id": "R5",
+              "name": "r5_inflates_penalty_schedule_page_streams",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent inflates the compressed page streams of penalty_schedule.pdf to read the schedule parameters.",
+              "reasoning": "The agent explicitly extracted PDF stream bodies from penalty_schedule.pdf and inflated them with zlib.decompress in steps 17 and 18, revealing the R|PARAM schedule rows. The delivered solver also implements read_pdf using zlib.decompress on each compressed page stream before parsing the schedule parameters."
+            },
+            {
+              "id": "R6",
+              "name": "r6_reads_energy_surcharge_from_memo",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent reads the energy surcharge from the paragraphs of amendment_memo.docx.",
+              "reasoning": "The agent explicitly opened amendment_memo.docx as a ZIP, parsed word/document.xml paragraph-by-paragraph, joined each paragraph's w:t text, inspected the R|PARAM rows, and identified the winning energy_surcharge as 214 bps. The reusable solver likewise reads DOCX paragraphs and obtains energy_surcharge from the memo's PARAM records."
+            },
+            {
+              "id": "R7",
+              "name": "r7_orders_planning_horizon_fiscal_ordinal",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent orders the planning horizon by the fiscal ordinal held in the period window register.",
+              "reasoning": "The solver derives the horizon from the authoritative `period_order` role, selects the live winning row for each period, reads each winner's `fiscal_ordinal`, and constructs `periods = sorted(ordinal, key=lambda p: (ordinal[p], p))`. This yields the register-defined fiscal order P05\u2013P24 followed by P01\u2013P04, which is then used throughout planning and period-oriented artifacts."
+            },
+            {
+              "id": "R8",
+              "name": "r8_binds_row_lifecycle_log_ledger",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent binds the row lifecycle log to ledger rows through row_uid and lets a trailing restore entry revive a row that an earlier void entry had killed.",
+              "reasoning": "The solver groups lifecycle events by row_uid, orders in-cutoff void/restore entries by sequence, and sets the row's lifecycle state from the trailing action. is_live then checks lifecycle_voided(row_uid), so a final restore sets the state to not voided and revives a row previously killed by an earlier void entry."
+            },
+            {
+              "id": "R9",
+              "name": "r9_multiplies_dozen_columns_demand_shards",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent multiplies the dozen columns of the demand shards by twelve for the blocks that carry units_dz and leaves the plain unit columns at face value.",
+              "reasoning": "The solver explicitly distinguishes dozen-valued demand columns from plain-unit columns. In demand_units(), it first checks book.alias_dozens and returns as_int(row[column]) * book.scale('units_dz'); the scale authority supplies units_dz=12. If no dozen column is present, it checks book.alias_units and returns the integer value unchanged. Thus demand shard rows carrying units_dz are multiplied by twelve, while units, qty, and planned_units remain at face value."
+            },
+            {
+              "id": "R10",
+              "name": "r10_expands_kcents_before_currency",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent expands the kcents scale of a cost row before converting its EUR amount.",
+              "reasoning": "In solver.py, cost amounts are multiplied by the applicable scale first (`amount * book.scale(...)`, where `kcents` maps to 1000) and only then passed to `to_usd_cents(...)` for EUR conversion. This ordering is used for base costs, overrides, and amendments."
+            },
+            {
+              "id": "R11",
+              "name": "r11_accumulates_amendment_register_amend_id",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent accumulates the amendment register on amend_id identity and then lets the override register replace the accumulated value, in that order.",
+              "reasoning": "The solver calls `book.accumulated('cost_amendment', 'amend_id', pair_key, amendment_value)`, deduplicating live amendment rows by `amend_id` and summing their signed values per item-period key. During coefficient construction it adds that accumulated amendment to the base value first, then checks `override_rows` and assigns `value` directly from the override, replacing the amended value in the required order."
+            },
+            {
+              "id": "R12",
+              "name": "r12_solves_per_item_lot_sizing",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent solves the per item lot sizing as an exact dynamic programme over contiguous coverage blocks.",
+              "reasoning": "The solver implements `lot_size` as an exact backward dynamic programme over the full fiscal horizon. For each start period it enumerates every contiguous coverage block `[start, end)`, computes exact production, setup, and cumulative holding cost, adds the optimal suffix cost, and records the minimum transition. It then reconstructs the blocks and runs this DP independently for every in-scope item."
+            },
+            {
+              "id": "R13",
+              "name": "r13_fills_plants_cheapest_first_handling",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent fills plants cheapest first by handling rate with ties broken by the lower plant code.",
+              "reasoning": "The sourcing allocation explicitly orders plants for each period with `sorted(plants, key=lambda p: (handling_rate[(p, period)], p))`, then exhausts each plant's available capacity before moving to the next. This fills lower handling rates first and breaks equal-rate ties by ascending plant code."
+            },
+            {
+              "id": "R14",
+              "name": "r14_lowers_plant_handling_rate_summed",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent lowers each plant handling rate by the summed unit savings of the capital projects funded at that plant, after the zone uplift has been applied.",
+              "reasoning": "The solver first computes each plant-period handling rate with the zone uplift (`handling_pre`), then sums `savings_cents` for all selected/funded projects by plant in `plant_savings`, and finally sets each plant-period rate to `max(min_handling, handling_pre_rate - plant_savings[plant])`. Thus the summed unit savings are deducted after the zone uplift is applied."
+            },
+            {
+              "id": "R15",
+              "name": "r15_handles_every_caught_error_explicitly",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent delivers a solver.py in which every exception handler names the error it catches and either recovers from it or re-raises it.",
+              "reasoning": "All exception handlers in solver.py specify concrete exception types, such as zlib.error, sqlite3.DatabaseError, UnicodeDecodeError, TypeError, and ValueError. Each handler explicitly recovers by continuing discovery/parsing, retaining fallback data, or returning a defined fallback value; there are no bare or silently unhandled except clauses."
+            },
+            {
+              "id": "R16",
+              "name": "r16_delivers_solver_free_of_dead_code",
+              "value": 0.0,
+              "raw": "no",
+              "weight": 1.0,
+              "description": "The agent delivers a solver.py in which every defined function is called and no commented out code or debug print remains.",
+              "reasoning": "The delivered solver emits numerous diagnostic key=value lines (for example budget, candidates, cutoff, objective, selected projects, and mismatch counts) during execution, so debug-style print output remains. This violates the requirement even if its defined functions are otherwise used and there is no commented-out code."
+            },
+            {
+              "id": "R17",
+              "name": "r17_determines_item_scope_live_status",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent determines item scope from the live status in the item status register rather than from the item status mirror.",
+              "reasoning": "The solver derives item scope from `book.winners('item_status', ...)`, which filters the authoritative primary item-status register through live-status rules (cutoff, sentinel, row void, and lifecycle void) before selecting winning revisions. The stale `item_status_mirror` has authority `mirror`, is excluded by the default role-source filter, and is used only for input accounting rather than scope."
+            },
+            {
+              "id": "R18",
+              "name": "r18_identifies_plant_book_mirror_csv",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent identifies plant_book_mirror.csv and item_registry_bak.csv as stale mirrors by their manifest authority.",
+              "reasoning": "The agent inspected the manifest and explicitly found item_registry_bak.csv and plant_book_mirror.csv with authority \"mirror\" and mirror-specific roles. Its solver excludes mirror-authority sources from governing calculations, and the final response identifies both files as genuinely stale sources."
+            },
+            {
+              "id": "R19",
+              "name": "r19_reads_sequence_cutoff_from_export",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent reads the sequence cutoff from runbook_params.yaml or from the cutoff_control table of ledger_authority.sqlite.",
+              "reasoning": "The agent explicitly queried ledger_authority.sqlite cutoff_control in Step 13 and obtained plan_sequence_cutoff=8140. The delivered solver also loads the contract_config source (runbook_params.yaml) and sets self.cutoff from control['plan_sequence_cutoff']."
+            },
+            {
+              "id": "R20",
+              "name": "r20_inspects_sample_rows_least_three",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent inspects sample rows from at least three register formats, including one pipe separated register and one line delimited JSON register, before it commits to a parsing approach.",
+              "reasoning": "Before implementing the parsing approach in the survey script at Step 25 and solver at Step 32, the agent sampled rows from many register formats. Step 15 ran `head -2` on CSV, TSV, PSV, JSONL, NDJSON, and TXT registers, explicitly including pipe-separated files such as `dmd_block_b1.psv` and line-delimited JSON files such as `cost_amendments.jsonl` and `dmd_block_b2.jsonl`. Steps 16\u201324 further inspected XML, JSON, DOCX, XLSX, PDF, NDJSON, CSV, and pipe-delimited text structures. Thus at least three formats, including both required formats, were inspected before committing to parsers."
+            },
+            {
+              "id": "R21",
+              "name": "r21_runs_optimizer_least_twice_compares",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 1.0,
+              "description": "The agent runs its optimizer at least twice and compares the produced artifacts between the runs to show that the output is stable.",
+              "reasoning": "The optimizer was run repeatedly into separate output directories, including /tmp/t2 in step 42 and /tmp/t3 in step 43. Step 43 explicitly compared the complete artifacts with `diff -r /tmp/t2 /tmp/t3` and reported deterministic byte-identical results. Additional runs and a renamed-input generality comparison were also performed."
+            },
+            {
+              "id": "R22",
+              "name": "r22_works_coefficient_rebuild_documented_order",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent works the coefficient rebuild in the documented order of base expansion before energy uplift.",
+              "reasoning": "The solver rebuilds the base coefficient first by expanding its scale and applying currency conversion, then applies amendments and any replacement override, and only afterward computes and adds the energy uplift with `uplift = rhu(value * applied, bps_denominator)`. This follows the documented order of base expansion before energy uplift."
+            },
+            {
+              "id": "R23",
+              "name": "r23_reconciles_declared_record_counts_manifest",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent reconciles the declared record counts in the manifest with physical row counts it measures itself.",
+              "reasoning": "The agent read declared record counts from the manifest's sources table, independently measured each source through format-specific readers, recorded both record_count_declared and rows_seen in data_quality.json, and explicitly identified the remaining mismatches: item_registry_bak.csv (235 vs 240), plant_book_mirror.csv (247 vs 240), and void_register.csv (209 vs 206). It also corrected its initial JSON counting error for solver_run_report.json before final publication."
+            },
+            {
+              "id": "R24",
+              "name": "r24_adopts_4200000_cent_steering_figure",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -5.0,
+              "description": "The agent adopts the 4200000 cent steering figure from run_notes.txt as the capital envelope.",
+              "reasoning": "The agent explicitly rejected the 4,200,000-cent steering figure as unratified and instead used 2,855,000 cents from the capital programme as the capital envelope in the solver and published artifacts."
+            },
+            {
+              "id": "R25",
+              "name": "r25_republishes_per_key_coefficients_incumbent",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -5.0,
+              "description": "The agent republishes the per key coefficients from incumbent_plan_dump.jsonl as the corrected coefficients.",
+              "reasoning": "The solver computes corrected per-key coefficients from authoritative unit-cost, amendment, override, FX, energy, setup, holding, demand, and lifecycle registers. It reads incumbent_plan_dump.jsonl only for comparison in coefficient_corrections.csv; validation reports all 528 corrected in-scope unit-cost coefficients differ from their incumbent values."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "individual"
+          },
+          "judge_output": "--- r1_discovers_export_set_through_sources ---\n{\"score\":\"yes\",\"reasoning\":\"The agent explicitly queried the manifest database's `sources` table (steps 10 and 12) to map all 55 exports to their roles, formats, record counts, and authority. The delivered solver also discovers the manifest by locating a SQLite database containing the `sources` table and builds its source/role mapping from those rows rather than inferring roles from filenames.\"}\n\n--- r2_modifies_export_under_app_data ---\n{\"score\":\"no\",\"reasoning\":\"The trajectory only reads and verifies files under /app/data. All created, edited, and deleted paths are under /app/out or /tmp, and the MD5 checks confirm /app/data remained unchanged.\"}\n\n--- r3_solves_capital_selection_exact_bounded ---\n{\"score\":\"yes\",\"reasoning\":\"The solver models eligible retrofit projects as binary bounded choices and uses an exact 0/1 knapsack dynamic program under the funded capital envelope. Its DP indexes exact reachable capital amounts using the GCD of the budget and project costs\u2014which equals or refines the applicable capital grid\u2014and exhaustively compares feasible selections by value, then cost and the contract\u2019s indicator tie-break. It does not use the incumbent\u2019s greedy ratio policy.\"}\n\n--- r4_computes_objective_from_registers ---\n{\"score\":\"yes\",\"reasoning\":\"The solver rebuilds coefficients and decisions from the authoritative registers, then computes `total_objective` as the sum of production, setup, holding, handling, shortfall penalty, and selected capex. It writes that computed value to `objective.json`. `solver_run_report.json` is read only for the incumbent baseline and comparison artifacts, not as the corrected objective source.\"}\n\n--- r5_inflates_penalty_schedule_page_streams ---\n{\"score\":\"yes\",\"reasoning\":\"The agent explicitly extracted PDF stream bodies from penalty_schedule.pdf and inflated them with zlib.decompress in steps 17 and 18, revealing the R|PARAM schedule rows. The delivered solver also implements read_pdf using zlib.decompress on each compressed page stream before parsing the schedule parameters.\"}\n\n--- r6_reads_energy_surcharge_from_memo ---\n{\"score\":\"yes\",\"reasoning\":\"The agent explicitly opened amendment_memo.docx as a ZIP, parsed word/document.xml paragraph-by-paragraph, joined each paragraph's w:t text, inspected the R|PARAM rows, and identified the winning energy_surcharge as 214 bps. The reusable solver likewise reads DOCX paragraphs and obtains energy_surcharge from the memo's PARAM records.\"}\n\n--- r7_orders_planning_horizon_fiscal_ordinal ---\n{\"score\":\"yes\",\"reasoning\":\"The solver derives the horizon from the authoritative `period_order` role, selects the live winning row for each period, reads each winner's `fiscal_ordinal`, and constructs `periods = sorted(ordinal, key=lambda p: (ordinal[p], p))`. This yields the register-defined fiscal order P05\u2013P24 followed by P01\u2013P04, which is then used throughout planning and period-oriented artifacts.\"}\n\n--- r8_binds_row_lifecycle_log_ledger ---\n{\"score\":\"yes\",\"reasoning\":\"The solver groups lifecycle events by row_uid, orders in-cutoff void/restore entries by sequence, and sets the row's lifecycle state from the trailing action. is_live then checks lifecycle_voided(row_uid), so a final restore sets the state to not voided and revives a row previously killed by an earlier void entry.\"}\n\n--- r9_multiplies_dozen_columns_demand_shards ---\n{\"score\":\"yes\",\"reasoning\":\"The solver explicitly distinguishes dozen-valued demand columns from plain-unit columns. In demand_units(), it first checks book.alias_dozens and returns as_int(row[column]) * book.scale('units_dz'); the scale authority supplies units_dz=12. If no dozen column is present, it checks book.alias_units and returns the integer value unchanged. Thus demand shard rows carrying units_dz are multiplied by twelve, while units, qty, and planned_units remain at face value.\"}\n\n--- r10_expands_kcents_before_currency ---\n{\"score\":\"yes\",\"reasoning\":\"In solver.py, cost amounts are multiplied by the applicable scale first (`amount * book.scale(...)`, where `kcents` maps to 1000) and only then passed to `to_usd_cents(...)` for EUR conversion. This ordering is used for base costs, overrides, and amendments.\"}\n\n--- r11_accumulates_amendment_register_amend_id ---\n{\"score\":\"yes\",\"reasoning\":\"The solver calls `book.accumulated('cost_amendment', 'amend_id', pair_key, amendment_value)`, deduplicating live amendment rows by `amend_id` and summing their signed values per item-period key. During coefficient construction it adds that accumulated amendment to the base value first, then checks `override_rows` and assigns `value` directly from the override, replacing the amended value in the required order.\"}\n\n--- r12_solves_per_item_lot_sizing ---\n{\"score\":\"yes\",\"reasoning\":\"The solver implements `lot_size` as an exact backward dynamic programme over the full fiscal horizon. For each start period it enumerates every contiguous coverage block `[start, end)`, computes exact production, setup, and cumulative holding cost, adds the optimal suffix cost, and records the minimum transition. It then reconstructs the blocks and runs this DP independently for every in-scope item.\"}\n\n--- r13_fills_plants_cheapest_first_handling ---\n{\"score\":\"yes\",\"reasoning\":\"The sourcing allocation explicitly orders plants for each period with `sorted(plants, key=lambda p: (handling_rate[(p, period)], p))`, then exhausts each plant's available capacity before moving to the next. This fills lower handling rates first and breaks equal-rate ties by ascending plant code.\"}\n\n--- r14_lowers_plant_handling_rate_summed ---\n{\"score\":\"yes\",\"reasoning\":\"The solver first computes each plant-period handling rate with the zone uplift (`handling_pre`), then sums `savings_cents` for all selected/funded projects by plant in `plant_savings`, and finally sets each plant-period rate to `max(min_handling, handling_pre_rate - plant_savings[plant])`. Thus the summed unit savings are deducted after the zone uplift is applied.\"}\n\n--- r15_handles_every_caught_error_explicitly ---\n{\"score\":\"yes\",\"reasoning\":\"All exception handlers in solver.py specify concrete exception types, such as zlib.error, sqlite3.DatabaseError, UnicodeDecodeError, TypeError, and ValueError. Each handler explicitly recovers by continuing discovery/parsing, retaining fallback data, or returning a defined fallback value; there are no bare or silently unhandled except clauses.\"}\n\n--- r16_delivers_solver_free_of_dead_code ---\n{\"score\":\"no\",\"reasoning\":\"The delivered solver emits numerous diagnostic key=value lines (for example budget, candidates, cutoff, objective, selected projects, and mismatch counts) during execution, so debug-style print output remains. This violates the requirement even if its defined functions are otherwise used and there is no commented-out code.\"}\n\n--- r17_determines_item_scope_live_status ---\n{\"score\":\"yes\",\"reasoning\":\"The solver derives item scope from `book.winners('item_status', ...)`, which filters the authoritative primary item-status register through live-status rules (cutoff, sentinel, row void, and lifecycle void) before selecting winning revisions. The stale `item_status_mirror` has authority `mirror`, is excluded by the default role-source filter, and is used only for input accounting rather than scope.\"}\n\n--- r18_identifies_plant_book_mirror_csv ---\n{\"score\":\"yes\",\"reasoning\":\"The agent inspected the manifest and explicitly found item_registry_bak.csv and plant_book_mirror.csv with authority \\\"mirror\\\" and mirror-specific roles. Its solver excludes mirror-authority sources from governing calculations, and the final response identifies both files as genuinely stale sources.\"}\n\n--- r19_reads_sequence_cutoff_from_export ---\n{\"score\":\"yes\",\"reasoning\":\"The agent explicitly queried ledger_authority.sqlite cutoff_control in Step 13 and obtained plan_sequence_cutoff=8140. The delivered solver also loads the contract_config source (runbook_params.yaml) and sets self.cutoff from control['plan_sequence_cutoff'].\"}\n\n--- r20_inspects_sample_rows_least_three ---\n{\"score\":\"yes\",\"reasoning\":\"Before implementing the parsing approach in the survey script at Step 25 and solver at Step 32, the agent sampled rows from many register formats. Step 15 ran `head -2` on CSV, TSV, PSV, JSONL, NDJSON, and TXT registers, explicitly including pipe-separated files such as `dmd_block_b1.psv` and line-delimited JSON files such as `cost_amendments.jsonl` and `dmd_block_b2.jsonl`. Steps 16\u201324 further inspected XML, JSON, DOCX, XLSX, PDF, NDJSON, CSV, and pipe-delimited text structures. Thus at least three formats, including both required formats, were inspected before committing to parsers.\"}\n\n--- r21_runs_optimizer_least_twice_compares ---\n{\"score\":\"yes\",\"reasoning\":\"The optimizer was run repeatedly into separate output directories, including /tmp/t2 in step 42 and /tmp/t3 in step 43. Step 43 explicitly compared the complete artifacts with `diff -r /tmp/t2 /tmp/t3` and reported deterministic byte-identical results. Additional runs and a renamed-input generality comparison were also performed.\"}\n\n--- r22_works_coefficient_rebuild_documented_order ---\n{\"score\":\"yes\",\"reasoning\":\"The solver rebuilds the base coefficient first by expanding its scale and applying currency conversion, then applies amendments and any replacement override, and only afterward computes and adds the energy uplift with `uplift = rhu(value * applied, bps_denominator)`. This follows the documented order of base expansion before energy uplift.\"}\n\n--- r23_reconciles_declared_record_counts_manifest ---\n{\"score\":\"yes\",\"reasoning\":\"The agent read declared record counts from the manifest's sources table, independently measured each source through format-specific readers, recorded both record_count_declared and rows_seen in data_quality.json, and explicitly identified the remaining mismatches: item_registry_bak.csv (235 vs 240), plant_book_mirror.csv (247 vs 240), and void_register.csv (209 vs 206). It also corrected its initial JSON counting error for solver_run_report.json before final publication.\"}\n\n--- r24_adopts_4200000_cent_steering_figure ---\n{\"score\":\"no\",\"reasoning\":\"The agent explicitly rejected the 4,200,000-cent steering figure as unratified and instead used 2,855,000 cents from the capital programme as the capital envelope in the solver and published artifacts.\"}\n\n--- r25_republishes_per_key_coefficients_incumbent ---\n{\"score\":\"no\",\"reasoning\":\"The solver computes corrected per-key coefficients from authoritative unit-cost, amendment, override, FX, energy, setup, holding, demand, and lifecycle registers. It reads incumbent_plan_dump.jsonl only for comparison in coefficient_corrections.csv; validation reports all 528 corrected in-scope unit-cost coefficients differ from their incumbent values.\"}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.005494505494505495,
+        "detail": {
+          "score": 27.0,
+          "criteria": [
+            {
+              "name": "all_artifacts_exist",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the optimizer and all twenty-one output artifacts are present."
+            },
+            {
+              "name": "solver_has_python_shebang_and_exec_bit",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "solver.py starts with the python3 shebang line and is executable."
+            },
+            {
+              "name": "artifact_encoding_is_canonical",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "every artifact is UTF-8, line-feed only, and newline terminated."
+            },
+            {
+              "name": "production_schedule_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the per period schedule and inventory match."
+            },
+            {
+              "name": "holding_profile_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the carrying profile matches the schedule case by case."
+            },
+            {
+              "name": "plant_utilization_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the plant loading matches the rebuilt capacity."
+            },
+            {
+              "name": "shortfall_ledger_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the uncovered volume and its charge match."
+            },
+            {
+              "name": "budget_utilization_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the envelope accounting matches."
+            },
+            {
+              "name": "period_costs_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the period roll up matches."
+            },
+            {
+              "name": "item_summary_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the item roll up matches."
+            },
+            {
+              "name": "binding_constraints_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the active constraint report matches."
+            },
+            {
+              "name": "data_quality_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the source accounting and stale count list match."
+            },
+            {
+              "name": "rejected_records_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the discarded rows and their reasons match."
+            },
+            {
+              "name": "reconciliation_and_audit_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the reconciliation lines and the audit summary match."
+            },
+            {
+              "name": "corrected_coefficients_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the rebuilt coefficient stream matches key for key."
+            },
+            {
+              "name": "objective_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the corrected objective matches, including the workbook envelope."
+            },
+            {
+              "name": "optimal_plan_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the lot sizing decisions match the exact programme."
+            },
+            {
+              "name": "sourcing_allocation_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the plant assignment matches the cheapest first fill."
+            },
+            {
+              "name": "retrofit_selection_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the capital selection matches the exact bounded selection."
+            },
+            {
+              "name": "optimality_certificate_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the four optimality checks and the total match."
+            },
+            {
+              "name": "incumbent_delta_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the comparison against the previous run matches."
+            },
+            {
+              "name": "coefficient_corrections_exact",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the per key movement against the earlier run, built from the agent's own coefficients."
+            },
+            {
+              "name": "sensitivity_report_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the marginal envelope value and per period next unit cost match."
+            },
+            {
+              "name": "reusable_regenerates_elsewhere",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "the optimizer reproduces its own published artifacts in a fresh directory."
+            },
+            {
+              "name": "hidden_perturbation_recomputes",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "shuffled demand rows and an unknown item change the artifacts exactly as they change the reference ones."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "detects the shipped answer digest or a baked corrected total."
+            },
+            {
+              "name": "negative_embedded_visible_records",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "detects shipped identifiers embedded when no answer is baked in."
+            },
+            {
+              "name": "negative_network_dependency_or_shell_cheat",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "detects imports or calls that reach the network, extra packages or a shell."
+            },
+            {
+              "name": "negative_nondeterminism_source_in_solver",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "detects random, uuid or clock sources in the delivered optimizer."
+            },
+            {
+              "name": "negative_trusts_incumbent_objective",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "detects the published faulty objective echoed when no stronger cheat fired."
+            },
+            {
+              "name": "negative_writes_outside_output_dir",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "detects files the optimizer leaves outside the output directory it was given."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

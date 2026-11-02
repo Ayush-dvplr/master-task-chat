@@ -1,0 +1,130 @@
+[
+ {
+  "id": "P-001",
+  "name": "Verifier-side seeded hidden inputs",
+  "how": "tests/test_output.py holds EVAL_SEED and regenerates hidden cases at grade time inside the separate verifier image; agent image never contains tests/.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/build-repair/tests/test_output.py:203-225; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/generate_bundle.py:1349-1351",
+  "automatic": true,
+  "weakness": "Hidden sets are small (build-repair 18 seeded + 2 edge manifests) and follow the same documented rules; cli-config and service-interaction grade only against shipped-data-derived expectations (no hidden inputs)."
+ },
+ {
+  "id": "P-002",
+  "name": "Seed-varying, fully documented binary grammar (format-recovery)",
+  "how": "_derive_grammar picks mode/wide/long-key bit positions, mode-id permutation, header order, delta varint flavour, dictionary source/direction, CRC coverage from the seed; _grammar_*_doc renders every choice into the shipped spec with worked examples.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/generate_bundle.py:1048-1320",
+  "automatic": true,
+  "weakness": "Complete specification by policy, so difficulty is careful reading; small grammar space; capture log is unlabelled but lets the agent self-check via CRC."
+ },
+ {
+  "id": "P-003",
+  "name": "Layered, mutually masking planted bugs in a zipped source tree",
+  "how": "Template source trees ship fixed defects (build-repair 7: package-dir, missing __init__, import cycle, tab/bracket syntax, tomli, inverted clamp, off-by-ones; repo-patch 5 layers; cli-config 7) that surface one at a time.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/build-repair/environment/data/project/; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/repo-patch/environment/data/repo/; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/cli-config/environment/data/tool/cli.py",
+  "automatic": true,
+  "weakness": "Static: identical bugs in every bundle of the archetype regardless of seed/category; repaired code is 59-135 lines in total."
+ },
+ {
+  "id": "P-004",
+  "name": "Labelled fixture corpora",
+  "how": "build-repair scoring_fixtures.jsonl (5,500 rows with want:{score,bucket}); repo-patch regression_cases.jsonl (2,403 payload->expected).",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/build-repair/datagen.py:24-30,94-101; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/repo-patch/datagen.py:110-133",
+  "automatic": true,
+  "weakness": "Lets the agent fit/verify the graded rule from labels; a corpus-derived rule replaces understanding the code."
+ },
+ {
+  "id": "P-005",
+  "name": "Dirty / inconsistent input data",
+  "how": "Per-field corruption p=0.004 and messy casing (data-pipeline); 1.2% calendar holes, 8% credits, 0-8 day posting lag (domain-calculation); 6% bad keys, ~15% out-of-bounds values, invalid modes, 2% stringified numbers (cli-config); ~9% damaged captures (format-recovery).",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/data-pipeline/datagen.py:156-216; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/domain-calculation/datagen.py:109-134; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/cli-config/datagen.py:44-62; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/format-recovery/tests/test_output.py:657-669",
+  "automatic": true,
+  "weakness": "Every handling rule is spelled out in schema.md / contract files; fixed rates per archetype."
+ },
+ {
+  "id": "P-006",
+  "name": "Noise filtering over a large log",
+  "how": "service-interaction: 2,400 approvals of which exactly 46 approved; 21,000 shuffled requests, only those with approved approvals (plus 1-3 idempotent duplicates) replay.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/service-interaction/datagen.py:39-86",
+  "automatic": true,
+  "weakness": "One join/filter removes the volume; size does not add reasoning depth."
+ },
+ {
+  "id": "P-007",
+  "name": "Contract-over-instinct drift values",
+  "how": "Fixed contract values and literal strings that an engineer would 'improve' (performance perf_report observed_relative_median 0.35, recommendation strings, opposite tie-breaks; service final_state is not /state).",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/performance/solution/TRUTH.md (Defect list); Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/service-interaction/solution/TRUTH.md:53",
+  "automatic": true,
+  "weakness": "Documented in shipped schema/contract files, so it rewards reading not reasoning."
+ },
+ {
+  "id": "P-008",
+  "name": "Byte-exact and canonical output requirements",
+  "how": "Encoder round-trip, signed i16/i32 boundary payloads, sorted JSON keys, zip compression/timestamp/mode taken from sidecars.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/format-recovery/tests/test_output.py; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/build-repair/datagen.py (compiler_flags.json); Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/repo-patch/datagen.py (build_config.json)",
+  "automatic": true,
+  "weakness": "Mechanical once read; no reasoning beyond the spec."
+ },
+ {
+  "id": "P-009",
+  "name": "Polarity-inverted negative (cheat) checks",
+  "how": "Each archetype registers 4-5 negative criteria (-3/-5) that hold only when a cheat signature is present (hardcoded answers, fake transcripts, network, monkeypatch, nondeterminism, filename dependence).",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/*/tests/test_output.py (criteria.negative_*); Terminal_2.0_Harbor_Harness/Input Bundle Generator New/validate_bundle.py:645-675",
+  "automatic": true,
+  "weakness": "Substring/regex heuristics: cli-config fires if repaired CLI source contains the visible numbers MAX_RECORDS_BASE or TIMEOUT_MS_BASE (false-positive risk); easy to evade by obfuscation."
+ },
+ {
+  "id": "P-010",
+  "name": "LLM-judged process channel (50% of reward)",
+  "how": "judge.toml 10-13 binary criteria on the ATIF trajectory, incl. ABSENCE criteria at -5; reward.toml gives the channel 0.5/P_judge.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/*/tests/judge.toml; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/generate_bundle.py:2009-2025",
+  "automatic": true,
+  "weakness": "Generic process criteria pay a well-behaved but wrong run; no oracle for the judged half; Step 10 ignores it."
+ },
+ {
+  "id": "P-011",
+  "name": "Relative speed gate (performance)",
+  "how": "Warm-ups plus repeated median of the delivered optimizer must be <= 0.70 of the baseline (thresholds.json max_relative_median).",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/performance/datagen.py:77-84; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/performance/tests/test_output.py (repeated_median_relative_speedup_is_stable)",
+  "automatic": true,
+  "weakness": "Timing noise on shared CPUs; baseline is a deliberately slow reference."
+ },
+ {
+  "id": "P-012",
+  "name": "Input volume gate and per-file ablation",
+  "how": "playground A5: >=20,000 total lines and >=2,000 per csv/tsv/jsonl/txt/log file; D4: oracle with one data file deleted must score <= ablation_max (0.5 default, 0.7-0.95 per manifest).",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/playground.py:180-204,329-341; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/*/archetype.toml (ablation_max)",
+  "automatic": false,
+  "weakness": "Playground-only (not in validate_bundle); passed by padding one or two files; high ablation ceilings mean single files are barely load-bearing (format-recovery capture log deletion costs 0.167, measured)."
+ },
+ {
+  "id": "P-013",
+  "name": "TRUTH.md focal/drift/trap classification",
+  "how": "Author documents defects with labels; validator requires >=2 (focal), >=1 (drift), >=1 (trap).",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/validate_bundle.py:1124-1142",
+  "automatic": false,
+  "weakness": "Substring count only; nothing ties a labelled trap to a test that catches it."
+ },
+ {
+  "id": "P-014",
+  "name": "Withholding the how / breadth of relevant inputs",
+  "how": "instruction states end state only and does not enumerate inputs; [dependencies] graph declares cross-file needs; A4 requires every data file to be named somewhere.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/FORMAT_SPEC.md:68-107; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/*/archetype.toml [dependencies]; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/playground.py:167-178",
+  "automatic": false,
+  "weakness": "Dependency graph is recorded in memory only, never enforced; A4 is a name-mention check."
+ },
+ {
+  "id": "P-015",
+  "name": "Partial-solver ceiling < 0.35",
+  "how": "GENERATOR_TRAP_RECIPE says weight HARD tests so easy_total/(easy+hard) < 0.35 and loop until a partial solver scores < 0.35.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/GENERATOR_TRAP_RECIPE.md:177-243",
+  "automatic": false,
+  "weakness": "Not implemented in generate_bundle.py, validate_bundle.py or playground.py; advisory only."
+ },
+ {
+  "id": "P-016",
+  "name": "Isolation and anti-tamper",
+  "how": "Separate verifier image, /logs/verifier root 0700, chmod go-rwx /tests, agent runs as uid 1000, setpriv in verifier, agent env no-network.",
+  "where": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/*/tests/test.sh:1-10; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/*/tests/Dockerfile; Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/*/task.toml:21-47",
+  "automatic": true,
+  "weakness": "Verifier base image is not digest-pinned (FROM python:3.12-slim)."
+ }
+]

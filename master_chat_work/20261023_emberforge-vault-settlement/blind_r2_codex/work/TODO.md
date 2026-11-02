@@ -1,0 +1,4 @@
+- [x] Read instruction.md and every data file it points to.
+- [x] Write the solution program once, completely.
+- [x] Run the shipped-data self-check for output files, shapes, and controls.
+- [x] Stop; write the blind report and result record.

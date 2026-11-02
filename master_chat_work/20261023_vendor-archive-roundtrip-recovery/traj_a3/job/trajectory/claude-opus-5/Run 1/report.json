@@ -1,0 +1,263 @@
+{
+  "model": "claude-opus-5",
+  "run_index": 1,
+  "include_multimodal": false,
+  "pytest": {
+    "passed": 27,
+    "failed": 5,
+    "exit_code": 1,
+    "reward": 1.0,
+    "tests": [
+      {
+        "name": "stream_doc_interleaved",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "stream_doc_new_runs",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "stream_doc_remap_runs",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "stream_doc_reset_runs",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "stream_doc_mix_a",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "stream_doc_mix_b",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "decode_doc_remapped",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "decode_doc_escapes",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "salvage_doc_state",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "salvage_doc_mix",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "encode_doc_unmodified",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "encode_doc_edited",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "encode_doc_new_records",
+        "weight": 5.0,
+        "passed": true
+      },
+      {
+        "name": "rule_count_raw_values",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "rule_field_cumulator",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "rule_resend_keeps_run",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "rule_boolean_override",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "rule_length_integer",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "reject_precedence",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "reject_count_bound",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "reject_crc_fields",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "mutation_override_flip",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "mutation_count_field",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "report_decoded_examples",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "report_roundtrip",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "report_error_analysis",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "report_format",
+        "weight": 3.0,
+        "passed": true
+      },
+      {
+        "name": "negative_hardcoded_sample_answers",
+        "weight": -5.0,
+        "passed": false
+      },
+      {
+        "name": "negative_nondeterministic_output",
+        "weight": -3.0,
+        "passed": false
+      },
+      {
+        "name": "negative_filename_dependent_behaviour",
+        "weight": -3.0,
+        "passed": false
+      },
+      {
+        "name": "negative_reads_training_corpus_at_runtime",
+        "weight": -5.0,
+        "passed": false
+      },
+      {
+        "name": "negative_rebinds_verifier_dependencies",
+        "weight": -3.0,
+        "passed": false
+      }
+    ]
+  },
+  "rubric": [
+    {
+      "number": 1,
+      "criterion": "The agent builds its own VARC1 segment holding a raw record of a field whose unit is something other than count with the top bit of its value bytes set, runs /app/decode.py on it and compares the value it prints with the value it expects.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 2,
+      "criterion": "The agent builds its own VARC1 segment in which delta records of two different field names take turns, runs /app/decode.py on it and compares the value printed for each delta record with the value it expects.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "None of the explicit hand-built segments has delta records for two field names alternating A/B/A/B, followed by a comparison of every resulting value against independent expectations."
+    },
+    {
+      "number": 3,
+      "criterion": "The agent builds its own manifest in which a segment has a seq_no equal to or smaller than that of a segment listed earlier in the same run of its stream, runs /app/decode.py --stream on it and compares the documents printed for the later entries with the values it expects.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The agent built and ran a synthetic manifest with repeated and smaller seq_no entries, but the command only printed the resulting values. It did not encode an expected result or assert/compare the later documents against one."
+    },
+    {
+      "number": 4,
+      "criterion": "The agent builds its own manifest in which an entry carries stream_continues as a JSON string or number, runs /app/decode.py --stream on it and compares the document printed for the next segment of that stream with the values it expects.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": false,
+      "justification": "The custom manifest used a boolean stream_continues override. Although the shipped manifest contained the string \"true\", the agent did not build its own manifest with a string or numeric override and compare the next segment against an expected document."
+    },
+    {
+      "number": 5,
+      "criterion": "The agent leaves /app/decode.py and /app/encode.py with zero bare except clauses and zero except Exception or except BaseException clauses, so that every handler names the error it expects.",
+      "type": "binary",
+      "evaluation_target": "state_change",
+      "importance": "important",
+      "score": 3.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 6,
+      "criterion": "The agent runs a check that encodes the decode document of every accepted capture in capture_catalog.jsonl with /app/encode.py and compares the bytes with the capture, before it finishes.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "important",
+      "score": 1.0,
+      "is_positive": true,
+      "passed": true
+    },
+    {
+      "number": 7,
+      "criterion": "The response says that a check passed, such as a round trip, a comparison, a control total or a self test, while the trajectory shows that check failing or shows no command that ran it.",
+      "type": "binary",
+      "evaluation_target": "final_answer",
+      "importance": "important",
+      "score": -3.0,
+      "is_positive": false,
+      "passed": true
+    },
+    {
+      "number": 8,
+      "criterion": "The agent opens, lists or reads a file under /tests or /logs/verifier.",
+      "type": "binary",
+      "evaluation_target": "trajectory",
+      "importance": "critically_important",
+      "score": -5.0,
+      "is_positive": false,
+      "passed": true
+    }
+  ],
+  "final_reward": 71.88,
+  "test_weights_percentage": 100.0,
+  "rubric_weights_percentage": 43.75,
+  "judge_model": "gpt-5.6-sol",
+  "judge_usage": {}
+}

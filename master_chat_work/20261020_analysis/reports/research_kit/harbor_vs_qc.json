@@ -1,0 +1,331 @@
+[
+  {
+    "item": "Bundle directory name",
+    "harbor_0_24": "no rule (any folder; [task].name is org/name)",
+    "qc_requires": "^[a-z0-9][a-z0-9-]{2,63}$ (QC assigned/Input_Bundle_QC/structure_qc.py:108 S1)",
+    "generator_requires": "same regex (Input Bundle Generator New/validate_bundle.py:33, 1281 \u00a71.1)",
+    "difference": "qc_only"
+  },
+  {
+    "item": "Root entries",
+    "harbor_0_24": "task.toml + environment/ required; instruction.md (single-step) or steps/; tests/, solution/, README.md, trajectory.json, .gitignore optional (02-format-spec-0.24.md:17-33; task.py:96-129)",
+    "qc_requires": "exactly instruction.md, task.toml, environment, solution, tests; anything else fails (QC assigned/Input_Bundle_QC/structure_qc.py:134-139 S3)",
+    "generator_requires": "instruction.md, task.toml, environment/, solution/, tests/ required (Input Bundle Generator New/validate_bundle.py:207-226) + delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3); tolerates cheat/ (Input Bundle Generator New/validate_bundle.py:277-306)",
+    "difference": "stricter"
+  },
+  {
+    "item": "Multi-step layout ([[steps]], steps/<name>/)",
+    "harbor_0_24": "supported; oracle, nop and min_reward gating all work (multi-oracle 1.0 / multi-nop 0.0 in this audit)",
+    "qc_requires": "not allowed: steps/ fails S3, missing root instruction.md and solution/solve.sh fail S2, root keys must be exactly [schema_version, artifacts] so steps / multi_step_reward_strategy fail T2 (QC assigned/Input_Bundle_QC/structure_qc.py:129-143, 425-427)",
+    "generator_requires": "no multi-step support anywhere (no 'step' rule in Input Bundle Generator New/validate_bundle.py; templates are single-step) + delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "README.md",
+    "harbor_0_24": "optional; scaffolded by task init",
+    "qc_requires": "forbidden (S3 unexpected entry)",
+    "generator_requires": "FORMAT_SPEC.md:3-7 says no README.md for Harbor 0.24 (v1 spec \u00a74 required it, superseded)",
+    "difference": "stricter"
+  },
+  {
+    "item": ".gitignore",
+    "harbor_0_24": "optional; scaffolded",
+    "qc_requires": "forbidden (S3)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "solution/solve.sh",
+    "harbor_0_24": "optional for loading; needed by oracle (oracle.py:57-64)",
+    "qc_requires": "required (QC assigned/Input_Bundle_QC/structure_qc.py:129-130 S2)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "solution/solve.py",
+    "harbor_0_24": "no concept",
+    "qc_requires": "optional (S2/S3 allow it)",
+    "generator_requires": "required: solution entries must be exactly TRUTH.md, solve.py, solve.sh (Input Bundle Generator New/validate_bundle.py:246-255; \u00a76.2 for corpus archetypes)",
+    "difference": "qc_only"
+  },
+  {
+    "item": "solution/TRUTH.md",
+    "harbor_0_24": "no concept",
+    "qc_requires": "required, 8 sections, never reachable by agent (S2; 02_Data_Solution_QC.md:74-80 DS-22/23/27)",
+    "generator_requires": "required with 8 canonical sections and provenance digests (Input Bundle Generator New/validate_bundle.py:1385-1392 \u00a715)",
+    "difference": "qc_only"
+  },
+  {
+    "item": "environment/ contents",
+    "harbor_0_24": "build context: Dockerfile or docker-compose.yaml, any files (02-format-spec-0.24.md:21-23)",
+    "qc_requires": "exactly Dockerfile + data/; data/ non-empty; all agent input under data/ (S3, S4)",
+    "generator_requires": "Dockerfile + data/ only, data/ must be flat with no subdirectories (Input Bundle Generator New/validate_bundle.py:229-243, 309-318)",
+    "difference": "stricter"
+  },
+  {
+    "item": "Agent image COPY scope",
+    "harbor_0_24": "anything in the build context",
+    "qc_requires": "COPY/ADD only from environment/ (data/); whole-context COPY, '..', TRUTH.md/tests/solution fail (QC assigned/Input_Bundle_QC/structure_qc.py:303-333 S7)",
+    "generator_requires": "final COPY is data only (Input Bundle Generator New/validate_bundle.py:1321 \u00a75.5) + delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "tests/ contents",
+    "harbor_0_24": "test.sh (or bundled verifier image) plus any helpers, reference files, optional tests/Dockerfile",
+    "qc_requires": "exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml (QC assigned/Input_Bundle_QC/structure_qc.py:138 S3); rewardkit imports every top-level .py and reads every .toml (QC assigned/Input_Bundle_QC/Final_checklist.md:28)",
+    "generator_requires": "exactly the same five (Input Bundle Generator New/validate_bundle.py:258-274 \u00a71.6)",
+    "difference": "stricter"
+  },
+  {
+    "item": "tests/test.sh behaviour",
+    "harbor_0_24": "any script; must leave reward.txt or reward.json in /logs/verifier (verifier.py:257-259)",
+    "qc_requires": "template only: rm stale reward files, lock /logs/verifier, chmod -R go-rwx /tests, last line exec rewardkit /tests --workspace /app --output /logs/verifier/reward.json; writes no reward, no exit/return/|| (QC assigned/Input_Bundle_QC/Final_checklist.md:235-246; QC assigned/Input_Bundle_QC/tests_qc.py B1-B5)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/tests/test.sh:1-10 identical + QC assigned/Input_Bundle_QC/tests_qc.py via \u00a77.6",
+    "difference": "different"
+  },
+  {
+    "item": "Reward writer and format",
+    "harbor_0_24": "reward.json (flat name->finite number) preferred over reward.txt; binary or fractional both accepted (verifier.py:257-259, 83, 118)",
+    "qc_requires": "rewardkit writes reward.json + reward-details.json; test.sh writes none; reward = weighted sum of both channels in -1..1, rounded to 4 dp (QC assigned/Input_Bundle_QC/Final_checklist.md:37, 229-231)",
+    "generator_requires": "same via QC assigned/Input_Bundle_QC/tests_qc.py",
+    "difference": "different"
+  },
+  {
+    "item": "Deterministic checks",
+    "harbor_0_24": "any test runner (scaffold: pytest + CTRF in tests/test_outputs.py)",
+    "qc_requires": "tests/test_output.py of @criterion(description=...) functions taking workspace, returning bool, registered once with criteria.<name>(weight=W), W in {5,3,1,-1,-3,-5}, 10-35 checks, negative_ prefix iff negative (QC assigned/Input_Bundle_QC/Final_checklist.md:171-215; QC assigned/Input_Bundle_QC/tests_qc.py A1-A5, W1-W7)",
+    "generator_requires": "same via QC assigned/Input_Bundle_QC/tests_qc.py (\u00a77.6)",
+    "difference": "qc_only"
+  },
+  {
+    "item": "Judged channel tests/judge.toml",
+    "harbor_0_24": "no concept in Harbor (rewardkit feature)",
+    "qc_requires": "required; pinned [judge] judge=openai/gpt-5.6-sol, mode individual, timeout 300, atif-trajectory /logs/agent/trajectory.json, weight 1.0; [scoring] weighted-sum; >=8 criteria with full annotations (QC assigned/Input_Bundle_QC/Final_checklist.md:112-161; 04_Judge_QC.md)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/tests/judge.toml:1-9 same header; judge_qc.py via \u00a77.5",
+    "difference": "qc_only"
+  },
+  {
+    "item": "tests/reward.toml",
+    "harbor_0_24": "no concept in Harbor (rewardkit feature)",
+    "qc_requires": "exactly one [[reward]] name=reward, weighted-sum, weights {test_output = 0.5/pos_total, judge = 0.5/pos_total} at full float precision + [scoring.test_output] (QC assigned/Input_Bundle_QC/Final_checklist.md:219-231; QC assigned/Input_Bundle_QC/tests_qc.py R1-R5)",
+    "generator_requires": "generated by generate_bundle.py (not in templates/); checked by tests_qc via \u00a77.6",
+    "difference": "qc_only"
+  },
+  {
+    "item": "test_weights.json / rubric.json / cheat/",
+    "harbor_0_24": "no concept",
+    "qc_requires": "all three forbidden (QC assigned/Input_Bundle_QC/structure_qc.py:236-245 S3)",
+    "generator_requires": "cheat/ tolerated if it holds exactly cheat.py + solve.sh (Input Bundle Generator New/validate_bundle.py:277-306); QC still fails it",
+    "difference": "qc_only"
+  },
+  {
+    "item": "ctrf.json and reward files in the bundle",
+    "harbor_0_24": "runtime outputs; not checked",
+    "qc_requires": "reward.txt, reward.json, reward-details.json, ctrf.json forbidden anywhere (QC assigned/Input_Bundle_QC/structure_qc.py:106 S5)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "qc_only"
+  },
+  {
+    "item": "tests/Dockerfile (verifier image)",
+    "harbor_0_24": "optional; when present it is the verifier image and tests/ is not uploaded (verifier_mode.py:110-116; trial.py:949)",
+    "qc_requires": "required; FROM python>=3.12, COPY . /tests/, pip install harbor-rewardkit==0.2.1, ENV LITELLM_LOCAL_MODEL_COST_MAP=True, util-linux, mkdir -p /app (QC assigned/Input_Bundle_QC/Final_checklist.md:252-266; QC assigned/Input_Bundle_QC/tests_qc.py K1-K7)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/tests/Dockerfile:1-9 identical",
+    "difference": "stricter"
+  },
+  {
+    "item": "rewardkit version",
+    "harbor_0_24": "Harbor 0.24.0 wheel pins none (no rewardkit reference in installed package); kit says 0.2.*",
+    "qc_requires": "exactly harbor-rewardkit==0.2.1 (K5)",
+    "generator_requires": "0.2.1 in template",
+    "difference": "stricter"
+  },
+  {
+    "item": "schema_version",
+    "harbor_0_24": "string, default 1.4; legacy top-level version accepted as schema_version (traps.log)",
+    "qc_requires": "exactly \"1.4\" (QC assigned/Input_Bundle_QC/structure_qc.py:574-576 T3)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "Root keys",
+    "harbor_0_24": "schema_version, artifacts, source, multi_step_reward_strategy, steps (all optional)",
+    "qc_requires": "exactly [schema_version, artifacts] in that order (T2)",
+    "generator_requires": "schema_version and artifacts present (Input Bundle Generator New/validate_bundle.py:479-485) + delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "artifacts",
+    "harbor_0_24": "list of string or table; '..' rejected; relative allowed (config.py:671-708)",
+    "qc_requires": "non-empty list of absolute string paths, no '..', no backslash (T4)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "Tables, key order, unknown keys",
+    "harbor_0_24": "unknown keys and sections silently ignored; any order (traps.log)",
+    "qc_requires": "exactly tables task, metadata, verifier(+env, +environment), agent, environment with fixed key lists and order; any extra key or table fails (QC assigned/Input_Bundle_QC/structure_qc.py:143-158, 417-461 T2)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "[task]",
+    "harbor_0_24": "optional; if present name (org/name) required; version, description, keywords, authors optional",
+    "qc_requires": "name = terminal-bench/<dir>, version 1.0.0, description <=100 words one paragraph, keywords >=1, authors [{name, email@ethara.ai}] with real full name (T5, T6, T13, T14)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/task.toml:4-9",
+    "difference": "stricter"
+  },
+  {
+    "item": "[metadata]",
+    "harbor_0_24": "free-form, ignored by Harbor",
+    "qc_requires": "exactly category, platforms [linux/amd64, linux/arm64], tags, estimated_duration_sec, expert_time_estimate_min, junior_time_estimate_min (> expert), null_floor 0.0, discrimination_weight 1.0; no difficulty (T2, T7-T10, T13)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/task.toml:11-19",
+    "difference": "qc_only"
+  },
+  {
+    "item": "[verifier] environment_mode",
+    "harbor_0_24": "null -> separate if [verifier.environment] set else shared; shared + [verifier.environment] is a validation error",
+    "qc_requires": "\"separate\" required; [verifier.environment] table required (T2, T12)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/task.toml:21-32",
+    "difference": "stricter"
+  },
+  {
+    "item": "[verifier.env]",
+    "harbor_0_24": "free table, ${VAR:-default} templating from host",
+    "qc_requires": "exactly OPENAI_API_KEY = \"${OPENAI_API_KEY:-}\" (T15)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/task.toml:27-28",
+    "difference": "stricter"
+  },
+  {
+    "item": "[environment] network_mode",
+    "harbor_0_24": "public (default) / no-network / allowlist",
+    "qc_requires": "exactly no-network, no allowed_hosts (T12)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/task.toml:42",
+    "difference": "stricter"
+  },
+  {
+    "item": "[verifier] and [verifier.environment] network",
+    "harbor_0_24": "phase override; null inherits environment",
+    "qc_requires": "allowlist with exactly [api.openai.com, *.openai.com] in both (T12)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/task.toml:24-32",
+    "difference": "stricter"
+  },
+  {
+    "item": "[agent] network",
+    "harbor_0_24": "phase override; null inherits environment",
+    "qc_requires": "allowlist with exactly [api.anthropic.com, api.z.ai] (T12)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/task.toml:36-37",
+    "difference": "stricter"
+  },
+  {
+    "item": "allow_internet",
+    "harbor_0_24": "deprecated, mapped to network_mode with a warning",
+    "qc_requires": "forbidden anywhere in task.toml (T12)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "[agent] user",
+    "harbor_0_24": "null = image USER (often root)",
+    "qc_requires": "exactly \"1000:1000\" (T13); uid 1000 account with home and ENV HOME in environment/Dockerfile (S10); artifact dirs writable by uid 1000 (S8)",
+    "generator_requires": "also requires RUN mkdir -p /app && chown 1000:1000 /app and WORKDIR /app (Input Bundle Generator New/validate_bundle.py:541-557)",
+    "difference": "stricter"
+  },
+  {
+    "item": "Timeouts",
+    "harbor_0_24": "agent timeout null = none; verifier 600; build 600",
+    "qc_requires": "[verifier]/[agent] timeout_sec and build_timeout_sec positive and present (T11); instruction says 'You have N seconds' with N = [agent] timeout_sec (instruction_qc C1)",
+    "generator_requires": "instruction mentions seconds (Input Bundle Generator New/validate_bundle.py:456-461 \u00a72.4) + instruction_qc via \u00a73.4",
+    "difference": "stricter"
+  },
+  {
+    "item": "Resources",
+    "harbor_0_24": "cpus, memory_mb, storage_mb, gpus nullable; gpu_types, tpu, mcp_servers, skills_dir, healthcheck, workdir, env available",
+    "qc_requires": "cpus/memory_mb/storage_mb positive ints, gpus = 0, mcp_servers = []; no other [environment] key (T2, T13)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/task.toml:40-47",
+    "difference": "stricter"
+  },
+  {
+    "item": "docker_image",
+    "harbor_0_24": "optional prebuilt image; Dockerfile then optional",
+    "qc_requires": "forbidden anywhere (T2: publish-time output)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "Base image pin",
+    "harbor_0_24": "any FROM",
+    "qc_requires": "not checked by QC scripts",
+    "generator_requires": "exactly one FROM, public.ecr.aws/docker/library/<img>:<tag>@sha256:<64hex> (Input Bundle Generator New/validate_bundle.py:29-32, 503-510 \u00a75.2)",
+    "difference": "different"
+  },
+  {
+    "item": "Agent runtime pre-bake",
+    "harbor_0_24": "Harbor installs agents at run time when network allows",
+    "qc_requires": "openhands-sdk==1.55.1, openhands-tools==1.55.1, litellm==1.105.0, fastapi in /opt/openhands-sdk-venv, import check, chmod a+rX, apt curl ca-certificates tmux (QC assigned/Input_Bundle_QC/structure_qc.py:40-44 S9; DS-29)",
+    "generator_requires": "template Input Bundle Generator New/templates/<archetype>/environment/Dockerfile:4-9; apt layer must also have xxd file curl bash nodejs npm procps ca-certificates (Input Bundle Generator New/validate_bundle.py:513-538 \u00a75.3)",
+    "difference": "qc_only"
+  },
+  {
+    "item": "Canary GUID in instruction.md",
+    "harbor_0_24": "one-line canary comment stripped before the agent sees it (task.py:10)",
+    "qc_requires": "IN-4 'no GUIDs' in instruction.md (01_Instruction_QC.md:34); no canary rule elsewhere",
+    "generator_requires": "no canary in templates",
+    "difference": "different"
+  },
+  {
+    "item": "'Do not cheat / online' sentence",
+    "harbor_0_24": "no concept",
+    "qc_requires": "no check, presence or absence never judged (IN-10)",
+    "generator_requires": "required: instruction must contain an online-lookup prohibition (Input Bundle Generator New/validate_bundle.py:464-471 \u00a72.5)",
+    "difference": "different"
+  },
+  {
+    "item": "Instruction prose rules",
+    "harbor_0_24": "none",
+    "qc_requires": "no em/en dash anywhere in bundle (X1), banned vocabulary and AI tells (P1-P3), no grading machinery named (C2), no word 'reward' (C3), declared artifacts named by full path (C5)",
+    "generator_requires": "size < 6000 chars, an absolute path in backticks (Input Bundle Generator New/validate_bundle.py:439-453) + instruction_qc",
+    "difference": "qc_only"
+  },
+  {
+    "item": "multi_step_reward_strategy / min_reward",
+    "harbor_0_24": "mean (runtime default) or final; min_reward number or table gates later steps",
+    "qc_requires": "not allowed (root keys exactly schema_version, artifacts)",
+    "generator_requires": "not used",
+    "difference": "stricter"
+  },
+  {
+    "item": "trajectory.json, steps/<name>/workdir, [[verifier.collect]], healthcheck, skills_dir",
+    "harbor_0_24": "supported",
+    "qc_requires": "forbidden by exact file set (S3) and exact key lists (T2)",
+    "generator_requires": "delegates to QC assigned/Input_Bundle_QC/structure_qc.py via Input Bundle Generator New/validate_bundle.py:1310 (\u00a73.3)",
+    "difference": "stricter"
+  },
+  {
+    "item": "reward.json precedence",
+    "harbor_0_24": "reward.json read first, reward.txt fallback (verifier.py:257-259)",
+    "qc_requires": "same fact relied on (QC assigned/Input_Bundle_QC/Final_checklist.md:37)",
+    "generator_requires": "same",
+    "difference": "same"
+  },
+  {
+    "item": "tests/ upload in separate mode",
+    "harbor_0_24": "not uploaded when the verifier image bundles tests (trial.py:949 skip_tests_upload=bundled_tests)",
+    "qc_requires": "same fact relied on (QC assigned/Input_Bundle_QC/Final_checklist.md:36)",
+    "generator_requires": "same",
+    "difference": "same"
+  },
+  {
+    "item": "Execution gate",
+    "harbor_0_24": "harbor run -a oracle / nop",
+    "qc_requires": "exe_copy.py tests-only copy; 5 oracle runs all exactly 1.000, nop exactly 0.000, stub run judged; harbor >= 0.24.0 (QC assigned/Input_Bundle_QC/Final_checklist.md:325-425)",
+    "generator_requires": "\u00a710 info only (Input Bundle Generator New/validate_bundle.py:1347)",
+    "difference": "qc_only"
+  },
+  {
+    "item": "File size / CRLF",
+    "harbor_0_24": "no rule (env content hash fixed for >4 GB in 0.24)",
+    "qc_requires": "no file > 100 MB (X3); CRLF fails in .sh (S6)",
+    "generator_requires": "CRLF fails in any text file (Input Bundle Generator New/validate_bundle.py:415-428)",
+    "difference": "qc_only"
+  }
+]

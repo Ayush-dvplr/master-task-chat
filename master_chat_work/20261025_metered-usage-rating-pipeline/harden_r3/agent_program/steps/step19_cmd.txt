@@ -1,0 +1,135 @@
+cd /tmp && rm -rf mod modout && cp -r /app/data mod && python3 - <<'EOF'
+import json, random, re
+# commitments: central -> tiny pool + huge minimum (true-up path); east -> huge pool (credit=charge)
+x = open('/tmp/mod/commitments.xml').read()
+x = x.replace('<pool region="central" amount="18054.89" minimum="55114.48"/>',
+              '<pool region="central" amount="500.00" minimum="90000.00"/>')
+x = x.replace('<pool region="east" amount="30356.92" minimum="38087.80"/>',
+              '<pool region="east" amount="900000.00" minimum="10.00"/>')
+x = x.replace('<pool region="west" amount="25385.56" minimum="45056.48"/>',
+              '<pool region="west" amount="0.00" minimum="0.00"/>')
+open('/tmp/mod/commitments.xml','w').write(x)
+
+# accounts: give 300 accounts a parent (billing group chains) to exercise tier counters
+rows = open('/tmp/mod/accounts.csv').read().splitlines()
+hdr, body = rows[0], rows[1:]
+ids = [r.split(',')[0] for r in body]
+random.seed(7)
+new = []
+for i, r in enumerate(body):
+    f = r.split(',')
+    if 100 <= i < 400:
+        f[3] = ids[i % 50]          # parent -> one of first 50 accounts
+    new.append(','.join(f))
+# make a 2-level chain: account at index 1 gets parent index 0
+f = new[1].split(','); f[3] = ids[0]; new[1] = ','.join(f)
+open('/tmp/mod/accounts.csv','w').write('\n'.join([hdr]+new)+'\n')
+
+# rate card: bump CMP consumer tier1 rate
+rc = open('/tmp/mod/rate_card.json').read().replace('"consumer": 0.0555', '"consumer": 0.1234')
+open('/tmp/mod/rate_card.json','w').write(rc)
+print('modified')
+EOF
+python3 /app/out/transform.py --input /tmp/mod --output /tmp/modout && python3 /tmp/verify.py /tmp/mod /tmp/modout && for r in central east west; do echo "-- $r"; cat /tmp/modout/region_$r.json; done
+
+=== OBSERVATION ===
+cd /tmp && rm -rf mod modout && cp -r /app/data mod && python3 - <<'EOF'
+import json, random, re
+# commitments: central -> tiny pool + huge minimum (true-up path); east -> huge pool (credit=charge)
+x = open('/tmp/mod/commitments.xml').read()
+x = x.replace('<pool region="central" amount="18054.89" minimum="55114.48"/>',
+              '<pool region="central" amount="500.00" minimum="90000.00"/>')
+x = x.replace('<pool region="east" amount="30356.92" minimum="38087.80"/>',
+              '<pool region="east" amount="900000.00" minimum="10.00"/>')
+x = x.replace('<pool region="west" amount="25385.56" minimum="45056.48"/>',
+              '<pool region="west" amount="0.00" minimum="0.00"/>')
+open('/tmp/mod/commitments.xml','w').write(x)
+# accounts: give 300 accounts a parent (billing group chains) to exercise tier counters
+rows = open('/tmp/mod/accounts.csv').read().splitlines()
+hdr, body = rows[0], rows[1:]
+ids = [r.split(',')[0] for r in body]
+random.seed(7)
+new = []
+for i, r in enumerate(body):
+    f = r.split(',')
+    if 100 <= i < 400:
+        f[3] = ids[i % 50]          # parent -> one of first 50 accounts
+    new.append(','.join(f))
+# make a 2-level chain: account at index 1 gets parent index 0
+f = new[1].split(','); f[3] = ids[0]; new[1] = ','.join(f)
+open('/tmp/mod/accounts.csv','w').write('\n'.join([hdr]+new)+'\n')
+# rate card: bump CMP consumer tier1 rate
+rc = open('/tmp/mod/rate_card.json').read().replace('"consumer": 0.0555', '"consumer": 0.1234')
+open('/tmp/mod/rate_card.json','w').write(rc)
+print('modified')
+EOF
+
+modified
+
+
+python3 /app/out/transform.py --input /tmp/mod --output /tmp/modout && python3 /tmp/verify.py /tmp/mod /tmp/modout && for r in central east west; do echo "-- $r"; cat /tmp/modout/region_$r.json; done
+all documents match the independent recomputation
+accepted lines: 15154 charge: 605710.38 credit: 124163.54 true_up: 16453.54 net: 498000.38
+-- central
+{
+  "region": "central",
+  "month": "2026-09",
+  "lines": 3048,
+  "accounts": 1181,
+  "units": {
+    "CMP": 166504,
+    "STO": 152109,
+    "EGR": 152348,
+    "SUP": 165094
+  },
+  "charge": "121958.93",
+  "credit_pool": "500.00",
+  "credit_base": "73546.29",
+  "credit_applied": "499.96",
+  "credit_unallocated": "0.04",
+  "minimum": "90000.00",
+  "true_up": "16453.54",
+  "net": "137912.51"
+}
+-- east
+{
+  "region": "east",
+  "month": "2026-09",
+  "lines": 3051,
+  "accounts": 1186,
+  "units": {
+    "CMP": 153097,
+    "STO": 150278,
+    "EGR": 149221,
+    "SUP": 172080
+  },
+  "charge": "125318.50",
+  "credit_pool": "900000.00",
+  "credit_base": "70180.56",
+  "credit_applied": "70180.56",
+  "credit_unallocated": "829819.44",
+  "minimum": "10.00",
+  "true_up": "0.00",
+  "net": "55137.94"
+}
+-- west
+{
+  "region": "west",
+  "month": "2026-09",
+  "lines": 3023,
+  "accounts": 1150,
+  "units": {
+    "CMP": 152367,
+    "STO": 164102,
+    "EGR": 149163,
+    "SUP": 158306
+  },
+  "charge": "121019.41",
+  "credit_pool": "0.00",
+  "credit_base": "74704.64",
+  "credit_applied": "0.00",
+  "credit_unallocated": "0.00",
+  "minimum": "0.00",
+  "true_up": "0.00",
+  "net": "121019.41"
+}

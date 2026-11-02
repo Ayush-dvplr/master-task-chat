@@ -1,0 +1,15 @@
+# P12 v3 r5 TODO (57e415c). Prompt: master_chat_tasks/prompts/issued/match-replay-desync-audit/20261024T2231_fix.md. Prior: TODO_P12v3r4.md
+- [x] P0.0 rename (opencode ses_e9122a413ffeNkrPVfYD46VZwn listed); date 22:33; tree sha 1cd9fe77061b match; kit HEAD 976c1666
+- [x] P0.1 rules read (COMMON v3, round notes C/E/F/G, LEVER_RULES, RULINGS, PLAYBOOK v2, checks.json CL-4/TS-23, FIX_SIDE_EFFECTS CL-4); fingerprints check
+- [x] P0.2 read QC v5 findings, r4 RECHECK_FIX, QC_DEFENCE, single_lever.py, test_output.py planting code
+- [x] P0.3 xref_check 0 findings (before)
+- [x] P0.4 copy tests/solution/environment -> trap/before_v3r5 (done); BEFORE single_lever rows (run_before_v3r5.log running)
+- [x] P1 recheck F1 CL-4, W1 TS-23 -> OUT/RECHECK_FIX.md rows
+- [x] P2.0 lock taken
+- [x] P2.1 F1 tests/test_output.py planting selection change
+- [x] P2.2 AFTER single_lever rows; oracle 172/172 all corpora; latest-entry fails density+tiebreak; RULE_COVERAGE reversal mutant; natural-corpus count over 50 seeds
+- [x] P2.3 WORK docs (LEVERS, DESIGN, QC_DEFENCE, XREF, COST_TABLE, RULE_COVERAGE) in step; TRUTH table + sha by script LAST
+- [x] P2.4 side effects recheck; xref; precheck CLEAN; kit scripts exit 0; pycache none
+- [x] P2.5 stacking_check -> OUT/STACKING_CHECK.md
+- [x] P2.6 Docker block (warm, oracle x3, owner x1, nop x1, stub x1) ALL_DONE
+- [x] P3 reports (RECHECK_FIX, PL_NOTE, result_57e415c.json); cleanup; lock release; rename

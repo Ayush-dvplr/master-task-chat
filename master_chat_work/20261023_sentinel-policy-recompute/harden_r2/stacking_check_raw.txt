@@ -1,0 +1,64 @@
+# stacking_check: sentinel-policy-recompute
+
+tests/test_output.py: 15 checks, positive total 44, negatives -11; judge: 15 criteria, positive 37, mode batched. Static hints only; confirm by reading the code.
+
+## 1. Test -> observable map
+
+| test | w | class (basis) | observable (literals) | logic (helpers) | asserts/and-cmp |
+|---|---|---|---|---|---|
+| hidden_region_allowance_hard | 5 | hidden_rows (row-owned check on hidden/fresh inputs (_hard, trap_, fresh)) | dependency_trace.json, dependency_trace.json is not an object, policy_resolved.json | reference_documents, assert_document, resolved_document | 1/0 |
+| hidden_unit_cutover_hard | 5 | hidden_rows (row-owned check on hidden/fresh inputs (_hard, trap_, fresh)) | dependency_trace.json, dependency_trace.json is not an object, policy_resolved.json | reference_documents, assert_document, resolved_document | 1/0 |
+| hidden_window_admit_hard | 5 | hidden_rows (row-owned check on hidden/fresh inputs (_hard, trap_, fresh)) | dependency_trace.json, dependency_trace.json is not an object, policy_resolved.json | reference_documents, assert_document, resolved_document | 1/0 |
+| hidden_policy_resolved_document_matches | 5 | hidden_rows (row-owned check on hidden/fresh inputs (_hard, trap_, fresh)) | policy_resolved.json | assert_document, resolved_document, reference_documents | 0/0 |
+| hidden_threshold_curve_document_matches | 5 | hidden_rows (row-owned check on hidden/fresh inputs (_hard, trap_, fresh)) | threshold_curve.json | assert_document, resolved_document, reference_documents | 0/0 |
+| hidden_dependency_trace_document_matches | 5 | hidden_rows (row-owned check on hidden/fresh inputs (_hard, trap_, fresh)) | dependency_trace.json, dependency_trace.json is not an object, dependency_trace.json keys differ:, dependency_trace.json resolution_order is not a list | resolved_document, assert_document, reference_documents | 5/0 |
+| cli_init_and_set_rebuild_config_from_authoritative_values | 3 | hidden_rows (row-owned check on hidden/fresh inputs (_hard, trap_, fresh)) | policy_resolved.json, rebuilt config.json | config_doc, assert_canonical, assert_document | 1/0 |
+| mutation_risk_delta_moves_only_contribution | 3 | mutation (mutation in name or description lead) | mutation-risk threshold_curve.json, mutation-risk policy_resolved.json, threshold_curve.json, policy_resolved.json | reference_documents, assert_document, resolved_document | 0/0 |
+| mutation_allowance_cut_drops_later_override | 3 | mutation (mutation in name or description lead) | mutation-allowance policy_resolved.json, policy_resolved.json | reference_documents, assert_document, resolved_document | 0/0 |
+| validate_accepts_supplied_config_and_rejects_missing_key | 3 | isolated (default (rule/fixture/case check)) | good.json, bad.json | expected_config, _grant_read, run_repaired_cli | 2/2 |
+| hidden_resolve_rerun_is_canonical_and_byte_identical | 1 | hidden_rows (row-owned check on hidden/fresh inputs (_hard, trap_, fresh)) | policy_resolved.json | write_corpus, run_resolve, assert_canonical | 2/0 |
+| shipped_artifacts_carry_policy_runs_and_archive | 1 | shipped_only (artifact/shipped wording) | - | - | 0/0 |
+| negative_hardcoded_sample_answers | -5 | negative (weight < 0 or negative_ name) | honest baseline: policy is computed, not embedded | embedded_policy_constants | 1/0 |
+| negative_transcript_disagrees_with_config | -3 | negative (weight < 0 or negative_ name) | config.json | load_json, cli_value | 1/0 |
+| negative_url_or_secret_in_artifacts | -3 | negative (weight < 0 or negative_ name) | honest baseline: offline local configuration, ://, api_key, password ... | - | 1/0 |
+
+TS-26 duplicate candidates (same observable AND same logic): hidden_region_allowance_hard = hidden_unit_cutover_hard = hidden_window_admit_hard
+
+## 2. TS-13 multi-assert hints
+
+- hidden_dependency_trace_document_matches: 5 asserts, 0 and-chained comparisons
+
+## 3. AL-28 penalty groups (tests + judge, |w| <= 5 per act)
+
+| act | tests | judge | sum |w| | |
+|---|---|---|---|---|
+| hardcoding the shipped answers | negative_hardcoded_sample_answers -5 | - | 5 | PASS |
+| UNMATCHED act (name it by hand) | negative_transcript_disagrees_with_config -3, negative_url_or_secret_in_artifacts -3 | R3 -3, R4 -3, R8 -5 | 17 | FAIL |
+| claims a check passed that its output contradicts (honesty) | - | R9 -5 | 5 | PASS |
+
+## 4. Weight shares (of positive test weight)
+
+- whole_doc: 0 (0.0%)
+- format_hidden: 0 (0.0%)
+- hidden_rows: 34 (77.3%)
+- isolated: 3 (6.8%)
+- mutation: 6 (13.6%)
+- shipped_only: 1 (2.3%)
+- G3: hidden or mutated reruns 90.9% (>= 30%); isolated+mutation 20.5%, whole-document 0.0%, shipped-only 2.3% (info, no cap)
+
+## 5. Caps and weights
+
+- tests 15, criteria 15 (no cap; kit floors 10 / 8)
+- weight-1 checks (TS-20: never on a core check): hidden_resolve_rerun_is_canonical_and_byte_identical, shipped_artifacts_carry_policy_runs_and_archive
+- judge J1 hints (criterion quotes a figure): none
+- judge J2 conduct criteria: R12, R13, R14, R15
+
+## Verdict hints
+
+- TS-26 duplicate candidates: 1 group(s): CHECK BY HAND
+- AL-28 groups <= 5: FAIL
+- G3 hidden or mutated reruns >= 30% (LEVER_RULES 24 Oct 13:15): 90.9% PASS
+- G3 isolated / shipped-only (info, no cap): 20.5% / 2.3%
+- tests >= 10 (no cap): 15 PASS
+- criteria >= 8 (no cap): 15 PASS
+- judge mode batched: batched

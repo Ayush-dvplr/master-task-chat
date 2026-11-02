@@ -1,0 +1,32 @@
+cd /app/data && python3 - <<'EOF'
+import re, collections
+# central
+lines=open('collector_central.csv',encoding='utf-8').read().split('\n')
+print('central last repr', repr(lines[-2])[:80], repr(lines[-1])[:40], len(lines))
+cnt=collections.Counter(l.count(',') for l in lines[1:] if l)
+print('central comma counts', cnt)
+# east
+el=open('collector_east.tsv',encoding='utf-8').read().split('\n')
+print('east tabs', collections.Counter(l.count('\t') for l in el[1:] if l), len(el))
+print('east qty non digit', collections.Counter(l.split('\t')[4] for l in el[1:] if l and not l.split('\t')[4].strip().isdigit()))
+# south
+s=open('collector_south.txt',encoding='latin-1').read().split('\n')
+print('south lens', collections.Counter(len(l) for l in s if l).most_common(10), len(s))
+print('south units bad', collections.Counter(l[46:52] for l in s if l and not l[46:52].strip().isdigit()))
+# west
+w=open('collector_west.log',encoding='utf-8').read().split('\n')
+print('west count', len([l for l in w if l]))
+print('west sample bad qty', collections.Counter(re.search(r'qty=(\S*)',l).group(1) for l in w if l and re.search(r'qty=(\S*)',l) and not re.search(r'qty=(\S*)',l).group(1).isdigit()))
+print([l for l in w if l and 'qty=' not in l][:5])
+EOF
+
+=== OBSERVATION ===
+central last repr 'CEN-003200,2026-10-02 23:22:27,AC43519,compute_hours,48' '' 3234
+central comma counts Counter({4: 3232})
+east tabs Counter({4: 3232}) 3234
+east qty non digit Counter({'7.0': 15, '12.5': 10, '-4': 9, 'n/a': 8, '': 8, '3e2': 7, 'twelve': 3, ' 7.0': 1})
+south lens [(72, 3232)] 3233
+south units bad Counter({'  12.5': 12, '   3e2': 10, '   n/a': 9, '      ': 9, 'twelve': 7, '    -4': 7, '   7.0': 5})
+west count 3232
+west sample bad qty Counter({'3e2': 10, 'twelve': 10, '-4': 9, '12.5': 8, '': 6, '7.0': 5, 'n/a': 5})
+[]

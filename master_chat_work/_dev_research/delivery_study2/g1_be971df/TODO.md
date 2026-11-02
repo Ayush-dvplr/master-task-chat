@@ -1,0 +1,16 @@
+# TODO be971df (g1)
+- [x] Setup: session renamed (opencode ses_e882f029cffeO1YgAa6918ZXgP matched), repo HEAD a7d269dfa75598792b23103d59dfc1e347ad7b8d
+- [x] Read map: LEVER_RULES_v2, QC_RULINGS, QC_FIX_PLAYBOOK_v2, LEAK_LIBRARY, DELIVERY_LEARNINGS, SYNTHESIS, QC kit rule ids
+- [x] QC report search for 6d12f970 / 7c2e77a1 (find -iname: only the task folders; no QC report)
+- [x] Step1 A_6d12f970.md (tests GENUINE; judge run used older judge.toml = version skew, failures real under it)
+- [x] Step1 A_18b5d99f.md (GENUINE tests+judge; weak-card hidden extracts 95/103; judge negatives 14)
+- [x] Step1 A_7c2e77a1.md (PARTLY: inverted rate-window oracle quirk 46 pts; held-out 11 unpinned)
+- [x] Step1 A_3f39299a.md (GENUINE: hidden mid-season settings change in all 22 hidden extracts; judge 15 conduct)
+- [x] Step1 A_b42c61b9.md
+- [x] Step2 C_6d12f970.md
+- [x] Step2 C_18b5d99f.md
+- [x] Step2 C_7c2e77a1.md
+- [x] Step2 C_3f39299a.md
+- [x] Step2 C_b42c61b9.md
+- [x] Step3 GROUP_SUMMARY.md
+- [x] result_be971df.json (parse check OK)

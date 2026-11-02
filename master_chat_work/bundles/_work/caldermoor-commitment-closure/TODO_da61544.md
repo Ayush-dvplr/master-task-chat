@@ -1,0 +1,25 @@
+# TODO da61544 (P9 harden r3, LAST) started 01:52 IST 25 Oct
+- [x] rename session, rules read (see summary), OUT created
+- [x] P1.1 Phase A genuine check (diff copy vs BUNDLE, result.json, verifier logs, judge)
+- [x] P1.2 root cause 4 causes
+- [x] P1.3 lever table from reward-details
+- [x] P1.4 trajectory autopsy (H7 step numbers: rewrite vs own reading)
+- [x] P1.5 save agent program to OUT/agent_program/
+- [x] P1.5b H7 fuzz >=300 on probe-3 and probe-2 programs (copy driver)
+- [x] P1.6 leak library rows + lever plan
+- [x] P1.7 OUT/DIAGNOSIS.md, STOP, wait for go
+- [x] go received 02:20 (night master): N2 wait; gate on chain_depth mutant >=25% alone
+- [x] P2.0 restore copy WORK/trap/before_r3
+- [x] P2.1 read test_output.py generator/reference/_SHIPPED_DROP/tests layout + solve.py reserve/closure
+- [x] P2.2 docs: glossary wait clause; protocol s9 'the wait of'
+- [x] P2.3 reference + solve.py wait reserve; mutant chain_depth
+- [x] P2.4 fixture diamond shortcuts hidden seeds + assert N PMs move; (_SHIPPED_DROP extended 342,454 DONE: 0 shipped separate)
+- [x] P2.5 (edges_desk_01.csv regenerated; no _SHIPPED_DATA embedding exists) regenerate shipped data, re-embed _SHIPPED_DATA, new tests wait_reserve_exact/_hard, reward.toml
+- [x] P2.6 scores (oracle 194, mut_N2 -35.05%, p3/p2 87) + fuzz300 (mut 299/300, p3 300/300)
+- [x] P2.7 judge R13 + solve.sh check R13 ok + JUDGE_MAP
+- [x] P2.8 WORK docs: LEVERS, COST_TABLE, RULE_COVERAGE, QC_DEFENCE, DESIGN, XREF; TRUTH sha last
+- [x] P3.1 stacking_check -> OUT/STACKING_CHECK.md
+- [x] P3.2 reflex gate p3 + p2
+- [x] P3.3 QC 4 scripts, validator, precheck CLEAN, no pycache
+- [x] P3.4 Docker block oracle x3 owner nop stub forgery
+- [x] P3.5 HARDEN_REPORT, result_da61544.json

@@ -1,0 +1,65 @@
+{
+  "package": "migrakit",
+  "fixes": [
+    "core/records.py: FieldView.from_payload dropped explicit nulls, so a null field was indistinguishable from an absent one; it now records the null state (N1).",
+    "core/records.py: null_counts_as treated an empty null_counts_as column as 'absent'; it now falls back to [presence] explicit_null of null_semantics.ini (N2).",
+    "core/records.py: fill_mode ignored the fill column of field_policy.tsv; the column now wins over [fill] mode (N3, N4).",
+    "core/planner.py: the planner judged every prerequisite on the record as received; prerequisites are now judged on the record state reached at that point of the plan (M6).",
+    "core/planner.py: the planner refused to enter a schema twice; a plan may now pass through a schema more than once (M7).",
+    "core/planner.py: a cost tie was broken by plan length; it is now broken by comparing the lists of edge ids element by element (M8).",
+    "core/planner.py: path enumeration was exponential; a label-setting search over (schema, field state) now answers within the K14 budget on graphs with astronomically many paths.",
+    "core/executor.py: every correction was applied before the first edge; a correction is now applied on the first arrival at its pinned schema, in log order, and never again (C4).",
+    "core/executor.py: prerequisites were never checked during execution; a failing prerequisite now stops the run with status failed, code E_PREREQ_FAILED, the failing edge, the schema reached, the steps completed and a null payload (M11).",
+    "pipeline.py: feed lines were processed in file order; they are now processed in the received_seq order of their batch, then by feed line number (K13).",
+    "pipeline.py: the replay identity used the partner as written instead of the canonical partner id (K16, P4).",
+    "pipeline.py: only a record whose execution started could hold an identity; every record that passes the partner stage is now a candidate holder (K16).",
+    "pipeline.py: null tokens were matched against trimmed payload values; the match is now exact (N6).",
+    "pipeline.py: the batch receipt XOR skipped records rejected after the partner stage; it now covers every record of the batch, fingerprinted on the line as received (K13).",
+    "parser/identity.py: only one merge link was followed and a merge cycle was not detected; merge links are now followed to the end (P2) and a cycle raises E_ALIAS_CYCLE (P3).",
+    "parser/contracts.py: a partner's token line was merged with the default list and an empty partner line fell back to the default; a partner with its own line now uses exactly that line (N7).",
+    "parser/feed.py: a line that is not JSON aborted the run; it is now rejected with E_PARSE and the run continues (K15).",
+    "cli.py: a relative command-line path was resolved against the package folder instead of the caller's working directory (K10).",
+    "src/migrakit/__main__.py was missing, so `python -m migrakit` could not be run at all (K10).",
+    "report/classify.py: classify_result reported 'migrated' for every record that had a plan; status and code now come from the execution result (K13).",
+    "report/summary.py: by_category counted record statuses as category names; records are now mapped through the report taxonomy and every category is listed, zero included (T1, T2).",
+    "report/summary.py: the partners list was sorted by id; it now follows the ranks of partner_order.tsv, with unranked partners sorted by id at the end (T3)."
+  ],
+  "checks": [
+    {
+      "name": "visible tests pass on the repaired repository",
+      "passed": true
+    },
+    {
+      "name": "contract checks on synthetic contract folders pass",
+      "passed": true
+    },
+    {
+      "name": "plan_migration agrees with a brute-force search on shipped records",
+      "passed": true
+    },
+    {
+      "name": "every batch receipt of the shipped manifest matches (K13)",
+      "passed": true
+    },
+    {
+      "name": "plan_migration stays well inside 10 s on a 200-schema, 3000-edge domain (K14)",
+      "passed": true
+    },
+    {
+      "name": "patched-repo.zip has the K1 layout, no directory entries, no absolute or .. names",
+      "passed": true
+    },
+    {
+      "name": "state_signature, plan_migration and execute_plan leave their arguments unchanged (K7)",
+      "passed": true
+    },
+    {
+      "name": "python -m migrakit run writes the records and summary of run_pipeline (K10)",
+      "passed": true
+    },
+    {
+      "name": "out/summary.json is the summary of the shipped inputs",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,618 @@
+[
+  {
+    "id": "C01",
+    "source": "research/00-index.md:8-10",
+    "claim": "Task format identical in 0.23.0 and 0.24.0: task schema byte-identical (sha256 6c08a596...ef08d), task init scaffolds byte-identical (34 files), schema_version default 1.4.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: harbor task schema sha256 6c08a596fb8f...ef08d equals both _evidence/0.23 and _evidence/0.24 task-schema.json; 4 x harbor task init -> 34 files, diff -r identical to _scaffold-0.24 and _scaffold-0.23."
+  },
+  {
+    "id": "C02",
+    "source": "research/00-index.md:11-14",
+    "claim": "0.24.0 CLI flag changes: --share-org -> --share, harbor add -> harbor dataset add, start-env import-path flags removed, wandb env dropped.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: 76 COLUMNS=200 --help captures diff -rq identical to _evidence/0.24/allhelp; run --help lists --share, --diff, --effort, --stream, --use-static-ip. 0.23 side not re-run."
+  },
+  {
+    "id": "C03",
+    "source": "research/00-index.md:11-13",
+    "claim": "0.24.0 runtime changes: separate-verifier image precedence, RewardKit per-file grouping, multi-step leak fix, MCP/skills preflight.",
+    "status": "STILL_TRUE",
+    "evidence": "~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/models/task/verifier_mode.py:95-116 (step then task tests/Dockerfile or docker_image wins); trial/trial.py:829-836 _reset_shared_step_verifier_dirs empties /logs/verifier and /tests; trial/trial.py:1619-1627 requires_skills/requires_mcp_servers preflight; rewardkit 0.2.1 [scoring.test_output] scored in /tmp/opencode-logs/research-kit-analysis-20261020T2301/dh-oracle.log. Changelog W2 not re-fetched."
+  },
+  {
+    "id": "C04",
+    "source": "research/00-index.md:15-16",
+    "claim": "Both examples pass static checks and score oracle 1.0, nop 0.0 in local Docker.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/single-oracle.log, single-nop.log, multi-oracle.log, multi-nop.log: result.json rewards 1.0 / 0.0 / 1.0 (both steps 1.0) / 0.0 (inspect-data only), exception None. Note: the 'static checks' are the kit's own; both examples fail current QC (/tmp/opencode-logs/research-kit-analysis-20261020T2301/qc_on_bundles.log)."
+  },
+  {
+    "id": "C05",
+    "source": "research/00-index.md:17-19",
+    "claim": "multi_step_reward_strategy final + min_reward 1.0: half-solved scores 0.0 under final, 0.5 under mean; mean drops a crashed step.",
+    "status": "STILL_TRUE",
+    "evidence": "~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/trial/trial.py:793-825 (_select_multi_step_reward returns last step result; _aggregate_step_rewards excludes steps with verifier_result None). Half-solved runs not repeated; oracle/nop final runs repeated (multi-oracle 1.0, multi-nop 0.0 with step 2 skipped)."
+  },
+  {
+    "id": "C06",
+    "source": "research/00-index.md:20-21",
+    "claim": "Unknown task.toml keys and misspelled sections are silently ignored.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log: [enviroment], cpu = 2 and root key stepz all load with warnings=[]; task-schema.json has 0 occurrences of \"additionalProperties\": false."
+  },
+  {
+    "id": "C07",
+    "source": "research/00-index.md:21",
+    "claim": "Only one-line canary comments are stripped from instruction.md.",
+    "status": "STILL_TRUE",
+    "evidence": "~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/models/task/task.py:10 _CANARY_LINE_RE = ^(<!--.*canary.*-->|#.*canary.*)$; /tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log: one-line stripped, two-line comment passed through unchanged."
+  },
+  {
+    "id": "C08",
+    "source": "research/00-index.md:21-22",
+    "claim": "A step's verifier timeout does not inherit [verifier] timeout_sec; it is 600 s unless set per step.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log: task verifier.timeout_sec 300.0, step verifier.timeout_sec 600.0, fallback condition (step value is None) False; ~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/trial/trial.py:838-843; models/task/config.py:563 timeout_sec: float = 600.0."
+  },
+  {
+    "id": "C09",
+    "source": "research/00-index.md:22-23",
+    "claim": "A separate verifier sees only files declared in artifacts.",
+    "status": "STILL_TRUE",
+    "evidence": "~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/models/task/verifier_mode.py:95-116; trial/trial.py:949 skip_tests_upload=definition.bundled_tests; trial/artifact_handler.py:370 _upload_target_source. /tmp/opencode-logs/research-kit-analysis-20261020T2301/dh-oracle.log: separate verifier built from tests/Dockerfile scored 1.0 from declared artifacts only. QC Final_checklist.md:34-36 states the same."
+  },
+  {
+    "id": "C10",
+    "source": "research/00-index.md:46",
+    "claim": "L1: harbor --version prints 0.24.0.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: 0.24.0, exit 0."
+  },
+  {
+    "id": "C11",
+    "source": "research/00-index.md:47",
+    "claim": "L2: task schema identical across versions, schema_version default 1.4.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: sha256 identical to both saved schemas."
+  },
+  {
+    "id": "C12",
+    "source": "research/00-index.md:48",
+    "claim": "L3: four init variants, 34 files, identical across versions.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: SCAFFOLDS_IDENTICAL_TO_KIT_0.24 and _0.23."
+  },
+  {
+    "id": "C13",
+    "source": "research/00-index.md:49",
+    "claim": "L4: --help for all commands; 74 vs 76 files, 18 differ, dataset-add/remove only in 0.24.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: 76 files re-captured, identical to _evidence/0.24/allhelp. 0.23 captures not re-run (uvx harbor==0.23.0 not executed)."
+  },
+  {
+    "id": "C14",
+    "source": "research/00-index.md:50",
+    "claim": "L5: run --help gains --diff, --effort, --stream, --use-static-ip; --share-org -> --share.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: RUNHELP_IDENTICAL; flags listed."
+  },
+  {
+    "id": "C15",
+    "source": "research/00-index.md:51",
+    "claim": "L6: both examples load; is_valid_dir True.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log: single-step and multi-step is_valid_dir = True, loaded."
+  },
+  {
+    "id": "C16",
+    "source": "research/00-index.md:52",
+    "claim": "L7: harbor run --dry-run prints Dry run OK on both examples.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/checklist-test.log B8: 'Dry run OK - 1 trial(s); nothing was run.' rc=0 for both."
+  },
+  {
+    "id": "C17",
+    "source": "research/00-index.md:53",
+    "claim": "L8: single oracle 1.0, single nop 0.0, multi oracle 1.0, multi nop 0.0 (step 2 skipped), 0 exceptions.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/single-*.log, multi-*.log and result.json step_results."
+  },
+  {
+    "id": "C18",
+    "source": "research/00-index.md:54",
+    "claim": "L9: legacy memory/storage/allow_internet load with deprecation warnings; version=1.0 -> schema_version 1.0; typos load silently; bad/duplicate step names rejected.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log, same outcomes as _evidence/0.24/parser-edge-cases.txt."
+  },
+  {
+    "id": "C19",
+    "source": "research/00-index.md:55",
+    "claim": "L10: harbor lint does not exist (exit 2).",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: exit=2, No such command 'lint'."
+  },
+  {
+    "id": "C20",
+    "source": "research/00-index.md:56",
+    "claim": "L11: harbor check runs an agent, defaults claude-code / claude-sonnet-4-6.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log: both strings in harbor check --help."
+  },
+  {
+    "id": "C21",
+    "source": "research/00-index.md:57",
+    "claim": "L12: scaffolded scripts are -rw-r--r-- and still run.",
+    "status": "STILL_TRUE",
+    "evidence": "ls -l on re-scaffolded solve.sh/test.sh: -rw-r--r--; the -rw-r--r-- example scripts ran in the L8 re-runs."
+  },
+  {
+    "id": "C22",
+    "source": "research/00-index.md:58",
+    "claim": "L13: cited file:line locations in the installed 0.24.0 source.",
+    "status": "STILL_TRUE",
+    "evidence": "Spot-checked task.py:9-29, 96-104; trial.py:793-843, 1426-1430; verifier_mode.py:95-125; verifier.py:24-36, 189-193; oracle.py:57-64; multi_step.py:402-410; paths.py:47-48, 180-182; job.py:258-266. harbor-0.24.0.dist-info/RECORD dated Oct 14 18:21 2026, before the kit. Minor offsets (MCPServerConfig starts config.py:617, not 614)."
+  },
+  {
+    "id": "C23",
+    "source": "research/00-index.md:59",
+    "claim": "L14: final strategy oracle 1.0, nop 0.0; half-solved final 0.0, mean 0.5.",
+    "status": "STILL_TRUE",
+    "evidence": "oracle/nop re-run (see L8 row); half-solved variants not re-run; trial.py:793-825 gives the same arithmetic."
+  },
+  {
+    "id": "C24",
+    "source": "research/00-index.md:60",
+    "claim": "L15: examples pass every non-TB static checklist item.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/checklist-test.log: kit's checklist-test.zsh (keycheck/JOBS paths moved to SCRATCH) gives the same heading/rc sequence as the first 122 lines of _evidence/0.24/checklist-test.txt. Planted-fault copies not re-run."
+  },
+  {
+    "id": "C25",
+    "source": "research/00-index.md:101",
+    "claim": "schema_version 1.4 wins over the docs' 1.3.",
+    "status": "STILL_TRUE",
+    "evidence": "CLI default 1.4 (task-schema.json); QC structure_qc.py:574-576 T3 also requires exactly 1.4."
+  },
+  {
+    "id": "C26",
+    "source": "research/00-index.md:102",
+    "claim": "harbor lint absent in 0.24.0.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log."
+  },
+  {
+    "id": "C27",
+    "source": "research/00-index.md:103",
+    "claim": "Docs llms-full.txt describes a Harbor newer than 0.24.0.",
+    "status": "UNVERIFIED",
+    "evidence": "Web page not re-fetched (no outbound fetch in this audit)."
+  },
+  {
+    "id": "C28",
+    "source": "research/00-index.md:104",
+    "claim": "0.24.0 strips only one-line canary comments, unlike the docs' two-line example.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log two-line case kept."
+  },
+  {
+    "id": "C29",
+    "source": "research/00-index.md:105",
+    "claim": "MCP headers not in the 0.24.0 schema.",
+    "status": "STILL_TRUE",
+    "evidence": "grep -c '\"headers\"' task-schema.json = 0."
+  },
+  {
+    "id": "C30",
+    "source": "research/00-index.md:106",
+    "claim": "Scaffold timeouts are 600.0.",
+    "status": "STILL_TRUE",
+    "evidence": "re-scaffolded single/task.toml:16,22,26 timeout_sec = 600.0."
+  },
+  {
+    "id": "C31",
+    "source": "research/00-index.md:107",
+    "claim": "Legacy version = 1.0 / memory = 2G are legacy; use schema_version / memory_mb.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log legacy rows."
+  },
+  {
+    "id": "C32",
+    "source": "research/00-index.md:108",
+    "claim": "Canary prefix written by init is harbor-canary.",
+    "status": "STILL_TRUE",
+    "evidence": "_scaffold-0.24/canary/instruction.md:1 re-scaffolded identically."
+  },
+  {
+    "id": "C33",
+    "source": "research/00-index.md:109",
+    "claim": "Verifier placement depends on target: Harbor default shared, TB separate.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor default unchanged (config.py:569-575). QC removes the choice: separate is mandatory (structure_qc.py:455-459 T2; Final_checklist.md:34)."
+  },
+  {
+    "id": "C34",
+    "source": "research/00-index.md:110",
+    "claim": "Omit allow_internet and use network_mode.",
+    "status": "STILL_TRUE",
+    "evidence": "allow_internet still deprecated (traps.log warning); QC also bans it (structure_qc.py:505-507 T12)."
+  },
+  {
+    "id": "C35",
+    "source": "research/00-index.md:111",
+    "claim": "Use binary reward.txt (TB requires binary).",
+    "status": "STILL_TRUE",
+    "evidence": "Still valid for Harbor (verifier.py:257-259 reads reward.json then reward.txt). Conflicts with QC: rewardkit writes reward.json, test.sh writes no reward (tests_qc B4), reward is weighted -1..1 (Final_checklist.md:229-231)."
+  },
+  {
+    "id": "C36",
+    "source": "research/00-index.md:116",
+    "claim": "Separate-verifier and RewardKit behaviour in 0.24 not exercised locally.",
+    "status": "STALE",
+    "evidence": "Now exercised: QC exe_copy.py tests-only copy of a current-format bundle, separate verifier built from tests/Dockerfile with harbor-rewardkit==0.2.1: oracle 1.0, nop 0.0, reward.json + reward-details.json written by rewardkit (/tmp/opencode-logs/research-kit-analysis-20261020T2301/dh-oracle.log, dh-nop.log). Judged channel not executed."
+  },
+  {
+    "id": "C37",
+    "source": "research/00-index.md:117-118",
+    "claim": "Agent network_mode = no-network enforcement is unproven.",
+    "status": "UNVERIFIED",
+    "evidence": "On this host (Docker 29.8.2 linux/arm64) Harbor accepted agent no-network and the runs completed (/tmp/opencode-logs/research-kit-analysis-20261020T2301/single-oracle.log); docker.py:323-338 sets disable_internet from _enable_egress_control. No probe of actual egress was run."
+  },
+  {
+    "id": "C38",
+    "source": "research/00-index.md:119-120",
+    "claim": "[steps.verifier] fallback to task-level user and network_mode.",
+    "status": "UNVERIFIED",
+    "evidence": "Not checked in this audit."
+  },
+  {
+    "id": "C39",
+    "source": "research/00-index.md:121",
+    "claim": "dataset.toml field list.",
+    "status": "UNVERIFIED",
+    "evidence": "harbor dataset init not run."
+  },
+  {
+    "id": "C40",
+    "source": "research/00-index.md:122-126",
+    "claim": "TB resource sizes, TB acceptance of omitted allow_internet, TB suffix N, TB non-root, TB2 metadata keys.",
+    "status": "UNVERIFIED",
+    "evidence": "TB repository not fetched."
+  },
+  {
+    "id": "C41",
+    "source": "research/00-index.md:133-136",
+    "claim": "Kit temp folders under /tmp/opencode-logs were left in place.",
+    "status": "STILL_TRUE",
+    "evidence": "ls -d shows jobs/, half-final/, half-mean/, legacytask/, scaffold-check/, 'bad task/' all present."
+  },
+  {
+    "id": "C42",
+    "source": "research/00-index.md:144-146",
+    "claim": "/tmp/harbor-v024 clone left in place.",
+    "status": "STILL_TRUE",
+    "evidence": "ls -d /tmp/harbor-v024 present."
+  },
+  {
+    "id": "C43",
+    "source": "research/01-report-0.23-to-0.24.md:9-14",
+    "claim": "Task file format did not change; a 0.23.0 task needs no file edits to load under 0.24.0.",
+    "status": "STILL_TRUE",
+    "evidence": "Schema and scaffolds identical (rerun.log). True for Harbor only: the same task fails current QC on file set, task.toml shape and reward mechanism (qc_on_bundles.log)."
+  },
+  {
+    "id": "C44",
+    "source": "research/01-report-0.23-to-0.24.md:20-21",
+    "claim": "Installed 0.24.0; 0.23.0 available via uvx.",
+    "status": "STILL_TRUE",
+    "evidence": "harbor --version 0.24.0; uvx 0.23.0 not re-run."
+  },
+  {
+    "id": "C45",
+    "source": "research/01-report-0.23-to-0.24.md:22-24",
+    "claim": "v0.24.0 released 2026-10-05 (b53b813), v0.23.0 2026-09-12 (1e5c5c6), 146 commits.",
+    "status": "UNVERIFIED",
+    "evidence": "GitHub not queried (allowed repos list excludes harbor-framework/harbor)."
+  },
+  {
+    "id": "C46",
+    "source": "research/01-report-0.23-to-0.24.md:25",
+    "claim": "requires_python >=3.12.",
+    "status": "STILL_TRUE",
+    "evidence": "harbor-0.24.0.dist-info/METADATA: Requires-Python: >=3.12 (0.23 not checked)."
+  },
+  {
+    "id": "C47",
+    "source": "research/01-report-0.23-to-0.24.md:31-36",
+    "claim": "Schema sha identical, 1.4 default, scaffolds identical, task help identical, no renamed fields.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log."
+  },
+  {
+    "id": "C48",
+    "source": "research/01-report-0.23-to-0.24.md:37-38",
+    "claim": "git diff v0.23.0..v0.24.0 shows config.py changed only in a doc pointer.",
+    "status": "UNVERIFIED",
+    "evidence": "No clone or diff run."
+  },
+  {
+    "id": "C49",
+    "source": "research/01-report-0.23-to-0.24.md:40-42",
+    "claim": "Docs configuration page shows schema_version 1.3; CLI 1.4 wins.",
+    "status": "UNVERIFIED",
+    "evidence": "CLI half true (1.4); docs half not re-fetched."
+  },
+  {
+    "id": "C50",
+    "source": "research/01-report-0.23-to-0.24.md:50",
+    "claim": "Separate verifiers prefer their own image/build definition; a dedicated image must bundle tests.",
+    "status": "STILL_TRUE",
+    "evidence": "~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/models/task/verifier_mode.py:95-116; trial.py:949; /tmp/opencode-logs/research-kit-analysis-20261020T2301/dh-oracle.log."
+  },
+  {
+    "id": "C51",
+    "source": "research/01-report-0.23-to-0.24.md:51",
+    "claim": "RewardKit groups criteria per Python file; pin harbor-rewardkit==0.2.*.",
+    "status": "STILL_TRUE",
+    "evidence": "rewardkit 0.2.1 scores test_output.py as input 'test_output' via [scoring.test_output] (dh-oracle run). QC narrows the pin to exactly ==0.2.1 (tests_qc K5)."
+  },
+  {
+    "id": "C52",
+    "source": "research/01-report-0.23-to-0.24.md:52",
+    "claim": "RewardKit rejects non-finite scores; missing CSV column is no longer an empty match.",
+    "status": "UNVERIFIED",
+    "evidence": "rewardkit internals not tested; Harbor's own verifier.py rejects non-finite reward.txt values (seen at verifier.py:83 (txt) and :118 (json))."
+  },
+  {
+    "id": "C53",
+    "source": "research/01-report-0.23-to-0.24.md:53",
+    "claim": "Multi-step: previous step's /tests and /logs/verifier no longer leak.",
+    "status": "STILL_TRUE",
+    "evidence": "~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/trial/trial.py:829-836."
+  },
+  {
+    "id": "C54",
+    "source": "research/01-report-0.23-to-0.24.md:54",
+    "claim": "MCP/skills capability preflight.",
+    "status": "STILL_TRUE",
+    "evidence": "~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/trial/trial.py:1619-1627."
+  },
+  {
+    "id": "C55",
+    "source": "research/01-report-0.23-to-0.24.md:55-58",
+    "claim": "Mount warning, compose GPU, exec bits on publish, >4 GB hash fix.",
+    "status": "UNVERIFIED",
+    "evidence": "Not checked."
+  },
+  {
+    "id": "C56",
+    "source": "research/01-report-0.23-to-0.24.md:70-81",
+    "claim": "CLI change table.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/rerun.log (0.24 side)."
+  },
+  {
+    "id": "C57",
+    "source": "research/01-report-0.23-to-0.24.md:85-87",
+    "claim": "0.24.0 adds semver>=3.0.4, cwsandbox[wandb]>=1.10.0, runta-sdk>=0.2.0,<0.3.0.",
+    "status": "STILL_TRUE",
+    "evidence": "harbor-0.24.0.dist-info/METADATA Requires-Dist lines."
+  },
+  {
+    "id": "C58",
+    "source": "research/01-report-0.23-to-0.24.md:99-103",
+    "claim": "One-line canary strip, step verifier timeout not inherited, mean drops errored steps.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log; trial.py:793-843."
+  },
+  {
+    "id": "C59",
+    "source": "research/01-report-0.23-to-0.24.md:104-106",
+    "claim": "Unknown keys ignored with no warning.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log."
+  },
+  {
+    "id": "C60",
+    "source": "research/01-report-0.23-to-0.24.md:111-112",
+    "claim": "RewardKit and separate-verifier changes not exercised locally.",
+    "status": "STALE",
+    "evidence": "Exercised now (/tmp/opencode-logs/research-kit-analysis-20261020T2301/dh-oracle.log, dh-nop.log)."
+  },
+  {
+    "id": "C61",
+    "source": "research/01-report-0.23-to-0.24.md:113-114",
+    "claim": "Whether 0.23 tasks with a dedicated verifier image but no bundled tests now fail.",
+    "status": "UNVERIFIED",
+    "evidence": "Not tested."
+  },
+  {
+    "id": "C62",
+    "source": "research/02-format-spec-0.24.md:35-41",
+    "claim": "is_valid_dir needs task.toml, environment/, instruction + test script (or bundled verifier image); solve.sh not checked by loader.",
+    "status": "STILL_TRUE",
+    "evidence": "~/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/models/task/task.py:96-129; traps.log loads three bundles."
+  },
+  {
+    "id": "C63",
+    "source": "research/02-format-spec-0.24.md:50",
+    "claim": "Minimal scaffold test.sh comment says rewards.json; Harbor reads reward.json.",
+    "status": "STILL_TRUE",
+    "evidence": "re-scaffolded minimal/tests/test.sh:7; models/trial/paths.py:48."
+  },
+  {
+    "id": "C64",
+    "source": "research/02-format-spec-0.24.md:92",
+    "claim": "Separate verifier: agent filesystem invisible; outputs must be in artifacts; no image -> fresh agent-env copy with tests/ uploaded.",
+    "status": "STILL_TRUE",
+    "evidence": "verifier_mode.py:118-125 fallback to environment_dir; dh-oracle run."
+  },
+  {
+    "id": "C65",
+    "source": "research/02-format-spec-0.24.md:105-106",
+    "claim": "No additionalProperties: false on any schema object.",
+    "status": "STILL_TRUE",
+    "evidence": "grep count 0 in task-schema.json."
+  },
+  {
+    "id": "C66",
+    "source": "research/02-format-spec-0.24.md:152",
+    "claim": "environment_mode default: separate if [verifier.environment] set else shared; shared + [verifier.environment] is an error.",
+    "status": "STILL_TRUE",
+    "evidence": "config.py:569-575 description; TaskConfig with shared + [verifier.environment] raised ValidationError (this audit)."
+  },
+  {
+    "id": "C67",
+    "source": "research/02-format-spec-0.24.md:188",
+    "claim": "[steps.verifier] timeout_sec defaults to 600 and never inherits.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log."
+  },
+  {
+    "id": "C68",
+    "source": "research/02-format-spec-0.24.md:195-202",
+    "claim": "mean averages steps with a verifier result; final returns the last step's result.",
+    "status": "STILL_TRUE",
+    "evidence": "trial.py:793-825."
+  },
+  {
+    "id": "C69",
+    "source": "research/02-format-spec-0.24.md:241-245",
+    "claim": "reward.json wins over reward.txt; missing/empty/unparsable reward is a verifier error.",
+    "status": "STILL_TRUE",
+    "evidence": "verifier.py:257-259 (json first, then txt); verifier.py:24-36 error classes."
+  },
+  {
+    "id": "C70",
+    "source": "research/02-format-spec-0.24.md:256",
+    "claim": "Oracle uploads steps/<name>/solution/ if present, else root solution/.",
+    "status": "STILL_TRUE",
+    "evidence": "agents/oracle.py:57-64."
+  },
+  {
+    "id": "C71",
+    "source": "research/02-format-spec-0.24.md:267-274",
+    "claim": "Keep the canary on one line; a two-line comment reaches the agent.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/traps.log."
+  },
+  {
+    "id": "C72",
+    "source": "research/03-decisions.md:14-17",
+    "claim": "D1: single-step by default; multi-step only when the consumer supports it.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor accepts both (multi oracle 1.0). QC: multi-step is not allowed at all; structure_qc.py:129-139 S2 needs root instruction.md, S3 rejects steps/, T2 root keys exactly [schema_version, artifacts] (qc_on_bundles.log)."
+  },
+  {
+    "id": "C73",
+    "source": "research/03-decisions.md:26-31",
+    "claim": "D2: TB -> separate verifier with artifacts; own -> shared acceptable.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor behaviour unchanged. QC conflict: separate is mandatory for every bundle (structure_qc.py:455-459 T2, Final_checklist.md:34)."
+  },
+  {
+    "id": "C74",
+    "source": "research/03-decisions.md:42-45",
+    "claim": "D3: test.sh runs pinned pytest + CTRF against a hidden reference.",
+    "status": "STILL_TRUE",
+    "evidence": "Still works in Harbor (L8 re-runs). QC conflict: test.sh must end with exec rewardkit (tests_qc B1), checks live in tests/test_output.py as @criterion functions, ctrf.json forbidden (structure_qc S5), test_outputs.py and *.reference files rejected (S3)."
+  },
+  {
+    "id": "C75",
+    "source": "research/03-decisions.md:55-57",
+    "claim": "D4: TB -> bake deps into tests/Dockerfile; own + shared -> runtime install with verifier public.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor unchanged. QC: always bake into tests/Dockerfile (K2, K4, K5, K7); verifier network is an OpenAI-only allowlist (T12), so a runtime pip/uv install cannot work."
+  },
+  {
+    "id": "C76",
+    "source": "research/03-decisions.md:67-69",
+    "claim": "D5: binary reward.txt; write 0 first, 1 on pass.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor unchanged. QC conflict: test.sh writes no reward bytes (tests_qc B4 flags 'echo 0 > /logs/verifier/reward.txt'), rewardkit writes reward.json, reward is a weighted sum in -1..1 (Final_checklist.md:229-231)."
+  },
+  {
+    "id": "C77",
+    "source": "research/03-decisions.md:80-85",
+    "claim": "D6: use network_mode never allow_internet; TB public; own agent no-network, verifier public.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor unchanged. QC conflict on values: [environment] no-network, [verifier] and [verifier.environment] allowlist api.openai.com/*.openai.com, [agent] allowlist api.anthropic.com/api.z.ai (structure_qc.py:464-509 T12). 'Never allow_internet' agrees."
+  },
+  {
+    "id": "C78",
+    "source": "research/03-decisions.md:95-97",
+    "claim": "D7: pin base images by digest, pin pip packages, do not pin apt.",
+    "status": "STILL_TRUE",
+    "evidence": "QC does not check base digests; it pins rewardkit ==0.2.1 (K5) and openhands-sdk/tools 1.55.1, litellm 1.105.0 (S9). Generator is stricter: one FROM, digest-pinned public.ecr.aws/docker/library (validate_bundle.py:29-32, 503-510 \u00a75.2)."
+  },
+  {
+    "id": "C79",
+    "source": "research/03-decisions.md:107-110",
+    "claim": "D8: always add canary strings; one-line canary first line of instruction.md.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor strips it (task.py:10). QC conflict: 01_Instruction_QC.md:34 IN-4 'no GUIDs' in instruction.md; canary in other files is not covered by any QC check."
+  },
+  {
+    "id": "C80",
+    "source": "research/03-decisions.md:119-125",
+    "claim": "D9: set cpus/memory_mb/storage_mb and all timeouts explicitly; multi-step per-step verifier timeout.",
+    "status": "STILL_TRUE",
+    "evidence": "QC enforces the same for single-step (T11 timeouts positive, T13 cpus/memory_mb/storage_mb positive ints, T2 key presence). Multi-step part N/A under QC."
+  },
+  {
+    "id": "C81",
+    "source": "research/03-decisions.md:129-138",
+    "claim": "D10: always solve.sh, README.md, [task]; keep .gitignore; optional trajectory.json, workdir/, shared tests/, compose.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor accepts all. QC conflict: README.md, .gitignore and any extra entry fail S3 (structure_qc.py:134-139); TRUTH.md, tests/Dockerfile, test_output.py, judge.toml, reward.toml are required (S2); solve.sh and [task] agree."
+  },
+  {
+    "id": "C82",
+    "source": "research/03-decisions.md:142-148",
+    "claim": "D11: [metadata] free-form; use target benchmark's template.",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor ignores [metadata] (traps.log passes it through). QC conflict: exact keys category, platforms, tags, estimated_duration_sec, expert_time_estimate_min, junior_time_estimate_min, null_floor, discrimination_weight (structure_qc.py:147-149 T2), no difficulty key."
+  },
+  {
+    "id": "C83",
+    "source": "research/03-decisions.md:158-163",
+    "claim": "D12: multi_step_reward_strategy final + min_reward 1.0 on every step before the last.",
+    "status": "STILL_TRUE",
+    "evidence": "trial.py:793-825 and multi runs. Not applicable under QC (multi-step rejected by S2/S3/T2)."
+  },
+  {
+    "id": "C84",
+    "source": "research/03-decisions.md:165-168",
+    "claim": "D13: schema_version 1.4.",
+    "status": "STILL_TRUE",
+    "evidence": "CLI default 1.4; QC T3 requires exactly 1.4."
+  },
+  {
+    "id": "C85",
+    "source": "research/03-decisions.md:170-176",
+    "claim": "D14: absolute paths, exact schema, no test-only requirements; TB suffix and no headings for TB only.",
+    "status": "STILL_TRUE",
+    "evidence": "QC: IN-1 / instruction_qc C1 requires 'You have N seconds' with N = [agent] timeout_sec; 'do not cheat' sentence has no check (IN-10) but generator \u00a72.5 requires an online-lookup phrase (validate_bundle.py:464-471); headings allowed (01_Instruction_QC.md:19)."
+  },
+  {
+    "id": "C86",
+    "source": "research/03-decisions.md:180-182",
+    "claim": "D15: leave agent user at the image default (root).",
+    "status": "STILL_TRUE",
+    "evidence": "Harbor default unchanged; lint still absent. QC conflict: [agent] user = \"1000:1000\" pinned (T13) and uid 1000 account required in environment/Dockerfile (S10)."
+  },
+  {
+    "id": "C87",
+    "source": "research/04-checklist.md:16-21",
+    "claim": "Both examples pass every non-TB static item; fail TB items C3, C5, C6 and the D5 suffix on purpose.",
+    "status": "STILL_TRUE",
+    "evidence": "/tmp/opencode-logs/research-kit-analysis-20261020T2301/checklist-test.log (C3/C5/C6 rc=1, D5 suffix FAIL, rest pass)."
+  },
+  {
+    "id": "C88",
+    "source": "research/04-checklist.md:7",
+    "claim": "Harbor's Python is at ~/.local/share/uv/tools/harbor/bin/python.",
+    "status": "STILL_TRUE",
+    "evidence": "Used for every Python check in this audit."
+  }
+]

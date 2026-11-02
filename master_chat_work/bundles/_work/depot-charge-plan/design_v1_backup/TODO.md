@@ -1,0 +1,15 @@
+# TODO depot-charge-plan (board 154f570)
+- [x] rename session (name_session.py printed opencode ses_e6c82bbdfffebyu6deVAtfxNU5)
+- [x] read docs 1-5
+- [x] P0.1 fingerprints GEN/QC (160+12 files byte-identical; GEN has 63 extra files under "ayush sah tasks/" not in fingerprint, not generator code)
+- [x] P0.2 PREMORTEM.md
+- [x] P0.3 DESIGN.md + BRANCH_FIRE.md + KILL_TEST.md (Docker)
+- [x] P0.4 QC_DEFENCE.md
+- [x] P0.5 DESIGN_SUMMARY.md
+- [x] P0.6 STOP: DESIGN READY
+- [x] P0b.1a proto/render.py (12 files from gen_proto instance)
+- [x] P0b.1b proto/solve_proto.py (parse files -> core.solve_flow -> 10 outputs)
+- [x] P0b.1c design_blind/instruction.md + environment/data/ (shipped sample) + docs/charging_rules.md
+- [x] P0b.2 BRANCH_FIRE on sample + 3 hidden seeds via rendered files
+- [x] P0b.3 STOP: DESIGN BLIND READY (path in DESIGN_SUMMARY.md)
+- [x] P0b.4 score design blind fd98e12: NO CORE (EXACT 9/9 on all 5 corpora); wait for master go for G-8 redesign

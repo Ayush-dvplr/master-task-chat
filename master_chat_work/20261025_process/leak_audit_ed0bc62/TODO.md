@@ -1,0 +1,106 @@
+# TODO ed0bc62 leak audit
+
+- [x] sentinel-policy-recompute | S1 visible surface
+- [x] sentinel-policy-recompute | S2 A-names
+- [x] sentinel-policy-recompute | S2 B-tone
+- [x] sentinel-policy-recompute | S2 C-rules
+- [x] sentinel-policy-recompute | S2 D-data
+- [x] sentinel-policy-recompute | S2 E-selftests
+- [x] sentinel-policy-recompute | S2 F-history
+- [x] sentinel-policy-recompute | S2 G-leftovers
+- [x] sentinel-policy-recompute | S2 H-consistency
+- [x] sentinel-policy-recompute | S2 I-judge
+- [x] sentinel-policy-recompute | S2 J-trajectory
+- [x] sentinel-policy-recompute | S3 <slug>.md written
+- [x] sensor-network-lsq-correlated-adjustment | S1 visible surface
+- [x] sensor-network-lsq-correlated-adjustment | S2 A-names
+- [x] sensor-network-lsq-correlated-adjustment | S2 B-tone
+- [x] sensor-network-lsq-correlated-adjustment | S2 C-rules
+- [x] sensor-network-lsq-correlated-adjustment | S2 D-data
+- [x] sensor-network-lsq-correlated-adjustment | S2 E-selftests
+- [x] sensor-network-lsq-correlated-adjustment | S2 F-history
+- [x] sensor-network-lsq-correlated-adjustment | S2 G-leftovers
+- [x] sensor-network-lsq-correlated-adjustment | S2 H-consistency
+- [x] sensor-network-lsq-correlated-adjustment | S2 I-judge
+- [x] sensor-network-lsq-correlated-adjustment | S2 J-trajectory
+- [x] sensor-network-lsq-correlated-adjustment | S3 <slug>.md written
+- [x] district-heat-flex-procurement | S1 visible surface
+- [x] district-heat-flex-procurement | S2 A-names
+- [x] district-heat-flex-procurement | S2 B-tone
+- [x] district-heat-flex-procurement | S2 C-rules
+- [x] district-heat-flex-procurement | S2 D-data
+- [x] district-heat-flex-procurement | S2 E-selftests
+- [x] district-heat-flex-procurement | S2 F-history
+- [x] district-heat-flex-procurement | S2 G-leftovers
+- [x] district-heat-flex-procurement | S2 H-consistency
+- [x] district-heat-flex-procurement | S2 I-judge
+- [x] district-heat-flex-procurement | S2 J-trajectory
+- [x] district-heat-flex-procurement | S3 <slug>.md written
+- [x] tariff-engine-audit-repair | S1 visible surface
+- [x] tariff-engine-audit-repair | S2 A-names
+- [x] tariff-engine-audit-repair | S2 B-tone
+- [x] tariff-engine-audit-repair | S2 C-rules
+- [x] tariff-engine-audit-repair | S2 D-data
+- [x] tariff-engine-audit-repair | S2 E-selftests
+- [x] tariff-engine-audit-repair | S2 F-history
+- [x] tariff-engine-audit-repair | S2 G-leftovers
+- [x] tariff-engine-audit-repair | S2 H-consistency
+- [x] tariff-engine-audit-repair | S2 I-judge
+- [x] tariff-engine-audit-repair | S2 J-trajectory
+- [x] tariff-engine-audit-repair | S3 <slug>.md written
+- [x] caldermoor-commitment-closure | S1 visible surface
+- [x] caldermoor-commitment-closure | S2 A-names
+- [x] caldermoor-commitment-closure | S2 B-tone
+- [x] caldermoor-commitment-closure | S2 C-rules
+- [x] caldermoor-commitment-closure | S2 D-data
+- [x] caldermoor-commitment-closure | S2 E-selftests
+- [x] caldermoor-commitment-closure | S2 F-history
+- [x] caldermoor-commitment-closure | S2 G-leftovers
+- [x] caldermoor-commitment-closure | S2 H-consistency
+- [x] caldermoor-commitment-closure | S2 I-judge
+- [x] caldermoor-commitment-closure | S2 J-trajectory
+- [x] caldermoor-commitment-closure | S3 <slug>.md written
+- [x] metered-usage-rating-pipeline | S1 visible surface
+- [x] metered-usage-rating-pipeline | S2 A-names
+- [x] metered-usage-rating-pipeline | S2 B-tone
+- [x] metered-usage-rating-pipeline | S2 C-rules
+- [x] metered-usage-rating-pipeline | S2 D-data
+- [x] metered-usage-rating-pipeline | S2 E-selftests
+- [x] metered-usage-rating-pipeline | S2 F-history
+- [x] metered-usage-rating-pipeline | S2 G-leftovers
+- [x] metered-usage-rating-pipeline | S2 H-consistency
+- [x] metered-usage-rating-pipeline | S2 I-judge
+- [x] metered-usage-rating-pipeline | S2 J-trajectory
+- [x] metered-usage-rating-pipeline | S3 <slug>.md written
+- [x] data-product-config-compiler | S1 visible surface
+- [x] data-product-config-compiler | S2 A-names
+- [x] data-product-config-compiler | S2 B-tone
+- [x] data-product-config-compiler | S2 C-rules
+- [x] data-product-config-compiler | S2 D-data
+- [x] data-product-config-compiler | S2 E-selftests
+- [x] data-product-config-compiler | S2 F-history
+- [x] data-product-config-compiler | S2 G-leftovers
+- [x] data-product-config-compiler | S2 H-consistency
+- [x] data-product-config-compiler | S2 I-judge
+- [x] data-product-config-compiler | S2 J-trajectory
+- [x] data-product-config-compiler | S3 <slug>.md written
+- [x] match-replay-desync-audit | S1 visible surface
+- [x] match-replay-desync-audit | S2 A-names
+- [x] match-replay-desync-audit | S2 B-tone
+- [x] match-replay-desync-audit | S2 C-rules
+- [x] match-replay-desync-audit | S2 D-data
+- [x] match-replay-desync-audit | S2 E-selftests
+- [x] match-replay-desync-audit | S2 F-history
+- [x] match-replay-desync-audit | S2 G-leftovers
+- [x] match-replay-desync-audit | S2 H-consistency
+- [x] match-replay-desync-audit | S2 I-judge
+- [x] match-replay-desync-audit | S2 J-trajectory
+- [x] match-replay-desync-audit | S3 <slug>.md written
+- [x] S4 LEAK_AUDIT.md sec1 table
+- [x] S4 sec2 recurring patterns
+- [x] S4 sec3 template patterns (P2 build, harden template, issue.py, LEVER_RULES)
+- [x] S4 sec4 LEAK_LIBRARY rows
+- [x] S4 sec5 open questions
+- [x] S4 sec6 lessons
+- [x] result_ed0bc62.json parses
+- [x] final reply

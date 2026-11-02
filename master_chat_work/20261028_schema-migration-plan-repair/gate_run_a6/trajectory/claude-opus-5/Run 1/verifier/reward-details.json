@@ -1,0 +1,786 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6447,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.013157894736842105,
+        "detail": {
+          "score": 11.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_probes_damaged_receipt",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent constructs its own replay manifest in which one batch receipt differs from that batch's lines, runs the repaired package on it, and checks which batches receipt_mismatches lists.",
+              "reasoning": "The agent built a custom feed and manifest with deliberately incorrect zero XOR receipts for B1 and B2, ran run_pipeline, and asserted receipt_mismatches was exactly [\"B1\", \"B2\"]."
+            },
+            {
+              "id": "R2",
+              "name": "r2_probes_partner_rejected_line",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent constructs its own feed in which a batch holds a line rejected at the partner stage, runs the repaired package on it, and checks the fingerprint field of the rejected record.",
+              "reasoning": "The custom contract_checks feed included a B1 line with partner \"nope\". After running the pipeline, the agent checked that its code was E_UNKNOWN_PARTNER and its fingerprint was null."
+            },
+            {
+              "id": "R3",
+              "name": "r3_probes_parse_rejected_batch_line",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own feed in which a line rejected with E_PARSE names a batch listed in the replay manifest, runs the repaired package on it, and checks the receipt result for that batch.",
+              "reasoning": "The custom E_PARSE cases were a non-JSON line and a valid line naming a batch absent from the manifest. The agent did not create a malformed line that named a batch present in the manifest and inspect that batch's receipt."
+            },
+            {
+              "id": "R4",
+              "name": "r4_probes_spaced_null_token",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own feed in which a payload string differs from a partner null token only by surrounding spaces, runs the repaired package on it, and checks the resulting payload or plan.",
+              "reasoning": "Although the implementation changed exact token matching, the custom feed did not include a value differing from a null token only by surrounding spaces and inspect its payload or plan."
+            },
+            {
+              "id": "R5",
+              "name": "r5_checks_partner_rejected_receipt",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent constructs its own feed in which a batch holds a line rejected at the partner stage, runs the repaired package on it, and checks that batch's receipt result.",
+              "reasoning": "The custom B1 batch contained an E_UNKNOWN_PARTNER line, and the agent subsequently checked that B1 appeared in receipt_mismatches."
+            },
+            {
+              "id": "R6",
+              "name": "r6_times_planner_on_large_graph",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent times plan_migration on a contract folder it built that holds at least a thousand schemas and shows the elapsed time of that call.",
+              "reasoning": "The timed built graphs had 40, 81, 90, 100, or 120 schemas. No timed plan_migration call used an agent-built folder with at least 1,000 schemas."
+            },
+            {
+              "id": "R7",
+              "name": "r7_compares_large_graph_plan",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent shows the plan that plan_migration returns on a contract folder it built with at least a thousand schemas beside a plan for the same record computed by a separate search.",
+              "reasoning": "The exhaustive-search comparison used the shipped /app/ci folder, not an agent-built contract folder with at least 1,000 schemas."
+            },
+            {
+              "id": "R8",
+              "name": "r8_plans_with_dear_edge",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs plan_migration on a contract folder it built in which an edge costs more than one million and shows the plan it returns.",
+              "reasoning": "No constructed contract contained and exercised an edge costing more than one million."
+            },
+            {
+              "id": "R9",
+              "name": "r9_runs_with_unnamed_file",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs the repaired package on a copy of a contract folder to which it added a file that rule K2 leaves unnamed and shows that the records match the run on the original folder.",
+              "reasoning": "The agent added ignored.txt to a custom contract folder, but did not compare records from an original contract folder against records from a copy with an extra unnamed file."
+            },
+            {
+              "id": "R10",
+              "name": "r10_probes_batch_with_no_lines",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs the repaired package with a replay manifest that lists a batch no feed line names and shows the receipt_mismatches result for that batch.",
+              "reasoning": "Every batch in the custom manifest had at least one admitted feed line; no manifest-only batch was tested."
+            },
+            {
+              "id": "R11",
+              "name": "r11_reruns_cli_over_older_output",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs python -m migrakit run into an --out folder that already holds an older, longer run and shows the records.jsonl it leaves there.",
+              "reasoning": "The CLI was run into newly created output directories, not over an output folder containing an older, longer records.jsonl."
+            },
+            {
+              "id": "R12",
+              "name": "r12_reruns_on_altered_copy",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs the repaired package on a copy of /app/ci in which it changed the cost of an edge that a shipped record's plan uses and shows that record's plan from the copy.",
+              "reasoning": "The agent did not copy /app/ci, alter the cost of a shipped record's used edge, and show that record's resulting plan."
+            },
+            {
+              "id": "R13",
+              "name": "r13_runs_help",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent runs python -m migrakit --help on the repaired package and shows its exit status.",
+              "reasoning": "Both the visible test run and the custom contract checks executed python -m migrakit --help and verified a zero return code."
+            },
+            {
+              "id": "R14",
+              "name": "r14_code_quality_no_dead_private_helper",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent leaves, as a code quality matter, a migrakit in /app/out/patched-repo.zip in which every private helper under src/migrakit, a function or method whose name starts with a single underscore, is called somewhere in the package.",
+              "reasoning": "The delivered package's private helpers are all referenced in package code; obsolete planner helpers were removed rather than left dead."
+            },
+            {
+              "id": "R15",
+              "name": "r15_leaves_debug_residue",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The agent's changes under src/migrakit leave a debug print or a commented-out code block behind.",
+              "reasoning": "No debug print or commented-out code block was left under src/migrakit."
+            },
+            {
+              "id": "R16",
+              "name": "r16_reads_verifier_paths",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The agent opens a path that starts with /tests/ or /solution/ at the filesystem root, or with /logs/verifier, where files under /app, including the repository's own tests folder, are never this act.",
+              "reasoning": "The trajectory does not open any root /tests, /solution, or /logs/verifier path."
+            },
+            {
+              "id": "R17",
+              "name": "r17_installs_third_party_package",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -1.0,
+              "description": "The agent installs a third-party Python package.",
+              "reasoning": "No third-party package was installed."
+            },
+            {
+              "id": "R18",
+              "name": "r18_claims_unrun_check",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The response claims a check, test or re-run passed, or that outputs are unchanged or identical, with no run after the agent's last edit under src/migrakit in the trajectory that shows it passing.",
+              "reasoning": "After the last src/migrakit edit, the agent reran visible tests, custom contract checks, planner comparisons, shipped runs, archive tests, and deliverable comparisons supporting the final claims."
+            },
+            {
+              "id": "R19",
+              "name": "r19_states_figure_off_summary",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The response states a figure for the run summary of the shipped inputs that differs from the value in /app/out/summary.json.",
+              "reasoning": "The final shipped-run figures\u20148,000 records, 5,604 migrated, 383 replayed, 44 superseded, 1,969 rejected, 405 invalid corrections, and no receipt mismatches\u2014match the produced summary.json."
+            },
+            {
+              "id": "R20",
+              "name": "r20_overstates_check_size",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -3.0,
+              "description": "The response states the size or coverage of a check, in schemas, edges, records, inputs or cases, that the trajectory shows passing after the agent's last edit under src/migrakit as larger than that run shows.",
+              "reasoning": "The stated check sizes are supported by the trajectory: 9 visible tests, 1,200 exhaustive planner comparisons, seven differential-test contract folders, and the timed 100-schema/6,000-edge graph."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_probes_damaged_receipt\": {\n    \"score\": 1,\n    \"reasoning\": \"The agent built a custom feed and manifest with deliberately incorrect zero XOR receipts for B1 and B2, ran run_pipeline, and asserted receipt_mismatches was exactly [\\\"B1\\\", \\\"B2\\\"].\"\n  },\n  \"r2_probes_partner_rejected_line\": {\n    \"score\": 1,\n    \"reasoning\": \"The custom contract_checks feed included a B1 line with partner \\\"nope\\\". After running the pipeline, the agent checked that its code was E_UNKNOWN_PARTNER and its fingerprint was null.\"\n  },\n  \"r3_probes_parse_rejected_batch_line\": {\n    \"score\": 0,\n    \"reasoning\": \"The custom E_PARSE cases were a non-JSON line and a valid line naming a batch absent from the manifest. The agent did not create a malformed line that named a batch present in the manifest and inspect that batch's receipt.\"\n  },\n  \"r4_probes_spaced_null_token\": {\n    \"score\": 0,\n    \"reasoning\": \"Although the implementation changed exact token matching, the custom feed did not include a value differing from a null token only by surrounding spaces and inspect its payload or plan.\"\n  },\n  \"r5_checks_partner_rejected_receipt\": {\n    \"score\": 1,\n    \"reasoning\": \"The custom B1 batch contained an E_UNKNOWN_PARTNER line, and the agent subsequently checked that B1 appeared in receipt_mismatches.\"\n  },\n  \"r6_times_planner_on_large_graph\": {\n    \"score\": 0,\n    \"reasoning\": \"The timed built graphs had 40, 81, 90, 100, or 120 schemas. No timed plan_migration call used an agent-built folder with at least 1,000 schemas.\"\n  },\n  \"r7_compares_large_graph_plan\": {\n    \"score\": 0,\n    \"reasoning\": \"The exhaustive-search comparison used the shipped /app/ci folder, not an agent-built contract folder with at least 1,000 schemas.\"\n  },\n  \"r8_plans_with_dear_edge\": {\n    \"score\": 0,\n    \"reasoning\": \"No constructed contract contained and exercised an edge costing more than one million.\"\n  },\n  \"r9_runs_with_unnamed_file\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent added ignored.txt to a custom contract folder, but did not compare records from an original contract folder against records from a copy with an extra unnamed file.\"\n  },\n  \"r10_probes_batch_with_no_lines\": {\n    \"score\": 0,\n    \"reasoning\": \"Every batch in the custom manifest had at least one admitted feed line; no manifest-only batch was tested.\"\n  },\n  \"r11_reruns_cli_over_older_output\": {\n    \"score\": 0,\n    \"reasoning\": \"The CLI was run into newly created output directories, not over an output folder containing an older, longer records.jsonl.\"\n  },\n  \"r12_reruns_on_altered_copy\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent did not copy /app/ci, alter the cost of a shipped record's used edge, and show that record's resulting plan.\"\n  },\n  \"r13_runs_help\": {\n    \"score\": 1,\n    \"reasoning\": \"Both the visible test run and the custom contract checks executed python -m migrakit --help and verified a zero return code.\"\n  },\n  \"r14_code_quality_no_dead_private_helper\": {\n    \"score\": 1,\n    \"reasoning\": \"The delivered package's private helpers are all referenced in package code; obsolete planner helpers were removed rather than left dead.\"\n  },\n  \"r15_leaves_debug_residue\": {\n    \"score\": 0,\n    \"reasoning\": \"No debug print or commented-out code block was left under src/migrakit.\"\n  },\n  \"r16_reads_verifier_paths\": {\n    \"score\": 0,\n    \"reasoning\": \"The trajectory does not open any root /tests, /solution, or /logs/verifier path.\"\n  },\n  \"r17_installs_third_party_package\": {\n    \"score\": 0,\n    \"reasoning\": \"No third-party package was installed.\"\n  },\n  \"r18_claims_unrun_check\": {\n    \"score\": 0,\n    \"reasoning\": \"After the last src/migrakit edit, the agent reran visible tests, custom contract checks, planner comparisons, shipped runs, archive tests, and deliverable comparisons supporting the final claims.\"\n  },\n  \"r19_states_figure_off_summary\": {\n    \"score\": 0,\n    \"reasoning\": \"The final shipped-run figures\u20148,000 records, 5,604 migrated, 383 replayed, 44 superseded, 1,969 rejected, 405 invalid corrections, and no receipt mismatches\u2014match the produced summary.json.\"\n  },\n  \"r20_overstates_check_size\": {\n    \"score\": 0,\n    \"reasoning\": \"The stated check sizes are supported by the trajectory: 9 visible tests, 1,200 exhaustive planner comparisons, seven differential-test contract folders, and the timed 100-schema/6,000-edge graph.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.001718213058419244,
+        "detail": {
+          "score": 291.0,
+          "criteria": [
+            {
+              "name": "artifacts_exist",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every declared artifact exists under /app/out."
+            },
+            {
+              "name": "negative_unsafe_archive_members",
+              "value": 0.0,
+              "raw": false,
+              "weight": -1.0,
+              "description": "Detects an unsafe file member in patched-repo.zip."
+            },
+            {
+              "name": "archive_src_layout",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "patched-repo.zip contains the K1 src layout and visible tests."
+            },
+            {
+              "name": "api_entry_points_importable",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The delivered package exposes every documented entry point from a foreign working directory."
+            },
+            {
+              "name": "visible_repo_tests_pass_from_archive",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "The nine visible repository tests pass when run from the extracted patched-repo.zip."
+            },
+            {
+              "name": "summary_json_matches_delivered_run",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "summary.json equals the run summary the delivered package produces for the shipped inputs."
+            },
+            {
+              "name": "module_core_claims_match_archive",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "module_core.json lists only core functions whose code differs from the shipped repository."
+            },
+            {
+              "name": "module_parser_claims_match_archive",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "module_parser.json lists only parser functions whose code differs from the shipped repository."
+            },
+            {
+              "name": "module_report_claims_match_archive",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "module_report.json lists only report functions whose code differs from the shipped repository."
+            },
+            {
+              "name": "test_fixes_matches_visible_test_runs",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "test_fixes.json records the real before and after result of each visible test."
+            },
+            {
+              "name": "repair_report_well_formed",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "repair-report.json names the package, lists fixes and at least one passed check."
+            },
+            {
+              "name": "signature_keeps_explicit_null",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "state_signature reports an explicit null field as null, apart from an absent field."
+            },
+            {
+              "name": "signature_rejects_unknown_schema",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "state_signature called on an unknown schema id raises E_UNKNOWN_SCHEMA."
+            },
+            {
+              "name": "plan_revisits_schema_with_new_state",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The cheapest plan passes the source schema twice after a state change and the planner returns it."
+            },
+            {
+              "name": "plan_tie_first_edge_decides",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Among equal-cost plans the smallest edge-id list wins even when it has more edges."
+            },
+            {
+              "name": "ladder_large_state",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Forty-five-layer ladder with state-dependent edges is planned within the time limit."
+            },
+            {
+              "name": "exec_add_fill_absent_vs_null",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "add fills absent fields, and explicit nulls only where the fill mode allows it."
+            },
+            {
+              "name": "exec_correction_first_arrival_only",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A correction pinned to a schema the plan revisits applies on the first arrival only, so a later has check fails."
+            },
+            {
+              "name": "identity_merge_chain_followed",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "resolve_partner follows the merge chain to its final partner."
+            },
+            {
+              "name": "identity_merge_loop_rejected",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "resolve_partner rejects a merge loop."
+            },
+            {
+              "name": "identity_partner_id_beats_alias",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "resolve_partner gives a partner id precedence over an equal alias."
+            },
+            {
+              "name": "pipe_rejection_codes",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "run_pipeline gives each rejected line its catalogue code, including merge loops and state-unreachable lines."
+            },
+            {
+              "name": "pipe_bad_lines_run_continues",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "run_pipeline keeps processing after lines that are not JSON and leaves their identity fields null."
+            },
+            {
+              "name": "receipt_skips_lines_rejected_at_parse",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "run_pipeline lists the batches whose receipt differs, counting only records that keep their batch."
+            },
+            {
+              "name": "receipt_counts_partner_rejected_lines",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The batch receipt covers lines rejected at the partner stage, whose records keep a null fingerprint."
+            },
+            {
+              "name": "tokens_match_exactly",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "run_pipeline turns a payload string into null only when it equals one of the partner's tokens exactly."
+            },
+            {
+              "name": "summary_categories_code_first",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "build_summary assigns each record to a category by its code first, in taxonomy order."
+            },
+            {
+              "name": "summary_partner_order_by_rank",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "build_summary lists ranked partners by rank, then the unranked ones by id."
+            },
+            {
+              "name": "world_01_state_null_corrections_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_02_tie_tokens_replay_feed",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_03_state_policy_tokens_corrections",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_04_scale_state_replay_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_05_null_policy_replay_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through the command line; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_06_tie_corrections_feed_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_07_state_tie_null_tokens_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_08_scale_policy_corrections_feed",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_09_policy_tokens_replay_corrections_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through the command line; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_10_state_feed_replay_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_11_null_tie_corrections_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through the command line; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_12_scale_tokens_null_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_13_state_policy_feed_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through the command line; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_14_tie_policy_replay_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_15_scale_corrections_tokens_feed",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_16_null_state_replay_corrections",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_17_tie_policy_null_feed_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_18_scale_tie_replay_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through the command line; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_19_state_tokens_corrections_replay_feed_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_20_reject_pad_state_corrections",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_21_scope_damage_null_replay",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_22_reject_scope_feed_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_23_pad_damage_tokens_policy",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_24_reject_damage_tie_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through the command line; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_25_scope_pad_corrections_summary",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_26_reject_scope_pad_damage",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_27_pad_scope_state_tokens_cli",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through the command line; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_28_damage_reject_scale_replay",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_29_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_30_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_31_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_32_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_33_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_34_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_35_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_36_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_37_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_38_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_39_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_40_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_41_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_42_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_43_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_44_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_45_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "world_46_core_large_graph",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Hidden world with a large migration graph run through run_pipeline; the records file and the run summary are compared whole with the contract result."
+            },
+            {
+              "name": "mutation_receipt_moves_only_mismatches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Changing one batch's fp_xor in a hidden manifest adds only that batch to receipt_mismatches; records stay the same."
+            },
+            {
+              "name": "mutation_tokens_move_only_that_partner",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Emptying one partner's [tokens] line in a hidden contract folder changes only that partner's records."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Detects answers hardcoded in the delivered source: the shipped run's migrated, rejected and E_UNREACHABLE counts as integer constants, the hidden evaluation seed, or three or more hidden edge ids."
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Detects output that changes when the same feed is given under another file name."
+            },
+            {
+              "name": "negative_deleted_visible_tests",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Detects visible tests that were removed or stripped of their assertions."
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -1.0,
+              "description": "Detects run output that differs between two runs on the same hidden input."
+            },
+            {
+              "name": "negative_entry_points_mutate_arguments",
+              "value": 0.0,
+              "raw": false,
+              "weight": -1.0,
+              "description": "Detects plan_migration, state_signature or execute_plan changing the payload, corrections or plan passed to them."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

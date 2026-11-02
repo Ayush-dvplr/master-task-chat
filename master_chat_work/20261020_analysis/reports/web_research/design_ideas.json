@@ -1,0 +1,307 @@
+[
+ {
+  "id": "W-001",
+  "lever": "Hidden composition of documented rules",
+  "mechanism": "instruction.md documents 8-15 rules for a tool (e.g. a config merger or ledger reconciler) plus an explicit precedence/combination table; visible examples exercise each rule alone; hidden tests combine 2-4 rules and hit their error paths.",
+  "why_models_fail": "Agents build locally correct per-rule handlers and test each rule in isolation; interactions and rejection paths are left unexercised.",
+  "evidence": [
+   "F-003",
+   "F-014",
+   "F-002"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "Every combination outcome must follow from the written precedence table; include one worked combined example so the reviewer can trace each hidden case to text.",
+  "partial_credit_design": "Tiers: single-rule cases 15%, pairwise combinations 35%, triple+ combinations 30%, documented error cases 20%; each tier is a weighted pytest group.",
+  "grader_cost": "Low: oracle generates expected outputs; pytest compares.",
+  "not_copied_from": "Inspired by SpecBench (036) visible-vs-held-out composition gap; differs: small offline CLI in a new domain, combination semantics written down, graded in tiers rather than as a gap metric."
+ },
+ {
+  "id": "W-002",
+  "lever": "Audit-and-repair of a broken multi-stage pipeline against a documented contract",
+  "mechanism": "Ship a 4-6 stage data or build pipeline with 5-8 independent defects of different kinds (logic, ordering, unit, concurrency, silent truncation). Only the end-to-end contract and per-stage contracts are documented, never the bug list.",
+  "why_models_fail": "Agents fix the first visible failure and stop; downstream defects are masked by upstream ones; silent defects produce plausible output.",
+  "evidence": [
+   "F-012",
+   "F-002",
+   "F-008",
+   "F-009"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Grader must check documented contracts, not 'did you find bug #4'. Each defect must violate a written contract clause.",
+  "partial_credit_design": "One weighted check per stage contract plus an end-to-end check; downstream checks run on oracle-fed inputs so one upstream miss does not zero everything.",
+  "grader_cost": "Medium: per-stage fixtures produced by the oracle pipeline.",
+  "not_copied_from": "Inspired by LHTB 2.0 audit-and-repair category (008) and TB2 unsolved system tasks (001); differs: new pipeline, defects mapped one-to-one to written contract clauses, stage-isolated grading."
+ },
+ {
+  "id": "W-003",
+  "lever": "Algorithmic lift on a size ladder",
+  "mechanism": "Provide a correct but naive reference program and the exact input sizes and time limit per size. Small and medium sizes pass with library-level speedups; the largest needs a reformulation (incremental update, different data structure, decomposition). Output must match the reference exactly.",
+  "why_models_fail": "Models apply surface-level speedups (vectorise, Numba, better call) and anchor on the given structure; the needed reformulation is an insight.",
+  "evidence": [
+   "F-004",
+   "F-010"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Must be hard for the agent, not the computer: oracle must run the largest size in under ~10% of the limit on the stated hardware; state the hardware.",
+  "partial_credit_design": "Weighted by size tier (e.g. 10/20/30/40%); correctness gate per tier; no credit for a tier that exceeds the limit.",
+  "grader_cost": "Medium: timing on fixed hardware; repeat 3x and take the min to cut noise.",
+  "not_copied_from": "Inspired by BenchEvolver 'dominant algorithmic lift' (010) and AlgoTune (015); differs: agentic terminal task with exact-match outputs and fixed size tiers instead of open-ended speedup."
+ },
+ {
+  "id": "W-004",
+  "lever": "Stacked orthogonal artifact constraints",
+  "mechanism": "Ask for one artifact (binary, package, container layer, dataset) that must meet 4-5 independent written constraints at once, e.g. reproducible byte-identical output, pinned versions, a size cap, a target platform, no network at runtime.",
+  "why_models_fail": "Each extra constraint multiplies the dependent work; models drop or rationalise away the costliest one.",
+  "evidence": [
+   "F-005",
+   "F-001"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "Each constraint must be essential to the scenario, not decoration; avoid more than 5.",
+  "partial_credit_design": "One weighted check per constraint plus a functional check; artifact must work for any credit.",
+  "grader_cost": "Low.",
+  "not_copied_from": "Inspired by CompileBench one-constraint collapse (019); differs: not cross-compiling curl; the constraints are reproducibility and policy limits in a new artifact."
+ },
+ {
+  "id": "W-005",
+  "lever": "Dependent multi-stage chain with no shortcut",
+  "mechanism": "8-12 stages where each stage needs the verified output of the previous one (e.g. recover a parameter from stage-1 data, which decodes stage-2 input, ...). All procedures are documented; no stage can be done out of order.",
+  "why_models_fail": "Errors compound across dependent steps and an early wrong value poisons later steps; success falls with coherent length.",
+  "evidence": [
+   "F-001",
+   "F-009",
+   "F-002"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "Each stage must be individually fair and documented; avoid puzzle-hunt style hidden hints.",
+  "partial_credit_design": "Checkpoint file per stage; credit for each correct checkpoint, ordered (Cybench-style subtask ladder).",
+  "grader_cost": "Low: compare checkpoint files.",
+  "not_copied_from": "Inspired by METR time-horizon results (011, 020) and Cybench subtasks (013); differs: deterministic engineering stages, not CTF flags."
+ },
+ {
+  "id": "W-006",
+  "lever": "Format-only validator plus self-verification burden",
+  "mechanism": "Provide a validator that the instruction states checks format only. Correctness criteria (invariants, totals, cross-file consistency) are written in the spec and must be checked by the agent itself.",
+  "why_models_fail": "Agents treat a passing validator as done and submit unchecked (premature completion).",
+  "evidence": [
+   "F-002",
+   "F-014"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "Must clearly say the validator is format-only; otherwise it is a gotcha.",
+  "partial_credit_design": "Format 5%, each documented invariant a separate weighted check.",
+  "grader_cost": "Low.",
+  "not_copied_from": "Inspired by MLE-bench validation-server non-use (017) and LHTB false finishes (002); differs: deliberately partial validator, stated as partial."
+ },
+ {
+  "id": "W-007",
+  "lever": "Mixed feasible and infeasible instances with certificates",
+  "mechanism": "A batch of scheduling or allocation requests under written constraints; some are provably infeasible. Feasible ones need a valid (or optimal) plan; infeasible ones need a minimal conflicting subset as certificate.",
+  "why_models_fail": "Models invent a plan for unsolvable instances and rarely prove infeasibility.",
+  "evidence": [
+   "F-011",
+   "F-004"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "Certificate format and validity rule must be written; grader verifies the certificate, not a fixed answer.",
+  "partial_credit_design": "Per instance: feasible plan valid 1 pt (optimal +0.5); infeasible flag 0.5, valid certificate +0.5.",
+  "grader_cost": "Medium: write a certificate checker.",
+  "not_copied_from": "Inspired by PlanBench unsolvable-instance results (028); differs: terminal batch job with checkable infeasibility certificates."
+ },
+ {
+  "id": "W-008",
+  "lever": "Documented quiet failure in a provided component",
+  "mechanism": "A provided library or CLI has a man page that documents a behaviour on certain input classes (e.g. returns a sentinel, truncates at a limit). Inputs contain such cases; correct output requires handling them.",
+  "why_models_fail": "Silent wrong outputs are propagated; agents do not read the full tool doc or check outputs.",
+  "evidence": [
+   "F-008",
+   "F-002"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Risk of being judged a gimmick ('technically correct but suggests the wrong answer', 005). Keep the behaviour natural for the domain and mention the doc in the instruction.",
+  "partial_credit_design": "Normal cases 50%, quiet-failure cases 50%, weighted per case class.",
+  "grader_cost": "Low.",
+  "not_copied_from": "Inspired by PlanBench-XL implicit tool failures (030); differs: offline, documented behaviour, no tool ecosystem."
+ },
+ {
+  "id": "W-009",
+  "lever": "Small set of interacting ad-hoc rules with precedence",
+  "mechanism": "15-30 non-commonsense rules (written, numbered) with an explicit precedence order, applied to a batch of cases via a stateful tool where some actions are single-use.",
+  "why_models_fail": "Models fall back on common-sense priors over written ad-hoc rules and miss single-use/collect-first constraints.",
+  "evidence": [
+   "F-007",
+   "F-005",
+   "F-006"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Keep the rule count modest; TB reviewers reject hardness from many corner cases (005).",
+  "partial_credit_design": "Per-case final-state comparison; weight cases by number of interacting rules.",
+  "grader_cost": "Low: oracle replays cases.",
+  "not_copied_from": "Inspired by tau-bench policy failures (014); differs: no simulated user, offline deterministic batch, precedence table given."
+ },
+ {
+  "id": "W-010",
+  "lever": "Parameter identification within a documented model family",
+  "mechanism": "The spec fully defines a parameterised family of behaviours; the agent observes outputs of an instance and must recover its parameters, then predict outputs on hidden scenarios.",
+  "why_models_fail": "Requires designing experiments and generalising beyond the observed scenarios.",
+  "evidence": [
+   "F-004",
+   "F-014"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Family and identifiability must be documented; hidden scenarios must lie inside the documented family.",
+  "partial_credit_design": "Parameter accuracy tiers plus hidden-scenario prediction accuracy.",
+  "grader_cost": "Medium.",
+  "not_copied_from": "Inspired by LHTB 2.0 reconstruction tasks (008); differs: the model family is written down, removing the underspecification."
+ },
+ {
+  "id": "W-011",
+  "lever": "Budget planning for a documented expensive job",
+  "mechanism": "The stated time budget and hardware make the naive full recompute impossible; the agent must cache, reuse or compute incrementally.",
+  "why_models_fail": "Agents ignore run-time cost and time out while busy.",
+  "evidence": [
+   "F-010",
+   "F-001"
+  ],
+  "qc_risk": "high",
+  "qc_risk_note": "Rubric criterion 'hard for the agent, not the computer' (006) and 'no resource pressure' (007). Only use with large oracle headroom and stated limits.",
+  "partial_credit_design": "Fraction of required outputs produced within budget.",
+  "grader_cost": "Medium.",
+  "not_copied_from": "Inspired by LHTB timeouts (002) and MLE-bench resource blindness (017)."
+ },
+ {
+  "id": "W-012",
+  "lever": "Misleading first hypothesis in a debugging task",
+  "mechanism": "The first symptom suggests a common cause; later evidence (logs, a second test) contradicts it; the real cause is documented system behaviour.",
+  "why_models_fail": "Stubborn early assumptions; ignoring contradictory information.",
+  "evidence": [
+   "F-009",
+   "F-008"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Must be a natural failure, not a planted trick; the docs must explain the real behaviour.",
+  "partial_credit_design": "Root-cause fix check, regression check, no-collateral-damage check.",
+  "grader_cost": "Low.",
+  "not_copied_from": "Inspired by RE-Bench long-horizon agency failures (016)."
+ },
+ {
+  "id": "W-013",
+  "lever": "Optimality gap scoring on structured instances",
+  "mechanism": "Large combinatorial instances with exploitable structure; generic ILP/brute force is too slow at the top size; score by gap to the oracle's optimum.",
+  "why_models_fail": "Agents reach for generic solvers or greedy heuristics and miss the structure.",
+  "evidence": [
+   "F-022",
+   "F-004"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Oracle optimum must be provable; do not block package install (004 says disabling network is not a valid difficulty).",
+  "partial_credit_design": "Valid solution 20%; then linear credit in gap from 10% down to 0%.",
+  "grader_cost": "Medium.",
+  "not_copied_from": "Inspired by NPHardEval (029) and AlgoTune clamped scoring (015)."
+ },
+ {
+  "id": "W-014",
+  "lever": "Beat a fully documented fixed opponent or checker",
+  "mechanism": "A deterministic opponent (bot, filter, compressor bound) with full source provided; the agent must produce a strategy that beats it on hidden seeds.",
+  "why_models_fail": "Needs creative or adversarial reasoning and experimentation, not pattern-following.",
+  "evidence": [
+   "F-004"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "Hidden seeds must come from a documented distribution.",
+  "partial_credit_design": "Win-rate tiers (e.g. >50%, >70%, >90%).",
+  "grader_cost": "Low.",
+  "not_copied_from": "Inspired by TB2 human-medium/model-hard tasks (001); differs: new game or filter, not corewars or XSS."
+ },
+ {
+  "id": "W-015",
+  "lever": "Novel fully specified formalism",
+  "mechanism": "A new small DSL or VM with complete written semantics; the agent implements it and uses it to produce artifacts; hidden tests mix features and error cases.",
+  "why_models_fail": "Lower prior familiarity; composition and error semantics.",
+  "evidence": [
+   "F-013",
+   "F-003"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "Spec must be complete and unambiguous; give a reference grammar.",
+  "partial_credit_design": "Feature tiers plus composition tier plus error tier.",
+  "grader_cost": "Medium.",
+  "not_copied_from": "Inspired by PlanBench Mystery (028) and TB2 interpreter tasks (003 Table 3); differs: new formalism."
+ },
+ {
+  "id": "W-016",
+  "lever": "Error-path and rejection weight",
+  "mechanism": "Spec lists which inputs must be rejected and with which code; at least 25% of hidden weight is on invalid inputs.",
+  "why_models_fail": "Agents optimise for the happy path; rejection is where a strong compiler still failed.",
+  "evidence": [
+   "F-003",
+   "F-014"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "Every rejection rule written.",
+  "partial_credit_design": "Separate weighted group for rejections.",
+  "grader_cost": "Low.",
+  "not_copied_from": "Inspired by SpecBench CCC error-detection failures (036)."
+ },
+ {
+  "id": "W-017",
+  "lever": "Spec-legal input variants in combination",
+  "mechanism": "The input format spec allows several variants (quoting, encodings, line endings, optional fields); hidden inputs combine them.",
+  "why_models_fail": "Agents test on the examples given and miss combined variants.",
+  "evidence": [
+   "F-003",
+   "F-014"
+  ],
+  "qc_risk": "high",
+  "qc_risk_note": "Risk of 'clerical difficulty' FAIL (006, 007). Keep as a minor weight only.",
+  "partial_credit_design": "Small weight (<=15%) for variant combinations.",
+  "grader_cost": "Low.",
+  "not_copied_from": "Inspired by LHTB hidden stress cases (002); differs: all variants written in the spec."
+ },
+ {
+  "id": "W-018",
+  "lever": "Coupled multi-module change in an original mid-size codebase",
+  "mechanism": "An original 10-30k LOC codebase; the feature touches many modules with shared invariants.",
+  "why_models_fail": "Success falls with files touched and engineering complexity.",
+  "evidence": [
+   "F-003",
+   "F-001",
+   "F-009"
+  ],
+  "qc_risk": "low",
+  "qc_risk_note": "High authoring cost; interfaces must be specified.",
+  "partial_credit_design": "Per-module and integration tests weighted.",
+  "grader_cost": "High.",
+  "not_copied_from": "Inspired by SWE-bench Pro file-count decline (012) and RE-Bench LOC R^2 (016)."
+ },
+ {
+  "id": "W-019",
+  "lever": "Stateful protocol with irreversible steps",
+  "mechanism": "A local server with a documented protocol where some actions are irreversible and order matters; the agent must plan before acting.",
+  "why_models_fail": "Agents act before collecting all needed information.",
+  "evidence": [
+   "F-005",
+   "F-007",
+   "F-009"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Server must be reset-safe for grading; the protocol must be fully documented.",
+  "partial_credit_design": "Final server state per entity.",
+  "grader_cost": "Medium.",
+  "not_copied_from": "Inspired by tau-bench single-use exchange failure (014)."
+ },
+ {
+  "id": "W-020",
+  "lever": "Interactive program driving as a secondary ingredient",
+  "mechanism": "One stage requires operating a documented interactive program (REPL/TUI) where the state persists.",
+  "why_models_fail": "Agents stall on interactive tools.",
+  "evidence": [
+   "F-023"
+  ],
+  "qc_risk": "medium",
+  "qc_risk_note": "Weak evidence; harness tmux support must be checked.",
+  "partial_credit_design": "Stage checkpoint.",
+  "grader_cost": "Low.",
+  "not_copied_from": "Inspired by TB discussion #224 (007)."
+ }
+]

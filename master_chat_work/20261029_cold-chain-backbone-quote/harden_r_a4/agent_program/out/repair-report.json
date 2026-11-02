@@ -1,0 +1,49 @@
+{
+  "defects": [
+    {
+      "file": "pyproject.toml",
+      "summary": "The package metadata did not match /app/ci/package_manifest.json: version was 0.0.0, requires-python was >=3.13, a third-party dependency on requests was declared and package-dir pointed at a non-existent lib/ directory. It now declares version 2.18.5, requires-python >=3.12, no dependencies and the src layout."
+    },
+    {
+      "file": "src/task/__init__.py",
+      "summary": "task.VERSION was missing, so the public API of the manifest was incomplete. The module now exports VERSION = \"2.18.5\", the version of the manifest and of pyproject.toml."
+    },
+    {
+      "file": "src/task/core.py",
+      "summary": "best_network only approximated the cheapest network: it joined terminals along cheapest paths, rebuilt a minimum spanning tree over the sites it had collected and trimmed loose ends, which overcharges whenever a relay has to be shared or avoided, and it had no tie rule. It now solves the quote exactly with the Dreyfus-Wagner subset dynamic program over the depot and the cold rooms, charging link costs and activation charges together, and breaks ties on the incidence vector of the network over the project's open links in ascending link id order."
+    },
+    {
+      "file": "src/task/core.py",
+      "summary": "site_lines added a site's activation charge once per link booked to it and gave no line at all to an activated site with no link booked to it, so quotes, line totals, corridor totals and share_bp were all wrong. Every activated site now has exactly one line holding its charge plus the cost of the links booked to it, a link being booked to its end with the larger corridor position."
+    },
+    {
+      "file": "src/task/parser.py",
+      "summary": "Closed links were never dropped: access_rules.toml [closed] links was not read, so closed links were priced, counted in open_links and used to join projects that in fact have no network. Closed links are now removed before any rejection rule or network is considered."
+    },
+    {
+      "file": "src/task/parser.py",
+      "summary": "activation.ini was read with the default configparser option transform, which lower-cases keys, so no [overrides] entry such as P1236/S100 ever matched a site and every site was charged its class charge. The parser now keeps keys with their exact spelling and case."
+    },
+    {
+      "file": "src/task/parser.py",
+      "summary": "Layout slots were kept as strings, so corridor positions were ranked by the text of the slot (\"10\" before \"8\") whenever slots had different digit counts. Slots are now compared as numbers, which fixes the positions and with them the booking of links to their later end."
+    },
+    {
+      "file": "src/task/parser.py",
+      "summary": "load_book never raised MissingBookFile, so a book missing one of the five files died with a FileNotFoundError traceback instead of the contract's report. The five book files are now checked in contract order and the first absent one is reported, after which the command writes E_MISSING_FILE <name> on standard error, writes no document and exits non-zero."
+    },
+    {
+      "file": "src/task/report.py",
+      "summary": "share_bp rounded to the nearest basis point instead of rounding down, so shares were one basis point too high about half of the time. It now floors total * 10000 / quote."
+    }
+  ],
+  "checks": [
+    "PYTHONPATH=src python3 -m unittest discover -s tests -v: 6 of 6 visible tests pass, including the four that failed in /app/ci/failing_tests.log (activation override, closed link dropped, share rounds down, numeric slot order).",
+    "PYTHONPATH=src python3 -m task --book /app/ci --out /app/out: exit status 0, the four documents written, 90 projects quoted and 6 rejected, in 3.2 s for the whole 96-project book (limit 4 s per project plus 10 s).",
+    "Brute force over every subset of a project's open links, comparing quote, chosen links and activated sites with best_network: 351 regression cases of /app/ci/regression_cases.jsonl and 421 random projects (up to 10 sites, 18 links, 6 cold rooms) agree exactly, tie rule included.",
+    "Independent re-derivation of the four documents straight from the book files: project counts, the networks being trees that join the depot to every cold room, every quote, every line and corridor total, every share_bp and every summary total agree with /app/out.",
+    "Quote of all 2400 regression cases compared with the unrepaired package: the 715 cases whose quote changed are exactly the 715 failing regression tests of /app/ci/failing_tests.log, and the 1685 unchanged ones are exactly those that passed.",
+    "Book with links.jsonl removed: the command prints E_MISSING_FILE links.jsonl on standard error, writes no document and exits 2; with sites.csv also removed it reports sites.csv, the first file of the list.",
+    "The archive /app/out/patched-repo.zip unpacked into a scratch directory, made read-only and run from another working directory: its four documents are byte for byte those in /app/out, and its test suite passes."
+  ]
+}

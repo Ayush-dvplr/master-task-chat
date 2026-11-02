@@ -1,0 +1,166 @@
+"""Write BUNDLE/solution/TRUTH.md with every digest, figure and line cite computed now.
+
+usage: python3 -B write_truth.py <dir holding solve.py outputs on the shipped data>
+"""
+import hashlib
+import json
+import re
+import sys
+import tomllib
+from pathlib import Path
+
+B = Path("/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/outage-window-replan")
+OUTD = Path(sys.argv[1])
+
+
+def sha(p):
+    return hashlib.sha256((B / p).read_bytes()).hexdigest()
+
+
+def lines(p):
+    return len((B / p).read_text(encoding="utf-8").splitlines())
+
+
+def line_of(p, pattern):
+    rx = re.compile(pattern)
+    for i, l in enumerate((B / p).read_text(encoding="utf-8").splitlines(), 1):
+        if rx.search(l):
+            return i
+    raise SystemExit("no line for %r in %s" % (pattern, p))
+
+
+summ = json.loads((OUTD / "summary.json").read_text())
+dq = json.loads((OUTD / "data_quality.json").read_text())
+pa = json.loads((OUTD / "policy_audit.json").read_text())["requests"]
+reasons = {}
+for r in pa:
+    if r["status"] == "deferred":
+        reasons[r["reason"]] = reasons.get(r["reason"], 0) + 1
+origin = {}
+for r in pa:
+    origin[r["origin"]] = origin.get(r["origin"], 0) + 1
+
+tests_src = (B / "tests/test_output.py").read_text(encoding="utf-8")
+weights = [int(w) for w in re.findall(r"^criteria\.\w+\(weight=(-?\d+)\)", tests_src, re.M)]
+pos_t = sum(w for w in weights if w > 0)
+neg_t = sum(w for w in weights if w < 0)
+judge = tomllib.loads((B / "tests/judge.toml").read_text())["criterion"]
+pos_j = sum(c["weight"] for c in judge if c["weight"] > 0)
+neg_j = sum(c["weight"] for c in judge if c["weight"] < 0)
+negs = ", ".join("%s (%d)" % (c["id"], c["weight"]) for c in judge if c["weight"] < 0)
+hidden_w = sum(int(w) for n, w in re.findall(r"^criteria\.(h[23]_\w+)\(weight=(\d+)\)", tests_src, re.M))
+tneg = ", ".join("`%s` (%s)" % (n, w) for n, w in re.findall(r"^criteria\.(\w+)\(weight=(-\d+)\)", tests_src, re.M))
+w5 = sum(int(w) for n, w in re.findall(r"^criteria\.(h[23]_\w+)\(weight=(\d+)\)", tests_src, re.M) if w == "5")
+
+T = "tests/test_output.py"
+L_lit = line_of(T, r"^def release_literals")
+L_build = line_of(T, r"^def build_inputs")
+L_ref = line_of(T, r"^def reference")
+L_sweep = line_of(T, r"^def sweep")
+L_seeds = line_of(T, r"^_FRESH_SEEDS")
+L_run = line_of(T, r"^def _run_program")
+L_first = line_of(T, r"^def _first_difference")
+S = "solution/solve.py"
+L_planner = line_of(S, r"^class LanePlanner")
+L_moved = line_of(S, r"^def is_moved")
+L_take = line_of(S, r"def _take")
+L_band = line_of(S, r"def _band")
+L_reason = line_of(S, r"no_feasible_start")
+SH = "solution/solve.sh"
+L_check = line_of(SH, r"print\(f\"check ")
+
+C = "replan_contract.md"
+I = "intake.md"
+
+text = f"""# TRUTH.md - outage-window-replan
+
+## Defect
+
+There is no broken program to repair. `/app/data` holds ten data files ({sum(lines('environment/data/' + n) for n in ['assets.jsonl','requests.json','published_plan.json','customers.csv','load_forecast.tsv','crew_roster.jsonl','network_constraints.json','region_calendar.json','control_room.log','risk_policy.toml'])} lines) and four contract documents under `/app/data/docs/`, and the deliverable is a reusable program `/app/out/derive_report.py` that replans a season of transmission maintenance outages after a control-room notice and writes nine exact JSON documents. The program is run again on fresh seasons in the same layout, so the work is the replan itself, not the shipped answer.
+
+0. (focal) Level 1 of the objective (`{C}:35`) asks for the smallest total risk-days over every feasible season. On the shipped season every greedy order, every repair of the published plan and every bounded search reaches that minimum, because each region and crew type holds a handful of requests. The fresh seasons put three or more contended valleys into every region and crew type (cheap load days where a crew loss leaves one crew), bridged so that each lane is one contention component of about thirty requests. A greedy plan, a local search from it, a repair of the published plan or a search that returns its incumbent when a time guard fires is feasible and higher on level 1 in every region; an unguarded depth-first search over the whole component does not finish inside the stated 60 seconds.
+1. (focal) Level 2 (`{C}:36`) counts moved outages with five stated cases. Every fresh lane carries a published request whose published start is not its earliest equal-cost start and a heavier control-room request that can take the earliest day; the minimum keeps the published start. A program that drops level 2, or counts a deferred request that stays deferred as moved, or counts a control-room request as moved, picks a different season.
+2. (focal) Level 3 (`{C}:37`) breaks the remaining ties by the start-day list in ascending `asset_id` order with deferral later than every day. Every fresh lane carries two new requests whose windows exactly fill a flat stretch of one crew; both orders cost the same and move nothing, and only the lower `asset_id` first is selected. A dynamic program or search that keeps the first optimum it meets in its own order publishes the other season.
+3. (drift) The fresh seasons change the release values that the shipped files carry: `published_at`, the public class weight, `defer_factor` and both band floors in `risk_policy.toml`. A program that copies the shipped values instead of reading them drifts on every fresh document.
+4. (trap) Rejection checks run in the stated order (`{I}:11`): a record that is both out of season and too short is `out_of_season`, a duplicate whose window is too short is `window_too_short`, and a duplicate still counts after its first record was withdrawn (`{I}:16`). A `CREW_LOSS` stamped exactly at `published_at` has no effect (`{I}:34`).
+5. (trap) A blackout day forbids a start only (`{C}:22`); an outage already out stays out through it. A precedence `after` may start on the day after the `before` request's last day, not on that last day (`{C}:25`).
+
+## Load-bearing work
+
+- Intake (`docs/intake.md`): accept `requests.json` records in list order and then `NEW_REQUEST` events in log order, with the four checks in order; apply `CREW_LOSS` and `WITHDRAW` events stamped after `published_at`; count malformed lines in `ignored_lines` whatever their timestamp.
+- Season model (`docs/replan_contract.md`): weights from `customers.csv` and the class weights, load factors from the daily peak and the bands, capacity from on-duty roster rows less crew loss, feasibility from window, blackout start, capacity, incompatibility and precedence.
+- Replan: one exact lexicographic optimum per region and crew type, since every network entry stays inside one region and crew type (`{C}:27`) and capacity is per region and crew type.
+- Reports (`docs/output_schema.md`): the nine documents, every figure taken from the one selected season (`{C}:3`).
+
+On the shipped data the reference selects a season with {summ['requests']} active requests ({origin.get('published', 0)} published, {origin.get('control_room', 0)} from the control-room log), {summ['scheduled']} scheduled, {summ['deferred']} deferred ({', '.join('%s %d' % kv for kv in sorted(reasons.items()))}), {summ['moved']} moved, risk-days {summ['risk_days']}, crew-days {summ['crew_days']}, objective {summ['objective']}. `data_quality.json` lists {len(dq['rejected'])} rejected records ({', '.join('%s %d' % kv for kv in sorted(dq['counts'].items()))}), {len(dq['withdrawn'])} withdrawn requests and {dq['ignored_lines']} ignored log lines.
+
+## Verification
+
+- `tests/test_output.py` ({lines(T)} lines) holds {len(weights)} checks worth {pos_t} positive weight and {-neg_t} negative weight; the negative tests are {tneg}. Three grade the delivered shipped documents; {hidden_w} weight grades two fresh seasons built by the embedded generator (`build_inputs`, {T}:{L_build}; release values from `release_literals`, {T}:{L_lit}; seeds at {T}:{L_seeds}), {w5} of it in weight-5 checks; three run the program on an altered copy, a relocated copy and a copy with `customers.csv` removed.
+- The expected documents come from an independent engine inside the tests: a forward day sweep with backward values (`sweep`, {T}:{L_sweep}) and a fixing pass in `asset_id` order (`reference`, {T}:{L_ref}). The delivered program is run with the stated command as an unprivileged user from its own working directory (`_run_program`, {T}:{L_run}); each document is compared whole and the message names the first differing path (`_first_difference`, {T}:{L_first}).
+- Measured: oracle 1.0 on three runs and 0.0 on a no-op run, test channel only. The reference takes about 2.5 to 2.9 seconds per fresh season inside the 60-second limit.
+- `solution/solve.sh` copies `solve.py` to `/app/out/derive_report.py`, runs it on `/app/data`, then prints `check <id> ok` and one witness line for eight self-checks ({SH}:{L_check}).
+
+Digests after the last edit:
+
+solve.sh: {sha(SH)}
+solve.py: {sha(S)}
+test_output.py: {sha(T)}
+judge.toml: {sha('tests/judge.toml')}
+instruction.md: {sha('instruction.md')}
+
+## Root cause
+
+The shipped season is small enough that every plausible method returns the minimum on it, so a program checked only against `/app/data` looks finished. The rules that decide the fresh seasons are all written in `docs/replan_contract.md` and `docs/intake.md`; what differs is the size and contention of each region and crew type, and the planted ties and keep pairs that only the full objective order settles.
+
+## Solution shape
+
+`solve.py` ({lines(S)} lines) reads every file through one loader that names the file in any error, builds the season per `docs/intake.md`, and solves each region and crew type with `LanePlanner` ({S}:{L_planner}): a forward sweep over days whose state is the set of waiting requests, the requests still out with their end days, and the deferred predecessors; each state keeps the lexicographically least (risk-days, moved, start list) reached so far, which is exact because two paths that reach one state have decided the same requests. Moved follows `is_moved` ({S}:{L_moved}); rejection order follows `_take` ({S}:{L_take}); bands follow `_band` ({S}:{L_band}); reasons start at {S}:{L_reason}.
+
+## Ordered plan
+
+1. Read `docs/RULES.md` and the three documents it names.
+2. Write the loader and intake with the four checks in order and the log rules.
+3. Build weights, factors, capacity and the feasibility test.
+4. Write the exact per-lane replan carrying the full objective order.
+5. Write the nine documents per `docs/output_schema.md`.
+6. Run once on `/app/data` with `--out /app/out` after the last change.
+
+## Pitfalls
+
+- A time guard that returns the incumbent turns a timeout into a wrong season.
+- Keeping only (risk-days, moved) per state loses the level-3 order.
+- Hard-coding the shipped `defer_factor`, class weights, band floors or `published_at`.
+- Treating a blackout day as a day an outage cannot be out.
+- Counting HEARTBEAT lines, or skipping malformed lines stamped before `published_at`, in `ignored_lines`.
+
+## Provenance
+
+```yaml
+uuid: null  # task.toml carries no canary_guid or uuid field
+instance_id: outage-window-replan
+task_name: terminal-bench/outage-window-replan
+fix_patch_sha256: {sha(SH)}  # sha256 of solution/solve.sh
+solve_py_sha256: {sha(S)}  # informational; solve.py is {lines(S)} lines
+language: python
+golden_score_measured: null  # not measured for this instance
+golden_score_channel_a_pct: null
+golden_score_channel_b_pct: null
+golden_score_runs: 0
+golden_score_trial_id: null  # no calibration trial has been run yet
+golden_score_verified_by: >
+  Not yet measured on the harness. Local runs of solve.sh through the test
+  channel give exactly 1.000 on each of three oracle runs and exactly 0.000
+  on a no-op run; the judged channel has no oracle score.
+caveat: >
+  The test channel carries {len(weights)} checks worth {pos_t} positive weight and
+  {-neg_t} negative weight, so on its own it ranges {neg_t / pos_t:.3f} to +1.000. The judged
+  channel carries {len(judge)} criteria worth {pos_j} positive points and {neg_j}
+  negative points ({negs}).
+  tests/reward.toml divides each channel's weighted sum by its positive
+  total and gives each half of the reward, so the combined reward runs from
+  {(neg_t / pos_t + neg_j / pos_j) * 0.5:.3f} to +1.000 with no clamp.
+```
+"""
+(B / "solution/TRUTH.md").write_text(text, encoding="utf-8")
+print("TRUTH.md", len(text.splitlines()), "lines; tests", pos_t, neg_t, "judge", pos_j, neg_j)

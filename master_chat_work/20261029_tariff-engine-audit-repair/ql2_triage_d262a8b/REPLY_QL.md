@@ -1,0 +1,28 @@
+Hi Sugam,
+
+Thank you for the review of **tariff-engine-audit-repair** (29 Oct 2026). Here is what we found for each point.
+
+| # | Your point (short) | Our verdict | Evidence | What changed |
+|---|---|---|---|---|
+| F1 | Statement grading uses a voucher scale the contract never states | Not changed: this is how the rule reads | DS-21 (02_Data_Solution_QC.md:70) "Default to pass ... name the exact piece of information the solver cannot obtain"; CL-10 (Final_checklist.md:498) "Derivation counts fully ... long or difficult work is not a defect here"; CL-5 (:492) and IN-8 (01_Instruction_QC.md:38) cover order, names, strings, error shapes and tolerances, not input size. The rule is stated at api_contract.md:211-231 and the 10 second limit at api_contract.md:25-28; the contract sets no size bound, so the hidden sets are inside everything it states. Same lines were kept at the last QC. | none |
+| F2 | Batch and cycle statements copy the first statement kind | Not changed: this is how the rule reads | TS-26 (03_Tests_QC.md:53) "What is NOT a duplicate: two tests reading genuinely different aspects of the same object"; TS-20 (03_Tests_QC.md:51) "Mild imbalance within the right ordering is a minor." The three sets come from three different seeds (tests/test_output.py:7548) and are built and stored apart (:7652-7666), so each reads a different input. Kept at the last QC. | none |
+| M1 | "Graded whole" in the instruction, but scoring is split by part | Not changed: this is how the rule reads | AL-18 (05_Alignment_Integrity_QC.md:75) is about files, paths, counts or numbers that do not match the bundle. instruction.md:13 states a stricter bar than the per-part checks (tests/test_output.py:7671-7745), each of which is still an exact match; a solver who meets the stated bar loses nothing. | none |
+| M2 | Judge R7 bundles several properties and cannot be decided | Not changed: this is how the rule reads | JD-18 (04_Judge_QC.md:99) asks for one criterion on code quality with "no dead or duplicated blocks"; R7 (judge.toml:89-100) checks that one thing and spells out what counts as dead code. /app/repo is where instruction.md:3 says the repair happens. A run's judge decided it on a concrete unused constant. At most two parts of one act, a minor by 04_Judge_QC.md:71. | none |
+| M3 | TRUTH.md gives two balance ranges | Not changed: both are correct | DS-22 (02_Data_Solution_QC.md:78). TRUTH.md:143-146 (4e10 to 8e10) is the range the generator aims for (tests/test_output.py:7399); TRUTH.md:242 (3e10 to 1e11) is the wider range the tests assert (:7331). Every hidden balance we built lies inside both. | none |
+| W1 | 158 checks against a limit of 35 | Not changed: this is how the rule reads | TS-23 (03_Tests_QC.md:62) "at most 35 (warn)"; the 158 checks (tests/test_output.py:8797-8954) stay recorded as that warn; we do not merge checks only to meet the count. | none |
+| W2 | The 10 s statement limit is wall clock under several threads | Not changed: this is how the rule reads | TS-11 (03_Tests_QC.md:41). The shared result lock added last round (tests/test_output.py:5590-5608) means each statement program runs once; the slowest call measured 1.25 s with 8 threads against the 10 s limit. | none |
+| W3 | Judge R1 asks the solver to recompute every invoice | Not changed: this is how the rule reads | JD-15 (04_Judge_QC.md:92) lists checking your own work as a pass; an overlap with the tests is at most a warn under JD-9 (04_Judge_QC.md:146). R1 is at judge.toml:11-22. | none |
+| F3 | The solver's repaired test_visible.py is never run or checked | Partly fixed | AL-2 (05_Alignment_Integrity_QC.md:22) "Everything promised is graded." You are right that the delivered file is never run (tests/test_output.py:7790-7808) and that a wrong corrected value still earns the name check (:7825-7832), so api_contract.md:237 is not graded on the delivered file. We keep our own corrected copy of the suite, since that is what stops a solver from deleting assertions. | Planned: `tests/test_output.py:7803-7808` before: runs only our corrected copy → after: also runs the delivered `tests/test_visible.py` against the delivered code; both must pass; weight unchanged |
+| F4 | Solver programs are not in their own process group and are not killed on timeout | Fixed (planned) | TS-24 (03_Tests_QC.md:71) "Every agent subprocess has exited before its check returns (killing the process group)". We confirmed a background child outlives a timed-out call with the same call shape. | Planned: `tests/test_output.py:5623-5625`, `:7221-7225`, `:7500-7504` before: plain call with a timeout → after: each program starts in its own process group and the whole group is killed when the call ends or times out |
+| M4 | TRUTH.md says every check runs the package | Fixed (planned) | DS-22 (02_Data_Solution_QC.md:78). Four checks only read delivered JSON (tests/test_output.py:7872-7912). | Planned: `TRUTH.md:188-191` before: "Every check extracts `/app/out/patched-repo.zip` and runs the package inside it" → after: names which checks run the package and which four read JSON only |
+
+**Checks after the changes:** to follow once the changes are made: local QC scripts, reference solution 1.0 (3 runs), empty submission 0.0, recheck result.
+
+**New run:** needed, since the test file changes. Date and scores to follow; the earlier run no longer stands for the new files.
+
+**Files delivered:** same folder as before; current version b0cd2c1813ba (a new version follows the changes).
+
+If you see any of the "not changed" points differently, please tell us which rule line you read, and we will look again.
+
+Regards,
+Ayush

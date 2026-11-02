@@ -1,0 +1,6 @@
+# KEPT cold-chain-backbone-quote (after QC v1, P12 board 5951927)
+
+| finding id | file:line | reason | kit line it rests on |
+|---|---|---|---|
+| G05-3 CL-10 / AL-4 (warn) | environment/ci/api_contract.md:24-25, :91-92; tests/test_output.py wide_1..3 checks | Every fact the six wide checks assert follows from stated rules (network, quote, tie, charging lines, documents), the stated rerun on other books (api_contract.md:24-25) and the stated time limit (api_contract.md:91-92). The QC itself calls it "Hard rather than impossible". A sentence saying that other books carry many more sites and cold rooms would state a size, which names the hidden scale and makes the core lever easier. | Final_checklist.md:498 CL-10 "Derivation counts fully and is meant to - working the value out from the data is the task, and long or difficult work is not a defect here." |
+| G01-1 IN-12 (warn, partly fixed) | task.toml:8, :14 | "stdlib" was replaced with "network-optimization". "steiner-tree" was not added, because it names the method the task asks the agent to find. The remaining repair words (repo-patch, debugging, source-repair) are related to the task, which makes them at most a warn. | 01_Instruction_QC.md:42 "completely unrelated entries are a fail, weak-but-related entries are a warn." |

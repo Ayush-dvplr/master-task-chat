@@ -1,0 +1,12 @@
+#!/bin/bash
+# Blind-score install (d07903b): place the blind's delivered files where the instruction says the agent leaves them.
+set -euo pipefail
+ROOT="${SOLUTION_ROOT:-/solution}"
+mkdir -p /app/out
+# blind app/transform.py -> /app/out/transform.py (identical bytes to blind out/transform.py)
+cp "$ROOT/blind/app/transform.py" /app/out/transform.py
+# blind out/* -> /app/out/*
+cp "$ROOT/blind/out/"* /app/out/
+echo "INSTALLED:"; cd /app/out && sha256sum * | sort -k2
+echo "DIFF app/transform.py vs /app/out/transform.py:"; diff "$ROOT/blind/app/transform.py" /app/out/transform.py && echo identical
+echo "DIFF -r blind out vs /app/out:"; diff -r "$ROOT/blind/out" /app/out && echo identical

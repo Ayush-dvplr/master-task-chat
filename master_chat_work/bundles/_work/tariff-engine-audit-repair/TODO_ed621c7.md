@@ -1,0 +1,22 @@
+# TODO ed621c7 (harden round _ql1 of 3, prompt master_chat_tasks/prompts/issued/tariff-engine-audit-repair/20261029T0414_harden.md)
+
+- [x] rename session (opencode listed ses_e7b4f9be3ffeGLih7pSg6duCMe; no explicit ed621c7)
+- [x] read COMMON_RULES_v5, round notes C/E/F/G, LEVER_RULES_v3, LEAK_LIBRARY, QC_RULINGS, QC_FIX_PLAYBOOK_v3
+- [x] read ROUTE.md
+- [x] read CHANGES, CONFLICTS, TRIP_ql (INVENTORY skipped, optional)
+- [x] read WORK DESIGN, LEVERS, QC_DEFENCE, XREF (no tariff baselines.json exists anywhere)
+- [x] fingerprint check GEN 160/160 + QC 12/12 match; kit HEAD 5574d77e, diff empty
+- [x] trajectory readout (run_1) + pass_summary per-test losses (OUT/TRIP.md + hand rows)
+- [x] Phase 1: OUT/DIAGNOSIS.md -> stop DIAGNOSIS READY (waiting for Ayush go)
+- [x] (after go 04:33) backup BUNDLE -> WORK/pushed_0de116d29fdb, replace with ql_bundle, add-on _visible_test_removed (bypass replay WORK/ql1/bypass_replay.py: both fire)
+- [x] Docker oracle x1 + nop on QL bytes+add-on: oracle 1.0, nop 0.0 (/tmp/opencode-logs/tariff-ql1-f0b-20261029T043733-b127, ALL_DONE 04:39:38; first chain f0-...b72a errored: judge.toml not stripped, use exe_copy.py)
+- [x] Phase 2a (0 divergences in 557 docs; PAUSED: cond 1 vs 2/4, OUT/PAUSED.md; wait for master) differential fuzz agent package vs reference (WORK/ql1/fuzz_agent.py, fuzz40.log) to find WRONG divergences (go cond 1+2 need WRONG loss)
+- [x] master go 09:15 (option 1, crash+timeout cap 60% for tariff only)
+- [x] B1 (halves/any/split 0 mismatches on 3000 brute cases; ref worst 0.28 s per corpus Docker; ledger docs byte-identical to before) reference _redeem_any (bitset small / gcd split / MITM first-id tie) + timing 300 seeds Docker
+- [x] B2 (156 checks, positive 670; reward 0.5/670 + judge 0.5/42 set) tests: F1 r3 statement corpora -> hidden scale (2 ledger + 1 arbitrary account), F2 batch + cycle sets (42 checks), reward.toml 0.5/670
+- [x] B3 (oracle 670/670 in kill k1) solve.py MITM fallback + R14-R16 self-checks; judge.toml R14-R16, reward judge 0.5/42
+- [x] B4 (kill chain ALL_DONE 12:05:14, k1-k4.json) oracle local run all checks; kill table Docker (agent pkg, bitset, gcd-split, MITM-only, tie-naive, greedy) W/T/C
+- [x] B5 (TRUTH sha by ql1/truth_sha.py) docs WORK (DESIGN, LEVERS, QC_DEFENCE, XREF, BRANCH_FIRE, RULE_TRACE, JUDGE_MAP, KILL_TEST, COST_TABLE), TRUTH by script
+- [x] B6 (PRECHECK CLEAN; QC 0 FAIL, A3 warn; validator 40/0; xref 0; kit HEAD 5574d77e diff empty) STACKING_CHECK, precheck, QC scripts, validator, xref
+- [x] B7 (gates ALL_DONE 12:26: oracle 1/1/1, owner 1, nop 0, stub 0, forgery 0.0463) Docker oracle x3 / owner / nop / stub / forgery
+- [x] B8 (synced 5 files, tree 7d8861ab1d7a, BUILD DONE) Tasks_INPUT sync, tree sha, HARDEN_REPORT, result json

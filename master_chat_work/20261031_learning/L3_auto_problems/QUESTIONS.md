@@ -1,0 +1,5 @@
+# Decisions for Ayush
+
+1. When `auto.py stop --now` finds a worker's detached Docker job still running, what should happen? **Recommended: keep it running and show its verified PID, log, input tree, and result in the stop report; stop it only on an explicit “stop children” instruction.** Alternative: stop verified children automatically, which may discard expensive scoring work. The current behavior kept 4989b35's children after its 10:23 session abort until Ayush explicitly stopped them at 10:27 (`master_chat_tasks/auto/runs/20261030T0100_night/REPORT.md:35-38`; `AUTO_POLICY.md:59`).
+
+2. Should an independent macOS watchdog be installed to detect when `auto.py` itself stops polling? **Recommended: yes, after a dry run that proves only one watcher can own a run.** Alternative: rely on `auto.py`'s current `check_gap`, which reports only after it resumes. The 27-28 Oct run had event-delivery gaps of roughly 3 h 39 m and 2 h 54 m (`auto/runs/20261027T2239_overnight/events.jsonl:19-20,47-48`; `auto.py:1712-1718`).

@@ -1,0 +1,14 @@
+# QC_RISKS e2bfbf0 slipway-overhaul-replan-repair (original bytes, tree 62dbcde0c809)
+
+None of these were fixed: no edit of mine touches them (note 6).
+
+| id | risk | where | checks affected | likely QC rule |
+|---|---|---|---|---|
+| Q1 | Reference drops lodgements naming a JOB-CYCLE job; doc says they are rejected under EDG-UNKNOWNJOB and appear once in the rejection register | spec_stage_p02_precedence_graph.md:5-6, :20-23 vs tests/test_output.py reference graph build (~l2812-2832) and repaired cells.Round in PACKAGE_FILES | shipped_graph_layer_exact 3, shipped_audit_documents_exact 3, package_probe_publication_exact 3 (02,19,23,24,25) | doc/reference contradiction; doc-faithful solvers lose 9 |
+| Q2 | Top-level `weighted_resource` of 11/18 is the sum of the twelve-place precinct strings in the reference; no document fixes this; a3 rounded the exact sum | output_schema_reference.md:6, :68; p10:24-26; p11:15-18 vs `_selection_body` l3035-3060 | package_eval_state_exact 5, package_challenge_state_exact 5 (and shipped_baseline/final on rounds where the 12th place differs) | G1 every value form a test reads named in the contract |
+| Q3 | `inert` defined by the instruction as reaching no cell; reference returns `governed` with an empty seed set for a class_rate_revision of a class holding no job | instruction.md:21 vs `_seed_set` l2890-2892 | latent (generator never plants it) | CL-2 / doc-reference |
+| Q4 | 13 of 20 fresh seeds abort inside write_corpus (SystemExit "no precinct was seated on a level charge"); hidden seeds must be hand-picked | write_corpus l3630-3651, `_engineer_boundary/_tie` l3460-3586 | any future seed addition | G12 (asserts over 300 seeds) |
+| Q5 | known_traps_and_footguns.md announces graded behaviours: duplicate edge withdrawal (l42-44), rule never firing still in solve key (l31-32), rebate closure of two or more (l34-36), restatement moves nothing (l38-40), duplicate amendments still classified (l20-22), withdrawn row behind later sealed row (l8-9) | environment/data/known_traps_and_footguns.md | negative_withdrawal_treated_as_inert, rule-digest and rebate checks, R17/R19 | IN-17 trap announcement |
+| Q6 | Judge R6-R19 (47 of 94 positive) restate the 15 repairs that tests and negative detectors already grade; R1-R5, R20 delivery/read habits; no J3a/J3b/J3c honesty negatives, no J4 code-quality criterion, no probe band | tests/judge.toml | judge channel | JD-8 overlap, J3/J4 mandatory |
+| Q7 | Reference amendment code supports only planted shapes: reversal of an edge_lodged would KeyError, reversal of edge_withdrawn re-withdraws, lodged-edge amendment tests UNKNOWNJOB before SELF (p02 order is SELF first) | `_apply_payload` l2896, `_resolve` l2960 | latent | TS-19 / doc order |
+| Q8 | aliases_active: doc says count of active crosswalk rows; oracle engine counts the alias map | output_schema_reference.md:12 | latent (equal on generator data) | doc/reference |

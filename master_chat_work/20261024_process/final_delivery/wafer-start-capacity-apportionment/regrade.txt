@@ -1,0 +1,64 @@
+# Re-grade e841c43 (wafer-start-capacity-apportionment), Sat Oct 24 12:06:06 IST 2026
+Docker: docker ps empty at session start (11:57 IST). Later, sibling fd* regrade containers from other sessions appeared (fdcgsl/fdsurvey/fdsent); no harness runner container seen.
+Verifier image: fdwafer-verifier:e841c43 built from a COPY of tests/ ($S/rg/tests_nojudge) with judge.toml removed and reward.toml weights reduced to { test_output = 0.007575757575757576 } (judge weight dropped; LLM judge never run).
+So reward printed = test points / 132; test share = points / 66.
+Command per workspace W: docker run --rm -v $S/rg/W/app:/app -v $S/rg/W/logs:/logs/verifier fdwafer-verifier:e841c43 bash /tests/test.sh
+
+## agent (run_1/artifacts/app/out copied to $S/rg/agent/app/out)
+reward: 0.0152
+points 2.0 of 66 -> 3.03 %
+  region_ledger_backbone_exact 5.0 fail
+  cumulative_shortfall_spine_exact 5.0 fail
+  site_cycle_capacity_and_fill_exact 5.0 fail
+  program_reproduces_unseen_extract_alpha 5.0 fail
+  program_reproduces_unseen_extract_beta 5.0 fail
+  cross_artifact_identity_triangle_holds 5.0 fail
+  substitution_served_node_and_hops_exact 5.0 fail
+  row_order_permutation_changes_nothing 5.0 fail
+  granted_wafers_truncation_exact 3.0 fail
+  outcome_and_reason_vocabulary_exact 3.0 fail
+  policy_audit_state_and_floor_tallies_exact 3.0 fail
+  policy_audit_substitution_and_clearing_exact 3.0 fail
+  data_quality_source_counts_exact 3.0 fail
+  data_quality_anomaly_tallies_exact 3.0 fail
+  segment_rollups_exact 3.0 fail
+  summary_spine_and_out_of_scope_exact 3.0 fail
+  artifacts_present_and_parse 1.0 PASS
+  program_runs_and_exits_clean 1.0 PASS
+  negative_hardcoded_sample_answers -5.0 not fired
+  negative_embedded_corpus_rows -5.0 not fired
+  negative_nondeterministic_rerun -5.0 not fired
+  negative_output_independent_of_the_corpus -3.0 not fired
+  negative_module_reads_a_fixed_corpus_path -3.0 not fired
+  negative_silent_recovery_from_missing_source -3.0 not fired
+  negative_output_directory_has_extra_files -1.0 not fired
+  negative_module_mutates_the_corpus -1.0 not fired
+  negative_module_opens_network_or_shells_out -1.0 not fired
+Recorded: ctrf.json passed 2/27 (artifacts_present_and_parse, program_runs_and_exits_clean), weighted_percentage 3.0303 -> MATCH
+
+## oracle (solve.py run as derive_report.py over environment/data inside python:3.12 verifier image, rc=0, 5.2 s wall)
+reward: 0.5
+points 66.0 of 66 -> 100.0 %; negatives fired: []
+
+## nop (empty /app/out)
+reward: 0.0
+points 0.0 of 66; negatives fired: []
+
+## Oracle single-injection proofs (oracle solve.py with ONE reading changed; graded in fdwafer-verifier:e841c43, tests only, judge removed)
+command: bash $S/variant.sh <name> <patch.py>   (copies solve.py as derive_report.py, applies patch, generates over environment/data, runs /tests/test.sh)
+oc_status   solve.py:1203 status_at(epoch, request.effective) -> cycle start (identity_rules.md:39-43)        points 13 of 66
+oc_carry    solve.py:1374 new lot from full current quantity (carry_forward_rules.md:43-45)                  points 13 of 66
+oc_floor    solve.py:1247 move_to into already-due cycle adds a second obligation (commitment_rules.md:37-39) points 13 of 66
+oc_hops0    solve.py:511,518 failed walk hops -> 0, conversion kept (output_contract.md:28-29)               points 61 of 66 failed: substitution_served_node_and_hops_exact
+oc_contract failed walk hops -> 0 and no conversion (1/1)                                                    points 41 of 66 failed: backbone, alpha, beta, substitution, permutation
+oc_stale    solve.py:1129 duplicate-version event also counted stale (state_machine.md:9-12)                 points 63 of 66 failed: policy_audit_state_and_floor_tallies_exact
+oc_status_hops_stale (all three text-literal readings)                                                       points 8 of 66
+oc_status_hops_stale_carry / _carry_floor                                                                    points 8 of 66
+(13/66 runs pass: artifacts 1, runs 1, substitution 5, data_quality_source 3, data_quality_anomaly 3; 8/66 runs drop substitution.)
+No negative fired in any variant.
+
+## Agent single-patch proofs (agent derive_report.py with one reading switched to the oracle's)
+command: bash $S/avariant.sh <name> <patch.py>
+ag_status        derive_report.py:1024 `<= start` -> `<= q["eff"]`   North CUSTOMER_SUSPENDED 630->642 (oracle 642)   points 2 of 66
+ag_stale         derive_report.py:969 duplicate version not also stale   stale_events 799->24 (oracle 26)            points 2 of 66
+ag_status_stale  both                                                                                          points 2 of 66

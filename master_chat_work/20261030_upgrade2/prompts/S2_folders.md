@@ -1,0 +1,11 @@
+# S2: Folder restructure, cleanup policy and a private git repo
+OUT: `/Users/mac/Desktop/Terminal Bench/master_chat_work/20261030_upgrade2/S2_folders/`
+
+Goal (Ayush U3, U4): the root is disorganised; propose a clean layout, a cleanup policy by age, and what goes into a new private GitHub repo the master can push/pull (other root folders must never be pushed).
+
+Answer with evidence:
+1. Inventory every top-level folder of `/Users/mac/Desktop/Terminal Bench/` and the second level of master_chat_tasks, master_chat_work, QC, Terminal_2.0_Harbor_Harness: size (`du -sh`), file count, newest/oldest mtime, what it is for, who writes it (which tool/prompt references the path: `rg -l` over master_chat_tasks/ and Terminal_2.0_Harbor_Harness/scripts/), and whether anything still reads it. Output `INVENTORY.csv`.
+2. Hard-coded paths: every path string in tools/, auto/, prompts/templates/, AUTO_POLICY.md, harness scripts that a move would break. Output `PATH_REFS.csv` (file:line, path). This decides what can move safely.
+3. Proposed layout: a target tree (max 3 levels) with a reason per folder, and a migration order that never breaks a running session (symlinks or a path map first, move later). Mark folders that belong to other people or other repos (anubis-stage-1/2, Anubis_Tasks_Samples, harness clone) as do-not-touch.
+4. Cleanup policy: per folder type (jobs/, gate_run copies, QC/copies, /tmp/oracle-qc, /tmp/harbor-jobs-qc, master_chat_work/bundles/_work, old prompts, opencode DB size), how long to keep, what must be kept forever (anything referenced by a pushed task, decisions, QC reports), and how much space each rule frees (measure). Note macOS deletes /tmp files not accessed for 3 days and a reboot on 30 Oct wiped /tmp.
+5. Git repo: which folders/files go in (code, prompts, knowledge, registry, decisions), which never (bundles, jobs, trajectories, secrets, Docker data, large binaries), a `.gitignore` draft, total size, a secret scan of the candidate files (`rg -n` for key/token/secret/password/sk-; report file:line only, never the value), and the push/pull workflow for the master (branch, commit message style, who approves). Draft `.gitignore` and `REPO_PLAN.md` in OUT (not installed).

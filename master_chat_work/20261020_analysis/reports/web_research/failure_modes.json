@@ -1,0 +1,609 @@
+[
+ {
+  "id": "F-001",
+  "mode": "Success falls steeply with coherent, non-splittable task length (long dependent chains)",
+  "evidence": [
+   {
+    "source": "011",
+    "where": "§2.3 p5, Fig 3",
+    "finding": "Success falls roughly linearly in log(human task time): y=-0.07x+0.66, R^2 0.83."
+   },
+   {
+    "source": "011",
+    "where": "§3.2.1 p7",
+    "finding": "80% time horizons are 4-6x shorter than 50% horizons."
+   },
+   {
+    "source": "020",
+    "where": "live page FAQ",
+    "finding": "A task is a coherent unit that cannot be split; 1000 one-hour problems is a 1-hour task done 1000 times."
+   },
+   {
+    "source": "002",
+    "where": "Abstract; Fig.4 p.7",
+    "finding": "Long-horizon Harbor tasks: best model 28.3% at R>=0.95; mean over 17 models 6.4%; 62.8% of runs get partial credit."
+   },
+   {
+    "source": "008",
+    "where": "§4.3 p.8",
+    "finding": "Median successful run finishes after 57 min; 42% of solves come after the 1-hour checkpoint."
+   },
+   {
+    "source": "021",
+    "where": "§2.1 p.4; §3.2 p.7",
+    "finding": "Horizon H_s = ln(s)/ln(p); per-step accuracy falls as errors accumulate in context (self-conditioning)."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": true,
+  "how_to_use": "Make the core work a chain of 6-12 dependent stages where each stage's input comes from the previous stage's verified output. Do not count independent repeats as length."
+ },
+ {
+  "id": "F-002",
+  "mode": "Premature completion: claiming done without checking (false finish)",
+  "evidence": [
+   {
+    "source": "011",
+    "where": "Table 2 p7; §D.1 p25",
+    "finding": "Premature task abandonment = 16 of 32 o1 failures and 8 of 31 GPT-4 failures; defined as submitting without checking correctness."
+   },
+   {
+    "source": "002",
+    "where": "§3.5 p.10",
+    "finding": "124 self-terminated runs; 14 had R>=0.75 and stopped with ~20 min left (e.g. seven models stopped at R 0.80-0.87 on one task)."
+   },
+   {
+    "source": "008",
+    "where": "Intro p.2",
+    "finding": "Fast models often claim completion long before they finish."
+   },
+   {
+    "source": "017",
+    "where": "§3.1 p6",
+    "finding": "Agents did not always use the provided validation server; gpt-4o AIDE made a submission 70.7% of the time but a valid one only 54.9%."
+   },
+   {
+    "source": "001",
+    "where": "§4.4 p.9; App C.1 p29",
+    "finding": "Execution and verification errors (unaware of termination, weak verification) are TB2 failure classes."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": true,
+  "how_to_use": "State the full acceptance criteria, give a validator that checks only format (and say so), and weight the checks that a first-pass solution misses."
+ },
+ {
+  "id": "F-003",
+  "mode": "Composing individually documented features fails (feature isolation)",
+  "evidence": [
+   {
+    "source": "036",
+    "where": "Fig.1 p.2",
+    "finding": "HTTP server: 100% visible per-feature tests vs 25% held-out composition tests."
+   },
+   {
+    "source": "036",
+    "where": "Fig.5 p.6; §3.1 p.5",
+    "finding": "Visible-vs-held-out gaps of roughly 32-64 pp; gap grows ~27-28 pp per 10x LOC (paper is internally inconsistent on the exact figure)."
+   },
+   {
+    "source": "036",
+    "where": "§3.5 Fig.7 p.9",
+    "finding": "Adding composition tests to the visible set did not reliably close the gap: compositions are genuinely difficult."
+   },
+   {
+    "source": "037",
+    "where": "Table 2 p.6",
+    "finding": "Requirements met fall from 44.80% (independent) to 28.96% (dependency-aware) for GPT-Pilot."
+   },
+   {
+    "source": "012",
+    "where": "§6.1 p7, Fig 3",
+    "finding": "Success declines sharply as the number of files touched rises."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": true,
+  "how_to_use": "Document every rule and the combination semantics (precedence table); put most grading weight on hidden cases that combine 2-4 documented rules, plus error paths."
+ },
+ {
+  "id": "F-004",
+  "mode": "Standard or memorised approach is insufficient; an algorithmic insight or reformulation is needed",
+  "evidence": [
+   {
+    "source": "010",
+    "where": "§4.2 p.9, Table 3",
+    "finding": "Adding a 'dominant algorithmic lift' cut the Hard split mean pass@1 from 87.0% to 45.7%; GPT-5.4 94.8% to 49.7%."
+   },
+   {
+    "source": "015",
+    "where": "§4.2 p7",
+    "finding": "No novel algorithms found; speedups were surface-level (better library call, parameters, Numba)."
+   },
+   {
+    "source": "016",
+    "where": "§5.2 p17",
+    "finding": "Agents tried lightly modified transformers 84% of the time where transformers work poorly."
+   },
+   {
+    "source": "001",
+    "where": "§4.3 p.8",
+    "finding": "Tasks humans rated medium but models found hard needed creative or adversarial reasoning rather than pattern-following."
+   },
+   {
+    "source": "013",
+    "where": "§4 p8",
+    "finding": "Hardest CTF failures came from missing multi-step insights that take experts time."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": true,
+  "how_to_use": "Give a correct naive reference and a size ladder where the obvious speedups pass the small sizes but only a reformulation passes the large one."
+ },
+ {
+  "id": "F-005",
+  "mode": "Stacked explicit constraints: one more stated requirement collapses success; models rationalise a requirement away",
+  "evidence": [
+   {
+    "source": "019",
+    "where": "blog 'Making tasks hard with one simple trick'",
+    "finding": "curl build 96% pass@1; adding 'statically compiled binary for ARM64' dropped it to 2%."
+   },
+   {
+    "source": "019",
+    "where": "blog 'Google'",
+    "finding": "A model produced a dynamic binary because static builds were 'unnecessarily large', ignoring the stated requirement."
+   },
+   {
+    "source": "014",
+    "where": "§5.2 p8, App C.2.1",
+    "finding": "Visible policy said a tool can be called once after collecting all items; agent exchanged one item and never the second."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": true,
+  "how_to_use": "Require an artifact that meets 4-5 orthogonal, individually checkable constraints; weight each constraint separately."
+ },
+ {
+  "id": "F-006",
+  "mode": "Many simultaneous explicit instructions: omission rises with density",
+  "evidence": [
+   {
+    "source": "024",
+    "where": "Abstract; App A Table 1",
+    "finding": "Best model 68% at 500 instructions; gemini-2.5-pro 98.4% at 100, 84.8% at 250."
+   },
+   {
+    "source": "024",
+    "where": "§4.3 p.5",
+    "finding": "claude-opus-4 44.6% and claude-sonnet-4 42.9% at 500 instructions."
+   },
+   {
+    "source": "024",
+    "where": "§4.6 p.7",
+    "finding": "Errors shift toward omission as density rises."
+   },
+   {
+    "source": "005",
+    "where": "§Well-specified",
+    "finding": "TB reviewers reject tasks 'primarily hard because of how many corner cases must be handled'."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": true,
+  "how_to_use": "Use only as a minor weight: dozens of instructions are near-perfect for frontier models, and hundreds trip the QC 'corner-case count' rule."
+ },
+ {
+  "id": "F-007",
+  "mode": "Ad-hoc (non-commonsense) rules and plausible but inapplicable clauses are misapplied",
+  "evidence": [
+   {
+    "source": "014",
+    "where": "Table 3 p8",
+    "finding": "Removing the policy: retail 61.2 to 56.8 (common-sense rules) but airline 33.2 to 10.8 (ad-hoc rules), showing models rely on priors for common-sense rules."
+   },
+   {
+    "source": "026",
+    "where": "§4.4 p.10, Fig 8a",
+    "finding": "One irrelevant clause (GSM-NoOp) dropped o1-preview 17.5 points and GPT-4o 32.0 points."
+   },
+   {
+    "source": "028",
+    "where": "Table 2 p.3",
+    "finding": "Obfuscated Blocksworld with full rules: o1-preview 97.8% plain vs 52.8% Mystery vs 37.3% randomised."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": true,
+  "how_to_use": "Write rules that contradict the usual convention (documented clearly) and include documented clauses that apply only under stated conditions."
+ },
+ {
+  "id": "F-008",
+  "mode": "Silent wrong output from a tool or stage is propagated instead of detected",
+  "evidence": [
+   {
+    "source": "030",
+    "where": "Abstract; §5 p.8-9",
+    "finding": "GPT-5.4 51.90% block-free vs 11.36% under severe blocking; implicit (silent) failures give the lowest accuracy for all models."
+   },
+   {
+    "source": "016",
+    "where": "§5.2 p17",
+    "finding": "Agents ignore contradictory information and keep stubborn incorrect assumptions."
+   },
+   {
+    "source": "001",
+    "where": "App C.3 p34",
+    "finding": "After fetch errors an agent wrote a guessed model id and finished."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": true,
+  "how_to_use": "Have a documented component fail quietly on documented input classes; credit runs that detect and handle it."
+ },
+ {
+  "id": "F-009",
+  "mode": "Stale beliefs and context accumulation over long runs",
+  "evidence": [
+   {
+    "source": "016",
+    "where": "§5.2 p17",
+    "finding": "Modular agent does better when its context is wiped every 30 min."
+   },
+   {
+    "source": "021",
+    "where": "§3.2 p.7",
+    "finding": "Errors in history raise the next-step error rate; scaling fixes long-context decay but not self-conditioning (thinking models resist it)."
+   },
+   {
+    "source": "012",
+    "where": "§6.3 p8",
+    "finding": "Sonnet 4 unresolved runs: context overflow 35.6%, endless file reading 17.0%."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": true,
+  "how_to_use": "Long tasks where an early natural hypothesis must be revised when later evidence (logs, outputs) contradicts it."
+ },
+ {
+  "id": "F-010",
+  "mode": "Time and resource budget mismanagement",
+  "evidence": [
+   {
+    "source": "002",
+    "where": "Fig.6 + p.9",
+    "finding": "79% of unresolved runs were timeouts; timed-out runs had mean R only 0.10-0.35, i.e. not close to done."
+   },
+   {
+    "source": "017",
+    "where": "§3.1 p6",
+    "finding": "Agents rarely considered run time of their code; overloaded disk/RAM got processes killed."
+   },
+   {
+    "source": "016",
+    "where": "Fig 5 p14",
+    "finding": "Agents plateau after ~2 h while humans keep improving."
+   },
+   {
+    "source": "007",
+    "where": "§What Difficulty Actually Means",
+    "finding": "Telling agents the time left made them act irrationally; unstated resource limits are unfair."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": true,
+  "how_to_use": "State the time budget and hardware in task.toml/instruction; make the naive plan exceed it so the agent must plan, but never hide limits."
+ },
+ {
+  "id": "F-011",
+  "mode": "Poor detection and honest reporting of infeasible cases",
+  "evidence": [
+   {
+    "source": "028",
+    "where": "Table 3 p.5",
+    "finding": "o1-preview true-negative rate on unsolvable Blocksworld only 27%."
+   },
+   {
+    "source": "031",
+    "where": "§5.3 p.8",
+    "finding": "An explicit abort channel cut GPT-5 cheating 54% to 9% and o3 49% to 12%."
+   },
+   {
+    "source": "038",
+    "where": "Table 2 p.6",
+    "finding": "On ambiguous problems hardcoding rose to 22-44% vs 0-2% on unambiguous ones."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": true,
+  "how_to_use": "Mix feasible and provably infeasible sub-instances; require a checkable certificate for INFEASIBLE."
+ },
+ {
+  "id": "F-012",
+  "mode": "Audit-and-repair of broken multi-stage systems",
+  "evidence": [
+   {
+    "source": "008",
+    "where": "§4.2 p.8; Fig.4",
+    "finding": "Audit-and-repair mean 0.32 and 11/23 solved by any model; 8 of the 9 tasks where no model exceeds R=0.2 are audit-and-repair."
+   },
+   {
+    "source": "001",
+    "where": "Fig.11 caption p.22",
+    "finding": "Tasks unsolved by any model include complex system configuration, kernel driver compilation, database migration."
+   },
+   {
+    "source": "017",
+    "where": "§1 p2",
+    "finding": "Agents struggle to debug issues and recover from missteps."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": true,
+  "how_to_use": "Ship a pipeline with several independent defects against a documented end-to-end contract; grade per stage."
+ },
+ {
+  "id": "F-013",
+  "mode": "Unfamiliar formalisms even with full rules",
+  "evidence": [
+   {
+    "source": "028",
+    "where": "Table 2 p.3",
+    "finding": "Renaming a known domain dropped o1-preview from 97.8% to 52.8%."
+   },
+   {
+    "source": "022",
+    "where": "§4.4 p.11-12",
+    "finding": "Near-perfect Tower of Hanoi N=5 (31 moves) but failure on River Crossing N=3 (11 moves); giving the algorithm did not move the collapse point."
+   },
+   {
+    "source": "017",
+    "where": "Fig 9 p28",
+    "finding": "Agents medal on 2013-2022 competitions but struggle after 2022."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": true,
+  "how_to_use": "Specify a novel, fully documented formalism (DSL, VM, encoding) rather than a well-known one."
+ },
+ {
+  "id": "F-014",
+  "mode": "Overfitting to visible examples and hardcoding when tests are reachable",
+  "evidence": [
+   {
+    "source": "036",
+    "where": "§3.6 p.9",
+    "finding": "A 2,900-line hash table of precomputed outputs scored 97% visible, 0% held-out; search preferred it over a genuine compiler (53%/43%)."
+   },
+   {
+    "source": "038",
+    "where": "Table 1 p.6; §5 p.12",
+    "finding": "Heuristic or brute-force solutions can pass holdout tests when the test distribution is poor."
+   },
+   {
+    "source": "015",
+    "where": "§2.2 p5",
+    "finding": "Narrow input distributions allow hard-coded answers; a validity-only verifier let a trivially suboptimal output through."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": true,
+  "how_to_use": "Hidden tests drawn from a wider distribution than the visible examples, plus optimality/semantic checks, not just validity."
+ },
+ {
+  "id": "F-015",
+  "mode": "Messiness: no feedback loop or need to seek information proactively",
+  "evidence": [
+   {
+    "source": "011",
+    "where": "§F.2 p31",
+    "finding": "Each +1 messiness point lowers success ~8.1% at equal length (R^2=0.251)."
+   },
+   {
+    "source": "011",
+    "where": "§3.3 p7",
+    "finding": "Agents struggle without a clear feedback loop or when they must proactively seek information."
+   }
+  ],
+  "strength": "weak",
+  "works_with_visible_rules": false,
+  "how_to_use": "Only the 'no cheap feedback loop' part survives visible rules; underspecification parts would fail QC."
+ },
+ {
+  "id": "F-016",
+  "mode": "Exact arithmetic, counting, short state tracking (bypassed by Python in a terminal)",
+  "evidence": [
+   {
+    "source": "025",
+    "where": "§1 p.2; §3.2 p.7",
+    "finding": "GPT-4 59% on 3x3-digit multiplication (2023 models)."
+   },
+   {
+    "source": "027",
+    "where": "Table 1 p.6",
+    "finding": "GPT-4o with CoT stays at 1.00 through depth 10 on LinearWorld; failure is mostly older generations."
+   },
+   {
+    "source": "021",
+    "where": "§3 p.5",
+    "finding": "Running-sum execution failure is trivially bypassed by a one-line script (note 021 relevance)."
+   }
+  ],
+  "strength": "medium",
+  "works_with_visible_rules": false,
+  "how_to_use": "Do NOT use as a difficulty source; a terminal agent computes it with Python."
+ },
+ {
+  "id": "F-017",
+  "mode": "Clerical, format and precision difficulty (rejected by QC)",
+  "evidence": [
+   {
+    "source": "006",
+    "where": "criterion essential_difficulty",
+    "finding": "FAIL if most failures would come from formatting, arbitrary precision or clerical details."
+   },
+   {
+    "source": "007",
+    "where": "§Clerical Difficulty",
+    "finding": "Format-compliance failures are 'hard in an uninteresting way'."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": false,
+  "how_to_use": "Keep output formats trivial and given by example; do not put weight on formatting."
+ },
+ {
+  "id": "F-018",
+  "mode": "Volume, size and repetition do not add real difficulty",
+  "evidence": [
+   {
+    "source": "020",
+    "where": "live page FAQ",
+    "finding": "Splittable repetition is not long-horizon."
+   },
+   {
+    "source": "007",
+    "where": "§What Difficulty Actually Means",
+    "finding": "Making it bigger 'does not make it better. Real difficulty is conceptual'."
+   },
+   {
+    "source": "005",
+    "where": "§Examples > Reject",
+    "finding": "100,000-LoC summarisation rejected as time-consuming but not hard."
+   },
+   {
+    "source": "001",
+    "where": "§4.1 p.7; Fig.35",
+    "finding": "Essentially no correlation between number of turns and success."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": false,
+  "how_to_use": "Avoid; reviewers reject it and it does not lower careful-model scores."
+ },
+ {
+  "id": "F-019",
+  "mode": "Hidden rules or unstated interfaces create false negatives, not capability signal",
+  "evidence": [
+   {
+    "source": "012",
+    "where": "Table 3, §6.2 p8",
+    "finding": "Without human-written requirements and interface GPT-5 fell 25.9% to 8.40% (tests expected names the agent was not told)."
+   },
+   {
+    "source": "012",
+    "where": "abstract of 2610.24206 (UNVERIFIED beyond abstract)",
+    "finding": "SWE-Bench Pro V2: 480 of 731 public tasks repaired or retired."
+   },
+   {
+    "source": "009",
+    "where": "Table 10 p.19",
+    "finding": "15 task-level errors and 20 exploitable shortcuts surfaced only after saturation."
+   },
+   {
+    "source": "001",
+    "where": "App B.3 p.26-27",
+    "finding": "If all trials fail the same tests, the instructions are likely insufficient; different failures suggest fair difficulty."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": false,
+  "how_to_use": "Never; use the TB2 diagnostic: identical failure sets across runs signal a spec gap."
+ },
+ {
+  "id": "F-020",
+  "mode": "Reward hacking when grader or solution is reachable",
+  "evidence": [
+   {
+    "source": "032",
+    "where": "table 'What we've observed'",
+    "finding": "o3 hacked 30.4% of RE-Bench runs (100% on one task) vs 0.7% on HCAST; 'please do not cheat' still left 80% planning a hack."
+   },
+   {
+    "source": "003",
+    "where": "Table 2 p.12",
+    "finding": "With a planted admin/ folder, 16.4% of TB2.1 runs hacked; claude-opus-5 30.7% with no warning, 0.0% when told not to read admin/."
+   },
+   {
+    "source": "039",
+    "where": "issue body",
+    "finding": "Agents found fix commits via git log --all in SWE-bench images."
+   },
+   {
+    "source": "031",
+    "where": "§5.2 p.8",
+    "finding": "Read-only tests stop test edits but not special-casing or operator overloading."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": true,
+  "how_to_use": "Integrity requirement, not a difficulty lever: nothing graded may be reachable from the agent container."
+ },
+ {
+  "id": "F-021",
+  "mode": "Run-to-run variance and bimodal per-task outcomes",
+  "evidence": [
+   {
+    "source": "040",
+    "where": "Abstract; Table 1 p.5",
+    "finding": "Aggregate pass@1 varies 2.2-6.0 pp across 10 identical runs; SD >1.5 pp even at temperature 0."
+   },
+   {
+    "source": "040",
+    "where": "p.6",
+    "finding": "pass@1 34.4% vs pass^5 15.5% vs pass@5 52.9% for one config."
+   },
+   {
+    "source": "020",
+    "where": "live page FAQ",
+    "finding": "On 90 min-3 h tasks a GPT-5 agent succeeds 100% on ~1/3, fails 100% on ~1/3, mixed on ~1/3."
+   },
+   {
+    "source": "007",
+    "where": "§Tests That Validate the Wrong Things",
+    "finding": "Word2vec task over 25 runs: rank varied from 1 to 40."
+   },
+   {
+    "source": "016",
+    "where": "§5.1 p17",
+    "finding": "A lucky 0.88 re-ran to 0.69."
+   }
+  ],
+  "strength": "strong",
+  "works_with_visible_rules": true,
+  "how_to_use": "One build-time run proves little; use the 8 final runs for a bound (see REPORT)."
+ },
+ {
+  "id": "F-022",
+  "mode": "Exact optimisation at sizes beyond brute force",
+  "evidence": [
+   {
+    "source": "029",
+    "where": "§5.1 p.10",
+    "finding": "12 2023-era models: NP-hard weighted accuracy 0.02 vs 0.24 for P tasks."
+   },
+   {
+    "source": "015",
+    "where": "§4.2 p8",
+    "finding": "Opus 4 hand-wrote Lasso at 0.33x reference speed and ran out of budget."
+   }
+  ],
+  "strength": "weak",
+  "works_with_visible_rules": true,
+  "how_to_use": "Score by optimality gap against a reference optimum; small instances are bypassed by brute force or ILP."
+ },
+ {
+  "id": "F-023",
+  "mode": "Interactive programs (TUIs, long installs needing polling) stall agents",
+  "evidence": [
+   {
+    "source": "007",
+    "where": "§What Difficulty Actually Means; §Building Tasks That Work",
+    "finding": "Navigating an interactive TUI can completely stall an agent; install task needs watching a 30-60 min install."
+   }
+  ],
+  "strength": "weak",
+  "works_with_visible_rules": true,
+  "how_to_use": "Opinion-level evidence only; use as a secondary ingredient."
+ }
+]

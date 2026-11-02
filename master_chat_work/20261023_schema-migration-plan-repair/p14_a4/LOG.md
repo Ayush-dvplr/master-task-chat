@@ -1,0 +1,14 @@
+# LOG 41af690 (IST)
+- 00:28 session renamed (opencode ses_e95ded596ffePD6cuB9n3HKF8X); OUT created
+- 00:31 read COMMON_RULES_v2, LEVER_RULES 0-4 (+5-7), LEAK_LIBRARY, QC_RULINGS, master_process lessons (53-59,63-65)
+- 00:33 bundle fingerprint ef231be915446aaf3c172e2d54fdf917ba119ba1; reward split 0.5/201 tests, 0.5/13 judge
+- 00:35 result.json exception_info None; agent 15:47:25-17:39:49Z (112.4 min of 120); 96 steps; verifier 63 checks (57 pos all pass, 6 neg none fired); step index at scratch/steps_index.txt
+- 00:40 P2 read LEVERS.md (Harden P9 v2 r1 L1/L2/L5/L6), DESIGN.md defects F1-F17, as-built notes
+- 00:45 R8: claim step idx95 "returns in well under 10 s on graphs with astronomically many paths (K14)"; stress idx60 wide worst=77.75s, idx63 wide 78.05s, exit=124 (planner unchanged after idx61-62)
+- 00:55 local stress (scratch/stress2_local.py = agent stress2.py idx53 verbatim, path args only): agent graphs use 10 prereq fields (> K14's 8). In-limits variant (stress8_local.py, prereqs f0-f7): oracle thin_ops 43.29s, wide TIMEOUT>400s; agent thin_ops 7.49s, wide 74.60s (M1 Max, py3.14). ORACLE breaks K14 on in-limits op-heavy graphs -> no SCALE lever possible.
+- 01:05 date ok after 3rd compaction; resumed P3 (JD rules, R6 evidence, agent code facts in summary)
+- 01:12 diff oracle vs agent non-planner src: behaviour-equivalent (only refactors); planner differential 1600 cases (779 plans) 0 differ (scratch/diffplan.py)
+- 01:20 Phase A written (verdict PARTLY: tests genuine, R6 defect; R3/R4/R8 genuine; paper R6-fixed 30.77/65.38)
+- 01:09 Phase B written (8 sections + Lessons); P4 ticked
+- 01:09 Phase C GROUP_SUMMARY.md + result_41af690.json (parses); P5 ticked
+- 01:09 final rename ok (opencode ses_e95ded596ffePD6cuB9n3HKF8X); DONE

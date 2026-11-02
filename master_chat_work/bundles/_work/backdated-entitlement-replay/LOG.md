@@ -1,0 +1,29 @@
+# LOG backdated-entitlement-replay (board 99230f0)
+
+- 12:28 name_session.py 99230f0 -> `codex: no match` / `opencode: ['ses_e6f3f18e3ffeWNo8rto5hQJcuN']`
+- 12:29-12:33 read COMMON_RULES_v5, IDEA.md, LEVER_RULES_v3, LEAK_LIBRARY, QC_RULINGS, QC_FIX_PLAYBOOK_v3, KNOWLEDGE, checks.json (condensed view)
+- 12:34 fingerprint check (python hash of every `files` entry): pl_generator 160/160 match, qc 12/12 match. GEN git HEAD 5574d77eb9f2 differs from fingerprint git_head field 976c1666 but all hashed files match -> not UPSTREAM CHANGED.
+- 12:35-12:40 studied metered-usage-rating-pipeline, warrant-asof-entitlement-compiler, stage-2 PATTERNS.md and billing 59417607 for templates.
+- 12:41 wrote TODO.md, LOG.md
+- 12:43 wrote PREMORTEM.md; 12:45 kill/core.py draft (variant flags)
+- 12:47 refactor core.py into functions (variant dict), add posted transfer field for PA4; writing kill/gen.py
+- 12:57 gen.py fix last_change empty; PB3 check (target resolved by design). hidden seed 101: 22/22 extracts OK, each fires exactly its MUST set (+ALLOW).
+- 13:00 shipped seed 731905 (400 accts, 12 months): first run fired 'cap'; added replay-cap filter loop in shipped(); rerun fired [] (degenerate, incl. fixed1). Lines: invoice_lines 20207, register 5050, log 5323, events 2879, lots json 2242.
+- 13:02 hidden seed 202: 22/22 OK. Wrote kill/run_kill.py. dockfree START=no (3 containers of other jobs); waiting.
+- 13:04 kill run 1 in Docker (logs/kill.log): R4a first-fit 73.5 tests; R5 first-write 42.5.
+- 13:06 change 1: every void invoice rated at legacy default 1/actual (ambient void witness on every hidden extract); PB3 tier removed (10 tiers). kill run 2 (kill2.log): R4c withvoid 2.9; R4a 70.9.
+- 13:08 run_kill.py rows R5b + all-but-one A1-A7; kill run 3 (kill3.log): A1-A7 85.4-93.5; R5b 43.4; R4a 70.9.
+- 13:10 change 2: ambient quiet account (no changes, all 56 fit -> anchor_ambiguous) in k=1 extract of every non-PB tier. gen3 wrote both seeds into one mis-named dir (shell quoting); deleted, regenerated hid1 (seed 101) and hid2 (seed 202): 40/40 OK (gen4a.log).
+- 13:16 dockfree START=yes; kill run 4 started (kill4.log).
+- 13:20 kill run 5 (kill5.log, rows R6-R8 added): R6 careful unique + 2 slips 79.0; R8 4 slips 64.4; all first-fit/best/void/fixed1 rows 2.9.
+- 13:22 wrote KILL_TEST.md and DESIGN.md.
+- 13:26 wrote kill/branch_fire.py; Docker run logs/bf1.log ALL_DONE: shipped 0 differing docs for all 12 variants; each fires on its tiers in seeds 101, 202. Wrote BRANCH_FIRE.md, QC_DEFENCE.md.
+- 13:30 DESIGN.md section 9 honest gaps added; DESIGN_SUMMARY.md written (38 lines max). STOP: DESIGN READY.
+- 14:20 go received (master 14:30 note: IDEA line 15 change accepted; recorded in DESIGN.md section 10).
+- 14:24 proto/solve_proto.py, proto/gen_proto.py; shipped sample -> design_blind/environment/data (seed 731905, shipped fired []); hidden seeds 101/202/303 -> scratch/bhid*, 20 OK each.
+- 14:30 wrote the 5 rule docs + design_blind/instruction.md; forbidden-word scan clean; wrote proto/score_blind.py.
+- 14:35 DESIGN_SUMMARY.md `## Design blind ready` section; proto/branch_fire_proto.py.
+- 14:36 dockfree START=yes; Docker bf2.log: branch_fire on sample + 3 seeds, score_blind self-check (reference as program).
+- 14:38 bf2.log ALL_DONE: shipped sample 0 for all 12 variants; every tier fires on 101/202/303; scorer self-check 100%. BRANCH_FIRE.md updated. STOP: DESIGN BLIND READY.
+- 14:56 blind 1861cfe program copied to proto/blind/derive_report.py sha256 6e24c9d7cf98c6dc8aff65615fffcb90afc85be8eeedac11f6365042cce91232 (652 lines); dockfree START=yes; Docker score -> score-1861cfe/logs/score.log
+- 14:58 score.log ALL_DONE: blind 1861cfe exact on shipped + 40 hidden extracts (309/309, lever 300/300), 0 WRONG/TIMEOUT/CRASH. KILL_TEST row + DESIGN_SUMMARY section + QC_DEFENCE lessons written. VERDICT NO CORE; stop.

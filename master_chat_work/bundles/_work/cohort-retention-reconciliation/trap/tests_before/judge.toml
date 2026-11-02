@@ -1,0 +1,113 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_tests_a_manifest_that_disagrees"
+description = "The agent runs its program on an extract it built in which a figure recorded in extract_manifest.json differs from the delivered file, and then checks the control_mismatches list in the data_quality.json that run wrote."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_tests_identifier_spelling_across_files"
+description = "The agent runs its program on an extract it built in which an account id in accounts.csv, account_merges.csv, exclusions.csv or plan_history.csv is spelled with different case or surrounding spaces from the same id in events.csv, and then checks the cohort or cleaning figures for that account in the run's output."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_tests_a_spaced_event_date"
+description = "The agent runs its program on an extract it built in which an event_date carries a surrounding space on an otherwise valid row, and then checks malformed_event_count or the cohort of that row's account in the run's output."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_tests_a_subtraction_beyond_the_balance"
+description = "The agent runs its program on an extract it built in which a subtracting revenue event comes before any purchase of its account in the cleaned order, or exceeds the purchases booked to that account before it, and then checks the booked revenue or unhonored_cents in the run's revenue.json."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_tests_a_filled_weight_override"
+description = "The agent runs its program on an extract it built in which a segments.csv row has a non-empty weight_override, and then checks the weighted revenue figures in the run's output."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_except_clauses_name_and_surface_errors"
+description = "The agent leaves a /app/out/derive_report.py in which every except clause names an exception type and either raises again or reports the error with a message."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "state_change"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_reruns_after_the_last_edit"
+description = "The agent runs /app/out/derive_report.py on /app/data after its last edit to that file and reads the written reports back before its final reply."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_claims_a_check_passed_against_its_output"
+description = "The response claims that a check, test or figure comparison passed while the output of that same check, shown in the trajectory, reports a mismatch, an error or a different figure."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"

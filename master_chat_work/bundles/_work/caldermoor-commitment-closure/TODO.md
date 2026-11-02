@@ -1,0 +1,12 @@
+# TODO da62834 (judge rebuild v3) started 17:52 IST 26 Oct (old list saved TODO_da61544.md)
+- [x] rename session (da62834 not shown in list; noted), rules read, OUT created
+- [x] A1 OUT/JUDGE_BEFORE.md table
+- [x] A2 Opus acts list with step numbers (into JUDGE_BEFORE.md)
+- [x] B1 pick probes + sentences; WORK/JUDGE_MAP.md "v3 rebuild 26 Oct"
+- [x] B2 write tests/judge.toml
+- [x] C1 solve.sh self-check stage for every probe (local run, outputs unchanged)
+- [x] D1 oracle x3 + nop (ql procedure)
+- [x] D2 JD-7 criterion vs oracle log
+- [x] D3 QC 4 scripts + precheck CLEAN
+- [x] D4 TRUTH.md sha by script; no pycache
+- [x] E1 OUT/JUDGE_REBUILD.md + result_da62834.json

@@ -1,0 +1,11 @@
+# TODO d21576c (P12 fix v3, G05-1 adjacent pairs)
+- [x] 0 date, rename (opencode ok), rules read, HEAD 5574d77e, bundle == 92ee28b copy == Tasks_INPUT
+- [x] 1 xref 0 before; trap baseline = f65c/trap_f65c.json
+- [x] 2 Phase 1 G05-1 label + RECHECK_FIX rows
+- [x] 3 F1 template: _check_missing_adjacent_pairs + assemble reg (weight 3); G7 diff; reward 0.5/422
+- [x] 4 mutants (reversed, alphabetical) + oracle on new check, Docker; trap after; vacuity
+- [x] 5 truth_template bullet + write_truth.py (last)
+- [x] 6 xref, precheck CLEAN, stacking, RULE_COVERAGE row
+- [x] 7 Docker step10 oracle x3 / owner / nop (ONCE)
+- [x] 8 reports RECHECK_FIX, PL_NOTE, KEPT, STACKING_CHECK, result json
+- [x] 9 rsync to Tasks_INPUT, diff -rq empty, tree shas

@@ -1,0 +1,46 @@
+{
+  "r1_checks_a_drawn_allowance_on_its_own_extract": {
+    "score": 0,
+    "reasoning": "The synthetic extract does not exercise the required case. Its earlier event selects SA3 rather than the shared SA1 offer, and it does not explicitly verify that a later event's candidate count falls because the same allowance was consumed by an earlier selected offer."
+  },
+  "r2_checks_start_order_on_its_own_extract": {
+    "score": 0,
+    "reasoning": "The synthetic EV-A and EV-B timestamps do represent the same instant with differently sorting timestamp text and EV-B has the greater ID, but SA1's 1000-tick allowance covers both 100-tick offers. Thus it does not test an allowance covering only one offer or verify which event wins that constrained allowance."
+  },
+  "r3_checks_a_composed_rate_above_cap_on_its_own_extract": {
+    "score": 0,
+    "reasoning": "No chosen synthetic offer combines all required elements. EV-A/SA3 has an override, public-segment adder, and binding cap but zero event uplift; EV-B/SB1 has uplift and an adder but no override. The shipped-data Decimal check is not the required self-constructed extract."
+  },
+  "r4_checks_a_half_cent_interval_amount_on_its_own_extract": {
+    "score": 1,
+    "reasoning": "The synthetic extract's chosen OFF-C1 has 50 credited ticks × 10 Wh × 3000 mill-cents/kWh / 1,000,000 = exactly 1.5 cents. The hard-coded expected EV-B/Red credit is 2 cents under half-to-even rounding, and the script runs derive_report.py and compares that expectation successfully."
+  },
+  "r5_exact_arithmetic_for_reported_figures": {
+    "score": 1,
+    "reasoning": "Reported energy, money, ratios, objective components, grant shares, and rounding are calculated with Python integers and divmod-based rounding. No binary floating-point arithmetic is used for reported figures."
+  },
+  "r6_final_run_after_last_edit": {
+    "score": 1,
+    "reasoning": "After the final program edit in step 35, the agent ran the program successfully in step 36 and then, in step 39, deleted the shipped JSON outputs and regenerated them with `python3 out/derive_report.py data out`; that command completed successfully."
+  },
+  "r7_claims_a_check_its_output_contradicts": {
+    "score": 1,
+    "reasoning": "The final response claims that every export_manifest.tsv field_sum was reproduced exactly, but the trajectory contains no actual manifest-versus-parser comparison producing that result. Step 12 prints independently calculated sums, but no manifest values or equality checks are shown."
+  },
+  "r8_recomputes_grant_cents_outside_the_program": {
+    "score": 1,
+    "reasoning": "The synthetic test independently hard-codes and checks funded amounts and every listed beneficiary grant for at least EV-A/Red, EV-B/Red, and EV-C/Red, using the configured 40 cents-per-weight rule. It loads and compares the generated region documents. Step 28 additionally independently checks raw recipient weights and claims across the shipped claims-paid event-regions."
+  },
+  "r9_recomputes_remaining_allowance_outside_the_program": {
+    "score": 0,
+    "reasoning": "The independent replay checks aggregate candidate, blocked, and ineligible counts and uses selected offers to advance allowance usage, but it does not explicitly recompute and compare the remaining allowance for every chosen offer's site against the selections in the written region documents."
+  },
+  "r10_recomputes_credit_cents_outside_the_program": {
+    "score": 0,
+    "reasoning": "Step 27 independently recomputes every chosen offer's credit with Decimal, but compares each result to another in-memory calculation using derive_report's parsed objects and only compares the grand total to summary.json. It does not aggregate and compare every event-region's independently calculated chosen-offer credits with all written region-document credit_cents values."
+  },
+  "r11_derive_report_is_maintainable": {
+    "score": 1,
+    "reasoning": "The final program is large but reasonably structured: parsing is organized into named Extract loader methods, rounding and grant logic are separate functions, optimisation and report generation are distinct, names are descriptive, and comments document the non-obvious pruning invariant. Errors generally fail fast through standard exceptions rather than being silently masked."
+  }
+}

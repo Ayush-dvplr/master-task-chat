@@ -1,0 +1,58 @@
+{
+  "board": "9bd1ca1",
+  "status": "done",
+  "id": "e08c051f-cce9-5aba-b20d-88fb75574b6c",
+  "slug": "collateral-gated-settlement-ladder",
+  "scores": {"tests": 30.38, "rubric": 90.16, "combined": 60.27},
+  "scores_under_delivered_judge_weights": {"tests": 30.38, "rubric": 89.47, "combined": 59.93, "note": "run graded on pre-QC judge (61 positive); delivered judge.toml has R10/R12 at 3 (57 positive)"},
+  "regrade_matches": true,
+  "oracle_100": true,
+  "nop_score": 0,
+  "kit": {"fails": 0, "minors": 0, "warns": 0},
+  "breaks_our_rules": [
+    "B1 J1: R1-R9 are 'states figure X' criteria, 31/57 judge points (COMMON_v3:48, P2_build_v3:91, LEVER_RULES_v1:46)",
+    "B2 JD-7/J2: conduct criteria R15 (reordered corpus) and R13 the oracle trajectory cannot show; solve.py never reorders or inspects (COMMON_v3:49, LEVER_COMPAT:32)",
+    "B3 G3 shares: shipped-book points 69/79 = 87% (cap 5%), hidden-book 10/79 = 12.7% (floor 50%) (P2_build_v3:82)",
+    "B4 G2: whole event-set equality asserts inside per-rule tests test_output.py:805,816,825 (LEVER_RULES_v1:37)",
+    "B5 G6: one data mutation test (permuted+rescaled), we require at least 2 (P2_build_v3:82, LEVER_RULES_v1:41)",
+    "B6 hidden inputs are the shipped book relocated/permuted, no reseeded new rule cases (P2_build_v3:80)",
+    "B7 gate needs 2 runs under gate; only 1 Opus run, and on the pre-QC judge (COMMON_v3:55)",
+    "B8 J2: no w3 conduct criterion tied to the lever (string amount_minor rejection) (P2_build_v3:91)"
+  ],
+  "loss_by_class": {
+    "AMPLIFICATION": {"test_points": 55, "judge_points": 3, "combined_pts": 37.27, "note": "one GENUINE stated-rule slip (schema.md:34, :148-149) billed across 11 tests + judge R3"},
+    "CONDUCT": {"test_points": 0, "judge_points": 3, "combined_pts": 2.46, "note": "R15 reordered-corpus check, not asked for in instruction"},
+    "GENUINE": 0, "AMBIGUITY": 0, "HIDDEN_RULE": 0, "JUDGE_ERROR": 0, "ARTEFACT": 0
+  },
+  "distinct_mistakes": 2,
+  "points_per_mistake": [
+    {"mistake": "M1 coerced quoted-integer amount_minor strings (agent transform.py:504-514) -> 40 extra adjustment events", "test_points": 55, "tests_touched": 11, "judge_points": 3, "proof": "patched copy -> 79/79 tests, carry_forward 395 (regrade.txt)"},
+    {"mistake": "M2 no second reordered corpus before finishing (step 43 built a trimmed corpus)", "test_points": 0, "tests_touched": 0, "judge_points": 3, "proof": "score.json R15 reasoning"}
+  ],
+  "verdict": "GENUINE",
+  "adopt": [
+    "L5 strict type rule beside normalising neighbours, with easy-reject decoys (bools, floats) so only the quoted-integer case bites",
+    "G5 whole-file exactness and interlock stated up front (instruction.md:38-42)",
+    "Verifier rebuilds the book from embedded bytes and re-runs transform.py on a relocated copy and a shuffled copy with one currency curve scaled 1.0375 (test_output.py:679-692, 869-881)",
+    "AST network/process negative and run-twice nondeterminism negative (test_output.py:936, 948)",
+    "Sandboxed transform run: setpriv nobody, 600 s cap, no writes outside OUT_DIR (test_output.py:619)"
+  ],
+  "avoid": [
+    "Whole event-set equality inside per-rule tests (one slip fails 11 tests)",
+    "'States figure X' judge criteria",
+    "Conduct criteria the oracle trajectory cannot show and the instruction does not ask for (R15)"
+  ],
+  "template_edits": [
+    "LEVER_RULES_v1.md:17 L5: add easy-reject decoys of the same field and state the strict rule twice (field block + malformed list)",
+    "P2_build_v3.md:82 G3: allow relocate+permute re-run plus memorised-book negative as a hidden-input substitute, with a share floor",
+    "P2_build_v3.md:82 G6: name the shuffle-rows + scale-one-rate-curve mutation pattern as a stock mutation test",
+    "P2_build_v3.md:91 J2: conduct criterion only if solve.py performs the act and the instruction asks for it",
+    "P2_build_v3.md:98 G5: quote instruction.md:38-42 style as the model whole-document sentence",
+    "KNOWLEDGE.md:45: sync the per-run gate with COMMON_v3:55 (tests<100, rubric<100, overall<70, 2 runs)"
+  ],
+  "unverified": [
+    "Score spread of a third Opus run (two runs seen: 60.27 here, 62.73 older copy; both tests 30.38)",
+    "Whether an oracle trajectory would pass judge R10/R12/R14/R19 (judge not run)",
+    "Effect of the trajectory export dropping observations on steps 3,5,7,9,11,13,17,20,29 on judge reasoning"
+  ]
+}

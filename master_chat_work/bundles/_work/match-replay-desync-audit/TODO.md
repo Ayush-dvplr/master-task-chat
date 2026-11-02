@@ -1,0 +1,14 @@
+# P12 v3 r6 TODO (c45716e). Prompt: master_chat_tasks/prompts/issued/match-replay-desync-audit/20261025T1621_fix.md. Prior: TODO_P12v3r5.md
+- [x] P0.0 rename ran (opencode ses_e8d48bb6dffeAqIOiQgfJLC0bQ listed, title not echoed); date 16:29; tree sha 765e3d04ab89 match; kit HEAD 5574d77e
+- [x] P0.1 rules read (COMMON v3, round notes C/E/F/G, LEVER_RULES v2, RULINGS, PLAYBOOK v2)
+- [x] P0.2 live kit rule text IN-16/IN-17/TS-16/CL-4/TS-23 + FC:491; xref_check before; noise diff vs a9d62f3 copy
+- [x] P0.3 trap baseline: copy before_v3r6, single_lever BEFORE rows
+- [x] P1 recheck rows F1 F2 F3 N1-N7 W1 -> OUT/RECHECK_FIX.md
+- [x] P2.1 F1 report-schema.md + engine-rules.md clause; re-embed notes in tests (Always 6/11)
+- [x] P2.2 F2 tests negative behavioural trigger
+- [x] P2.3 F3 + N1-N7 instruction.md edits; W9
+- [x] P2.4 AFTER single_lever rows; oracle local; trap survival
+- [x] P2.5 WORK docs (LEVERS, QC_DEFENCE, XREF, DESIGN) ; TRUTH by script LAST
+- [x] P2.6 side effects; xref; precheck CLEAN; stacking_check
+- [x] P2.7 Docker block ALL_DONE
+- [x] P3 reports + json; cleanup; lock release

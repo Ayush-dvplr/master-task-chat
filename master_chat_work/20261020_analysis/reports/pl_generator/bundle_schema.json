@@ -1,0 +1,248 @@
+{
+ "harbor": "0.24 (rewardkit 0.2.1, task schema 1.4)",
+ "source": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/",
+ "tree": {
+  "instruction.md": "file; <6000 chars; backticked /app paths; trailer 'You have <int> seconds to complete this task. Do not cheat by using online solutions or hints specific to this task.'",
+  "task.toml": "file",
+  "environment/": {
+   "Dockerfile": "file",
+   "data/": "flat dir of files (zip allowed as a file); no subdirectories; >= min_inputs files"
+  },
+  "solution/": {
+   "solve.sh": "bash, set -euo pipefail",
+   "solve.py": "stdlib reference",
+   "TRUTH.md": ">=4000 chars, 8 ordered sections, yaml provenance"
+  },
+  "tests/": {
+   "Dockerfile": "verifier image",
+   "test.sh": "exec rewardkit",
+   "test_output.py": "rewardkit @criterion checks + criteria.<name>(weight=W); embeds environment/data as zlib+base64",
+   "judge.toml": "LLM-judged criteria",
+   "reward.toml": "generated: 0.5/positive total per channel"
+  },
+  "_forbidden": [
+   "README.md",
+   "tests/test_weights.json",
+   "tests/rubric.json",
+   "any extra file in solution/ (format-recovery check) or tests/",
+   "__pycache__",
+   "environment/<anything other than Dockerfile,data>"
+  ]
+ },
+ "task_toml": {
+  "root": {
+   "schema_version": "\"1.4\"",
+   "artifacts": "list[str] absolute paths; must equal templates/<archetype>/archetype.toml artifacts exactly (vb \u00a71.12)"
+  },
+  "task": {
+   "name": "\"terminal-bench/<bundle-name>\"",
+   "version": "\"1.0.0\"",
+   "description": "str (manifest default_description unless --description)",
+   "keywords": "list[str]",
+   "authors": "list of {name: 'Full Name' (>=2 capitalised words, not a placeholder), email: '<...>@ethara.ai'}"
+  },
+  "metadata": {
+   "category": "one of 16 display strings from gb _CATEGORIES (QC accepts any non-empty string)",
+   "platforms": [
+    "linux/amd64",
+    "linux/arm64"
+   ],
+   "tags": "list[str]",
+   "estimated_duration_sec": "float, default 7200.0",
+   "expert_time_estimate_min": "float, default 480.0",
+   "junior_time_estimate_min": "float, default 1440.0",
+   "null_floor": 0.0,
+   "discrimination_weight": 1.0
+  },
+  "verifier": {
+   "timeout_sec": "float, default 2700.0",
+   "environment_mode": "\"separate\"",
+   "network_mode": "\"allowlist\"",
+   "allowed_hosts": [
+    "api.openai.com",
+    "*.openai.com"
+   ]
+  },
+  "verifier.env": {
+   "OPENAI_API_KEY": "\"${OPENAI_API_KEY:-}\""
+  },
+  "verifier.environment": {
+   "network_mode": "\"allowlist\"",
+   "allowed_hosts": [
+    "api.openai.com",
+    "*.openai.com"
+   ]
+  },
+  "agent": {
+   "timeout_sec": "float, default 7200.0",
+   "network_mode": "\"allowlist\"",
+   "allowed_hosts": [
+    "api.anthropic.com",
+    "api.z.ai"
+   ],
+   "user": "\"1000:1000\""
+  },
+  "environment": {
+   "build_timeout_sec": "float, default 900.0",
+   "network_mode": "\"no-network\"",
+   "cpus": "int, default 2",
+   "memory_mb": "int, default 4096",
+   "storage_mb": "int, default 10240",
+   "gpus": 0,
+   "mcp_servers": []
+  },
+  "_absent": [
+   "difficulty",
+   "allow_internet (forbidden by QC T12)",
+   "docker_image"
+  ],
+  "_source": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/templates/*/task.toml:1-47 (identical in all 8)"
+ },
+ "environment_dockerfile": {
+  "FROM": "public.ecr.aws/docker/library/python:3.12-slim@sha256:646fb0bca3dd3ea1bcc6feb72c17ed16eed6e10cffc732fcc1478bd3e7f02d7b",
+  "agent_account": "RUN groupadd -g 1000 agent && useradd -u 1000 -g 1000 -m -d /home/agent -s /bin/bash agent; ENV HOME=/home/agent",
+  "apt": "single RUN apt-get update && apt-get install -y --no-install-recommends xxd file curl bash nodejs npm procps ca-certificates tmux && rm -rf /var/lib/apt/lists/*",
+  "openhands": "python3.12 -m venv /opt/openhands-sdk-venv; pip install openhands-sdk==1.55.1 openhands-tools==1.55.1 litellm==1.105.0 fastapi; import check; chmod -R a+rX",
+  "workdir": "WORKDIR /app; RUN mkdir -p /app && chown 1000:1000 /app (exact line)",
+  "last_line": "COPY data /app/data (only COPY)"
+ },
+ "tests_dockerfile": [
+  "FROM python:3.12-slim",
+  "RUN apt-get update && apt-get install -y --no-install-recommends util-linux && rm -rf /var/lib/apt/lists/*",
+  "RUN pip install --no-cache-dir harbor-rewardkit==0.2.1",
+  "ENV LITELLM_LOCAL_MODEL_COST_MAP=True",
+  "COPY . /tests/",
+  "RUN mkdir -p /app",
+  "WORKDIR /app"
+ ],
+ "test_sh": [
+  "#!/bin/bash",
+  "set -euo pipefail",
+  "rm -f /logs/verifier/reward.txt /logs/verifier/reward.json /logs/verifier/reward-details.json",
+  "mkdir -p /logs/verifier",
+  "chown root:root /logs/verifier",
+  "chmod 700 /logs/verifier",
+  "chmod -R go-rwx /tests",
+  "exec rewardkit /tests --workspace /app --output /logs/verifier/reward.json"
+ ],
+ "test_output_py": {
+  "registration": "module-level criteria.<check_name>(weight=W), W in {1,3,5,-1,-3,-5}, bijective with top-level functions decorated @criterion(description=...) (no braces in description)",
+  "required_negative": "negative_hardcoded_sample_answers (all archetypes)",
+  "format_recovery_extra": [
+   "SAMPLE_SEED/CHALLENGE_SEED/EVAL_SEED constants",
+   "_write_corpus",
+   "__main__ block",
+   "negative_filename_dependent_behaviour",
+   "negative_reads_training_corpus_at_runtime",
+   "negative_nondeterministic_output",
+   "negative_rebinds_verifier_dependencies"
+  ],
+  "embedded_data_token": "{{SHIPPED_DATA}} replaced by json {relpath: base64(zlib(bytes))}"
+ },
+ "judge_toml": {
+  "judge": {
+   "judge": "openai/gpt-5.6-sol",
+   "mode": "individual",
+   "timeout": 300,
+   "atif-trajectory": "/logs/agent/trajectory.json",
+   "weight": 1.0,
+   "_rule": "exactly these 5 keys in this order (gb:1903-1937)"
+  },
+  "scoring": {
+   "aggregation": "weighted-sum"
+  },
+  "criterion[]": {
+   "id": "R<n>",
+   "name": "snake_case",
+   "description": "str",
+   "type": "binary",
+   "weight": "int in {1,3,5,-1,-3,-5}",
+   "annotations": {
+    "mode": "judged",
+    "type": "e.g. EFFECT",
+    "evidence": "str",
+    "residue": "str",
+    "kind": "e.g. conduct",
+    "category": "e.g. agent behavior",
+    "evaluation_target": "trajectory|final_answer|...",
+    "importance": "important|critically_important",
+    "serves": "str",
+    "contract_file": "optional",
+    "contract_sentence": "optional, must appear verbatim in instruction.md (playground A3)"
+   }
+  },
+  "_rules": ">=8 criteria, >=1 positive, >=1 negative, sum|neg| <= sum pos"
+ },
+ "reward_toml": {
+  "text": "[[reward]]\nname = \"reward\"\naggregation = \"weighted-sum\"\nweights = { test_output = <0.5/P_test>, judge = <0.5/P_judge> }\n\n[scoring.test_output]\naggregation = \"weighted-sum\"\n",
+  "formula": "reward = 0.5*sum_i(v_i*w_i)/P_test + 0.5*sum_j(v_j*w_j)/P_judge, v in {0,1}; no clamp; floor -1.0",
+  "step10_copy": "Input_Bundle_QC/exe_copy.py rewrites to weights = { test_output = 1/P_test } and drops the judge, so oracle must read exactly 1.0 and nop 0.0",
+  "_source": "Terminal_2.0_Harbor_Harness/Input Bundle Generator New/generate_bundle.py:2009-2025"
+ },
+ "measured_channel_totals": {
+  "build-repair": {
+   "tests": 19,
+   "P_test": 51,
+   "N_test": -16,
+   "judge": 13,
+   "P_judge": 41,
+   "N_judge": -10
+  },
+  "cli-config": {
+   "tests": 18,
+   "P_test": 48,
+   "N_test": -16,
+   "judge": 10,
+   "P_judge": 30,
+   "N_judge": -10
+  },
+  "data-pipeline": {
+   "tests": 17,
+   "P_test": 51,
+   "N_test": -16,
+   "judge": 11,
+   "P_judge": 33,
+   "N_judge": -10
+  },
+  "domain-calculation": {
+   "tests": 20,
+   "P_test": 54,
+   "N_test": -16,
+   "judge": 11,
+   "P_judge": 38,
+   "N_judge": -5
+  },
+  "format-recovery": {
+   "tests": 29,
+   "P_test": 72,
+   "N_test": -23,
+   "judge": 12,
+   "P_judge": 34,
+   "N_judge": -10
+  },
+  "performance": {
+   "tests": 17,
+   "P_test": 49,
+   "N_test": -16,
+   "judge": 11,
+   "P_judge": 38,
+   "N_judge": -5
+  },
+  "repo-patch": {
+   "tests": 20,
+   "P_test": 54,
+   "N_test": -16,
+   "judge": 11,
+   "P_judge": 33,
+   "N_judge": -10
+  },
+  "service-interaction": {
+   "tests": 18,
+   "P_test": 48,
+   "N_test": -18,
+   "judge": 10,
+   "P_judge": 32,
+   "N_judge": -10
+  }
+ }
+}

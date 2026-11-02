@@ -1,0 +1,9 @@
+# counter-page-crash-recovery
+
+- Paths: `B = master_chat_work/bundles/counter-page-crash-recovery`; `W = master_chat_work/bundles/_work/counter-page-crash-recovery`; `O = B/solution/solve.py`.
+- State: bundle yes, no paid run; three blind reads were 95/95 and parked because they transliterated the recovery contract exactly (`master_chat_tasks/registry/tasks.json:737-742`, `W/DESIGN_SUMMARY.md:35-39`).
+- Careful program: **none on file** from blind reads. INFERRED file access from the contract: JSONL journal, binary pages, INI page map, TOML checkpoints, CSV catalog and JSON queries (`B/environment/data/recovery_contract.md:13-29,62-64`); `O:120-179,203-234` parses them with standard libraries and binary decoder. Oracle performs analysis, per-page redo and global undo (`O:303-390`), near O(records + appended records) with heap overhead; blind complexity unavailable.
+- Possible **(c), INFERRED only**: a book of 40 images × 1,200 journal records/24 pages is allowed (`B/environment/data/recovery_contract.md:20-21`) and has a 60 s sentence (`:185-188`). A naive repeated scan per undo could be quadratic, versus `O:303-390`'s indexed replay. But no blind program line or Docker >=240 s careful run exists; the earlier B1/B12 losses are misread-rule extras (`W/DESIGN_SUMMARY.md:14-27`, `W/LEVERS.md:3-5`).
+- QC: IN-16/DS-21 must preserve WAL links and valid binary pages (`B/environment/data/recovery_contract.md:29-62,80-83`); TS-11 needs oracle <=15 s and careful >=240 s on every corpus; TS-19/AL-27 need independently valid 40-image books; CL-4 already grades whole recovery documents (`B/instruction.md:11`, `W/LEVERS.md:19-38`). These are unmeasured.
+- Work: 12-18 h to obtain a careful program, prototype scale at 40 images, regenerate checks, full QC, paid run. Package repair adds build validation (`B/instruction.md:5-13`).
+- **Score 2/10**: large legal size exists, but no careful-program scale evidence after exact blinds.

@@ -1,0 +1,30 @@
+cd /app/out && python3 - <<'EOF'
+import re
+s=open('transform.py').read()
+s=s.replace("from decimal import Decimal\n","from decimal import ROUND_HALF_EVEN, Decimal\n")
+s=s.replace('    quantized = Decimal(value).quantize(CENT)','    quantized = Decimal(value).quantize(CENT, rounding=ROUND_HALF_EVEN)')
+s=s.replace('    return (Decimal(value) / 100).quantize(CENT)','    return (Decimal(value) / 100).quantize(CENT, rounding=ROUND_HALF_EVEN)')
+s=s.replace('line["charge_cents"] = cents((Decimal(line["units"]) * rate).quantize(CENT))','line["charge_cents"] = cents(\n            (Decimal(line["units"]) * rate).quantize(CENT, rounding=ROUND_HALF_EVEN)\n        )')
+open('transform.py','w').write(s)
+EOF
+grep -n "ROUND_HALF_EVEN" transform.py
+
+=== OBSERVATION ===
+cd /app/out && python3 - <<'EOF'
+import re
+s=open('transform.py').read()
+s=s.replace("from decimal import Decimal\n","from decimal import ROUND_HALF_EVEN, Decimal\n")
+s=s.replace('    quantized = Decimal(value).quantize(CENT)','    quantized = Decimal(value).quantize(CENT, rounding=ROUND_HALF_EVEN)')
+s=s.replace('    return (Decimal(value) / 100).quantize(CENT)','    return (Decimal(value) / 100).quantize(CENT, rounding=ROUND_HALF_EVEN)')
+s=s.replace('line["charge_cents"] = cents((Decimal(line["units"]) * rate).quantize(CENT))','line["charge_cents"] = cents(\n            (Decimal(line["units"]) * rate).quantize(CENT, rounding=ROUND_HALF_EVEN)\n        )')
+open('transform.py','w').write(s)
+EOF
+
+
+
+
+grep -n "ROUND_HALF_EVEN" transform.py
+12:from decimal import ROUND_HALF_EVEN, Decimal
+56:    quantized = Decimal(value).quantize(CENT, rounding=ROUND_HALF_EVEN)
+67:    return (Decimal(value) / 100).quantize(CENT, rounding=ROUND_HALF_EVEN)
+467:            (Decimal(line["units"]) * rate).quantize(CENT, rounding=ROUND_HALF_EVEN)

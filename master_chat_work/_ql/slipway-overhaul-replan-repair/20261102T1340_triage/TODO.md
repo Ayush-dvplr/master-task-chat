@@ -1,0 +1,29 @@
+# TODO ql-triage 75de8e7
+
+- [x] Read rules/knowledge files (COMMON_RULES_v5, PLAYBOOK_v3, QC_RULINGS, FP_DOSSIER, LEAK_LIBRARY, LEVER_RULES 1C + 6)
+- [x] Read QL_REPORT (18 findings QL1-F1..F18)
+- [x] Phase 0: tree shas of BUNDLE, TASKS_INPUT, OUTPUT_RFP, LAST_QC_COPY; POST_QC_DIFF.diff
+- [x] Read LAST_QC v3 report, KEPT.md, QC_DEFENCE.md; kit HEAD
+- [x] Phase 1 row QL1-F1
+- [x] Phase 1 row QL1-F2
+- [x] Phase 1 row QL1-F3
+- [x] Phase 1 row QL1-F4
+- [x] Phase 1 row QL1-F5
+- [x] Phase 1 row QL1-F6
+- [x] Phase 1 row QL1-F7
+- [x] Phase 1 row QL1-F8
+- [x] Phase 1 row QL1-F9
+- [x] Phase 1 row QL1-F10
+- [x] Phase 1 row QL1-F11
+- [x] Phase 1 row QL1-F12
+- [x] Phase 1 row QL1-F13
+- [x] Phase 1 row QL1-F14
+- [x] Phase 1 row QL1-F15
+- [x] Phase 1 row QL1-F16
+- [x] Phase 1 row QL1-F17
+- [x] Phase 1 row QL1-F18
+- [x] F2/F3 measured impact check + a4 49-check recompute
+- [x] Write TRIAGE.md (table, directions, reply notes, freeze impact, lessons)
+- [x] Write result_75de8e7.json and parse
+- [x] W1 self-check awk/grep on Reply notes
+- [x] name_session last

@@ -1,0 +1,369 @@
+{
+  "package": "tariff",
+  "fixes": [
+    "tariff.VERSION, the pyproject version and requires-python now follow package_manifest.json.",
+    "The requests dependency is gone: pyproject declares no dependency and the package imports the standard library only.",
+    "python -m tariff now accepts --statements, exits 2 and writes 'missing input: <file>' on standard error when an input file is missing.",
+    "The README no longer describes the 30-day proration and names the optional input files and the statement run.",
+    "The two visible tests that asserted the 30-day proration and a credit below the commitment now assert what the contract says.",
+    "A tier now covers the account positions up to and including its up_to; it used to stop one unit short of it.",
+    "Units are rated from the position they hold among the account's units over all its meters instead of restarting the tiers at every meter.",
+    "A standing line is now the sum, over the meter's active days, of the standing charge of the day divided by the days of that day's own month, in place of a flat 30-day month.",
+    "The standing charge of a day follows the plan's standing_changes entry with the latest from date on or before that day.",
+    "Every amount is computed from the decimal values as written in the input files with exact fractions and rounded half to even to 0.01, instead of binary floats.",
+    "Added the allowance sharing of the energy lines: equal parts capped at a line's exact value, re-shared while some stays unshared, and the remainder reported back.",
+    "The commitment credit is now measured on the invoice subtotal rather than on a second base that also rated refused reads, the total is the discounted subtotal rounded half to even and the credit is what the total takes off the subtotal.",
+    "Added the voucher redemption: the largest voucher sum not above the balance, taking the set whose id list comes first.",
+    "A quantity is a usable quantity only when it is a JSON integer of 0 or more, so text, decimals, booleans and null now receive malformed_quantity.",
+    "Added the missing outside_period exception for a read whose day lies in no billing period of its account.",
+    "Added the missing replaced_estimate exception for an estimate whose day already has an accepted measured read.",
+    "duplicate_read now compares the estimated flag as well and only fires against an earlier read that was itself accepted.",
+    "The exception list is sorted by read_id alone; it used to be sorted by account first.",
+    "Reads now carry their estimated and cumulative flags, and billed_quantities bills a cumulative read as the rise over the previous accepted cumulative read of its meter.",
+    "A meter can hold several active windows for one account, so inactive_meter looks at every row of accounts.csv for the pair.",
+    "Every row of billing_periods.csv is billed as its own invoice, sorted by account and then by start; the engine used to keep one invoice per account and silently drop the account's other rows.",
+    "A read is counted on the invoice whose period holds its day, and the period quantities, positions and active days of an invoice come from that row alone.",
+    "Active days are counted day by day inside the period over the meter's own windows, which also fixes periods that span two months.",
+    "The plan of a row is found by plan name or by one of the plan's codes.",
+    "Added the tier revision choice: a plan is rated with the one revision under which every paid invoice on the plan totals its paid amount.",
+    "The allowance that no energy line can take is carried to the account's next invoice by start and dropped after the last one.",
+    "An invoice gets no credit when the account's previous invoice by start was paid less than its total, which needed the optional payments.csv.",
+    "Added the statement document built from vouchers.csv: balance, redeemed voucher ids and what is due.",
+    "Every amount in the document is written as a string with exactly two decimals.",
+    "Added missing_input so the command line can name the first input file a directory lacks."
+  ],
+  "checks": [
+    {
+      "name": "archive holds every repository file",
+      "passed": true
+    },
+    {
+      "name": "archive members sorted by name",
+      "passed": true
+    },
+    {
+      "name": "archive has no directory entry and no cache file",
+      "passed": true
+    },
+    {
+      "name": "archive timestamps follow build_config",
+      "passed": true
+    },
+    {
+      "name": "archive compression follows build_config",
+      "passed": true
+    },
+    {
+      "name": "archive permission bits follow build_config",
+      "passed": true
+    },
+    {
+      "name": "archive code runs",
+      "passed": true
+    },
+    {
+      "name": "the visible tests pass against the repaired package",
+      "passed": true
+    },
+    {
+      "name": "standing_changes example",
+      "passed": true
+    },
+    {
+      "name": "two active windows",
+      "passed": true
+    },
+    {
+      "name": "two active windows standing units",
+      "passed": true
+    },
+    {
+      "name": "period order",
+      "passed": true
+    },
+    {
+      "name": "read counts on its own period",
+      "passed": true
+    },
+    {
+      "name": "cumulative example",
+      "passed": true
+    },
+    {
+      "name": "replaced estimate",
+      "passed": true
+    },
+    {
+      "name": "replaced estimate units",
+      "passed": true
+    },
+    {
+      "name": "allowance carry",
+      "passed": true
+    },
+    {
+      "name": "water filled allowance",
+      "passed": true
+    },
+    {
+      "name": "credit on both invoices",
+      "passed": true
+    },
+    {
+      "name": "credit suppressed after short payment",
+      "passed": true
+    },
+    {
+      "name": "credit kept after full payment",
+      "passed": true
+    },
+    {
+      "name": "revision picked by paid invoice",
+      "passed": true
+    },
+    {
+      "name": "statement example",
+      "passed": true
+    },
+    {
+      "name": "statement with no fitting voucher",
+      "passed": true
+    },
+    {
+      "name": "statement balance never below zero",
+      "passed": true
+    },
+    {
+      "name": "voucher ids in plain string order",
+      "passed": true
+    },
+    {
+      "name": "no vouchers file",
+      "passed": true
+    },
+    {
+      "name": "plan code",
+      "passed": true
+    },
+    {
+      "name": "exceptions sorted by read_id",
+      "passed": true
+    },
+    {
+      "name": "estimates refused for the measured read",
+      "passed": true
+    },
+    {
+      "name": "measured read billed",
+      "passed": true
+    },
+    {
+      "name": "cli exit",
+      "passed": true
+    },
+    {
+      "name": "cli document",
+      "passed": true
+    },
+    {
+      "name": "cli newline",
+      "passed": true
+    },
+    {
+      "name": "cli statements",
+      "passed": true
+    },
+    {
+      "name": "cli missing rate_card.json",
+      "passed": true
+    },
+    {
+      "name": "cli statements missing rate_card.json",
+      "passed": true
+    },
+    {
+      "name": "cli missing billing_periods.csv",
+      "passed": true
+    },
+    {
+      "name": "cli statements missing billing_periods.csv",
+      "passed": true
+    },
+    {
+      "name": "cli missing accounts.csv",
+      "passed": true
+    },
+    {
+      "name": "cli statements missing accounts.csv",
+      "passed": true
+    },
+    {
+      "name": "cli missing meter_reads.jsonl",
+      "passed": true
+    },
+    {
+      "name": "cli statements missing meter_reads.jsonl",
+      "passed": true
+    },
+    {
+      "name": "VERSION",
+      "passed": true
+    },
+    {
+      "name": "render is json text",
+      "passed": true
+    },
+    {
+      "name": "ci determinism",
+      "passed": true
+    },
+    {
+      "name": "ci invoice count",
+      "passed": true
+    },
+    {
+      "name": "ci amounts are two decimal strings",
+      "passed": true
+    },
+    {
+      "name": "ci invoices sorted",
+      "passed": true
+    },
+    {
+      "name": "ci exceptions sorted by read_id",
+      "passed": true
+    },
+    {
+      "name": "ci subtotal is the sum of its lines",
+      "passed": true
+    },
+    {
+      "name": "core: tier 1 covers the positions up to and including its up_to",
+      "passed": true
+    },
+    {
+      "name": "core: a later tier starts above the previous up_to",
+      "passed": true
+    },
+    {
+      "name": "core: the null tier has no upper end",
+      "passed": true
+    },
+    {
+      "name": "core: a meter carries on from the account positions before it",
+      "passed": true
+    },
+    {
+      "name": "core: a meter wholly inside one tier has one line",
+      "passed": true
+    },
+    {
+      "name": "core: a meter with no unit has no energy line",
+      "passed": true
+    },
+    {
+      "name": "core: the contract's standing_changes example",
+      "passed": true
+    },
+    {
+      "name": "core: the standing charge of a day before any change",
+      "passed": true
+    },
+    {
+      "name": "core: the standing charge of a day after a change",
+      "passed": true
+    },
+    {
+      "name": "core: 14 February days of an 18.60 charge",
+      "passed": true
+    },
+    {
+      "name": "core: an allowance that fits the lines",
+      "passed": true
+    },
+    {
+      "name": "core: an equal part capped at the exact value of a line",
+      "passed": true
+    },
+    {
+      "name": "core: the part no energy line can take stays unshared",
+      "passed": true
+    },
+    {
+      "name": "core: no energy line leaves the whole allowance unshared",
+      "passed": true
+    },
+    {
+      "name": "core: no credit below the commitment",
+      "passed": true
+    },
+    {
+      "name": "core: credit at the commitment",
+      "passed": true
+    },
+    {
+      "name": "core: credit rounded half to even",
+      "passed": true
+    },
+    {
+      "name": "core: a suppressed credit",
+      "passed": true
+    },
+    {
+      "name": "core: round_cents rounds half to even down",
+      "passed": true
+    },
+    {
+      "name": "core: round_cents rounds half to even up",
+      "passed": true
+    },
+    {
+      "name": "core: money writes two decimals",
+      "passed": true
+    },
+    {
+      "name": "core: the contract's voucher example",
+      "passed": true
+    },
+    {
+      "name": "core: no voucher fits the balance",
+      "passed": true
+    },
+    {
+      "name": "core: vouchers in plain string order",
+      "passed": true
+    },
+    {
+      "name": "core: the largest sum not above the balance",
+      "passed": true
+    },
+    {
+      "name": "two runs on /app/ci return equal documents",
+      "passed": true
+    },
+    {
+      "name": "tariff.VERSION matches the package manifest",
+      "passed": true
+    },
+    {
+      "name": "pyproject carries the manifest version and python, and no dependency",
+      "passed": true
+    },
+    {
+      "name": "the package imports the standard library only",
+      "passed": true
+    },
+    {
+      "name": "every dispute replay produces an invoice total",
+      "passed": true
+    },
+    {
+      "name": "no visible test function was deleted or renamed",
+      "passed": true
+    },
+    {
+      "name": "no visible test is skipped",
+      "passed": true
+    }
+  ]
+}

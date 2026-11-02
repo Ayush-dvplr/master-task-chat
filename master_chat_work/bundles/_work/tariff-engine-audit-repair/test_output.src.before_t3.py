@@ -1,0 +1,2394 @@
+"""Checks for the repaired tariff package delivered under /app/out."""
+
+from __future__ import annotations
+
+import ast
+import base64
+import csv
+import io
+import json
+import os
+import random
+import shutil
+import subprocess
+import sys
+import tempfile
+import tomllib
+import zipfile
+import zlib
+from datetime import date, timedelta
+from fractions import Fraction
+from pathlib import Path
+from typing import Any
+
+from rewardkit import criteria, criterion
+
+H1_SEED = int("740213")
+H3_SEED = int("518806")
+H5_SEED = int("962457")
+H7_SEED = int("307541")
+APP_ROOT = Path(os.environ.get("APP_ROOT", "/app"))
+OUT_DIR = APP_ROOT / "out"
+ARTIFACTS = [
+    "/app/out/patched-repo.zip",
+    "/app/out/repair-report.json",
+    "/app/out/module_core.json",
+    "/app/out/module_parser.json",
+    "/app/out/module_report.json",
+    "/app/out/test_fixes.json",
+    "/app/out/summary.json",
+]
+INPUT_FILES = ("meter_reads.jsonl", "accounts.csv", "billing_periods.csv", "rate_card.json")
+CORRECTED = ["test_commitment_credit_base", "test_partial_period_standing_charge"]
+REUSED_IDS = ("A0003", "A0010", "A0042")
+_SETPRIV = ["setpriv", "--reuid=nobody", "--regid=nogroup", "--clear-groups"]
+
+_SHIPPED_DATA: dict[str, str] = {}
+_DATA_CACHE: list[Path] = []
+_MEMO: dict[str, Any] = {}
+
+
+# ---------------------------------------------------------------- plumbing
+
+def _open_tree(root: Path) -> Path:
+    """Make a tree the checks built readable by the unprivileged runner."""
+    for path in [root, *root.rglob("*")]:
+        path.chmod(0o755 if path.is_dir() else 0o644)
+    return root
+
+
+def _scratch(prefix: str) -> Path:
+    path = Path(tempfile.mkdtemp(prefix=prefix))
+    path.chmod(0o755)
+    return path
+
+
+def _data_dir() -> Path:
+    """The agent's /app/ci and /app/repo, rebuilt here: the verifier container never has them."""
+    if not _DATA_CACHE:
+        root = _scratch("shipped-data-")
+        for rel, blob in _SHIPPED_DATA.items():
+            target = root / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(zlib.decompress(base64.b64decode(blob)))
+        _DATA_CACHE.append(_open_tree(root))
+    return _DATA_CACHE[0]
+
+
+def _root_only_tests_present() -> bool:
+    try:
+        status = Path("/tests").stat()
+    except FileNotFoundError:
+        return False
+    return status.st_uid == 0 and (status.st_mode & 0o077) == 0
+
+
+def _grant_read(argument: str) -> None:
+    """Make an agent-written path readable before the uid drop.
+
+    Agent editors write through a temp file in the same directory and rename it,
+    so a program the agent wrote can land at mode 0600 (owner-only). The checks
+    run that program as an unprivileged user, which then cannot open it, and a
+    correct submission would score zero for a reason that has nothing to do with
+    the task. The verifier runs as root, so widening the mode is always allowed
+    here and it changes no graded content.
+    """
+    if not argument.startswith("/app"):
+        return
+    path = Path(argument)
+    if not path.exists():
+        return
+    try:
+        path.chmod(path.stat().st_mode | (0o555 if path.is_dir() else 0o444))
+        for parent in path.parents:
+            parent.chmod(parent.stat().st_mode | 0o555)
+            if str(parent) == "/app":
+                break
+    except OSError:
+        pass
+
+
+def _untrusted_command(command: list[str]) -> list[str]:
+    if os.name != "posix" and _root_only_tests_present():
+        raise RuntimeError("verifier isolation requires POSIX uid/gid dropping")
+    if os.name == "posix" and os.geteuid() != 0 and _root_only_tests_present():
+        raise RuntimeError("verifier must run as root to isolate submitted code from /tests")
+    if os.name == "posix" and os.geteuid() == 0:
+        for argument in command:
+            _grant_read(argument)
+        return [*_SETPRIV, *command]
+    return command
+
+
+def _artifact(name: str) -> Path:
+    return OUT_DIR / name
+
+
+def _load_json(name: str) -> Any:
+    return json.loads(_artifact(name).read_text(encoding="utf-8"))
+
+
+def _memo(key: str, build) -> Any:
+    """Compute once per verifier run; a failure is remembered and raised again."""
+    if key not in _MEMO:
+        try:
+            _MEMO[key] = (True, build())
+        except Exception as error:  # remembered so each dependent check fails alike
+            _MEMO[key] = (False, error)
+    ok, value = _MEMO[key]
+    if not ok:
+        raise value
+    return value
+
+
+def _extract_archive() -> Path:
+    archive = _artifact("patched-repo.zip")
+    assert archive.is_file(), "patched-repo.zip missing"
+    dest = _scratch("repo-patch-check-")
+    with zipfile.ZipFile(archive) as zf:
+        for info in zf.infolist():
+            rel = Path(info.filename)
+            assert not rel.is_absolute() and ".." not in rel.parts, "unsafe archive member"
+            assert not info.filename.endswith("/"), "directory entries are not needed"
+            target = dest / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(zf.read(info))
+    return _open_tree(dest)
+
+
+def _repo() -> Path:
+    return _memo("repo", _extract_archive)
+
+
+def _env(repo: Path | None) -> dict[str, str]:
+    env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "PYTHONDONTWRITEBYTECODE": "1", "LC_ALL": "C.UTF-8"}
+    if repo is not None:
+        env["PYTHONPATH"] = str(repo / "src")
+    return env
+
+
+def _run(command: list[str], env: dict[str, str], cwd: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(_untrusted_command(command), text=True, capture_output=True, env=env,
+                          cwd=str(cwd), timeout=120)
+
+
+def _cli(data: Path) -> subprocess.CompletedProcess:
+    repo = _repo()
+    return _run([sys.executable, "-B", "-m", "tariff", str(data)], _env(repo), _scratch("cwd-"))
+
+
+_ISOLATED = (
+    "import runpy, sys\n"
+    "src, data = sys.argv[1], sys.argv[2]\n"
+    "sys.path.insert(0, src)\n"
+    "sys.argv = ['tariff', data]\n"
+    "runpy.run_module('tariff', run_name='__main__', alter_sys=True)\n"
+)
+_API = (
+    "import json, sys\n"
+    "sys.path.insert(0, sys.argv[1])\n"
+    "import tariff\n"
+    "print(json.dumps(tariff.build_invoices(sys.argv[2])))\n"
+)
+
+
+def _write_texts(texts: dict[str, str], folder: Path) -> Path:
+    folder.mkdir(parents=True, exist_ok=True)
+    for name, text in texts.items():
+        (folder / name).write_text(text, encoding="utf-8")
+    return folder
+
+
+def _delivered(corpus: str) -> dict[str, Any]:
+    """The delivered package's document for one corpus, run the way that corpus is run."""
+    def build() -> dict[str, Any]:
+        texts = _corpus_texts(corpus)
+        if corpus == "relocated":
+            base = _scratch("moved-")
+            shutil.copytree(_repo(), base / "checkout" / "billing-engine")
+            data = _write_texts(texts, base / "feeds" / "cycle-inputs")
+            _open_tree(base)
+            command = [sys.executable, "-I", "-B", "-c", _ISOLATED,
+                       str(base / "checkout" / "billing-engine" / "src"), str(data)]
+            done = _run(command, _env(None), _scratch("elsewhere-"))
+        elif corpus == "api":
+            data = _open_tree(_write_texts(texts, _scratch("api-") / "data"))
+            command = [sys.executable, "-I", "-B", "-c", _API, str(_repo() / "src"), str(data)]
+            done = _run(command, _env(None), _scratch("elsewhere-"))
+        else:
+            data = _open_tree(_write_texts(texts, _scratch(f"{corpus}-") / "data"))
+            done = _cli(data)
+        assert done.returncode == 0, f"{corpus}: exit {done.returncode}: {done.stderr[-400:]}"
+        document = json.loads(done.stdout)
+        assert isinstance(document, dict) and set(document) == {"invoices", "exceptions"}, "document keys"
+        return document
+    return _memo(f"doc:{corpus}", build)
+
+
+def _shipped_texts() -> dict[str, str]:
+    ci = _data_dir() / "ci"
+    return {name: (ci / name).read_text(encoding="utf-8") for name in INPUT_FILES}
+
+
+def _shipped_delivered() -> dict[str, Any]:
+    def build() -> dict[str, Any]:
+        done = _cli(_data_dir() / "ci")
+        assert done.returncode == 0, f"shipped: exit {done.returncode}: {done.stderr[-400:]}"
+        return json.loads(done.stdout)
+    return _memo("doc:shipped", build)
+
+
+# ---------------------------------------------------------------- reference reading of the contract
+
+def _even_cents(value: Fraction) -> int:
+    scaled = value * 100
+    whole = scaled.numerator // scaled.denominator
+    rest = scaled - whole
+    if rest > Fraction(1, 2) or (rest == Fraction(1, 2) and whole % 2 == 1):
+        whole += 1
+    return whole
+
+
+def _amount(cents: int) -> str:
+    return f"{cents // 100}.{cents % 100:02d}"
+
+
+class _Ledger:
+    """The contract read literally, with exact fractions.
+
+    `off` names quiet rules read the habitual way instead (Q1 estimated reads,
+    Q2 standing changes, Q3 several billing rows, Q4 allowance carried, Q5
+    several meter rows, U1 plan revisions, D1 paid amounts, D2 cumulative
+    reads, and their variants); the planting asserts use it, the checks never
+    do."""
+
+    def __init__(self, texts: dict[str, str], off: frozenset = frozenset()):
+        self.off = off
+        card = json.loads(texts["rate_card.json"], parse_float=Fraction)
+        self.plans = card["plans"]
+        self.keys: dict[str, str] = {}
+        self.periods: dict[str, tuple[date, date, str, Fraction, Fraction]] = {}
+        self.rows: dict[str, list] = {}
+        for row in csv.DictReader(io.StringIO(texts["billing_periods.csv"])):
+            row = {key.strip(): (value or "").strip() for key, value in row.items()}
+            entry = (date.fromisoformat(row["start"]), date.fromisoformat(row["end"]),
+                     row["plan"], Fraction(row["commitment"]), Fraction(row.get("allowance") or "0"))
+            self.periods[row["account"]] = entry
+            kept = [] if "Q3" in off else self.rows.get(row["account"], [])
+            self.rows[row["account"]] = kept + [entry]
+        for entries in self.rows.values():
+            entries.sort()
+        self.windows: dict[tuple[str, str], tuple[date, date | None]] = {}
+        self.spans: dict[tuple[str, str], list] = {}
+        for row in csv.DictReader(io.StringIO(texts["accounts.csv"])):
+            row = {key.strip(): (value or "").strip() for key, value in row.items()}
+            until = date.fromisoformat(row["active_to"]) if row["active_to"] else None
+            key = (row["account"], row["meter"])
+            self.windows[key] = (date.fromisoformat(row["active_from"]), until)
+            kept = [] if "Q5" in off else self.spans.get(key, [])
+            self.spans[key] = kept + [self.windows[key]]
+        self.reads = [json.loads(line) for line in texts["meter_reads.jsonl"].splitlines() if line.strip()]
+        self.paid: dict[tuple[str, date], Fraction] = {}
+        for row in csv.DictReader(io.StringIO(texts.get("payments.csv", ""))):
+            row = {key.strip(): (value or "").strip() for key, value in row.items()}
+            key = (row["account"], date.fromisoformat(row["start"]))
+            self.paid[key] = self.paid.get(key, Fraction(0)) + Fraction(row["paid"])
+        self.ties: dict[str, int] = {}
+        self.passes: dict[str, int] = {}
+        self.halves: dict[str, int] = {}
+
+    def _plan_key(self, name: str) -> str:
+        if name in self.plans:
+            return name
+        listed = [key for key, plan in self.plans.items()
+                  if name in [code.strip() for code in plan.get("codes", [])]]
+        assert len(listed) == 1, f"plan {name!r} names {len(listed)} rate card entries"
+        return listed[0]
+
+    def _row(self, account: str, day: date):
+        for entry in self.rows.get(account, []):
+            if entry[0] <= day <= entry[1]:
+                return entry
+        return None
+
+    def _estimated(self, read: dict) -> bool:
+        return "Q1" not in self.off and read.get("estimated", False) is True
+
+    def _reason(self, account: str, meter: str, day: date, quantity: Any, estimated: bool,
+                taken: set, actual: set) -> str | None:
+        if type(quantity) is not int or quantity < 0:
+            return "malformed_quantity"
+        spans = self.spans.get((account, meter))
+        if spans is None:
+            return "unknown_meter"
+        if not any(since <= day and (until is None or day <= until) for since, until in spans):
+            return "inactive_meter"
+        if self._row(account, day) is None:
+            return "outside_period"
+        if (account, meter, day, estimated) in taken:
+            return "duplicate_read"
+        if estimated and (account, meter, day) in actual:
+            return "replaced_estimate"
+        return None
+
+    def document(self) -> dict[str, Any]:
+        self.ties, self.passes, self.halves = {}, {}, {}
+        taken: set = set()
+        actual: set = set()
+        usage: dict[tuple[str, date, str], int] = {}
+        exceptions, accepted = [], []
+        ordered = [read for read in self.reads if not self._estimated(read)]
+        ordered += [read for read in self.reads if self._estimated(read)]
+        for read in ordered:
+            account, meter = read["account"].strip(), read["meter"].strip()
+            day = date.fromisoformat(read["day"].strip())
+            estimated = self._estimated(read)
+            reason = self._reason(account, meter, day, read["quantity"], estimated, taken, actual)
+            if reason is None:
+                taken.add((account, meter, day, estimated))
+                if not estimated:
+                    actual.add((account, meter, day))
+                accepted.append((read, account, meter, day))
+            else:
+                exceptions.append({"read_id": read["read_id"].strip(), "account": account, "reason": reason})
+        exceptions.sort(key=lambda row: row["read_id"])
+        billed = self._billed(accepted)
+        for read, account, meter, day in accepted:
+            key = (account, self._row(account, day)[0], meter)
+            usage[key] = usage.get(key, 0) + billed[read["read_id"]]
+        self.chosen: dict[str, Any] = {}
+        for key in sorted(self.plans):
+            if "U1" in self.off or not self.plans[key].get("revisions"):
+                continue
+            fits = [number for number, revision in enumerate(self.plans[key]["revisions"])
+                    if self._fits(key, revision["tiers"], usage)]
+            if len(fits) == 1 or (fits and "U1first" in self.off):
+                self.chosen[key] = self.plans[key]["revisions"][fits[0]]["tiers"]
+            elif not fits and "U1nofit" in self.off:
+                self.chosen[key] = self.plans[key]["revisions"][0]["tiers"]
+        self.ties, self.passes, self.halves = {}, {}, {}
+        invoices = []
+        for account in sorted(self.rows):
+            invoices += self._chain(account, usage, self.chosen)
+        return {"invoices": invoices, "exceptions": exceptions}
+
+    def _billed(self, accepted: list) -> dict[str, int]:
+        """Billed quantity per read id of the accepted reads."""
+        billed, chains = {}, {}
+        pool = accepted
+        if "D2any" in self.off:
+            pool = [(read, read["account"].strip(), read["meter"].strip(), date.fromisoformat(read["day"].strip()))
+                    for read in self.reads if type(read["quantity"]) is int and read["quantity"] >= 0]
+        for place, (read, account, meter, day) in enumerate(pool):
+            if "D2" not in self.off and read.get("cumulative", False) is True:
+                scope = self._row(account, day)[0] if "D2row" in self.off else None
+                chains.setdefault((account, meter, scope), []).append((day, place, read))
+        for read, account, meter, day in accepted:
+            billed[read["read_id"]] = read["quantity"]
+        for chain in chains.values():
+            chain.sort(key=lambda item: item[1] if "D2file" in self.off else item[0])
+            for place, (day, _, read) in enumerate(chain):
+                if read["read_id"] not in billed:
+                    continue
+                count = read["quantity"]
+                before = chain[place - 1][2]["quantity"] if place else None
+                billed[read["read_id"]] = 0 if before is None else count if before > count else count - before
+        return billed
+
+    def _fits(self, key: str, tiers: list, usage: dict) -> bool:
+        tried = dict(self.chosen)
+        tried[key] = tiers
+        for account in sorted(self.rows):
+            if all(self._plan_key(entry[2]) != key for entry in self.rows[account]):
+                continue
+            for invoice in self._chain(account, usage, tried):
+                paid = self.paid.get((account, date.fromisoformat(invoice["period"]["start"])))
+                if self._plan_key(invoice["plan"]) == key and paid is not None and Fraction(invoice["total"]) != paid:
+                    return False
+        return True
+
+    def _chain(self, account: str, usage: dict, chosen: dict) -> list[dict[str, Any]]:
+        invoices, carry, owed = [], Fraction(0), False
+        for entry in self.rows[account]:
+            invoice, left = self._invoice(account, entry, usage, carry, chosen, owed)
+            invoices.append(invoice)
+            carry = Fraction(0) if "Q4" in self.off else left
+            paid = self.paid.get((account, entry[0]), Fraction(0) if "D1zero" in self.off else None)
+            owed = "D1" not in self.off and paid is not None and paid < Fraction(invoice["total"])
+        return invoices
+
+    def _charge(self, plan: dict, day: date) -> Fraction:
+        charge, since = Fraction(plan["standing_charge"]), None
+        if "Q2" in self.off:
+            return charge
+        for change in plan.get("standing_changes", []):
+            when = date.fromisoformat(change["from"].strip())
+            if when <= day and (since is None or when > since):
+                charge, since = Fraction(change["standing_charge"]), when
+        return charge
+
+    def _invoice(self, account: str, entry: tuple, usage: dict, carry: Fraction,
+                 chosen: dict | None = None, owed: bool = False) -> tuple[dict[str, Any], Fraction]:
+        start, end, plan_name, commitment, allowance = entry
+        self.keys[account] = self._plan_key(plan_name)
+        plan = self.plans[self.keys[account]]
+        tiers = (chosen or {}).get(self.keys[account], plan["tiers"])
+        lines, ties, position = [], 0, 0
+        for meter in sorted(m for (a, m) in self.spans if a == account):
+            quantity, floor = usage.get((account, start, meter), 0), 0
+            if "N3" in self.off:
+                position = 0
+            for number, tier in enumerate(tiers, 1):
+                cap = tier["up_to"]
+                low = max(position, floor)
+                high = position + quantity if cap is None else min(position + quantity, cap)
+                if high > low:
+                    lines.append([meter, "energy", number, high - low, (high - low) * Fraction(tier["rate"])])
+                if cap is None:
+                    break
+                floor = cap
+            position += quantity
+            exact, units = Fraction(0), 0
+            for since, until in sorted(self.spans[(account, meter)]):
+                first, last = max(since, start), end if until is None else min(until, end)
+                day = first
+                while day <= last:
+                    month_end = date(day.year + day.month // 12, day.month % 12 + 1, 1) - timedelta(days=1)
+                    exact += self._charge(plan, day) / month_end.day
+                    units += 1
+                    day = day + timedelta(days=1)
+            if units:
+                lines.append([meter, "standing", 0, units, exact])
+        left, live, passes = allowance + carry, [line for line in lines if line[1] == "energy"], 0
+        while left > 0 and live and not ("N1" in self.off and passes):
+            passes += 1
+            part = left / len(live)
+            for line in live:
+                take = min(part, line[4])
+                line[4] -= take
+                left -= take
+            live = [line for line in live if line[4] > 0]
+        rows, subtotal, halves = [], 0, 0
+        for meter, kind, tier, units, exact in lines:
+            cents = _even_cents(exact)
+            if exact * 100 - (exact * 100).numerator // (exact * 100).denominator == Fraction(1, 2):
+                halves += 1
+                ties += cents % 2 == 0
+            subtotal += cents
+            rows.append({"meter": meter, "kind": kind, "tier": tier, "units": units, "amount": _amount(cents)})
+        total = subtotal
+        if Fraction(subtotal, 100) >= commitment and not owed:
+            kept = subtotal * (1 - Fraction(plan["credit_rate"]))
+            halves += kept - kept.numerator // kept.denominator == Fraction(1, 2)
+            total = _even_cents(Fraction(subtotal, 100) * (1 - Fraction(plan["credit_rate"])))
+        self.halves[account] = self.halves.get(account, 0) + halves
+        self.ties[account] = self.ties.get(account, 0) + ties
+        self.passes[account] = max(self.passes.get(account, 0), passes)
+        invoice = {"account": account, "period": {"start": start.isoformat(), "end": end.isoformat()},
+                   "plan": plan_name, "lines": rows, "subtotal": _amount(subtotal),
+                   "credit": _amount(subtotal - total), "total": _amount(total)}
+        return invoice, left
+
+
+def _expected(corpus: str) -> dict[str, Any]:
+    texts = _shipped_texts() if corpus == "shipped" else _corpus_texts(corpus)
+    return _memo(f"ref:{corpus}", lambda: _Ledger(texts).document())
+
+
+# ---------------------------------------------------------------- hidden corpora
+
+def _rate_text(units: int) -> str:
+    return f"{units // 10000}.{units % 10000:04d}"
+
+
+def _tie_units(rate: int, limit: int) -> list[int]:
+    """Units whose line lands on half a cent with an even cent below and the binary float product above it."""
+    found = []
+    for units in range(1, limit):
+        value = units * rate
+        if value % 100 != 50 or (value // 100) % 2:
+            continue
+        if Fraction((rate / 10000) * units) > Fraction(value, 10000):
+            found.append(units)
+    return found
+
+
+def _tie_rate(rng: random.Random, low: int, high: int, limit: int) -> tuple[int, list[int]]:
+    while True:
+        rate = rng.randrange(low, high)
+        if rate % 4 == 0 or Fraction(rate / 10000) <= Fraction(rate, 10000):
+            continue
+        units = _tie_units(rate, limit)
+        if len(units) >= 3:
+            return rate, units
+
+
+def _card_text(plans: dict[str, dict[str, Any]]) -> str:
+    parts = []
+    for name, plan in plans.items():
+        tiers = ", ".join(
+            "{" + f'"up_to": {"null" if cap is None else cap}, "rate": {_rate_text(rate)}' + "}"
+            for cap, rate in plan["tiers"])
+        codes = "".join(f'"codes": {json.dumps(plan["codes"])}, ' for _ in [0] if "codes" in plan)
+        parts.append(f'    "{name}": {{"standing_charge": {_amount(plan["standing"])}, '
+                     f'"credit_rate": {plan["credit"]}, {codes}"tiers": [{tiers}]}}')
+    return '{\n  "currency": "EUR",\n  "plans": {\n' + ",\n".join(parts) + "\n  }\n}\n"
+
+
+def _read_line(read: dict[str, Any]) -> str:
+    return ('{"read_id": ' + json.dumps(read["read_id"]) + ', "account": ' + json.dumps(read["account"])
+            + ', "meter": ' + json.dumps(read["meter"]) + ', "day": ' + json.dumps(read["day"])
+            + ', "quantity": ' + read["quantity"]
+            + "".join(f', "estimated": {json.dumps(read["estimated"])}' for _ in [0] if "estimated" in read)
+            + "".join(', "cumulative": true' for _ in [0] if read.get("cumulative")) + "}")
+
+
+def _assemble(plans, periods, meters, reads) -> dict[str, str]:
+    return {
+        "meter_reads.jsonl": "".join(_read_line(read) + "\n" for read in reads),
+        "accounts.csv": "account,meter,active_from,active_to\n"
+        + "".join(f"{a},{m},{f},{t}\n" for a, m, f, t in meters),
+        "billing_periods.csv": "account,start,end,plan,commitment,allowance\n"
+        + "".join(f"{a},{s},{e},{p},{c},{w}\n" for a, s, e, p, c, w in periods),
+        "rate_card.json": _card_text(plans),
+    }
+
+
+def _period(rng: random.Random, crossing: bool) -> tuple[date, date]:
+    if not crossing:
+        year, month = rng.choice([2026, 2027]), rng.choice([1, 2, 3, 5, 7, 8, 10, 12])
+        start = date(year, month, 1)
+        return start, date(year + month // 12, month % 12 + 1, 1) - timedelta(days=1)
+    while True:
+        start = date(rng.choice([2026, 2027]), rng.randrange(1, 13), rng.randrange(2, 28))
+        end = start + timedelta(days=rng.choice([27, 29, 32, 33, 34]) - 1)
+        if (end.year, end.month) != (start.year, start.month):
+            return start, end
+
+
+def _split(rng: random.Random, total: int, parts: int) -> list[int]:
+    cuts = sorted(rng.sample(range(1, total), parts - 1)) if total > parts else []
+    bounds = [0, *cuts, total]
+    return [b - a for a, b in zip(bounds, bounds[1:])] if cuts else [total]
+
+
+def _corpus(seed: int, size: int, reuse: tuple[str, ...],
+            levers: frozenset[str]) -> tuple[dict[str, str], dict[str, Any]]:
+    """A seed whose rates cannot settle a planted case moves on to the next seed in a fixed sequence."""
+    for attempt in range(25):
+        try:
+            return _corpus_once(seed + 100003 * attempt, size, reuse, levers)
+        except AssertionError:
+            if attempt == 24:
+                raise
+    raise AssertionError(seed)
+
+
+def _corpus_once(seed: int, size: int, reuse: tuple[str, ...],
+                 levers: frozenset[str]) -> tuple[dict[str, str], dict[str, Any]]:
+    rng = random.Random(seed)
+    tag = "".join(rng.choice("KLMNPRSTVW") for _ in range(2))
+    plans: dict[str, dict[str, Any]] = {}
+    tie_units: dict[str, list[tuple[int, int]]] = {}
+    scale_step = rng.randrange(30, 41)
+    shared_tiers = "N3" in levers
+    for index, credit in enumerate(["0.05", "0.02", "0.06", "0.04"]):
+        first = rng.randrange(80, 261) if shared_tiers else rng.randrange(5000, 6001)
+        second = first + rng.randrange(200, 501)
+        middle, middle_units = _tie_rate(rng, 1800, 2400, second - first)
+        last, last_units = _tie_rate(rng, 1150, 1800, 1500)
+        if index == 0:
+            head, head_units = 80 * scale_step, list(range(60, 1000))
+        elif shared_tiers:
+            head, head_units = rng.randrange(2400, 3200), []
+        else:
+            head, head_units = _tie_rate(rng, 2400, 3200, 1000)
+        name = f"{tag}-{index + 1}"
+        plans[name] = {"standing": rng.randrange(1200, 7000), "credit": credit,
+                       "tiers": [(first, head), (second, middle), (None, last)]}
+        if shared_tiers:
+            tie_units[name] = [(first, u) for u in middle_units] + [(second, u) for u in last_units]
+        else:
+            tie_units[name] = [(0, u) for u in head_units]
+    names = list(plans)
+    named = _plant_codes(random.Random(seed * 7 + 11), plans, "L11" in levers)
+    accounts = sorted({*reuse, *(f"{tag[0]}{n:04d}" for n in rng.sample(range(1, 10000), size - len(reuse)))})
+    credit_ties = {accounts[1]: names[1], accounts[4]: names[2]}
+    equal = {accounts[7]: names[3]}
+    meter_ids = iter(f"{tag[1]}{n:05d}" for n in rng.sample(range(1, 100000), size * 6))
+    read_ids = iter(f"H{n:05d}" for n in rng.sample(range(10000, 100000), size * 40))
+    periods, meters, reads, pairs = [], [], [], []
+    tuned: dict[str, dict[str, Any]] = {}
+    kinds = ["late", "early", "gone"]
+
+    def add(account, meter, day, quantity, pad=False):
+        read = {"read_id": next(read_ids), "account": account, "meter": meter, "day": day.isoformat(),
+                "quantity": quantity}
+        if pad or rng.random() < 0.04:
+            read["read_id"], read["account"], read["meter"] = f" {read['read_id']}", f"{account} ", f" {meter}  "
+        reads.append(read)
+        return read
+
+    for position, account in enumerate(accounts):
+        plan_name = credit_ties.get(account) or equal.get(account) or rng.choice(names)
+        start, end = _period(rng, "N2" in levers)
+        span = (end - start).days + 1
+        days = [start + timedelta(days=k) for k in range(span)]
+        periods.append([account, start.isoformat(), end.isoformat(), plan_name, None])
+        own = sorted(next(meter_ids) for _ in range(4))
+        for meter in own[:3]:
+            meters.append((account, meter, (start - timedelta(days=rng.randrange(30, 400))).isoformat(), ""))
+        quiet = account in credit_ties or account in equal
+        kind = "open" if quiet else (kinds[position % 3] if position < 6 else rng.choice(["open", "open", *kinds]))
+        since, until = start - timedelta(days=rng.randrange(20, 300)), None
+        if kind == "late":
+            since = start + timedelta(days=rng.randrange(1, span - 2))
+        elif kind == "early":
+            until = start + timedelta(days=rng.randrange(0, span - 3))
+        elif kind == "gone":
+            until = start - timedelta(days=rng.randrange(1, 40))
+            since = until - timedelta(days=rng.randrange(20, 200))
+        meters.append((account, own[3], since.isoformat(), "" if until is None else until.isoformat()))
+        if not quiet and position % 3 == 1:
+            # an active meter whose only read is rejected still pays its standing line
+            own.append(next(meter_ids))
+            meters.append((account, own[4], (start - timedelta(days=rng.randrange(30, 400))).isoformat(), ""))
+            add(account, own[4], rng.choice(days), rng.choice(["null", "false", "7.5", "-3"]))
+        used: dict[str, set] = {meter: set() for meter in own}
+        accepted_first: dict[str, dict[str, Any]] = {}
+        prefix, picked = 0, set()
+        for meter in own[:3]:
+            # each tie meter ends on a line of tie units, counted from the units of the meters before it
+            caps, fits = [cap for cap, _ in plans[plan_name]["tiers"]], []
+            for floor, units in tie_units[plan_name]:
+                top = caps[caps.index(floor) + 1] if floor in caps else None
+                quantity = floor + units - prefix if prefix <= floor else units
+                if top is None or prefix + quantity <= top:
+                    fits.append(quantity)
+            quantity = rng.choice([q for q in fits if q not in picked] or fits)
+            picked.add(quantity)
+            prefix += quantity
+            parts = _split(rng, quantity, rng.choice([2, 3]))
+            for part, day in zip(parts, rng.sample(days, len(parts))):
+                read = add(account, meter, day, str(part))
+                used[meter].add(day)
+                accepted_first.setdefault(meter, read)
+        live = [d for d in days if d >= since and (until is None or d <= until)]
+        for day in rng.sample(live, min(len(live), rng.choice([2, 3]))) if kind != "gone" else []:
+            add(account, own[3], day, str(rng.randrange(0, 300)))
+            used[own[3]].add(day)
+        if quiet:
+            spare = [d for d in days if d not in used[own[3]]]
+            tuned[account] = add(account, own[3], rng.choice(spare), "0")
+        # a quoted integer on a day of its own, so reading it would move the energy line
+        spare = [d for d in days if d not in used[own[0]]]
+        quoted = rng.randrange(20, 90)
+        add(account, own[0], rng.choice(spare), json.dumps(rng.choice([str(quoted), f" {quoted} ", f"{quoted} "])))
+        # same day, same quantity again on a tie meter
+        twin = accepted_first[own[1]]
+        pairs.append((twin, add(account, own[1], date.fromisoformat(twin["day"]), twin["quantity"])))
+        outside = end + timedelta(days=rng.randrange(1, 6)) if rng.random() < 0.5 else start - timedelta(days=rng.randrange(1, 6))
+        add(account, own[1], outside, str(rng.randrange(5, 200)))
+        if position % 4 == 0:
+            add(account, own[1], outside, str(rng.randrange(5, 200)))
+        spare = [d for d in days if d not in used[own[2]]]
+        add(account, own[2], rng.choice(spare), rng.choice(["2.5", "12.0", "1E2", "3e1", "true", "false", "null", "-4", "40.00"]))
+        stranger = rng.choice([m for (_, m, _, _) in meters if m not in own] or ["Z00000"])
+        add(account, stranger, rng.choice(days), rng.choice([str(rng.randrange(1, 90)), json.dumps(str(rng.randrange(1, 90)))]))
+        if kind in ("late", "early", "gone"):
+            away = start - timedelta(days=3) if kind == "late" else end + timedelta(days=3)
+            add(account, own[3], away, str(rng.randrange(1, 90)))
+            gap = [d for d in days if d < since or (until is not None and d > until)]
+            if gap:
+                add(account, own[3], rng.choice(gap), str(rng.randrange(1, 90)))
+        if not quiet and kind != "gone" and used[own[3]]:
+            day = rng.choice(sorted(used[own[3]]))
+            first = next(r for r in reads if r["meter"].strip() == own[3] and r["day"] == day.isoformat())
+            pairs.append((first, add(account, own[3], day, str(int(first["quantity"]) + rng.randrange(1, 40)))))
+        if kind == "open" and not quiet:
+            spare = [d for d in days if d not in used[own[3]]]
+            day = rng.choice(spare)
+            pairs.append((add(account, own[3], day, "null"), add(account, own[3], day, str(rng.randrange(1, 60)))))
+            used[own[3]].add(day)
+            day = rng.choice([d for d in days if d not in used[own[3]]])
+            pairs.append((add(account, own[3], day, str(rng.randrange(1, 60))), add(account, own[3], day, "-7")))
+    add("Q" + tag, "Z" + tag, date(2026, 6, 1), "10")
+    if "L11" in levers:
+        _name_by_code(random.Random(seed * 7 + 13), plans, periods, named)
+
+    order = list(range(len(reads)))
+    rng.shuffle(order)
+    reads = [reads[i] for i in order]
+    for first, second in pairs:
+        a, b = reads.index(first), reads.index(second)
+        if a > b:
+            reads[a], reads[b] = reads[b], reads[a]
+
+    allowances: dict[str, str] = {}
+
+    def texts_for(chosen: set[str] | None, commitments: dict[str, str]) -> dict[str, str]:
+        keep = (lambda account: True) if chosen is None else (lambda account: account in chosen)
+        rows = [[*row[:3], named.get(row[0], row[3]), commitments.get(row[0], "0.00"),
+                 allowances.get(row[0], "0.00")] for row in periods if keep(row[0])]
+        return _assemble(plans, rows, [m for m in meters if keep(m[0])],
+                         [r for r in reads if keep(r["account"].strip())])
+
+    def sharing(values: list[Fraction], allowance: Fraction) -> tuple[int, Fraction, Fraction]:
+        left, live, passes, after_two = allowance, list(values), 0, Fraction(0)
+        while left > 0 and live:
+            passes += 1
+            part = left / len(live)
+            taken = [min(part, value) for value in live]
+            left -= sum(taken)
+            live = [value - take for value, take in zip(live, taken) if value > take]
+            if passes == 2:
+                after_two = left
+        return passes, after_two, left
+
+    reshared = []
+    if "N1" in levers:
+        base = _Ledger(texts_for(None, {}))
+        for invoice in base.document()["invoices"]:
+            account = invoice["account"]
+            if account in credit_ties or account in equal or accounts.index(account) % 2:
+                continue
+            tiers = base.plans[base.keys[account]]["tiers"]
+            values = [line["units"] * tiers[line["tier"] - 1]["rate"] for line in invoice["lines"]
+                      if line["kind"] == "energy"]
+            for _ in range(600):
+                cents = rng.randrange(1, int(sum(values) * 100))
+                passes, after_two, unused = sharing(values, Fraction(cents, 100))
+                if passes >= 3 and after_two >= Fraction(5, 100) and unused == 0:
+                    allowances[account] = _amount(cents)
+                    reshared.append(account)
+                    break
+            else:
+                raise AssertionError(f"no allowance shared three times for {account}")
+
+    for account, read in tuned.items():
+        for quantity in range(0, 600):
+            read["quantity"] = str(quantity)
+            cents = _cents_of(_Ledger(texts_for({account}, {})).document()["invoices"][0]["subtotal"])
+            if account in equal or cents % 50 == 25:
+                break
+        else:
+            raise AssertionError("no settling quantity for a credit tie")
+    ledger = _Ledger(texts_for(None, {}))
+    subtotals = {inv["account"]: _cents_of(inv["subtotal"]) for inv in ledger.document()["invoices"]}
+    commitments = {}
+    for account, cents in subtotals.items():
+        if account in equal:
+            commitments[account] = _amount(cents)
+        elif account in credit_ties:
+            commitments[account] = _amount(cents - rng.randrange(0, cents // 4))
+        else:
+            commitments[account] = _amount(int(cents * rng.choice([0.6, 0.75, 0.9, 1.05, 1.2, 1.4])))
+    texts = texts_for(None, commitments)
+    info = {"plans": plans, "first_plan": names[0], "scale_step": scale_step, "credit_ties": sorted(credit_ties),
+            "equal": sorted(equal), "subtotals": subtotals, "ties": dict(ledger.ties), "kinds": None,
+            "levers": sorted(levers), "reshared": reshared, "named": dict(named)}
+    _assert_bounds(texts, info)
+    return texts, info
+
+
+def _code_text(rng: random.Random, letter: str, taken: set[str]) -> str:
+    while True:
+        code = f"{letter}{rng.randrange(1000, 10000)}"
+        if code not in taken and not any(code.startswith(t) or t.startswith(code) for t in taken):
+            taken.add(code)
+            return code
+
+
+def _plant_codes(rng: random.Random, plans: dict[str, dict[str, Any]], naming: bool) -> dict[str, str]:
+    """Every corpus card lists fresh tariff codes; one plan lists none and one code carries a space."""
+    letter, taken = rng.choice("BDFGHJ"), set()
+    names = list(plans)
+    bare = rng.choice(names[1:-1])
+    for name in names:
+        plans[name]["codes"] = [] if name == bare else [_code_text(rng, letter, taken) for _ in range(rng.choice([1, 2]))]
+    coded = [n for n in names if plans[n]["codes"]]
+    if all(len(plans[n]["codes"]) < 2 for n in coded):
+        plans[coded[0]]["codes"].append(_code_text(rng, letter, taken))
+    _share_stem(plans, taken)
+    padded = rng.choice(coded)
+    plans[padded]["codes"][0] = " " + plans[padded]["codes"][0]
+    return {}
+
+
+def _share_stem(plans: dict[str, dict[str, Any]], taken: set[str]) -> None:
+    """Two plans list codes that open with the same three characters."""
+    first, second = [n for n in plans if plans[n]["codes"]][:2]
+    old = plans[second]["codes"][0]
+    stem = plans[first]["codes"][0].strip()[:3]
+    taken.discard(old.strip())
+    for tail in range(10, 100):
+        code = f"{stem}{tail}"
+        if code != old.strip() and code not in taken and not any(code.startswith(t) or t.startswith(code) for t in taken):
+            taken.add(code)
+            plans[second]["codes"][0] = old.replace(old.strip(), code)
+            return
+    raise AssertionError("no free code stem")
+
+
+def _name_by_code(rng: random.Random, plans: dict[str, dict[str, Any]], periods: list, named: dict[str, str]) -> None:
+    """Name about half of the accounts by a code of their own plan, every code at least once."""
+    pending = [code for plan in plans.values() for code in plan["codes"]]
+    rows = [row for row in periods if plans[row[3]]["codes"]]
+    rng.shuffle(rows)
+    goal = max(-(-len(periods) * 2 // 5), len(pending))
+    for row in rows:
+        codes = plans[row[3]]["codes"]
+        mine = [code for code in pending if code in codes]
+        if mine or len(named) < goal or rng.random() < 0.3:
+            code = (mine or [rng.choice(codes)])[0]
+            if code in pending:
+                pending.remove(code)
+            named[row[0]] = code.strip() if rng.random() < 0.85 else f" {code.strip()} "
+    assert not pending and len(named) >= goal, (pending, len(named))
+    if all(value == value.strip() for value in named.values()):
+        first = sorted(named)[0]
+        named[first] = f" {named[first]} "
+
+
+def _assert_codes(ledger: "_Ledger", texts: dict[str, str], info: dict[str, Any]) -> None:
+    keys = list(ledger.plans)
+    codes = [code.strip() for plan in ledger.plans.values() for code in plan.get("codes", [])]
+    assert len(codes) == len(set(codes)) >= 3 and not set(codes) & set(keys)
+    folded = {"".join(ch for ch in text.casefold() if ch.isalnum()) for text in keys}
+    assert len(folded) == len(keys) and not folded & {code.casefold() for code in codes}
+    assert any(not plan.get("codes") for plan in ledger.plans.values())
+    assert any(code != code.strip() for plan in ledger.plans.values() for code in plan.get("codes", []))
+    named = {a: ledger.periods[a][2] for a in ledger.periods if ledger.periods[a][2] not in ledger.plans}
+    if "L11" not in info["levers"]:
+        assert not named
+        return
+    assert len(named) * 10 >= len(ledger.periods) * 4, len(named)
+    assert {name for name in named.values()} == set(codes)
+    owners = {ledger.keys[a] for a in named}
+    assert len(owners) >= 2 and owners - {keys[0]} and owners - {keys[-1]}
+    assert any(len(plan.get("codes", [])) >= 2 for plan in ledger.plans.values())
+    stems = [{code.strip()[:3] for code in plan.get("codes", [])} for plan in ledger.plans.values()]
+    assert any(a & b for i, a in enumerate(stems) for b in stems[i + 1:])
+    raw = [line.split(",")[3] for line in texts["billing_periods.csv"].splitlines()[1:]]
+    assert any(value != value.strip() for value in raw)
+
+
+def _renamed(texts: dict[str, str], info: dict[str, Any], seed: int) -> dict[str, str]:
+    """Every code renamed in card and billing together, plan order rotated, every file's rows rotated."""
+    rng = random.Random(seed)
+    letter = rng.choice([c for c in "BDFGHJ" if c not in "".join(info["named"].values())])
+    taken: set[str] = set()
+    fresh: dict[str, str] = {}
+    plans = {}
+    for name, plan in info["plans"].items():
+        plans[name] = dict(plan, codes=[])
+        for code in plan["codes"]:
+            fresh[code.strip()] = _code_text(rng, letter, taken)
+            plans[name]["codes"].append(code.replace(code.strip(), fresh[code.strip()]))
+    before = {code.strip() for plan in plans.values() for code in plan["codes"]}
+    _share_stem(plans, taken)
+    after = {code.strip() for plan in plans.values() for code in plan["codes"]}
+    (gone,), (new,) = before - after, after - before
+    fresh = {old: (new if value == gone else value) for old, value in fresh.items()}
+    order = list(plans)
+    k = rng.randrange(1, len(order))
+    plans = {name: plans[name] for name in order[k:] + order[:k]}
+    head, *body = texts["billing_periods.csv"].splitlines(keepends=True)
+    rows = []
+    for line in body:
+        cells = line.split(",")
+        value = cells[3].strip()
+        if value in fresh:
+            cells[3] = cells[3].replace(value, fresh[value])
+        rows.append(",".join(cells))
+    out = {**texts, "billing_periods.csv": head + "".join(rows), "rate_card.json": _card_text(plans)}
+    return _rotated(out, seed + 1)
+
+
+def _cents_of(text: str) -> int:
+    whole, cents = text.split(".")
+    return int(whole) * 100 + int(cents)
+
+
+def _assert_bounds(texts: dict[str, str], info: dict[str, Any]) -> None:
+    """Every corpus stays inside what the contract promises about its inputs and plants each of its cases."""
+    ledger = _Ledger(texts)
+    document = ledger.document()
+    levers = set(info["levers"])
+    for account, (start, end, plan, commitment, allowance) in ledger.periods.items():
+        span = (end - start).days + 1
+        assert 1 <= span <= 62 and span not in (28, 30, 31) if "N2" in levers else span in (28, 31), account
+        if "N2" in levers:
+            assert (start.year, start.month) != (end.year, end.month), account
+        else:
+            assert start.day == 1 and (end + timedelta(days=1)).day == 1, account
+        assert (commitment * 100).denominator == 1 and commitment >= 0, account
+        assert (allowance * 100).denominator == 1 and allowance >= 0, account
+        assert allowance == 0 or account in info["reshared"], account
+    for account in info["reshared"]:
+        assert ledger.passes[account] >= 3, f"{account} shares its allowance {ledger.passes[account]} times"
+    for invoice in document["invoices"]:
+        account, plan = invoice["account"], ledger.plans[ledger.keys[invoice["account"]]]
+        energy = [line for line in invoice["lines"] if line["kind"] == "energy"]
+        units = sum(line["units"] for line in energy)
+        if "N3" in levers:
+            assert len({line["meter"] for line in energy}) >= 2 and units > plan["tiers"][0]["up_to"], account
+        else:
+            assert units <= plan["tiers"][0]["up_to"], account
+        if account not in info["reshared"] and ("N3" in levers or ledger.keys[account] != info["first_plan"]):
+            assert info["ties"][account] >= 3, f"{account} has {info['ties'][account]} half-cent lines"
+    assert sum(info["ties"].values()) >= 10
+    for plan in ledger.plans.values():
+        assert (plan["standing_charge"] * 100).denominator == 1
+        assert 0 <= plan["credit_rate"] <= 1 and (plan["credit_rate"] * 10000).denominator == 1
+        assert all(tier["rate"] > 0 and (tier["rate"] * 10 ** 8).denominator == 1 for tier in plan["tiers"])
+        assert [t["up_to"] for t in plan["tiers"]][-1] is None
+    for account in info["credit_ties"]:
+        cents = info["subtotals"][account]
+        assert cents % 50 == 25 and ledger.periods[account][3] * 100 <= cents, account
+    for account in info["equal"]:
+        assert ledger.periods[account][3] * 100 == info["subtotals"][account], account
+    ids = [json.loads(line)["read_id"].strip() for line in texts["meter_reads.jsonl"].splitlines()]
+    assert len(ids) == len(set(ids))
+    quoted = {json.loads(line)["account"].strip() for line in texts["meter_reads.jsonl"].splitlines()
+              if isinstance(json.loads(line)["quantity"], str)}
+    assert set(ledger.periods) <= quoted
+    _assert_codes(ledger, texts, info)
+
+
+def _rescaled(texts: dict[str, str], info: dict[str, Any], seed: int) -> dict[str, str]:
+    """Rows shuffled and one plan's first rate multiplied by 1.0375 (83/80), still four decimals."""
+    plans = {name: dict(plan) for name, plan in info["plans"].items()}
+    first = plans[info["first_plan"]]
+    (cap, rate), *rest = first["tiers"]
+    assert rate == 80 * info["scale_step"]
+    first["tiers"] = [(cap, 83 * info["scale_step"]), *rest]
+    lines = texts["meter_reads.jsonl"].splitlines(keepends=True)
+    random.Random(seed).shuffle(lines)
+    return {**texts, "meter_reads.jsonl": "".join(lines), "rate_card.json": _card_text(plans)}
+
+
+def _rotated(texts: dict[str, str], seed: int) -> dict[str, str]:
+    rng = random.Random(seed)
+    out = dict(texts)
+    for name in ("meter_reads.jsonl", "accounts.csv", "billing_periods.csv"):
+        lines = texts[name].splitlines(keepends=True)
+        head, body = (lines[:1], lines[1:]) if name.endswith(".csv") else ([], lines)
+        k = rng.randrange(1, len(body))
+        out[name] = "".join(head + body[k:] + body[:k])
+    return out
+
+
+_QUIET = ("Q1", "Q2", "Q3", "Q4", "Q5")
+_QUIET_SEEDS = {"fresh": H1_SEED, "rescaled": H1_SEED + 1, "relocated": H3_SEED, "rotated": H3_SEED + 1,
+                "api": H5_SEED, "recoded": H7_SEED, "renamed": H7_SEED + 1}
+_GROUPS = {"estimated": frozenset({"Q1"}), "standing_changes": frozenset({"Q2"}),
+           "meter_rows": frozenset({"Q5"}), "billing_rows": frozenset({"Q3"}),
+           "allowance_carried": frozenset({"Q3", "Q4"})}
+
+
+def _month(year: int, month: int, step: int = 0) -> tuple[date, date]:
+    year, month = year + (month - 1 + step) // 12, (month - 1 + step) % 12 + 1
+    start = date(year, month, 1)
+    return start, date(year + month // 12, month % 12 + 1, 1) - timedelta(days=1)
+
+
+def _quiet_once(texts: dict[str, str], rng: random.Random):
+    """Accounts of the five quiet rules (and of pairs of them) added to a corpus on their own ids and plans."""
+    base = _Ledger(texts)
+    used = {name.upper() for name in [*base.rows, *(m for _, m in base.spans), *base.plans]}
+    used |= {read["read_id"].strip().upper() for read in base.reads}
+    lead = max(sorted({a[0] for a in base.rows}), key=lambda c: sum(a[0] == c for a in base.rows))
+    mlead = max(sorted({m[0] for _, m in base.spans}), key=lambda c: sum(m[0] == c for _, m in base.spans))
+    stem = sorted(base.plans)[0].rsplit("-", 1)[0]
+
+    def new_id(prefix: str, width: int) -> str:
+        while True:
+            value = f"{prefix}{rng.randrange(10 ** width):0{width}d}"
+            if value.upper() not in used:
+                used.add(value.upper())
+                return value
+
+    plans: dict[str, dict[str, Any]] = {}
+
+    def new_plan(changes=()) -> tuple[str, dict[str, Any]]:
+        number = 5
+        while f"{stem}-{number}".upper() in used:
+            number += 1
+        name = f"{stem}-{number}"
+        used.add(name.upper())
+        plans[name] = {"standing": rng.randrange(1500, 6000), "credit": rng.choice(["0.03", "0.05", "0.07"]),
+                       "tiers": [(rng.randrange(5000, 6001), rng.randrange(8, 40) * 100),
+                                 (None, rng.randrange(5, 30) * 100)], "changes": list(changes)}
+        return name, plans[name]
+
+    year = rng.choice([2026, 2027])
+    m1, m2 = rng.sample(range(1, 13), 2)
+    plain_a, plain_b = new_plan(), new_plan()
+    first, after = _month(year, m1), _month(year, m1, 1)
+    early = _month(year, m1, -2)[0]
+    changed = [(first[0] + timedelta(days=rng.randrange(8, 15)), rng.randrange(1500, 6000)),
+               (early + timedelta(days=rng.randrange(0, 20)), rng.randrange(1500, 6000))]
+    plan_c = new_plan(changed)
+    second = _month(year, m2)
+    plan_d = new_plan([(second[0] + timedelta(days=rng.randrange(17, 24)), rng.randrange(1500, 6000)),
+                       (_month(year, m2, 7)[0], rng.randrange(1500, 6000)),
+                       (second[0] + timedelta(days=rng.randrange(5, 12)), rng.randrange(1500, 6000))])
+    blocks: dict[str, list[list]] = {"billing": [], "meters": []}
+    reads: list[dict[str, Any]] = []
+    before: list[tuple[dict, dict]] = []
+    labels: dict[str, frozenset] = {}
+
+    def read(account, meter, day, quantity, estimated=None):
+        item = {"read_id": new_id("H", 5), "account": account, "meter": meter, "day": day.isoformat(),
+                "quantity": str(quantity)}
+        if estimated is not None:
+            item["estimated"] = estimated
+        reads.append(item)
+        return item
+
+    def days(span, count):
+        width = (span[1] - span[0]).days + 1
+        return [span[0] + timedelta(days=d) for d in rng.sample(range(width), count)]
+
+    def plain(account, meter, span, count):
+        for day in days(span, count):
+            read(account, meter, day, rng.randrange(5, 60))
+
+    def meter_rows(account, rows):
+        meter = new_id(mlead, 5)
+        blocks["meters"].append([(account, meter, since.isoformat(), "" if until is None else until.isoformat())
+                                 for since, until in rows])
+        return meter
+
+    def open_meter(account, start):
+        return meter_rows(account, [(start - timedelta(days=rng.randrange(0, 200)), None)])
+
+    def bill(account, entries, kinds):
+        blocks["billing"].append([(account, s.isoformat(), e.isoformat(), plan, _amount(commit), _amount(allow))
+                                  for s, e, plan, commit, allow in entries])
+        labels[account] = frozenset(kinds)
+
+    def commit():
+        return rng.choice([0, rng.randrange(100, 2000), 999900])
+
+    def month_of():
+        return _month(rng.choice([2026, 2027]), rng.randrange(1, 13))
+
+    def pair(span, account, meter):
+        day = days(span, 1)[0]
+        guess = read(account, meter, day, rng.randrange(5, 60), True)
+        real = read(account, meter, day, rng.randrange(61, 90), rng.choice([None, False]))
+        before.append((guess, real))
+
+    def rate_of(plan_name):
+        return plans[plan_name]["tiers"][0][1] // 100
+
+    # Q1 estimated reads
+    for shape in range(3):
+        account, span = new_id(lead, 4), month_of()
+        meter = open_meter(account, span[0])
+        plain(account, meter, span, 3)
+        bill(account, [(*span, plain_a[0], commit(), 0)], {"Q1"})
+        spot, other = days(span, 2)
+        if shape == 0:
+            pair(span, account, meter)
+            read(account, meter, other, rng.randrange(5, 60), True)
+        elif shape == 1:
+            real = read(account, meter, spot, rng.randrange(5, 60), False)
+            guess = read(account, meter, spot, rng.randrange(61, 90), True)
+            before.append((real, guess))
+            read(account, meter, other, rng.randrange(5, 60), True)
+            read(account, meter, other, rng.randrange(5, 60), True)
+        else:
+            read(account, meter, spot, -3)
+            read(account, meter, spot, rng.randrange(5, 60), True)
+            pair(span, account, meter)
+            plain(account, open_meter(account, span[0]), span, 2)
+    # Q2 standing changes
+    for plan, span in ((plan_c, first), (plan_c, after), (plan_d, second)):
+        account = new_id(lead, 4)
+        bill(account, [(*span, plan[0], commit(), 0)], {"Q2"})
+        for _ in range(rng.randrange(1, 3)):
+            plain(account, open_meter(account, span[0]), span, 3)
+    # Q3 several billing rows
+    for shape in range(2):
+        account = new_id(lead, 4)
+        spans = [month_of(), None, None]
+        spans[1] = _month(spans[0][0].year, spans[0][0].month, 2)
+        spans[2] = _month(spans[0][0].year, spans[0][0].month, 3)
+        spans = spans[:2 + shape]
+        rows = [(*span, rng.choice([plain_a[0], plain_b[0]]), commit(), 0) for span in spans]
+        rows = rows[::-1] if shape == 0 else rng.sample(rows, len(rows))
+        if rows == sorted(rows):
+            rows = rows[::-1]
+        bill(account, rows, {"Q3"})
+        meter = open_meter(account, spans[0][0])
+        for span in spans:
+            plain(account, meter, span, 2)
+        gap = _month(spans[0][0].year, spans[0][0].month, 1)
+        read(account, meter, days(gap, 1)[0], rng.randrange(5, 60))
+        if shape:
+            plain(account, open_meter(account, spans[0][0]), spans[-1], 2)
+
+    # Q4 allowance carried (single meter, so one share pass)
+    def carried(kinds, plan_name, spans, empty):
+        account = new_id(lead, 4)
+        meter = open_meter(account, spans[0][0])
+        rate, entries, carry = rate_of(plan_name), [], 0
+        for index, span in enumerate(spans):
+            if index in empty:
+                entries.append((*span, plan_name, commit(), rng.randrange(100, 400)))
+                carry += entries[-1][4]
+                continue
+            if index < len(spans) - 1:
+                quantity = rng.randrange(10, 40)
+                entries.append((*span, plan_name, commit(), quantity * rate + rng.randrange(100, 500)))
+                carry += entries[-1][4] - quantity * rate
+            else:
+                allow = rng.randrange(100, 300)
+                quantity = (allow + carry) // rate + rng.randrange(20, 60)
+                entries.append((*span, plan_name, commit(), allow))
+            spots = days(span, 2)
+            read(account, meter, spots[0], quantity // 2)
+            read(account, meter, spots[1], quantity - quantity // 2)
+        bill(account, rng.sample(entries, len(entries)), kinds)
+
+    start = month_of()
+    carried({"Q3", "Q4"}, plain_b[0], [_month(start[0].year, start[0].month, k) for k in range(2)], ())
+    start = month_of()
+    carried({"Q3", "Q4"}, plain_a[0], [_month(start[0].year, start[0].month, k) for k in range(3)], (1,))
+    # Q5 several meter rows
+    for shape in range(2):
+        account, span = new_id(lead, 4), month_of()
+        cut = rng.randrange(8, 12)
+        rows = [(span[0] - timedelta(days=rng.randrange(1, 9)), span[0] + timedelta(days=cut)),
+                (span[0] + timedelta(days=cut + rng.randrange(4, 8)), None if shape == 0 else span[1] - timedelta(days=3))]
+        meter = meter_rows(account, rows if shape == 0 else rows[::-1])
+        bill(account, [(*span, plain_b[0], commit(), 0)], {"Q5"})
+        plain(account, meter, (span[0], rows[0][1]), 2)
+        plain(account, meter, (rows[1][0], rows[1][1] or span[1]), 2)
+        read(account, meter, rows[0][1] + timedelta(days=2), rng.randrange(5, 60))
+        if shape:
+            plain(account, open_meter(account, span[0]), span, 2)
+    # pairs of quiet rules on one account
+    account, span = new_id(lead, 4), month_of()
+    later = _month(span[0].year, span[0].month, 1)
+    bill(account, [(*later, plain_a[0], commit(), 0), (*span, plain_b[0], commit(), 0)], {"Q1", "Q3"})
+    meter = open_meter(account, span[0])
+    plain(account, meter, span, 2)
+    plain(account, meter, later, 1)
+    pair(rng.choice([span, later]), account, meter)
+    account = new_id(lead, 4)
+    bill(account, [(*_month(year, m1, -3), plain_b[0], commit(), 0), (*first, plan_c[0], commit(), 0)], {"Q2", "Q3"})
+    meter = open_meter(account, _month(year, m1, -3)[0])
+    plain(account, meter, _month(year, m1, -3), 2)
+    plain(account, meter, first, 2)
+    account, span = new_id(lead, 4), month_of()
+    later = _month(span[0].year, span[0].month, 1)
+    bill(account, [(*span, plain_a[0], commit(), 0), (*later, plain_a[0], commit(), 0)], {"Q3", "Q5"})
+    rows = [(span[0] - timedelta(days=4), span[0] + timedelta(days=19)), (later[0] + timedelta(days=5), None)]
+    meter = meter_rows(account, rows)
+    plain(account, meter, (span[0], rows[0][1]), 2)
+    plain(account, meter, (rows[1][0], later[1]), 2)
+    read(account, meter, rows[0][1] + timedelta(days=3), rng.randrange(5, 60))
+    account, span = new_id(lead, 4), month_of()
+    rows = [(span[0] - timedelta(days=2), span[0] + timedelta(days=12)), (span[0] + timedelta(days=18), None)]
+    meter = meter_rows(account, rows[::-1])
+    bill(account, [(*span, plain_b[0], commit(), 0)], {"Q1", "Q5"})
+    plain(account, meter, (span[0], rows[0][1]), 1)
+    plain(account, meter, (rows[1][0], span[1]), 1)
+    pair((rows[1][0], span[1]), account, meter)
+    carried({"Q2", "Q3", "Q4"}, plan_c[0], [first, after], ())
+
+    rng.shuffle(reads)
+    for one, two in before:
+        i, j = reads.index(one), reads.index(two)
+        if i > j:
+            reads[i], reads[j] = two, one
+
+    def merged(text: str, lines: list[str], head: bool) -> str:
+        body = text.splitlines(keepends=True)
+        top, body = (body[:1], body[1:]) if head else ([], body)
+        slots = set(rng.sample(range(len(body) + len(lines)), len(lines)))
+        out, old, new = [], iter(body), iter(lines)
+        for index in range(len(body) + len(lines)):
+            out.append(next(new) if index in slots else next(old))
+        return "".join(top + out)
+
+    def flat(name):
+        chosen = rng.sample(blocks[name], len(blocks[name]))
+        return [",".join(row) + "\n" for block in chosen for row in block]
+
+    def plan_text(name, plan):
+        tiers = ", ".join("{" + f'"up_to": {"null" if cap is None else cap}, "rate": {_rate_text(rate)}' + "}"
+                          for cap, rate in plan["tiers"])
+        changes = ", ".join(f'{{"from": "{when.isoformat()}", "standing_charge": {_amount(cents)}}}'
+                            for when, cents in plan["changes"])
+        extra = f'"standing_changes": [{changes}], ' if plan["changes"] else ""
+        return (f'    "{name}": {{"standing_charge": {_amount(plan["standing"])}, '
+                f'"credit_rate": {plan["credit"]}, {extra}"tiers": [{tiers}]}}')
+
+    card = texts["rate_card.json"]
+    assert card.endswith("\n  }\n}\n")
+    card = card[:-len("\n  }\n}\n")] + "".join(",\n" + plan_text(n, p) for n, p in plans.items()) + "\n  }\n}\n"
+    planted = {
+        "meter_reads.jsonl": merged(texts["meter_reads.jsonl"], [_read_line(r) + "\n" for r in reads], False),
+        "accounts.csv": merged(texts["accounts.csv"], flat("meters"), True),
+        "billing_periods.csv": merged(texts["billing_periods.csv"], flat("billing"), True),
+        "rate_card.json": card,
+    }
+    return planted, labels
+
+
+def _assert_quiet(texts: dict[str, str], planted: dict[str, str], labels: dict[str, frozenset]) -> None:
+    def part(document, keep):
+        return ([i for i in document["invoices"] if keep(i["account"])],
+                [r for r in document["exceptions"] if keep(r["account"])])
+
+    full = _Ledger(planted)
+    document = full.document()
+    assert part(document, lambda a: a not in labels) == part(_Ledger(texts).document(), lambda a: True)
+    for invoice in document["invoices"]:
+        account = invoice["account"]
+        if account in labels:
+            assert full.halves[account] == 0 and full.passes[account] <= 1, account
+            assert {line["tier"] for line in invoice["lines"]} <= {0, 1}, account
+            assert invoice["period"]["start"].endswith("-01"), account
+    for rule in _QUIET:
+        off = _Ledger(planted, frozenset({rule})).document()
+        moved = {a for a in labels if part(off, lambda x: x == a) != part(document, lambda x: x == a)}
+        owners = {a for a, kinds in labels.items() if rule in kinds}
+        assert moved == owners, (rule, sorted(moved ^ owners))
+        alone = _GROUPS["allowance_carried"] if rule == "Q4" else frozenset({rule})
+        assert sum(kinds == alone for kinds in labels.values()) >= 2, rule
+    shapes = set(labels.values())
+    assert len([s for s in shapes if s not in _GROUPS.values()]) == 5, shapes
+
+
+def _quiet(texts: dict[str, str], seed: int) -> tuple[dict[str, str], dict[str, frozenset]]:
+    for attempt in range(40):
+        rng = random.Random(seed * 31 + 7 + 1000003 * attempt)
+        try:
+            planted, labels = _quiet_once(texts, rng)
+            _assert_quiet(texts, planted, labels)
+            return planted, labels
+        except AssertionError:
+            if attempt == 39:
+                raise
+    raise AssertionError(seed)
+
+
+_LEVER_GROUPS = {"revision": frozenset({"U1"}), "revision_rows": frozenset({"U1", "Q3"}),
+                 "arrears": frozenset({"D1", "Q3"}), "arrears_carried": frozenset({"D1", "Q2", "Q3", "Q4"}),
+                 "cumulative": frozenset({"D2"}), "cumulative_rows": frozenset({"D2", "Q3"}),
+                 "cumulative_meter_rows": frozenset({"D2", "Q5"})}
+_GROUPS.update(_LEVER_GROUPS)
+
+
+def _levers_once(texts: dict[str, str], rng: random.Random):
+    """Accounts of plan revisions, paid amounts and cumulative reads added to a corpus on their own ids and plans."""
+    base = _Ledger(texts)
+    used = {name.upper() for name in [*base.rows, *(m for _, m in base.spans), *base.plans]}
+    used |= {read["read_id"].strip().upper() for read in base.reads}
+    lead = max(sorted({a[0] for a in base.rows}), key=lambda c: sum(a[0] == c for a in base.rows))
+    mlead = max(sorted({m[0] for _, m in base.spans}), key=lambda c: sum(m[0] == c for _, m in base.spans))
+    stem = sorted(base.plans)[0].rsplit("-", 1)[0]
+
+    def new_id(prefix: str, width: int) -> str:
+        while True:
+            value = f"{prefix}{rng.randrange(10 ** width):0{width}d}"
+            if value.upper() not in used:
+                used.add(value.upper())
+                return value
+
+    plans: dict[str, dict[str, Any]] = {}
+
+    def new_plan(tiers, revisions=()) -> str:
+        number = 5
+        while f"{stem}-{number}".upper() in used:
+            number += 1
+        name = f"{stem}-{number}"
+        used.add(name.upper())
+        plans[name] = {"standing": rng.randrange(1500, 6000), "credit": rng.choice(["0.03", "0.05", "0.07"]),
+                       "tiers": tiers, "revisions": list(revisions), "changes": []}
+        return name
+
+    def rate(*avoid):
+        while True:
+            value = rng.randrange(8, 40) * 100
+            if value not in avoid:
+                return value
+
+    blocks: dict[str, list[list]] = {"billing": [], "meters": []}
+    reads: list[dict[str, Any]] = []
+    before: list[tuple[dict, dict]] = []
+    labels: dict[str, frozenset] = {}
+
+    def read(account, meter, day, quantity, estimated=None, cumulative=False):
+        item = {"read_id": new_id("H", 5), "account": account, "meter": meter, "day": day.isoformat(),
+                "quantity": str(quantity)}
+        if estimated is not None:
+            item["estimated"] = estimated
+        if cumulative:
+            item["cumulative"] = True
+        reads.append(item)
+        return item
+
+    def days(span, count):
+        width = (span[1] - span[0]).days + 1
+        return sorted(span[0] + timedelta(days=d) for d in rng.sample(range(width), count))
+
+    def split(account, meter, span, quantity):
+        one, two = days(span, 2)
+        read(account, meter, one, quantity // 2)
+        read(account, meter, two, quantity - quantity // 2)
+
+    def meter_rows(account, rows):
+        meter = new_id(mlead, 5)
+        blocks["meters"].append([(account, meter, since.isoformat(), "" if until is None else until.isoformat())
+                                 for since, until in rows])
+        return meter
+
+    def open_meter(account, start):
+        return meter_rows(account, [(start - timedelta(days=rng.randrange(40, 200)), None)])
+
+    def bill(account, entries, kinds, keep_order=False):
+        rows = [(account, s.isoformat(), e.isoformat(), plan, _amount(commit), _amount(allow))
+                for s, e, plan, commit, allow in entries]
+        if not keep_order and len(rows) > 1:
+            while rows == sorted(rows, key=lambda r: r[1]):
+                rng.shuffle(rows)
+        blocks["billing"].append(rows)
+        labels[account] = frozenset(kinds)
+
+    def month_of():
+        return _month(rng.choice([2026, 2027]), rng.randrange(1, 13))
+
+    def months(count):
+        first = month_of()
+        return [_month(first[0].year, first[0].month, k) for k in range(count)]
+
+    def cents(tiers):
+        return tiers[0][1] // 100
+
+    # U1: plan A has one revision fitting every paid amount, plan B two, plan C none
+    cap_t, rate_t = rng.randrange(30, 81), rate()
+    fit = [(cap_t, rate_t), (None, rate())]
+    near = [(cap_t, rate_t), (None, rate(fit[1][1]))]
+    far = [(cap_t + rng.choice([-9, -5, 4, 8]), rate(rate_t)), (None, fit[1][1])]
+    revisions_a = [near, fit]
+    revisions_a.insert(rng.randrange(3), far)
+    plan_a = new_plan([(rng.randrange(30, 81), rate(rate_t)), (None, rate())], revisions_a)
+    cap_b, rate_b = rng.randrange(30, 81), rate()
+    pick = [(cap_b, rate_b), (None, rate())]
+    plan_b = new_plan([(rng.randrange(30, 81), rate(rate_b)), (None, rate())],
+                      [pick, [(cap_b, rate_b), (None, rate(pick[1][1]))]])
+    own_c = [(rng.randrange(30, 81), rate()), (None, rate())]
+    plan_c = new_plan(own_c, [[(own_c[0][0], rate(own_c[0][1])), own_c[1]],
+                              [(rng.randrange(30, 81), rate(own_c[0][1])), (None, rate())]])
+    witness: list[tuple[str, date]] = []
+    span = month_of()
+    one = new_id(lead, 4)
+    split(one, open_meter(one, span[0]), span, rng.randrange(6, cap_t))
+    bill(one, [(*span, plan_a, 0, 0)], {"U1"})
+    witness.append((one, span[0]))
+    span, two = month_of(), new_id(lead, 4)
+    pair = sorted([open_meter(two, span[0]), open_meter(two, span[0])])
+    low = rng.randrange(cap_t // 3, cap_t - 4)
+    high = cap_t - low + rng.randrange(1, 4)
+    split(two, pair[0], span, low)
+    split(two, pair[1], span, high)
+    small = (low + high - cap_t) * fit[1][1] // 100
+    bill(two, [(*span, plan_a, 0, 3 * small + rng.randrange(3, 300))], {"U1"})
+    witness.append((two, span[0]))
+    span, three = month_of(), new_id(lead, 4)
+    split(three, open_meter(three, span[0]), span, cap_t + rng.randrange(2, 20))
+    bill(three, [(*span, plan_a, 0, 0)], {"U1"})
+    for paid_row in (True, False):
+        pair_span, account = months(2), new_id(lead, 4)
+        meter = open_meter(account, pair_span[0][0])
+        first = rng.randrange(5, 15)
+        split(account, meter, pair_span[0], first)
+        split(account, meter, pair_span[1], cap_t + rng.randrange(3, 15))
+        bill(account, [(*pair_span[0], plan_a, 0, first * cents(fit) + rng.randrange(100, 500)),
+                       (*pair_span[1], plan_a, 0, 0)], {"U1", "Q3"}, keep_order=paid_row)
+        if paid_row:
+            witness.append((account, pair_span[1][0]))
+    for account in (new_id(lead, 4), new_id(lead, 4)):
+        span = month_of()
+        split(account, open_meter(account, span[0]), span, rng.randrange(6, cap_b))
+        bill(account, [(*span, plan_b, 0, 0)], {"U1"})
+        witness.append((account, span[0]))
+    span, account = month_of(), new_id(lead, 4)
+    split(account, open_meter(account, span[0]), span, cap_b + rng.randrange(2, 20))
+    bill(account, [(*span, plan_b, 0, 0)], {"U1"})
+    span, account = month_of(), new_id(lead, 4)
+    split(account, open_meter(account, span[0]), span, rng.randrange(6, own_c[0][0]))
+    bill(account, [(*span, plan_c, 0, 0)], {"U1"})
+    witness.append((account, span[0]))
+    span, account = month_of(), new_id(lead, 4)
+    split(account, open_meter(account, span[0]), span, rng.randrange(6, 90))
+    bill(account, [(*span, plan_c, 0, 0)], {"U1"})
+
+    # D1: paid amounts below the previous total
+    plain = new_plan([(rng.randrange(5000, 6001), rate()), (None, rate())])
+    arrears: dict[str, tuple[int, list]] = {}
+    for shape in (0, 1, 2, 3):
+        spans = months(4 if shape < 2 else 3)
+        if shape >= 2:
+            plain = new_plan([(rng.randrange(5000, 6001), rate()), (None, rate())])
+            plans[plain]["changes"] = [(spans[1][0] + timedelta(days=rng.randrange(5, 20)), rng.randrange(1500, 6000))]
+        account = new_id(lead, 4)
+        meter = open_meter(account, spans[0][0])
+        entries = []
+        for index, span in enumerate(spans):
+            quantity = rng.randrange(10, 60)
+            split(account, meter, span, quantity)
+            allow = quantity * cents(plans[plain]["tiers"]) + rng.randrange(100, 600) if shape >= 2 and index == 0 else 0
+            entries.append((*span, plain, 0, allow))
+        bill(account, entries, {"D1", "Q3"} if shape < 2 else {"D1", "Q2", "Q3", "Q4"})
+        arrears[account] = (shape, [span[0] for span in spans])
+
+    # D2: cumulative reads
+    stock = new_plan([(rng.randrange(5000, 6001), rate()), (None, rate())])
+
+    def counts(n, start):
+        values = [start]
+        for _ in range(n - 1):
+            values.append(values[-1] + rng.randrange(5, 60))
+        return values
+
+    for _ in range(2):
+        span, account = month_of(), new_id(lead, 4)
+        meter = meter_rows(account, [(span[0] - timedelta(days=60), None)])
+        bill(account, [(*span, stock, 0, 0)], {"D2"})
+        spots = days((span[0] + timedelta(days=1), span[1]), 5)
+        c1, c2 = counts(2, rng.randrange(100, 5000))
+        c3 = rng.randrange(5, 60)
+        c4 = c3 + rng.randrange(5, 60)
+        read(account, meter, span[0] - timedelta(days=rng.randrange(1, 20)), c1 - rng.randrange(5, 60), cumulative=True)
+        first = read(account, meter, spots[0], c1, cumulative=True)
+        guess = read(account, meter, spots[1], c2 + rng.randrange(5, 60), True, cumulative=True)
+        real = read(account, meter, spots[1], c2, rng.choice([None, False]), cumulative=True)
+        before.append((guess, real))
+        read(account, meter, spots[2], c3, cumulative=True)
+        last = read(account, meter, spots[3], c4, cumulative=True)
+        before.append((last, first))
+        read(account, meter, spots[4], rng.randrange(5, 60))
+    for _ in range(2):
+        spans, account = months(2), new_id(lead, 4)
+        meter = open_meter(account, spans[0][0])
+        bill(account, [(*spans[0], stock, 0, 0), (*spans[1], stock, 0, 0)], {"D2", "Q3"})
+        values = counts(4, rng.randrange(100, 5000))
+        for day, value in zip(days(spans[0], 2) + days(spans[1], 2), values):
+            read(account, meter, day, value, cumulative=True)
+    for _ in range(2):
+        span, account = month_of(), new_id(lead, 4)
+        cut, gap = rng.randrange(8, 12), rng.randrange(4, 7)
+        rows = [(span[0] - timedelta(days=30), span[0] + timedelta(days=cut)),
+                (span[0] + timedelta(days=cut + gap), None)]
+        meter = meter_rows(account, rows if rng.random() < 0.5 else rows[::-1])
+        bill(account, [(*span, stock, 0, 0)], {"D2", "Q5"})
+        c1, c2 = counts(2, rng.randrange(100, 5000))
+        for day, value in zip(days((span[0], rows[0][1]), 2), (c1, c2)):
+            read(account, meter, day, value, cumulative=True)
+        read(account, meter, rows[0][1] + timedelta(days=rng.randrange(1, gap)), c2 + rng.randrange(5, 60), cumulative=True)
+        c3 = rng.randrange(5, 60)
+        for day, value in zip(days((rows[1][0], span[1]), 2), (c3, c3 + rng.randrange(5, 60))):
+            read(account, meter, day, value, cumulative=True)
+
+    rng.shuffle(reads)
+    for one_read, two_read in before:
+        i, j = reads.index(one_read), reads.index(two_read)
+        if i > j:
+            reads[i], reads[j] = two_read, one_read
+
+    def plan_text(name, plan, tiers=None, revisions=None):
+        def listed(values):
+            return "[" + ", ".join("{" + f'"up_to": {"null" if cap is None else cap}, "rate": {_rate_text(r)}' + "}"
+                                   for cap, r in values) + "]"
+        tiers = plan["tiers"] if tiers is None else tiers
+        revisions = plan["revisions"] if revisions is None else revisions
+        extra = ("" if not revisions else
+                 '"revisions": [' + ", ".join('{"tiers": ' + listed(r) + "}" for r in revisions) + "], ")
+        extra += "".join('"standing_changes": [' + ", ".join(
+            f'{{"from": "{when.isoformat()}", "standing_charge": {_amount(c)}}}' for when, c in plan["changes"]) + "], "
+            for _ in [0] if plan["changes"])
+        return (f'    "{name}": {{"standing_charge": {_amount(plan["standing"])}, '
+                f'"credit_rate": {plan["credit"]}, {extra}"tiers": {listed(tiers)}}}')
+
+    def mini(card_lines, pays):
+        return {
+            "meter_reads.jsonl": "".join(_read_line(r) + "\n" for r in reads),
+            "accounts.csv": "account,meter,active_from,active_to\n"
+            + "".join(",".join(row) + "\n" for block in blocks["meters"] for row in block),
+            "billing_periods.csv": "account,start,end,plan,commitment,allowance\n"
+            + "".join(",".join(row) + "\n" for block in blocks["billing"] for row in block),
+            "rate_card.json": '{\n  "currency": "EUR",\n  "plans": {\n' + ",\n".join(card_lines) + "\n  }\n}\n",
+            "payments.csv": "account,start,paid\n" + "".join(f"{a},{s.isoformat()},{_amount(c)}\n" for a, s, c in pays),
+        }
+
+    def totals(document):
+        return {(i["account"], date.fromisoformat(i["period"]["start"])): i for i in document["invoices"]}
+
+    settled = {plan_a: fit, plan_b: pick}
+    variant = [plan_text(n, p, tiers=settled.get(n), revisions=[]) for n, p in plans.items()]
+    real = [plan_text(n, p) for n, p in plans.items()]
+    shown = totals(_Ledger(mini(variant, [])).document())
+    pays = []
+    for account, start in witness:
+        due = _cents_of(shown[(account, start)]["total"])
+        if rng.random() < 0.3 and due > 1:
+            part = rng.randrange(1, due)
+            pays += [(account, start, part), (account, start, due - part)]
+        else:
+            pays.append((account, start, due))
+    for step in range(4):
+        ledger = _Ledger(mini(real, pays))
+        now = totals(ledger.document())
+        for account, (shape, starts) in arrears.items():
+            if step >= len(starts):
+                continue
+            invoice = now[(account, starts[step])]
+            due, sub = _cents_of(invoice["total"]), _cents_of(invoice["subtotal"])
+            rate_c = Fraction(plans[invoice["plan"]]["credit"])
+            if (shape, step) in ((0, 0), (1, 2), (2, 0), (3, 0)):
+                assert due > 1
+                pays.append((account, starts[step], due - rng.randrange(1, min(due, 500))))
+            elif (shape, step) == (0, 1):
+                assert invoice["credit"] == "0.00"
+                credited = _even_cents(Fraction(sub, 100) * (1 - rate_c))
+                assert credited < sub
+                pays.append((account, starts[step], credited))
+            elif (shape, step) == (0, 2):
+                part = rng.randrange(1, due)
+                pays += [(account, starts[step], part), (account, starts[step], due - part)]
+            elif (shape, step) == (1, 1):
+                assert sub - due >= 2
+                pays.append((account, starts[step], due + rng.randrange(1, sub - due)))
+            elif shape >= 2 and step == 1:
+                pays.append((account, starts[step], due))
+    final = _Ledger(mini(real, pays))
+    document = final.document()
+    assert final.chosen.get(plan_a) == final.plans[plan_a]["revisions"][revisions_a.index(fit)]["tiers"]
+    assert plan_b not in final.chosen and plan_c not in final.chosen
+    for off in ({"Q3"}, {"N1"}, {"N3"}):
+        trial = _Ledger(mini(real, pays), frozenset(off))
+        trial.document()
+        assert trial.chosen.get(plan_a) != final.chosen[plan_a], off
+    now = totals(document)
+    expect = {0: ["0.00", "0.00", None], 1: [None, None, "0.00"], 2: ["0.00", None], 3: ["0.00", None]}
+    for account, (shape, starts) in arrears.items():
+        for start, credit in zip(starts[1:], expect[shape]):
+            got = now[(account, start)]["credit"]
+            assert (got == "0.00") if credit else (got != "0.00"), (account, shape, start)
+
+    card = texts["rate_card.json"]
+    assert card.endswith("\n  }\n}\n")
+    card = card[:-len("\n  }\n}\n")] + "".join(",\n" + line for line in real) + "\n  }\n}\n"
+
+    def merged(text: str, lines: list[str], head: bool) -> str:
+        body = text.splitlines(keepends=True)
+        top, body = (body[:1], body[1:]) if head else ([], body)
+        slots = set(rng.sample(range(len(body) + len(lines)), len(lines)))
+        out, old, new = [], iter(body), iter(lines)
+        for index in range(len(body) + len(lines)):
+            out.append(next(new) if index in slots else next(old))
+        return "".join(top + out)
+
+    def flat(name):
+        chosen = rng.sample(blocks[name], len(blocks[name]))
+        return [",".join(row) + "\n" for block in chosen for row in block]
+
+    rng.shuffle(pays)
+    planted = {
+        "meter_reads.jsonl": merged(texts["meter_reads.jsonl"], [_read_line(r) + "\n" for r in reads], False),
+        "accounts.csv": merged(texts["accounts.csv"], flat("meters"), True),
+        "billing_periods.csv": merged(texts["billing_periods.csv"], flat("billing"), True),
+        "rate_card.json": card,
+        "payments.csv": "account,start,paid\n" + "".join(f"{a},{s.isoformat()},{_amount(c)}\n" for a, s, c in pays),
+    }
+    return planted, labels, document
+
+
+def _assert_levers(texts: dict[str, str], planted: dict[str, str], labels: dict[str, frozenset],
+                   alone: dict[str, Any]) -> None:
+    def part(document, keep):
+        return ([i for i in document["invoices"] if keep(i["account"])],
+                [r for r in document["exceptions"] if keep(r["account"])])
+
+    document = _Ledger(planted).document()
+    assert part(document, lambda a: a not in labels) == part(_Ledger(texts).document(), lambda a: True)
+    assert part(document, lambda a: a in labels) == part(alone, lambda a: True)
+    for rule, offs in (("U1", ("U1", "U1first", "U1nofit")), ("D1", ("D1",)), ("D2", ("D2",))):
+        moved, each = set(), []
+        for flag in offs:
+            off = _Ledger(planted, frozenset({flag})).document()
+            step = {a for a in labels if part(off, lambda x: x == a) != part(document, lambda x: x == a)}
+            each.append(step)
+            moved |= step
+        assert all(each), rule
+        assert moved == {a for a, kinds in labels.items() if rule in kinds}, (rule, sorted(moved))
+    for flag in ("D1zero", "D2row", "D2file", "D2any"):
+        off = _Ledger(planted, frozenset({flag})).document()
+        assert part(off, lambda a: a in labels) != part(document, lambda a: a in labels), flag
+    for group, kinds in _LEVER_GROUPS.items():
+        assert sum(label == kinds for label in labels.values()) >= 2, group
+
+
+def _levers(texts: dict[str, str], labels: dict[str, frozenset], seed: int) -> tuple[dict[str, str], dict[str, frozenset]]:
+    for attempt in range(40):
+        rng = random.Random(seed * 37 + 11 + 1000003 * attempt)
+        try:
+            planted, extra, alone = _levers_once(texts, rng)
+            _assert_levers(texts, planted, extra, alone)
+            return planted, {**labels, **extra}
+        except AssertionError:
+            if attempt == 39:
+                raise
+    raise AssertionError(seed)
+
+
+def _quiet_corpus(corpus: str) -> tuple[dict[str, str], dict[str, frozenset]]:
+    seed = _QUIET_SEEDS[corpus]
+    return _memo(f"quiet:{corpus}", lambda: _levers(*_quiet(_base_texts(corpus), seed), seed))
+
+
+def _corpus_texts(corpus: str) -> dict[str, str]:
+    return _quiet_corpus(corpus)[0]
+
+
+def _owned(corpus: str) -> dict[str, frozenset]:
+    return {} if corpus == "shipped" else _quiet_corpus(corpus)[1]
+
+
+def _base_texts(corpus: str) -> dict[str, str]:
+    def build() -> dict[str, str]:
+        if corpus == "fresh":
+            return _corpus(H1_SEED, 30, REUSED_IDS, frozenset({"N1", "N2"}))[0]
+        if corpus == "rescaled":
+            texts, info = _memo("fresh-info", lambda: _corpus(H1_SEED, 30, REUSED_IDS, frozenset({"N1", "N2"})))
+            return _rescaled(texts, info, H1_SEED + 1)
+        if corpus == "relocated":
+            return _corpus(H3_SEED, 24, (), frozenset({"N1", "N3"}))[0]
+        if corpus == "rotated":
+            return _rotated(_base_texts("relocated"), H3_SEED + 1)
+        if corpus == "api":
+            return _corpus(H5_SEED, 45, (), frozenset({"N2", "N3"}))[0]
+        if corpus == "recoded":
+            return _memo("recoded-info", lambda: _corpus(H7_SEED, 30, (), frozenset({"L11"})))[0]
+        if corpus == "renamed":
+            texts, info = _memo("recoded-info", lambda: _corpus(H7_SEED, 30, (), frozenset({"L11"})))
+            out = _renamed(texts, info, H7_SEED + 1)
+            _assert_bounds(out, info)
+            return out
+        raise KeyError(corpus)
+    return _memo(f"base:{corpus}", build)
+
+
+def _write_corpus(target: str) -> None:
+    for corpus in ("fresh", "rescaled", "relocated", "rotated", "api", "recoded", "renamed"):
+        _write_texts(_corpus_texts(corpus), Path(target) / corpus)
+
+
+# ---------------------------------------------------------------- owned rows
+
+def _by_account(document: dict[str, Any], owned: Any = ()) -> dict[str, dict[str, Any]]:
+    invoices = document["invoices"]
+    assert isinstance(invoices, list)
+    return {invoice["account"]: invoice for invoice in invoices if invoice.get("account") not in owned}
+
+
+def _same(a: Any, b: Any) -> bool:
+    return json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
+
+
+def _lines_of(invoice: dict[str, Any], kinds: tuple[str, ...]) -> list[Any]:
+    return [line for line in invoice["lines"] if line.get("kind") in kinds]
+
+
+def _got(corpus: str) -> dict[str, Any]:
+    return _delivered(corpus) if corpus != "shipped" else _shipped_delivered()
+
+
+def _check_lines(corpus: str, kinds: tuple[str, ...]) -> None:
+    owned = _owned(corpus)
+    want = _by_account(_expected(corpus), owned)
+    got = _by_account(_got(corpus), owned)
+    assert list(got) == list(want), "invoice accounts or order differ"
+    wrong = [a for a in want if not _same(_lines_of(got[a], kinds), _lines_of(want[a], kinds))]
+    assert not wrong, f"{len(wrong)} invoices with wrong {'/'.join(kinds)} lines, first {wrong[0]}"
+
+
+def _check_heads(corpus: str) -> None:
+    owned = _owned(corpus)
+    want = _by_account(_expected(corpus), owned)
+    got = _by_account(_delivered(corpus), owned)
+    assert list(got) == list(want), "invoice accounts or order differ"
+    keys = ["account", "period", "plan", "subtotal"]
+    wrong = [a for a in want
+             if set(got[a]) != set(want[a]) or not _same([got[a][k] for k in keys], [want[a][k] for k in keys])]
+    assert not wrong, f"{len(wrong)} invoices with wrong heads or subtotals, first {wrong[0]}"
+
+
+def _check_settlement(corpus: str) -> None:
+    owned = _owned(corpus)
+    want = _by_account(_expected(corpus), owned)
+    got = _by_account(_got(corpus), owned)
+    assert list(got) == list(want), "invoice accounts or order differ"
+    keys = ["credit", "total"] if corpus != "shipped" else ["subtotal", "credit", "total"]
+    wrong = [a for a in want if not _same([got[a][k] for k in keys], [want[a][k] for k in keys])]
+    assert not wrong, f"{len(wrong)} invoices with wrong {'/'.join(keys)}, first {wrong[0]}"
+
+
+def _rows_of(document: dict[str, Any], accounts: Any, keep: bool) -> list[Any]:
+    rows = document["exceptions"]
+    assert isinstance(rows, list)
+    return [row for row in rows if isinstance(row, dict) and (row.get("account") in accounts) == keep]
+
+
+def _check_exceptions(corpus: str) -> None:
+    owned = _owned(corpus)
+    got, want = _rows_of(_got(corpus), owned, False), _rows_of(_expected(corpus), owned, False)
+    assert _same(got, want), "exception list differs"
+
+
+def _check_owned(group: str, corpora: tuple[str, ...]) -> None:
+    for corpus in corpora:
+        labels = _owned(corpus)
+        if group in _GROUPS:
+            mine = {a for a, label in labels.items() if label == _GROUPS[group]}
+        else:
+            mine = {a for a, label in labels.items() if label not in _GROUPS.values()}
+        assert len(mine) >= 2, f"{corpus}: fewer than two {group} accounts"
+        got, want = _got(corpus), _expected(corpus)
+        for account in sorted(mine):
+            mine_got = [i for i in got["invoices"] if isinstance(i, dict) and i.get("account") == account]
+            mine_want = [i for i in want["invoices"] if i["account"] == account]
+            assert _same(mine_got, mine_want), f"{corpus}: invoices of {account} differ"
+        assert _same(_rows_of(got, mine, True), _rows_of(want, mine, True)), f"{corpus}: exception rows of {group} accounts differ"
+        order = [i.get("account") for i in got["invoices"] if isinstance(i, dict) and i.get("account") in mine]
+        assert order == [i["account"] for i in want["invoices"] if i["account"] in mine], f"{corpus}: {group} invoice order differs"
+
+
+# ---------------------------------------------------------------- deliverable checks
+
+def _shipped_repo_files() -> list[str]:
+    return sorted(rel.removeprefix("repo/") for rel in _SHIPPED_DATA if rel.startswith("repo/"))
+
+
+def _check_archive_and_metadata() -> None:
+    config = json.loads((_data_dir() / "ci" / "build_config.json").read_text())["archive"]
+    manifest = json.loads((_data_dir() / "ci" / "package_manifest.json").read_text())
+    method = {"stored": zipfile.ZIP_STORED, "deflated": zipfile.ZIP_DEFLATED}[config["compression"]]
+    with zipfile.ZipFile(_artifact("patched-repo.zip")) as zf:
+        infos = zf.infolist()
+    names = [info.filename for info in infos]
+    assert names == sorted(names), "members are not sorted"
+    assert not any(n.endswith("/") or "__pycache__" in n or n.endswith(".pyc") for n in names), "stray members"
+    assert set(_shipped_repo_files()) <= set(names), "a repository file is missing"
+    for info in infos:
+        assert info.date_time == tuple(config["timestamp"]), info.filename
+        assert info.compress_type == method, info.filename
+        assert (info.external_attr >> 16) & 0o777 == int(config["mode"], 8), info.filename
+    project = tomllib.loads((_repo() / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    assert project["version"] == manifest["version"], "pyproject version"
+    assert project["requires-python"] == manifest["requires_python"], "requires-python"
+    assert project["dependencies"] == [], "dependencies"
+    done = _run([sys.executable, "-B", "-c", "import tariff; print(repr(tariff.VERSION))"], _env(_repo()), _scratch("cwd-"))
+    assert done.returncode == 0 and done.stdout.strip() == repr(manifest["version"]), "tariff.VERSION"
+    for path in sorted((_repo() / "src" / "tariff").rglob("*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Import):
+                roots = [alias.name.split(".")[0] for alias in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.level == 0:
+                roots = [(node.module or "").split(".")[0]]
+            else:
+                continue
+            for root in roots:
+                assert root == "tariff" or root in sys.stdlib_module_names, f"{path.name} imports {root}"
+                assert root not in {"socket", "urllib", "http", "ssl", "ftplib", "smtplib", "sitecustomize"}, root
+
+
+def _check_visible_tests_pass() -> None:
+    repo = _repo()
+    done = _run([sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"],
+                _env(repo), repo)
+    assert done.returncode == 0, done.stderr[-600:]
+    assert "Ran 0 tests" not in done.stderr
+
+
+def _test_functions(text: str) -> dict[str, str]:
+    found = {}
+    for node in ast.walk(ast.parse(text)):
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
+            found[node.name] = ast.dump(node)
+    return found
+
+
+def _visible_texts() -> tuple[str, str]:
+    shipped = (_data_dir() / "repo" / "tests" / "test_visible.py").read_text(encoding="utf-8")
+    delivered = (_repo() / "tests" / "test_visible.py").read_text(encoding="utf-8")
+    return shipped, delivered
+
+
+def _check_corrected_tests() -> None:
+    shipped, delivered = (_test_functions(text) for text in _visible_texts())
+    changed = sorted(name for name in shipped if name in delivered and delivered[name] != shipped[name])
+    fixes = _load_json("test_fixes.json")
+    listed = fixes["corrected_tests"]
+    assert isinstance(listed, list) and listed == sorted(listed), "corrected_tests must be a sorted list"
+    assert set(CORRECTED) <= set(listed) and set(listed) <= set(changed), f"corrected_tests {listed} vs changed {changed}"
+    assert fixes["visible_tests_preserved"] is True
+
+
+def _case_texts(case: dict[str, Any], card: str) -> dict[str, str]:
+    meters = "".join(f"{case['account']},{m['meter']},{m['active_from']},{m['active_to']}\n" for m in case["meters"])
+    period = case["period"]
+    return {
+        "meter_reads.jsonl": "".join(json.dumps(read) + "\n" for read in case["reads"]),
+        "accounts.csv": "account,meter,active_from,active_to\n" + meters,
+        "billing_periods.csv": "account,start,end,plan,commitment,allowance\n"
+        + f"{case['account']},{period['start']},{period['end']},{case['plan']},{case['commitment']},"
+        + f"{case['allowance']}\n",
+        "rate_card.json": card,
+    }
+
+
+def _check_regression_rows() -> None:
+    ci = _data_dir() / "ci"
+    card = (ci / "rate_card.json").read_text(encoding="utf-8")
+    rows = []
+    for line in (ci / "regression_cases.jsonl").read_text(encoding="utf-8").splitlines():
+        case = json.loads(line)
+        total = _Ledger(_case_texts(case, card)).document()["invoices"][0]["total"]
+        rows.append({"name": case["name"], "expected": case["customer_claim"], "actual": total,
+                     "passed": total == case["customer_claim"]})
+    fixes = _load_json("test_fixes.json")
+    assert _same(fixes["regression_cases"], rows), "regression rows differ"
+    assert fixes["all_regressions_passed"] is all(row["passed"] for row in rows)
+
+
+def _lint_errors(module: str) -> int:
+    report = json.loads((_data_dir() / "ci" / "lint_report.json").read_text())
+    return sum(1 for issue in report["issues"]
+               if issue["module"] == f"tariff.{module}" and issue["severity"] == "error")
+
+
+def _strings(value: Any) -> bool:
+    return isinstance(value, list) and bool(value) and all(isinstance(v, str) and v.strip() for v in value)
+
+
+def _check_module_notes() -> None:
+    extras = {"core": "validations", "parser": "contract_terms", "report": "deterministic"}
+    for module, extra in extras.items():
+        note = _load_json(f"module_{module}.json")
+        assert set(note) == {"module", "status", "fixes", "lint_errors", extra}, module
+        assert note["module"] == module and note["status"] == "fixed" and _strings(note["fixes"]), module
+        assert type(note["lint_errors"]) is int and note["lint_errors"] == _lint_errors(module), module
+    assert _strings(_load_json("module_core.json")["validations"])
+    assert _load_json("module_parser.json")["contract_terms"] == ["VERSION", "build_invoices", "render"]
+    assert _load_json("module_report.json")["deterministic"] is True
+
+
+def _check_summary() -> None:
+    summary = _load_json("summary.json")
+    inputs = sorted({rel.split("/")[1] for rel in _SHIPPED_DATA if rel.startswith("ci/")})
+    assert set(summary) == {"package", "status", "inputs_used", "artifacts", "artifact_count", "stdlib_only"}
+    assert summary["package"] == "tariff" and summary["status"] == "complete"
+    assert summary["inputs_used"] == inputs and summary["artifacts"] == ARTIFACTS
+    assert type(summary["artifact_count"]) is int and summary["artifact_count"] == 7
+    assert summary["stdlib_only"] is True
+
+
+def _previously_failing() -> list[str]:
+    names = set()
+    for line in (_data_dir() / "ci" / "failing_tests.log").read_text(encoding="utf-8").splitlines():
+        if line.startswith("test_") and (line.endswith(" ... FAIL") or line.endswith(" ... ERROR")):
+            names.add(line.split()[0].removeprefix("test_"))
+    return sorted(names)
+
+
+def _check_repair_report() -> None:
+    report = _load_json("repair-report.json")
+    assert report["package"] == "tariff" and _strings(report["fixes"])
+    checks = report["checks"]
+    assert isinstance(checks, list) and checks
+    assert all(set(c) == {"name", "passed"} and isinstance(c["name"], str) and type(c["passed"]) is bool for c in checks)
+    assert any(c["passed"] is True for c in checks)
+    assert _load_json("test_fixes.json")["previously_failing"] == _previously_failing()
+
+
+def _check_missing_source() -> None:
+    data = _write_texts(_corpus_texts("fresh"), _scratch("missing-") / "data")
+    (data / "meter_reads.jsonl").unlink()
+    (data / "billing_periods.csv").unlink()
+    done = _cli(_open_tree(data))
+    assert done.returncode == 2, done.returncode
+    assert done.stdout == "", "standard output must stay empty"
+    assert done.stderr.strip() == "missing input: meter_reads.jsonl", done.stderr[-200:]
+
+
+def _check_two_runs() -> None:
+    data = _open_tree(_write_texts(_corpus_texts("fresh"), _scratch("twice-") / "data"))
+    first, second = _cli(data), _cli(data)
+    assert first.returncode == 0 and second.returncode == 0
+    assert first.stdout == second.stdout and first.stdout.strip()
+
+
+def _shipped_invoice_reused() -> bool:
+    shipped = _by_account(_expected("shipped"))
+    hidden = _by_account(_delivered("fresh"))
+    return any(a in shipped and a in hidden and _same(hidden[a], shipped[a]) for a in REUSED_IDS)
+
+
+def _visible_test_removed() -> bool:
+    shipped, delivered = _visible_texts()
+    if set(_test_functions(shipped)) - set(_test_functions(delivered)):
+        return True
+    tree = ast.parse(delivered)
+    for node in ast.walk(tree):
+        name = node.attr if isinstance(node, ast.Attribute) else node.id if isinstance(node, ast.Name) else ""
+        if name in {"skip", "skipIf", "skipUnless", "skipTest", "SkipTest", "expectedFailure"}:
+            return True
+    return False
+
+
+def _holds(check) -> bool:
+    try:
+        check()
+        return True
+    except Exception:
+        return False
+
+
+def _fires(probe) -> bool:
+    try:
+        return bool(probe())
+    except Exception:
+        return False
+
+
+if __name__ == "__main__":
+    _write_corpus(sys.argv[1])
+
+
+# ---------------------------------------------------------------- criteria
+
+@criterion(description="patched-repo.zip follows build_config.json and the repaired metadata matches package_manifest.json")
+def archive_and_metadata_follow_build_config(workspace: Path) -> bool:
+    return _holds(_check_archive_and_metadata)
+
+
+@criterion(description="The delivered tests/test_visible.py passes against the delivered package")
+def delivered_visible_tests_pass(workspace: Path) -> bool:
+    return _holds(_check_visible_tests_pass)
+
+
+@criterion(description="test_fixes.json corrected_tests names the changed visible tests, including both contradicting ones")
+def corrected_tests_name_the_changed_tests(workspace: Path) -> bool:
+    return _holds(_check_corrected_tests)
+
+
+@criterion(description="Every regression_cases row carries the contract total of its case")
+def regression_rows_match_contract(workspace: Path) -> bool:
+    return _holds(_check_regression_rows)
+
+
+@criterion(description="The three module notes carry the stated keys, lint error counts and extras")
+def module_notes_follow_contract(workspace: Path) -> bool:
+    return _holds(_check_module_notes)
+
+
+@criterion(description="summary.json lists every /app/ci file and the seven artifacts in task order")
+def summary_lists_inputs_and_artifacts(workspace: Path) -> bool:
+    return _holds(_check_summary)
+
+
+@criterion(description="repair-report.json has its stated shape and previously_failing matches failing_tests.log")
+def repair_report_and_failing_cases(workspace: Path) -> bool:
+    return _holds(_check_repair_report)
+
+
+@criterion(description="The exception list for the shipped /app/ci files is exact")
+def shipped_exceptions_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_exceptions("shipped"))
+
+
+@criterion(description="Every standing line for the shipped /app/ci files is exact")
+def shipped_standing_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("shipped", ("standing",)))
+
+
+@criterion(description="Every energy line, subtotal, credit and total for the shipped /app/ci files is exact")
+def shipped_energy_and_settlement_exact(workspace: Path) -> bool:
+    return _holds(lambda: (_check_lines("shipped", ("energy",)), _check_settlement("shipped")))
+
+
+@criterion(description="The exception list for a fresh corpus of other periods is exact")
+def fresh_exceptions_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_exceptions("fresh"))
+
+
+@criterion(description="Every energy line for a fresh corpus of other periods is exact")
+def fresh_energy_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("fresh", ("energy",)))
+
+
+@criterion(description="Every standing line for a fresh corpus of other periods is exact")
+def fresh_standing_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("fresh", ("standing",)))
+
+
+@criterion(description="Every invoice head and subtotal for a fresh corpus of other periods is exact")
+def fresh_subtotals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_heads("fresh"))
+
+
+@criterion(description="Every credit and total for a fresh corpus of other periods is exact")
+def fresh_credits_and_totals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_settlement("fresh"))
+
+
+@criterion(description="Every energy line is exact on the fresh corpus with rows shuffled and one rate scaled by 1.0375")
+def rescaled_energy_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("rescaled", ("energy",)))
+
+
+@criterion(description="Every standing line is exact on the shuffled, rescaled corpus")
+def rescaled_standing_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("rescaled", ("standing",)))
+
+
+@criterion(description="Every invoice head and subtotal is exact on the shuffled, rescaled corpus")
+def rescaled_subtotals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_heads("rescaled"))
+
+
+@criterion(description="Every credit and total is exact on the shuffled, rescaled corpus")
+def rescaled_credits_and_totals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_settlement("rescaled"))
+
+
+@criterion(description="Every line is exact on a second corpus run from relocated copies with python -I in a foreign directory")
+def relocated_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("relocated", ("energy", "standing")))
+
+
+@criterion(description="Every invoice head and subtotal is exact on the relocated corpus")
+def relocated_subtotals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_heads("relocated"))
+
+
+@criterion(description="Every credit and total is exact on the relocated corpus")
+def relocated_credits_and_totals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_settlement("relocated"))
+
+
+@criterion(description="Every line is exact on a corpus whose billing rows name some plans by another value")
+def recoded_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("recoded", ("energy", "standing")))
+
+
+@criterion(description="Every invoice head and subtotal is exact on the recoded corpus")
+def recoded_subtotals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_heads("recoded"))
+
+
+@criterion(description="Every credit and total is exact on the recoded corpus")
+def recoded_credits_and_totals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_settlement("recoded"))
+
+
+@criterion(description="Every line is exact on the recoded corpus with its values renamed and its rows rotated")
+def renamed_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("renamed", ("energy", "standing")))
+
+
+@criterion(description="Every invoice head and subtotal is exact on the renamed corpus")
+def renamed_subtotals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_heads("renamed"))
+
+
+@criterion(description="Every credit and total is exact on the renamed corpus")
+def renamed_credits_and_totals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_settlement("renamed"))
+
+
+@criterion(description="Every line is exact on the relocated corpus with the rows of every file rotated")
+def rotated_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("rotated", ("energy", "standing")))
+
+
+@criterion(description="Every invoice head and subtotal is exact on the rotated corpus")
+def rotated_subtotals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_heads("rotated"))
+
+
+@criterion(description="Every credit and total is exact on the rotated corpus")
+def rotated_credits_and_totals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_settlement("rotated"))
+
+
+@criterion(description="Every energy line is exact on a larger corpus read through tariff.build_invoices")
+def api_energy_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("api", ("energy",)))
+
+
+@criterion(description="Every standing line is exact on the build_invoices corpus")
+def api_standing_lines_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_lines("api", ("standing",)))
+
+
+@criterion(description="Every invoice head and subtotal is exact on the build_invoices corpus")
+def api_subtotals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_heads("api"))
+
+
+@criterion(description="Every credit and total is exact on the build_invoices corpus")
+def api_credits_and_totals_exact(workspace: Path) -> bool:
+    return _holds(lambda: _check_settlement("api"))
+
+
+@criterion(description="Invoices and exceptions of accounts with estimated reads are exact on the fresh and rescaled corpora")
+def estimated_read_accounts_on_fresh_rescaled(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("estimated", ('fresh', 'rescaled')))
+
+
+@criterion(description="Invoices and exceptions of accounts with estimated reads are exact on the relocated and rotated corpora")
+def estimated_read_accounts_on_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("estimated", ('relocated', 'rotated')))
+
+
+@criterion(description="Invoices and exceptions of accounts with estimated reads are exact on the api, recoded and renamed corpora")
+def estimated_read_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("estimated", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices of accounts on plans with standing changes are exact on the fresh and rescaled corpora")
+def standing_change_accounts_on_fresh_rescaled(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("standing_changes", ('fresh', 'rescaled')))
+
+
+@criterion(description="Invoices of accounts on plans with standing changes are exact on the relocated and rotated corpora")
+def standing_change_accounts_on_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("standing_changes", ('relocated', 'rotated')))
+
+
+@criterion(description="Invoices of accounts on plans with standing changes are exact on the api, recoded and renamed corpora")
+def standing_change_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("standing_changes", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices and exceptions of meters with several account rows are exact on the fresh and rescaled corpora")
+def meter_row_accounts_on_fresh_rescaled(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("meter_rows", ('fresh', 'rescaled')))
+
+
+@criterion(description="Invoices and exceptions of meters with several account rows are exact on the relocated and rotated corpora")
+def meter_row_accounts_on_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("meter_rows", ('relocated', 'rotated')))
+
+
+@criterion(description="Invoices and exceptions of meters with several account rows are exact on the api, recoded and renamed corpora")
+def meter_row_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("meter_rows", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices and exceptions of accounts with several billing rows are exact on the fresh, rescaled, relocated and rotated corpora")
+def billing_row_accounts_on_fresh_rescaled_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("billing_rows", ('fresh', 'rescaled', 'relocated', 'rotated')))
+
+
+@criterion(description="Invoices and exceptions of accounts with several billing rows are exact on the api, recoded and renamed corpora")
+def billing_row_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("billing_rows", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices of accounts whose unused allowance moves to a later row are exact on the fresh, rescaled, relocated and rotated corpora")
+def carried_allowance_accounts_on_fresh_rescaled_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("allowance_carried", ('fresh', 'rescaled', 'relocated', 'rotated')))
+
+
+@criterion(description="Invoices of accounts whose unused allowance moves to a later row are exact on the api, recoded and renamed corpora")
+def carried_allowance_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("allowance_carried", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices and exceptions of accounts combining two of these row forms are exact on the fresh, rescaled, relocated and rotated corpora")
+def combined_row_accounts_on_fresh_rescaled_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("pairs", ('fresh', 'rescaled', 'relocated', 'rotated')))
+
+
+@criterion(description="Invoices and exceptions of accounts combining two of these row forms are exact on the api, recoded and renamed corpora")
+def combined_row_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("pairs", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices of accounts on plans with revisions are exact on the fresh and rescaled corpora")
+def revision_accounts_on_fresh_rescaled(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("revision", ('fresh', 'rescaled')))
+
+
+@criterion(description="Invoices of accounts on plans with revisions are exact on the relocated and rotated corpora")
+def revision_accounts_on_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("revision", ('relocated', 'rotated')))
+
+
+@criterion(description="Invoices of accounts on plans with revisions are exact on the api, recoded and renamed corpora")
+def revision_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("revision", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices of accounts with several billing rows on plans with revisions are exact on the fresh, rescaled, relocated and rotated corpora")
+def revision_row_accounts_on_fresh_rescaled_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("revision_rows", ('fresh', 'rescaled', 'relocated', 'rotated')))
+
+
+@criterion(description="Invoices of accounts with several billing rows on plans with revisions are exact on the api, recoded and renamed corpora")
+def revision_row_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("revision_rows", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices of accounts with paid amounts on several billing rows are exact on the fresh and rescaled corpora")
+def arrears_accounts_on_fresh_rescaled(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("arrears", ('fresh', 'rescaled')))
+
+
+@criterion(description="Invoices of accounts with paid amounts on several billing rows are exact on the relocated and rotated corpora")
+def arrears_accounts_on_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("arrears", ('relocated', 'rotated')))
+
+
+@criterion(description="Invoices of accounts with paid amounts on several billing rows are exact on the api, recoded and renamed corpora")
+def arrears_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("arrears", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices of accounts with paid amounts and allowance moved to a later row are exact on the fresh, rescaled, relocated and rotated corpora")
+def arrears_carried_accounts_on_fresh_rescaled_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("arrears_carried", ('fresh', 'rescaled', 'relocated', 'rotated')))
+
+
+@criterion(description="Invoices of accounts with paid amounts and allowance moved to a later row are exact on the api, recoded and renamed corpora")
+def arrears_carried_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("arrears_carried", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices and exceptions of accounts with cumulative reads are exact on the fresh and rescaled corpora")
+def cumulative_read_accounts_on_fresh_rescaled(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("cumulative", ('fresh', 'rescaled')))
+
+
+@criterion(description="Invoices and exceptions of accounts with cumulative reads are exact on the relocated and rotated corpora")
+def cumulative_read_accounts_on_relocated_rotated(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("cumulative", ('relocated', 'rotated')))
+
+
+@criterion(description="Invoices and exceptions of accounts with cumulative reads are exact on the api, recoded and renamed corpora")
+def cumulative_read_accounts_on_api_recoded_renamed(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("cumulative", ('api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices and exceptions of accounts with cumulative reads on several billing rows are exact on every hidden corpus")
+def cumulative_row_accounts_on_all(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("cumulative_rows", ('fresh', 'rescaled', 'relocated', 'rotated', 'api', 'recoded', 'renamed')))
+
+
+@criterion(description="Invoices and exceptions of accounts with cumulative reads on meters with several account rows are exact on every hidden corpus")
+def cumulative_meter_row_accounts_on_all(workspace: Path) -> bool:
+    return _holds(lambda: _check_owned("cumulative_meter_rows", ('fresh', 'rescaled', 'relocated', 'rotated', 'api', 'recoded', 'renamed')))
+
+
+@criterion(description="With input files deleted the command names the first missing one, prints nothing and exits 2")
+def missing_source_is_named(workspace: Path) -> bool:
+    return _holds(_check_missing_source)
+
+
+@criterion(description="Two runs on the same fresh corpus print identical documents")
+def two_runs_are_identical(workspace: Path) -> bool:
+    return _holds(_check_two_runs)
+
+
+@criterion(description="Penalty: an invoice for a reused account id on a fresh corpus repeats its shipped invoice")
+def negative_hardcoded_sample_answers(workspace: Path) -> bool:
+    # True means the cheat happened: the package returned stored shipped invoices for other inputs.
+    return _fires(_shipped_invoice_reused)
+
+
+@criterion(description="Penalty: a shipped visible test function is missing or skipped in the delivered tests")
+def negative_visible_test_removed(workspace: Path) -> bool:
+    # True means the cheat happened: a visible test was deleted, renamed or skipped.
+    return _fires(_visible_test_removed)
+
+
+criteria.archive_and_metadata_follow_build_config(weight=3)
+criteria.delivered_visible_tests_pass(weight=3)
+criteria.corrected_tests_name_the_changed_tests(weight=3)
+criteria.regression_rows_match_contract(weight=3)
+criteria.module_notes_follow_contract(weight=1)
+criteria.summary_lists_inputs_and_artifacts(weight=1)
+criteria.repair_report_and_failing_cases(weight=1)
+criteria.shipped_exceptions_exact(weight=3)
+criteria.shipped_standing_lines_exact(weight=5)
+criteria.shipped_energy_and_settlement_exact(weight=5)
+criteria.fresh_exceptions_exact(weight=3)
+criteria.fresh_energy_lines_exact(weight=5)
+criteria.fresh_standing_lines_exact(weight=5)
+criteria.fresh_subtotals_exact(weight=5)
+criteria.fresh_credits_and_totals_exact(weight=5)
+criteria.rescaled_energy_lines_exact(weight=5)
+criteria.rescaled_standing_lines_exact(weight=5)
+criteria.rescaled_subtotals_exact(weight=5)
+criteria.rescaled_credits_and_totals_exact(weight=5)
+criteria.relocated_lines_exact(weight=5)
+criteria.relocated_subtotals_exact(weight=5)
+criteria.relocated_credits_and_totals_exact(weight=5)
+criteria.rotated_lines_exact(weight=5)
+criteria.rotated_subtotals_exact(weight=5)
+criteria.rotated_credits_and_totals_exact(weight=5)
+criteria.recoded_lines_exact(weight=5)
+criteria.recoded_subtotals_exact(weight=5)
+criteria.recoded_credits_and_totals_exact(weight=5)
+criteria.renamed_lines_exact(weight=5)
+criteria.renamed_subtotals_exact(weight=5)
+criteria.renamed_credits_and_totals_exact(weight=5)
+criteria.api_energy_lines_exact(weight=5)
+criteria.api_standing_lines_exact(weight=5)
+criteria.api_subtotals_exact(weight=5)
+criteria.api_credits_and_totals_exact(weight=5)
+criteria.estimated_read_accounts_on_fresh_rescaled(weight=5)
+criteria.estimated_read_accounts_on_relocated_rotated(weight=5)
+criteria.estimated_read_accounts_on_api_recoded_renamed(weight=5)
+criteria.standing_change_accounts_on_fresh_rescaled(weight=5)
+criteria.standing_change_accounts_on_relocated_rotated(weight=5)
+criteria.standing_change_accounts_on_api_recoded_renamed(weight=5)
+criteria.meter_row_accounts_on_fresh_rescaled(weight=5)
+criteria.meter_row_accounts_on_relocated_rotated(weight=5)
+criteria.meter_row_accounts_on_api_recoded_renamed(weight=5)
+criteria.billing_row_accounts_on_fresh_rescaled_relocated_rotated(weight=5)
+criteria.billing_row_accounts_on_api_recoded_renamed(weight=5)
+criteria.carried_allowance_accounts_on_fresh_rescaled_relocated_rotated(weight=5)
+criteria.carried_allowance_accounts_on_api_recoded_renamed(weight=3)
+criteria.combined_row_accounts_on_fresh_rescaled_relocated_rotated(weight=3)
+criteria.combined_row_accounts_on_api_recoded_renamed(weight=3)
+criteria.revision_accounts_on_fresh_rescaled(weight=5)
+criteria.revision_accounts_on_relocated_rotated(weight=5)
+criteria.revision_accounts_on_api_recoded_renamed(weight=5)
+criteria.revision_row_accounts_on_fresh_rescaled_relocated_rotated(weight=5)
+criteria.revision_row_accounts_on_api_recoded_renamed(weight=5)
+criteria.arrears_accounts_on_fresh_rescaled(weight=5)
+criteria.arrears_accounts_on_relocated_rotated(weight=5)
+criteria.arrears_accounts_on_api_recoded_renamed(weight=5)
+criteria.arrears_carried_accounts_on_fresh_rescaled_relocated_rotated(weight=5)
+criteria.arrears_carried_accounts_on_api_recoded_renamed(weight=5)
+criteria.cumulative_read_accounts_on_fresh_rescaled(weight=5)
+criteria.cumulative_read_accounts_on_relocated_rotated(weight=5)
+criteria.cumulative_read_accounts_on_api_recoded_renamed(weight=5)
+criteria.cumulative_row_accounts_on_all(weight=5)
+criteria.cumulative_meter_row_accounts_on_all(weight=5)
+criteria.missing_source_is_named(weight=3)
+criteria.two_runs_are_identical(weight=3)
+criteria.negative_hardcoded_sample_answers(weight=-5)
+criteria.negative_visible_test_removed(weight=-3)

@@ -1,0 +1,61 @@
+$ python3 -c "import ast,sys; ast.parse(open(sys.argv[1]).read())" H/scripts/master_queue.py
+exit 0
+$ python3 H/scripts/master_queue.py --help
+usage: master_queue.py [-h]
+                       {add,status,start,stop,resume,pause,cancel,set-max,render,scores,refinalize,dry-run,runner} ...
+
+Master run queue for route B: OpenHands on Claude, judge on Codex.
+
+Keeps up to N tasks from a FIFO queue running through scripts/anubis-run
+(openhands-sdk on claude-opus-5 via the Claude subscription bridge, judge
+gpt-5.6-sol via the Codex bridge, on a task copy staged by
+scripts/kiro_oauth/stage_task.py), records every attempt (start, finish,
+score, failure) in .master-queue/state.json, and re-renders the AUTO blocks of
+MASTER_RUN_LEDGER.md after every change. Runs recorded before route B used the
+Kiro route (scripts/run-with-kiro-subscription.sh).
+
+    .venv/bin/python scripts/master_queue.py add PATH [PATH ...]   # copy to Tasks_INPUT, queue, start runner
+    .venv/bin/python scripts/master_queue.py status
+    .venv/bin/python scripts/master_queue.py start | stop | resume
+    .venv/bin/python scripts/master_queue.py cancel TASK
+    .venv/bin/python scripts/master_queue.py set-max N
+    .venv/bin/python scripts/master_queue.py render
+    .venv/bin/python scripts/master_queue.py dry-run TASK   # print the launch for Tasks_INPUT/TASK; no agent runs
+
+The runner is a detached process. It exits on its own once nothing is queued or
+running, and `add`, `start` and `resume` start it again. Stopping the runner
+never stops runs that are already going: each run lives in its own session.
+
+A run counts as hung when a kiro-cli-chat process of its bridge has been alive
+for HANG_SECS with no ESTABLISHED TCP connection while the run log has not
+grown for HANG_SECS, on HANG_STRIKES consecutive checks. A hung run is killed,
+its containers and unfinished job folder are deleted, and it is put back at the
+front of the queue once (one automatic relaunch per queued item). Only Kiro runs
+have such a process; a route B run is bounded by harbor's agent and verifier
+timeouts.
+
+positional arguments:
+  {add,status,start,stop,resume,pause,cancel,set-max,render,scores,refinalize,dry-run,runner}
+    add                 copy tasks into Tasks_INPUT and queue them
+    status              show running, queued and recent runs
+    start               start the runner if it is not running
+    stop                stop the runner (runs already going keep going)
+    resume              clear a pause and start the runner
+    pause               pause the queue (running runs keep going); used by
+                        auto.py on LIMIT
+    cancel              drop a queued task or stop a running one
+    set-max             set the maximum number of concurrent runs
+    render              re-render the ledger from state
+    scores              latest combined, tests and rubric score per task
+    refinalize          run the harness finalize steps again for a finished
+                        run
+    dry-run             wrapper --dry-run for a Tasks_INPUT task; no agent
+                        runs, no state change
+    runner              ==SUPPRESS==
+
+options:
+  -h, --help            show this help message and exit
+exit 0
+$ NEGATIVE: ast.parse on a copy with a broken line
+SyntaxError: expected ':'
+exit 0

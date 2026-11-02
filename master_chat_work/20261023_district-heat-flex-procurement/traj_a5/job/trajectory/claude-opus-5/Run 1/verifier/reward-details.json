@@ -1,0 +1,386 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.8125,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.03125,
+        "detail": {
+          "score": 10.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_checks_grant_shares_on_its_own_extract",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which one event-region's funded grant pool leaves a remainder when shared in proportion to the weights of its beneficiaries, works out the cents of each grants entry of that event-region by hand, runs derive_report.py on the extract, and compares the two.",
+              "reasoning": "The mini extract uses a 101-cent funded pool and beneficiary weights 3 and 6, producing a largest-remainder split of 34 and 67 cents. Those hand-specified expectations are asserted against derive_report.py, and the final mini run reports zero failures."
+            },
+            {
+              "id": "R2",
+              "name": "r2_checks_multiplied_readings_on_its_own_extract",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which a profiles.tsv row has a register_multiplier above 1 and a relief_wh whose product with that multiplier leaves a remainder when divided by wh_per_tick, runs derive_report.py on it, and checks the relief_ticks it reports for that interval.",
+              "reasoning": "The mini extract includes O-S5-c with relief_wh=4, register_multiplier=2, and wh_per_tick=3. The product 8 leaves a remainder when divided by 3 and rounds half-up to 3 ticks; the test explicitly checks the reported interval relief_ticks is 3."
+            },
+            {
+              "id": "R3",
+              "name": "r3_checks_an_override_with_an_adder_on_its_own_extract",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which a rate card with an override element belongs to a site row whose segment has a non-zero rate adder in program.ini, runs derive_report.py on it, and checks the credit_cents it reports for that site row's offer.",
+              "reasoning": "The targeted mini extract does not combine the two conditions: its selected override cards belong to commercial sites, while the only non-zero segment adder is for public sites. Random synthetic extracts may contain such combinations, but the trajectory does not identify and directly check the credit for a specific override-plus-adder offer."
+            },
+            {
+              "id": "R4",
+              "name": "r4_checks_a_half_cent_interval_amount_on_its_own_extract",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which one interval amount of an offer's credit is exactly half a cent, works out that offer's credit_cents by hand, runs derive_report.py on the extract, and compares the two.",
+              "reasoning": "The agent notes exact half-cent intervals in the shipped data, but does not construct and hand-check an offer in its own extract whose interval credit amount is exactly half a cent."
+            },
+            {
+              "id": "R5",
+              "name": "r5_exact_arithmetic_for_reported_figures",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent's final derive_report.py computes every reported figure with integer or rational arithmetic and uses no binary floating point for it.",
+              "reasoning": "The final program uses Python integers throughout, with explicit integer implementations of half-up and half-even division. It uses no binary floating-point arithmetic for reported energy, money, ratios, optimization components, grants, or totals."
+            },
+            {
+              "id": "R6",
+              "name": "r6_reads_the_file_comments_before_settlement_code",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent prints the comment lines of rate_cards.xml and program.ini, or those whole files, before it first writes the credit calculation of derive_report.py.",
+              "reasoning": "Before attempting to create derive_report.py, the agent printed all of program.ini and the beginning of rate_cards.xml, including their rule-bearing comments."
+            },
+            {
+              "id": "R7",
+              "name": "r7_final_run_after_last_edit",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent runs its final derive_report.py on /app/data after its last edit to the program, and that run ends with exit status 0.",
+              "reasoning": "After the final code edit in step 37, derive_report.py was run successfully on /app/data in steps 38 and 40, with exit status 0 and all required outputs present."
+            },
+            {
+              "id": "R8",
+              "name": "r8_claims_a_check_its_output_contradicts",
+              "value": 0.0,
+              "raw": 0,
+              "weight": -5.0,
+              "description": "The response says a check of derive_report.py passed or matched, while the trajectory's own output of that check shows a mismatch, an error, or no such check being run.",
+              "reasoning": "The final response accurately acknowledges the one initial mini-test mismatch as an error in the expected candidate count. After correcting that expectation, the mini test and independent verifier both report zero failures; no claimed passing check is contradicted by the shown final check output."
+            },
+            {
+              "id": "R9",
+              "name": "r9_separate_named_functions",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent's final derive_report.py keeps reading the input files, choosing the portfolios, computing the credits and grants, and writing the reports in separate named functions.",
+              "reasoning": "Input reading is separated into Extract loader methods, portfolio selection is in choose_portfolio, credit calculation is in credit_cents, grant allocation is in apportion, report assembly is in build, and file writing is handled by main."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_checks_grant_shares_on_its_own_extract\": {\n    \"score\": 1,\n    \"reasoning\": \"The mini extract uses a 101-cent funded pool and beneficiary weights 3 and 6, producing a largest-remainder split of 34 and 67 cents. Those hand-specified expectations are asserted against derive_report.py, and the final mini run reports zero failures.\"\n  },\n  \"r2_checks_multiplied_readings_on_its_own_extract\": {\n    \"score\": 1,\n    \"reasoning\": \"The mini extract includes O-S5-c with relief_wh=4, register_multiplier=2, and wh_per_tick=3. The product 8 leaves a remainder when divided by 3 and rounds half-up to 3 ticks; the test explicitly checks the reported interval relief_ticks is 3.\"\n  },\n  \"r3_checks_an_override_with_an_adder_on_its_own_extract\": {\n    \"score\": 0,\n    \"reasoning\": \"The targeted mini extract does not combine the two conditions: its selected override cards belong to commercial sites, while the only non-zero segment adder is for public sites. Random synthetic extracts may contain such combinations, but the trajectory does not identify and directly check the credit for a specific override-plus-adder offer.\"\n  },\n  \"r4_checks_a_half_cent_interval_amount_on_its_own_extract\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent notes exact half-cent intervals in the shipped data, but does not construct and hand-check an offer in its own extract whose interval credit amount is exactly half a cent.\"\n  },\n  \"r5_exact_arithmetic_for_reported_figures\": {\n    \"score\": 1,\n    \"reasoning\": \"The final program uses Python integers throughout, with explicit integer implementations of half-up and half-even division. It uses no binary floating-point arithmetic for reported energy, money, ratios, optimization components, grants, or totals.\"\n  },\n  \"r6_reads_the_file_comments_before_settlement_code\": {\n    \"score\": 1,\n    \"reasoning\": \"Before attempting to create derive_report.py, the agent printed all of program.ini and the beginning of rate_cards.xml, including their rule-bearing comments.\"\n  },\n  \"r7_final_run_after_last_edit\": {\n    \"score\": 1,\n    \"reasoning\": \"After the final code edit in step 37, derive_report.py was run successfully on /app/data in steps 38 and 40, with exit status 0 and all required outputs present.\"\n  },\n  \"r8_claims_a_check_its_output_contradicts\": {\n    \"score\": 0,\n    \"reasoning\": \"The final response accurately acknowledges the one initial mini-test mismatch as an error in the expected candidate count. After correcting that expectation, the mini test and independent verifier both report zero failures; no claimed passing check is contradicted by the shown final check output.\"\n  },\n  \"r9_separate_named_functions\": {\n    \"score\": 1,\n    \"reasoning\": \"Input reading is separated into Extract loader methods, portfolio selection is in choose_portfolio, credit calculation is in credit_cents, grant allocation is in apportion, report assembly is in build, and file writing is handled by main.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.004424778761061947,
+        "detail": {
+          "score": 113.0,
+          "criteria": [
+            {
+              "name": "artifact_set_exists_and_parses",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "All ten declared artifacts exist and the nine JSON reports parse as objects."
+            },
+            {
+              "name": "canonical_serialization_and_integer_units",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every JSON report has sorted keys at every level, a trailing newline, no float or boolean, and a JSON integer at every place the schema gives an integer field."
+            },
+            {
+              "name": "report_keys_match_schema",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every object in the eight region, segment, audit and quality reports carries exactly the schema keys for its place."
+            },
+            {
+              "name": "report_arrays_in_schema_order",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every array in the shipped-data reports has one entry per item in the order schema.md gives."
+            },
+            {
+              "name": "grants_extract_region_documents_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On a seeded extract rich in waivers, holds, overrides and grant pools, the four region files match the contract in every entry."
+            },
+            {
+              "name": "grants_extract_segment_documents_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On the same extract both segment files match the contract in every entry."
+            },
+            {
+              "name": "grants_extract_summary_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract summary.json matches the contract in every entry."
+            },
+            {
+              "name": "grants_extract_policy_audit_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract policy_audit.json matches the contract in every entry."
+            },
+            {
+              "name": "grants_extract_data_quality_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract data_quality.json matches the contract in every entry."
+            },
+            {
+              "name": "search_extract_region_documents_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On a seeded extract with tied portfolios, twin offers, register multipliers and groups of up to eight sites, the four region files match the contract in every entry."
+            },
+            {
+              "name": "search_extract_segment_documents_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On the same extract both segment files match the contract in every entry."
+            },
+            {
+              "name": "search_extract_summary_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract summary.json matches the contract in every entry."
+            },
+            {
+              "name": "search_extract_policy_audit_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract policy_audit.json matches the contract in every entry."
+            },
+            {
+              "name": "search_extract_data_quality_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract data_quality.json matches the contract in every entry."
+            },
+            {
+              "name": "rejects_extract_region_documents_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On a seeded extract with repeated, out-of-range, orphan and unknown-region rows in reversed row order, the four region files match the contract in every entry."
+            },
+            {
+              "name": "rejects_extract_segment_documents_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On the same extract both segment files match the contract in every entry."
+            },
+            {
+              "name": "rejects_extract_summary_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract summary.json matches the contract in every entry."
+            },
+            {
+              "name": "rejects_extract_policy_audit_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract policy_audit.json matches the contract in every entry."
+            },
+            {
+              "name": "rejects_extract_data_quality_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract data_quality.json matches the contract in every entry."
+            },
+            {
+              "name": "mixed_extract_region_documents_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On a seeded mixed extract with shuffled rows, the four region files match the contract in every entry."
+            },
+            {
+              "name": "mixed_extract_segment_documents_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "On the same extract both segment files match the contract in every entry."
+            },
+            {
+              "name": "mixed_extract_summary_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract summary.json matches the contract in every entry."
+            },
+            {
+              "name": "mixed_extract_policy_audit_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract policy_audit.json matches the contract in every entry."
+            },
+            {
+              "name": "mixed_extract_data_quality_document_matches",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "On the same extract data_quality.json matches the contract in every entry."
+            },
+            {
+              "name": "waiver_labels_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Site rows are labelled by the compliance ranking: a valid waiver, a hold with a cooldown, a pending certificate and an unrecorded signature each get their stated label."
+            },
+            {
+              "name": "tie_break_greatest_tuple_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Two portfolios equal on every component resolve to the greatest sorted offer-id tuple."
+            },
+            {
+              "name": "residual_ties_descending_id_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Leftover grant cents with equal remainders go to beneficiaries in descending id order, a zero-weight beneficiary is not listed, and the residual is recorded in the audit."
+            },
+            {
+              "name": "tick_feasibility_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Feasibility inside the search uses per-value ticks: two 15 Wh offers make 4 ticks and break a 34 Wh ceiling."
+            },
+            {
+              "name": "objective_component_order_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "The objective components are compared in their stated order: cost before overdelivery, overdelivery before offer count, and offer count last."
+            },
+            {
+              "name": "rejected_profile_rows_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A repeated profile row keeps the first row in file order, and a row with an interval outside 1 to interval_count is skipped; both decide the chosen portfolios and are counted in data_quality.json."
+            },
+            {
+              "name": "register_multiplier_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Profile readings are scaled by their register multiplier before they become ticks, and the scaled ticks decide feasibility and the reported intervals."
+            },
+            {
+              "name": "rate_composition_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A site row's rate starts from its card override or base, adds the event uplift and its segment's rate adder, and the cap binds that sum."
+            },
+            {
+              "name": "interval_credit_rounding_case",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Each interval amount of an offer's credit is rounded half to even to whole cents before the offer's interval amounts are summed."
+            },
+            {
+              "name": "segment_rate_adder_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Raising the public segment rate adder in program.ini moves the credits of the region file as the contract says, with the same portfolios."
+            },
+            {
+              "name": "wh_per_tick_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Changing wh_per_tick in program.ini moves the interval tick figures of the region file as the contract says."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Run on a different extract, the program emits the summary of the shipped extract."
+            },
+            {
+              "name": "negative_reads_tests_or_reward_files",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The delivered program names a grader path or grader file in a string it uses."
+            },
+            {
+              "name": "negative_external_dependency_or_network",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "The delivered program imports a third-party or network module."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+# P1 plan TODO (3d3a74a)
+- [x] Read R1 (FINDINGS + drafts)
+- [x] Read R2 (FINDINGS + apply_safe)
+- [x] Read R3 (FINDINGS + claims.csv + levers.csv)
+- [x] Read R4 (FINDINGS, genuineness, contrast, ANGLES, drafts)
+- [x] Read R5 (FINDINGS + issues.csv)
+- [x] Read context (INDEX, LEVER_RULES, intake.py gate, AUTO_POLICY, PLAN.md, CHANGELOG, COMMON_RULES)
+- [x] Spot-check load-bearing claims (file:line)
+- [x] Write UPGRADE_PLAN_v1.md
+- [x] Write QUESTIONS.md
+- [x] Write result_3d3a74a.json (parse check)
+- [x] name_session last

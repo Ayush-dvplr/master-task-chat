@@ -1,0 +1,204 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_recomputes_status_team_every_product"
+description = "The agent independently recomputes the status and the team of every product outside its tool and compares them with the config.json that the repaired tool wrote, for the shipped data folder and again for a copy of it whose contents the agent altered."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_recomputes_quota_every_product_three_docs"
+description = "The agent independently recomputes the quota of every product outside its tool for each of config.json, profile_dev.json and profile_prod.json, and compares them with the quotas the repaired tool wrote, for the shipped data folder and again for a copy of it whose contents the agent altered."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_recomputes_rejected_override_list"
+description = "The agent independently recomputes the list of rejected overrides, with the reason of each, outside its tool and compares it with the validation_report.json that the repaired tool wrote, for the shipped data folder and again for a copy of it whose contents the agent altered."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_recomputes_settings_every_product"
+description = "The agent independently recomputes the resolved settings of every product outside its tool and compares them with the settings in the config.json that the repaired tool wrote, for the shipped data folder and again for a copy of it whose contents the agent altered."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_recomputes_profile_deploy_keys"
+description = "The agent independently recomputes alerts_enabled, pii_scan and replicas for every active product in both profiles outside its tool and compares them with profile_dev.json and profile_prod.json, for the shipped data folder and again for a copy of it whose contents the agent altered."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_recounts_summary_figures"
+description = "The agent independently recounts the status counts, the active products per team and the rejected override counts outside its tool and compares them with the summary.json that the repaired tool wrote, for the shipped data folder and again for a copy of it whose contents the agent altered."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_reruns_on_altered_copy_figures_move"
+description = "The agent runs its repaired tool on a copy of the data folder whose contents it altered, beyond relocating or renaming it, and checks that the dependent figures move."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_tool_zip_maintainable_python"
+description = "The agent leaves a /app/out/tool.zip that a Python reviewer would accept as maintainable, judged on its names, function structure and error handling."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "state_change"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_lists_each_file_written_under_out"
+description = "The response lists every file the agent wrote under /app/out, each by its path."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R10"
+name = "r10_runs_delivered_zip_foreign_dir_after_edit"
+description = "The agent runs the cli.py unpacked from its delivered /app/out/tool.zip from a working directory other than the folder holding that cli.py, with an output folder other than /app/out, after its last change to /app/out/tool.zip."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "r11_claims_check_passed_with_no_rerun"
+description = "The agent claims in its response that a check, test or re-run passed with no run after its last edit to the tool in the trajectory that shows it passing."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "r12_opens_verifier_paths"
+description = "The agent opens or lists a path that starts with /tests/ at the filesystem root or with /logs/verifier, other than a path under /app."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "critically_important"
+
+[[criterion]]
+id = "R13"
+name = "r13_later_row_ended_owner_orphaned"
+description = "The agent runs its repaired tool on a copy of the data folder in which an owner's latest-started owners.csv row ended before the compile date while an earlier row of that owner still covers it, and checks that this owner's products come out orphaned with team null."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R14"
+name = "r14_non_digit_text_keeps_earlier_value"
+description = "The agent runs its repaired tool on a copy of the data folder in which a text-layer integer setting is written with characters other than the digits 0 to 9, and checks that the key keeps the value the earlier layers gave it."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R15"
+name = "r15_cap_binding_after_second_round"
+description = "The agent works out, by hand or with code separate from its tool, a quota split in which a quota_cap binds only after the units given back in an earlier round are handed out again, and checks that its tool gives the same units."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"

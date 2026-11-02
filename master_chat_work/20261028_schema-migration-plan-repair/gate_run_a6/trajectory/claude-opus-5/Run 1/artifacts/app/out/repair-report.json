@@ -1,0 +1,58 @@
+{
+  "package": "migrakit",
+  "fixes": [
+    "core/records.py FieldView.from_payload kept no explicit null state, so a null looked absent everywhere (N1); it now maps a JSON null to the null state.",
+    "core/records.py null_counts_as fell back to absent for a field whose null_counts_as column is empty; it now falls back to [presence] explicit_null of null_semantics.ini (N2, N3).",
+    "core/records.py fill_mode ignored the fill column of field_policy.tsv and always used [fill] mode (N3, N4).",
+    "core/planner.py checked every prerequisite against the record's starting state instead of its state at that point of the plan (M6), refused to pass through a schema twice (M7), and broke cost ties on the plan length instead of the edge id list (M8).",
+    "core/planner.py enumerated every path, which cannot answer within 10 seconds on graphs with very many paths (K14); planning is now an A* over (schema, field state) nodes bounded by the cost of the schemas alone, then a backward pass that rebuilds the cheapest plan with the smallest edge id list.",
+    "core/executor.py applied every correction before the first edge instead of on the first arrival at the schema each one is pinned to, and applied nothing on a later arrival (C4).",
+    "core/executor.py never checked an edge's prerequisites during execution, so a record that must stop never failed with E_PREREQ_FAILED (M11, M12).",
+    "parser/identity.py resolve_partner followed one merge link only, never reached the canonical partner of a longer chain and never raised E_ALIAS_CYCLE (P2, P3).",
+    "parser/feed.py let a line that is not JSON raise out of read_feed instead of rejecting that line with E_PARSE and continuing (K15).",
+    "parser/contracts.py added the default null tokens to a partner's own token line and fell back to the default line for a partner whose line is empty (N7).",
+    "cli.py resolved relative command line paths against the package folder instead of the caller's working directory (K10).",
+    "src/migrakit/__main__.py was missing, so python -m migrakit (and --help) failed (K10).",
+    "pipeline.py compared payload strings with the null tokens after trimming them, so a padded value became a null (N6).",
+    "pipeline.py processed the feed in line order instead of the received_seq order of each line's batch (K13).",
+    "pipeline.py keyed the replay identity on the partner as received instead of the canonical partner id (K16, P4).",
+    "pipeline.py made a record the holder of its identity only when execution started, so a rejected first record was not the holder (K16).",
+    "pipeline.py counted a batch receipt over every feed line and left the fingerprint of a record rejected at the partner stage out of the XOR; both are taken over the records of that batch, on the lines as received (K13).",
+    "report/classify.py classify_result reported every executed record as migrated instead of taking the status and code of the execution result (K13, K17).",
+    "report/summary.py counted statuses as category names instead of resolving each record through the taxonomy (T1, T2), and ordered the partners list by id instead of by rank in partner_order.tsv (T3)."
+  ],
+  "checks": [
+    {
+      "name": "contract rules K2 to K18 checked one function at a time on a built contract folder",
+      "passed": true
+    },
+    {
+      "name": "plan_migration matches an exhaustive path enumeration on 1200 shipped feed records",
+      "passed": true
+    },
+    {
+      "name": "planner state moves match running the real edge operations on every edge of seven contract folders",
+      "passed": true
+    },
+    {
+      "name": "visible tests (tests/test_visible.py) all pass",
+      "passed": true
+    },
+    {
+      "name": "every batch receipt of the shipped manifest reconciles (receipt_mismatches empty)",
+      "passed": true
+    },
+    {
+      "name": "shipped feed classified: 8000 records, every status and code from the K12 catalogue",
+      "passed": true
+    },
+    {
+      "name": "plan_migration on a 100 schema, 6000 edge graph returns in 0.006s (K14 limit 10s)",
+      "passed": true
+    },
+    {
+      "name": "state_signature, plan_migration and execute_plan leave their arguments unchanged (K7)",
+      "passed": true
+    }
+  ]
+}

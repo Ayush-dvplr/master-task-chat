@@ -1,0 +1,12 @@
+# TODO e66cd5f strategy review
+- [x] Phase 1 read: README, GOALS, BOARD, registry, decisions, feedback, lessons
+- [x] knowledge/ files
+- [x] _dev_research plans + peer_levers summaries
+- [x] templates (P2 v2, P4 v2, P9 v2, P11 v2, P12 v2, P13, _COMMON_RULES_v2, CHANGELOG)
+- [x] trajectory notes + P14 analyses (emberforge a7, schema a4, sensor a2)
+- [x] harness capacity (job-result.json x26, job-config, master_queue.py:63/:595)
+- [x] sibling OUT: qc_reverse A, B, leak_audit
+- [x] write SCENARIOS.md (10:42)
+- [x] Phase 2 CRITIQUE.md, ALTERNATIVES.md (10:45)
+- [ ] Phase 3 discussion topics 1-7
+- [ ] Phase 4 STRATEGY_v1.md, result.json, name_session again

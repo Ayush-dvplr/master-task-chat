@@ -1,0 +1,13 @@
+# LOG harden r4 ea94780
+- 20:00 rename ok (opencode ses_e687bf897ffeELcDEuw18nYS48); read route1 notes, COMMON_RULES_v5, LEVER_RULES 0b/1C/2/8, LEAK_LIBRARY, QC_RULINGS, PLAYBOOK 1b. Fingerprints qc 12/12 gen 160/160; kit HEAD 5574d77e; BUNDLE tree 931f8f817d76. Made h4_rule/, R harden4-20261101T2000, OUT harden_r4.
+- 20:15 read r3 docs, a3 score, contract, solve.py, a3 program, test_output.py structure; OUT/TRIP.md written. Candidate A (shared-crew cap 3 in Planning) chosen.
+- 20:18 cap 3->4 (shipped R62233 changed under cap 3). proto solve.py (count state in frontier DP), capgen.py make_book2 gadget branch own RNG, shape300 SEEDS_OK 300 + SHIPPED_DIFF_ROUNDS []. programs a3_natural/a3_correct/a3_prefilter/a3_unchanged written. drive4.sh/docscore.py/proto_books.py ready.
+- 20:40 kill3 (cap-aware feasible) ALL_DONE: a3nat/a3pre/a3unc WRONG 3/25 on H1c-H3c, Mc; a3cor EXACT 25/25 (7.9 s max); a1 TIMEOUT/WRONG; abo TIMEOUT/WRONG(>20 s); fw TIMEOUT (kill2). ref busy max 2.52 s (kill2), unbusy max 3.42 s. Started crosscheck.py (embedded _capped ledger vs proto solve) in Docker h4cross.
+20:50 crosscheck2 SEEDS_SAME/BOOK_SAME; judge+sentence decided; DESIGN.md 125 lines DESIGN READY; HARDEN_REPORT + result json PAUSED; tree 931f8f817d76 unchanged
+- 22:34 Phase2: digest before saved, contract.md:62 + instruction.md:15 sentences, solve.py from proto in BUNDLE
+- 22:50 test_output.py: generator capped branch (own RNG seed*31+7177) before make_book, make_book capped tail, import itertools, _capped after _portfolio, _Ledger line, _feasible cap+exemption, _BOOKS H1/H2/H3 capped 3 M capped 2 new sha (proto_match, SHIPPED unchanged) logs newbooks2/4
+- 22:40 solve.sh (R5 cap-aware enum, R7 crowded, R8 tie, relabels), judge.toml 12 criteria judge_qc PASS, reward.toml judge 0.015625, digest after/diff saved; exe_copy -> R/scratch/copy4; progs4 staged incl forkprobe.py
+- 22:50 verif lane all (h4v_all) oracle 108/108 64.2 s survivors 0; a3cor 108/108 85.5 s; QC_DEFENCE/EVIDENCE_MAP r4 rows appended, JUDGE_MAP rewritten (12 criteria), h4_rule/truth_update4.py written (run last with gate facts)
+- 23:19 stacking_check, precheck CLEAN, validator PASS 41/0/0, xref 0; verif_all: fw 3/108 (shipped 900 s timeout, verifier 215 s), abo running; gate dir hardengate4-20261101T230955; lane1 oracle 1.0 x3 (102.5/99.4/105.8 s); lane2 owner started.
+- 23:23 LEVERS.md + COST_TABLE.md harden r4 sections appended; lane2 owner 1.0 (101.22 s); lane3 running
+- 23:30 lane3 nop 0.0 stub 0.0093 forgery 0.1481; TRUTH re-run (99-106 s, plain__cexp4qK); validator PASS, PRECHECK CLEAN, xref 0; Tasks_INPUT synced 7d68065946fd; HARDEN_REPORT + result DONE

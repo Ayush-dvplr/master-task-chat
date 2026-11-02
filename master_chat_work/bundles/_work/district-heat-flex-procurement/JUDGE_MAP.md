@@ -1,0 +1,21 @@
+# JUDGE_MAP - district-heat-flex-procurement (P12 fix ql1 8556721, 29 Oct 2026: R3 split into R3 + R12; earlier gate v3.6 judge harden 8d509b8 re-targeted R4, R8, R9, R10)
+
+Positive 27 (R1-R4, R8-R10, R12 w3; R5, R6, R11 w1), negative -5 (R7, unchanged). Probe criteria (w3 process trajectory): R1-R4, R8-R10, R12 = 24 of 27 (88.9%). reward.toml judge 0.5/27. Previous map: g36/r8d509b8/JUDGE_MAP.before.md.
+R8-R10 now name a rerun on an altered copy of /app/data (template P-d); R4 now names two half-cent interval amounts of one offer. Instruction ties: instruction.md:3 (program reusable on other extracts). The :9 report sentence was removed in P12 (F2), so R7 grades any claim of a passed check the agent makes in its trajectory.
+
+| id | requirement it serves | oracle shows it at (solve.sh stage / printed line) | test it must not overlap |
+|---|---|---|---|
+| R1 drawn allowance on own extract | instruction.md exact values on fresh inputs; site_allowances.tsv drawn rule | own-extract stage, extract 1: "own extract, candidate_offer_count of the later event OWN-0102: program 1, by hand 1, agrees" | allowance_ticks_mutation and *_hard read grader extracts, not the agent's own |
+| R2 start order on own extract | schema.md season order by start instant | extract 2: "own extract, events that select Q-1's offer: program ['OWN-0202'], by hand ['OWN-0202'], agrees" | selection_match_hard |
+| R3 credit of a composed rate above cap on own extract | schema.md rate composition and cap | extract 3: "credit_cents of OWN-0301: program 40, by hand 40, agrees" + "check R3 ok" | segment_rate_adder_mutation, credit_rows_match* |
+| R4 two half-cent intervals on own extract | schema.md half-even per interval amount | extract 4 ([1500, 2500] Wh at base 1000: 1.5 -> 2, 2.5 -> 2): "own extract, credit_cents of OWN-0401: program 4, by hand 4, agrees" | credit_rows_match* (grader extracts) |
+| R5 exact arithmetic | schema.md:123-124 | solve.py:20 half_up, :25 half_even (integers only) | canonical_serialization_and_integer_units grades JSON types only |
+| R6 final run after last edit | instruction.md run on shipped data | solve.sh:6-7 copy then run derive_report.py; no later edit | artifact_set_exists_and_parses (presence) |
+| R7 (-5) claims a check its output contradicts | any reply the agent writes (no report is requested since P12 F2) | oracle claims nothing; stages print agree/DIFFER as measured | none |
+| R8 rerun with a pool too small for the claims | schema.md grants (claims or largest remainder) | altered copy 5 (pools.txt row of the first season event lowered to credit_cents + 2/7 of claims): "altered copy of the shipped extract, grants of W26-1388 West with its pool lowered to 1414 cents: program {...}, recomputed outside the program {...}, agrees" | grants_match* (grader extracts; no test reruns the agent's copy) |
+| R9 rerun with an allowance below a chosen offer | site_allowances.tsv drawn rule | altered copy 6 (holder allowance set to relief ticks - 1): "altered copy of the shipped extract, W26-1388-HX24740-N still selected with allowance HX24740 lowered to 4500 ticks: program False, recomputed outside the program False, agrees" | allowance_ticks_mutation (grader-side mutation, not the agent's act) |
+| R10 rerun with an uplift that lifts a rate above its cap | schema.md rate composition and cap | altered copy 7 (uplift of W26-1388 raised to cap - start - adder + 100): "altered copy of the shipped extract, credit_cents of W26-1388 East with its uplift raised to 6350: program 2175, recomputed outside the program 2175, agrees" | credit_rows_match*, cap_binding_match* |
+| R11 maintainable derive_report.py (J4) | JD-18 04:99 | solve.py named functions load :130, choose_portfolio :268, credit_cents :371, share_pool :396, holder :430, choose_all :437, build :458 | none |
+| R12 cap_binding_count of a composed rate above cap on own extract | schema.md cap_binding_count | extract 3: "cap_binding_count: program 1, by hand 1, agrees" + "check R12 ok" | cap_binding_match* (grader extracts) |
+
+The self-check stage returns 1 only when a recomputed figure differs (solve.sh:224; oracle 0). The own-extract stage (extracts 1-4 and altered copies 5-7) only prints, writes under a mkdtemp dir, reuses the self-check routines by loading the first heredoc of solve.sh, and ends `|| true`.

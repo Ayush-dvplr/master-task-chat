@@ -1,0 +1,63 @@
+VERDICT: The replays reproduce the low test scores, but most allocated loss rests on unfair contracts; the clearest demonstrated reusable failure is PM2.5 echo attribution on conforming inputs.
+
+# CAUSE_REPORT.md
+
+## Task results
+
+Test loss is in percentage points. The primary cause is an accounting choice when causes overlap.
+
+| Task | Recorded final / tests / judge | Replay / oracle tests | Lost test points: primary cause | Top judge loss class | Source |
+|---|---:|---:|---:|---|---|
+| billing | 15.68 / 7.22 / 24.14% | 7.22 / 100% | 92.78 UNFAIR | FIGURE-WRONG | `replay_A1/evidence/billing/score.json:final_reward,test_weights_percentage,rubric_weights_percentage`; `replay_A1/FINDINGS.md:7,69` |
+| pm25 | 16.62 / 9.09 / 24.14% | 9.09 / 100% | 90.91 LATENT-WRONG | FIGURE-WRONG | `replay_A1/evidence/pm25/score.json:final_reward,test_weights_percentage,rubric_weights_percentage`; `replay_A1/FINDINGS.md:8,69` |
+| royalty | 16.89 / 23.08 / 10.71% | 23.08 / 100% | 76.92 UNFAIR | PROBE-SKIPPED | `replay_A1/evidence/royalty/score.json:final_reward,test_weights_percentage,rubric_weights_percentage`; `replay_A1/FINDINGS.md:9,69` |
+| pension | 22.25 / 23.08 / 21.43% | 23.08 / 100% | 76.92 UNFAIR | PROBE-SKIPPED | `replay_A2/FINDINGS.md:7,22,66` |
+| spectrum | 22.25 / 23.08 / 21.43% | 23.08 / 100% | 76.92 UNFAIR | PROBE-SKIPPED | `replay_A2/FINDINGS.md:8,22,66` |
+
+The A1 replay used the original base-image digest; A2 used a local Python base because the private image was inaccessible. A2 kept its grading code and frozen expected hashes unchanged. These are tests-only replays, with no new paid judge run (`replay_A1/FINDINGS.md:93-95`; `replay_A2/FINDINGS.md:16-18`).
+
+## Lost test points
+
+On an **equal task scale**, UNFAIR receives **323.55 of 414.46 lost percentage points, or 78.07%**; LATENT-WRONG receives **90.91, or 21.93%**. The other primary classes receive zero. These are derived by summing `replay_A1/result_3d517b2.json:tasks[].lost_test_pts,by_cause` and `replay_A2/result_4e9d595.json:tasks[].lost_test_pts,by_cause`; they are allocation shares, not uniquely identifiable causal shares.
+
+A1 charges each failed check once and, where causes coexist, assigns it to a demonstrated in-contract inference failure. Thus PM2.5’s echo error receives the loss and its clock-contract defect gets zero additional weight (`replay_A1/FINDINGS.md:32,44-48`). A2 deduplicates by task and check despite several sufficient roots, assigns the pension and spectrum losses to UNFAIR, and treats AMPLIFIED as nonadditive (`replay_A2/FINDINGS.md:24-32`). The blind scorer instead assigns PM2.5 to UNFAIR because every scored hidden extract violates the stated constant-clock rule; it assigns its blind pension loss to RULE-MISREAD for an extra COLA-ledger event, while recording shared unfair metadata blockers (`score_blinds/FINDINGS.md:16-19`). Those scorer labels describe the **blind** and must not be added to the Opus totals.
+
+## Lost judge points
+
+Equal task scale gives these shares of **398.15 lost judge percentage points**: PROBE-SKIPPED **187.50 (47.09%)**; FIGURE-WRONG **120.69 (30.31%)**; PROCESS-SKIPPED **74.08 (18.61%)**; NEGATIVE-FIRED **10.53 (2.64%)**; OTHER **5.36 (1.35%)**. Derived from `replay_A1/FINDINGS.md:58-67` and `replay_A2/FINDINGS.md:60-68`, dividing each class’s raw weight by its task’s positive judge denominator before summing. Missing independent expected-value evidence is a judge finding; it does not prove the already matching royalty, pension, or spectrum business calculations were wrong (`replay_A1/FINDINGS.md:69-71`; `replay_A2/FINDINGS.md:70-74`).
+
+## Blind calibration
+
+| Task | Opus / blind tests | Lost by both / only Opus / only blind | Source |
+|---|---:|---:|---|
+| billing | 7.2165 / 7.2165% | 18 / 0 / 0 | `score_blinds/FINDINGS.md:7`; `score_blinds/CHECKS_billing.csv:opus,blind,both_lost` |
+| pm25 | 9.0909 / 9.0909% | 20 / 0 / 0 | `score_blinds/FINDINGS.md:8`; `score_blinds/CHECKS_pm25.csv:opus,blind,both_lost` |
+| pension | 23.0769 / 23.0769% | 8 / 0 / 0 | `score_blinds/FINDINGS.md:9`; `score_blinds/CHECKS_pension.csv:opus,blind,both_lost` |
+
+This supports a cheap directional **test-score** gate on these tasks. It does not establish fair hidden coverage, matching root causes, calibration on unrelated tasks, or a judge-score predictor. Pension’s blind has an extra COLA-ledger mismatch hidden by the same already-failing bundle checks; no blind judge was run (`score_blinds/FINDINGS.md:11,17,29,33`).
+
+## Copyable mechanisms, ranked by evidence
+
+These are **INFERRED QC-compatible designs after the stated repairs**, not certifications of the original bundles. The kit requires reachable graded expectations, decisive trigger fixtures, and proportional credit (`Input_Bundle_QC/01_Instruction_QC.md:38`; `Input_Bundle_QC/05_Alignment_Integrity_QC.md:21,38`; `Input_Bundle_QC/Final_checklist.md:491`).
+
+**Strongest — anchored shared-channel attribution.** Opus’s independent maximum-match vote misattributes constant-clock units. Correcting only stepped units leaves every scored PM2.5 check failing, and newly generated no-step probes still fail the captured program (`replay_A1/TASK_pm25.md:11-15`). Recipe: state the clock scope plainly; use shared-channel echoes that tempt independent voting, plus uniquely attributable receipts that make the joint answer determinate. Score attribution and downstream measurements in separate slices. Verify each planted tie changes a graded result. This keeps the difficulty in inference while meeting IN-8, AL-1, AL-27, and CL-4 (`replay_A1/TASK_pm25.md:70-82`; kit lines cited above).
+
+**Next — independent boundary verification.** The recorded judge repeatedly found missing independent expected-value evidence, even where agents ran fresh extracts and the business outputs matched (`replay_A1/FINDINGS.md:69,79`; `replay_A2/FINDINGS.md:70-82`). Recipe: ask for a method-neutral, independently calculated boundary or conservation check and an auditable claim about what ran. Give it a small conduct weight; do not require a particular framework or arbitrary counts. **INFERRED:** this should retain a useful judge signal after fair output schemas and proportional tests are installed. AL-1 allows odds-raising conduct but treats a maximum-weight conduct preference as a defect (`Input_Bundle_QC/05_Alignment_Integrity_QC.md:21`).
+
+**Weaker — grounded cross-rule composition.** Billing, royalty, pension, and spectrum contain real precedence, timing, rounding, and state interactions, but their observed test losses do not prove Opus failed those calculations: royalty’s financial reports and spectrum’s allocation reports matched the oracle on their scored extracts (`replay_A1/TASK_royalty.md:7-11,28`; `replay_A2/FINDINGS.md:48`). Recipe: twin a documented rule family into fresh inputs with paired faults and decisive ties; specify output keys, identifier scope, and ordering; score each rule family separately and keep a small integration check. **INFERRED:** a repaired version may challenge a careful agent. AL-27 needs a fixture where each precedence link matters, and CL-4 needs a near miss to retain proportional credit (`Input_Bundle_QC/05_Alignment_Integrity_QC.md:38`; `Input_Bundle_QC/Final_checklist.md:491`; `replay_A2/TASK_spectrum.md:60-64`).
+
+## Do not copy
+
+- Changing hidden clocks while authoritative documents say they never change fails IN-8 and AL-1 (`replay_A1/TASK_billing.md:7-11`; `replay_A1/TASK_pm25.md:7-10`; `Input_Bundle_QC/01_Instruction_QC.md:38`; `Input_Bundle_QC/05_Alignment_Integrity_QC.md:21`).
+- Unstated issue IDs, effective-row fields, count keys, or cell order fail IN-8 and CL-5. Whole-bundle hashes that repeatedly erase correct independent results fail CL-4 (`replay_A1/TASK_royalty.md:7-11,54-60`; `replay_A2/FINDINGS.md:36-56`; `Input_Bundle_QC/01_Instruction_QC.md:38`; `Input_Bundle_QC/Final_checklist.md:491-492`).
+- Named scenarios without a discriminating witness fail AL-27; both A2 tasks have a final tie-break that can be removed without changing their hidden expected reports (`replay_A2/FINDINGS.md:58`; `Input_Bundle_QC/05_Alignment_Integrity_QC.md:38`).
+- Demanding unchanged raw-input manifest bytes after reordering raw files is contradictory; royalty and A2 correctly distinguish semantic stability from changed raw digests (`replay_A1/TASK_royalty.md:34,44,62`; `replay_A2/FINDINGS.md:72`; `Input_Bundle_QC/01_Instruction_QC.md:43`).
+
+## Decisions for Ayush
+
+| Decision | Recommended | Alternative |
+|---|---|---|
+| Twin first | **INFERRED:** twin PM2.5’s conforming-clock, anchored echo mechanism first. It has an observed Opus inference failure plus no-step diagnostic failures (`replay_A1/TASK_pm25.md:11-15`). | **INFERRED:** twin royalty’s documented financial interactions only after specifying issue identity and splitting financial credit; its observed arithmetic already matched (`replay_A1/TASK_royalty.md:7-11,64-66`). |
+| Blind before paid run | **INFERRED:** keep it as a gate, with a contract audit, cause-level diff, and one-fact proportional-credit check before spending. Exact blind/Opus test agreement alone masked pension’s extra error (`score_blinds/FINDINGS.md:17,31-33`; `Input_Bundle_QC/Final_checklist.md:491`). | **INFERRED:** allow a capped paid pilot after a fresh design blind when cause attribution is uncertain, while recording that the blind has not predicted judge performance (`score_blinds/FINDINGS.md:11,33`). |
+| Judge target | **INFERRED:** aim for a judge midpoint at or below **20%**, using defensible, small conduct criteria and independent boundary evidence. The existing build target is recorded in `20261030_upgrade2/S5_build_method/DRAFT_BUILD_RECIPE.md:19`; the conduct-weight constraint is `Input_Bundle_QC/05_Alignment_Integrity_QC.md:21`. | **INFERRED:** accept a higher midpoint only if the combined score still clears the delivery gate after fair tests; the studied top group’s judge median is **22.785%** (`20261031_learning/L5_stage2_study/PATTERNS.md:7`). |
+| Pilot measurement | **INFERRED:** measure blind and paid Opus WRONG/TIMEOUT/CRASH separately; report-level deltas; loss by unique root; judge classes; and the score after a one-fact mutation. The study calls for fresh inputs and partial credit (`20261031_learning/L5_stage2_study/PATTERNS.md:23-28`); the A2 one-fact experiment shows why (`replay_A2/FINDINGS.md:52-56`). | **INFERRED:** run a smaller mechanism-only pilot first, measuring recovered echo attribution and independently calculated boundary answers before full integration (`replay_A1/TASK_pm25.md:80-82`; `replay_A1/FINDINGS.md:75-79`). |

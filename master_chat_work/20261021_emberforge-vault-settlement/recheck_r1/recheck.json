@@ -1,0 +1,110 @@
+[
+  {
+    "finding": "Gate 01 IN-16 (also gate 05 AL-4, re-found in Step 11). The contract does not settle whether a salvage that repeats an already-redeemed forge, and is also outside its own credit window, carries `UNCREDITED_SALVAGE` beside `SALVAGE_ALREADY_CREDITED`, and a graded check depends on the answer.",
+    "id": "IN-16",
+    "label": "REAL",
+    "rule_quote": "01_Instruction_QC.md:46 \"IN-16 No significant ambiguity in anything that is graded. ... First, something graded depends on the answer. Second, the contract admits two readings that a competent practitioner could both defend. Third, nothing in any file the agent can read picks between them, so the agent has to guess and the grader punishes half the guesses.\" (ID and wording match.)",
+    "evidence_quote": "Reading A: environment/data/invariants.md:15-16 \"An entry carries a finding for every condition that holds of it, so one entry may carry more than one.\"; the only exemption, invariants.md:16-21, covers \"its workshop's scope, its smith's standing, a missing forge or an unresolved edition\"; finding_codes.md:22-23 \"`UNCREDITED_SALVAGE` - the entry is a salvage whose named forge does not fall in the salvage credit window.\" Reading B: rulebook_salvage.md:54-55 \"Every later salvage naming that forge entry is not settled, whatever its own day and whatever the window would otherwise say of it.\" Grader takes B: tests/test_output.py:838-841 `if src[\"entry_id\"] in redeemed: ... continue` runs before the window test at 842-846 (solve.py:559-560 agrees). Scratch run: a grader variant that also tests the window adds (L0057|L0059|L0060|L0265|L0267, UNCREDITED_SALVAGE) to lv1a findings, which flips `cap_and_floor_one_findings` (test_output.py:3144, weight 5). The slice and visible season settle identically under both readings, and the 840-draw search under reading A still returns only RS-C/half-even/GFS/opening-plus-acquired, so the slice cannot pick between them.",
+    "fix": "Append to rulebook_salvage.md S6 and to RULEBOOK_TEXTS[\"rulebook_salvage.md\"] (test_output.py:1991-1992), byte-identical: \"A salvage refused under this rule is not tested against the credit window and carries only `SALVAGE_ALREADY_CREDITED`.\" Then refresh test_output_sha256 in TRUTH.md.",
+    "difficulty_effect": "easier (slightly: removes a coin flip worth 5 of 155 on lv1a)"
+  },
+  {
+    "finding": "Gate 05 AL-4: The finding record graded in lv1a encodes one reading of an ambiguous rule (only SALVAGE_ALREADY_CREDITED for a repeat salvage that is also outside its window), which the contract does not settle. Same defect as gate 01 IN-16; one fix closes both.",
+    "id": "AL-4",
+    "label": "REAL",
+    "rule_quote": "05_Alignment_Integrity_QC.md:24 \"AL-4 Hidden behaviours: a behaviour of the DELIVERABLE that the tests, an outcome judged criterion, or the solution handles while the contract forbids or omits it, ... (... undocumented edge cases carrying graded weight in either layer). Fail.\" (ID and wording match.)",
+    "evidence_quote": "Same evidence as IN-16: the grader settles the SAC-plus-outside-window case one way (test_output.py:838-841), the contract's N3 (invariants.md:15-21) reads the other way, and the case carries weight 5 on lv1a (test_output.py:3144). Scratch run: only lv1a's graded findings change; cl_identity, ld12 and ld48b also gain pairs but their findings are not graded.",
+    "fix": "Same one-sentence S6 addition as IN-16; no separate change.",
+    "difficulty_effect": "easier (slightly; same change as IN-16)"
+  },
+  {
+    "finding": "Gate 05 AL-3 / CL-5 / CL-6 (re-found in Step 11). record_shapes.md says the item separator is `\", \"`, but the graded form uses a bare comma at the end of each indented line, so writing exactly what the spec says fails `structure_canonical_serialisation`.",
+    "id": "AL-3",
+    "label": "REAL",
+    "rule_quote": "05_Alignment_Integrity_QC.md:23 \"Compare every literal shape the agent can see against every shape anything grades, byte by byte. ... Any mismatch where following the contract loses reward is an automatic fail\" (ID and wording match.)",
+    "evidence_quote": "environment/data/record_shapes.md:21-22 \"Each record is one JSON object in UTF-8, indented by two spaces, with `\", \"` between items and `\": \"` after each key\" (same text at test_output.py:1566-1567). Graded: test_output.py:2053-2055 `json.dumps(obj, indent=2, sort_keys=False, separators=(\",\", \": \"), ensure_ascii=False) + \"\\n\"` and 2732 `assert raw == _canon(json.loads(raw))`. Scratch run: `json.dumps(obj, indent=2, separators=(\", \", \": \"))` gives `'... 1, \\n    2 ...'` (trailing space) and is not equal to `_canon`; plain `json.dumps(obj, indent=2)` is equal. Cost: `structure_canonical_serialisation`, weight 1 (test_output.py:3142).",
+    "fix": "In record_shapes.md:21-22 and RULEBOOK_TEXTS[\"record_shapes.md\"] (test_output.py:1566-1567) replace \"with `\\\", \\\"` between items\" with \"with `\\\",\\\"` after every item but the last and no trailing whitespace on any line\"; refresh the TRUTH.md digest.",
+    "difficulty_effect": "none (1 of 155, a written-form point)"
+  },
+  {
+    "finding": "Gate 05 CL-5 (item separator, part of finding 2): \"CL-5 and CL-6 fired, finding 2\"; the exact-text comparison demands `\",\"` while the contract states `\", \"`.",
+    "id": "CL-5 (separator)",
+    "label": "REAL",
+    "rule_quote": "Final_checklist.md:485 \"CL-5 No hidden conventions. ... Each of those must either be stated in the contract (`instruction.md` or a spec file it points the agent to) or be compared in a way that does not care. ... Fail, and quote both the assertion and the sentence that should have promised it.\" (05_Alignment_Integrity_QC.md:78 checklist line matches; the full text lives in Final_checklist.md, as 05:15 says.)",
+    "evidence_quote": "Assertion: test_output.py:2732 `assert raw == _canon(json.loads(raw))` compares raw bytes, so whitespace matters. Sentence: record_shapes.md:21-22 promises `\", \"` between items, the opposite of what is enforced.",
+    "fix": "Same record_shapes.md edit as AL-3.",
+    "difficulty_effect": "none"
+  },
+  {
+    "finding": "Gate 05 CL-6 (part of finding 2): \"the `\", \"` separator in record_shapes.md:22 against the graded `\",\"`; the published slice files show the graded form but nothing marks the spec sentence as wrong\"",
+    "id": "CL-6",
+    "label": "REAL",
+    "rule_quote": "Final_checklist.md:486 \"CL-6 A wrong value we shipped ourselves must be signposted as suspect. ... Where the two differ, something the agent can read must mark our material as not authoritative. ... Fail, quoting both values.\"",
+    "evidence_quote": "Shipped value: record_shapes.md:21 `\", \"`. Graded value: test_output.py:2054 `separators=(\",\", \": \")`. The instruction names the spec as the authority, instruction.md:11 \"The fields of every record, their order and the written form of each file are set out in `/app/data/record_shapes.md`.\" calibration_controls.json and example_workshop_report.json are in the graded form (scratch: both equal `_canon` of themselves, 0 lines end in \", \"), but nothing marks the spec sentence as non-authoritative.",
+    "fix": "Same record_shapes.md edit as AL-3.",
+    "difficulty_effect": "none"
+  },
+  {
+    "finding": "Gate 05 AL-27. The `RETIRED_REAGENT` tie-break is stated but never triggered: no graded season has an edition with two retired reagents.",
+    "id": "AL-27",
+    "label": "REAL",
+    "rule_quote": "05_Alignment_Integrity_QC.md:27 \"For every ordering, precedence, or tie-break rule the instruction states, trace the fixtures ... For every other rule, ask \\\"which graded input would come out differently if the solver broke exactly this rule?\\\" - no such input means the rule is ungraded regardless of what the test is called. Fail; name the rule and the missing fixture.\" (ID and wording match.)",
+    "evidence_quote": "Rule: finding_codes.md:37-39 \"`RETIRED_REAGENT` - the retired reagent. Where the edition has lines for more than one retired reagent, the detail names the first of them in ascending reagent order.\" Grader: test_output.py:798 `gone = sorted(...)`, 812 `codes.append((\"RETIRED_REAGENT\", gone[0]))`. Fixture: `_lever_retired` (2443-2451) retires one reagent (`rid = _most_used_plain(main)`; `_retire(main, rid, retire_rank)`). Scratch run: retired reagents lv2a [R02], lv2b [R03], all other 14 seasons []; the visible season has only R14 and R4 grades codes, not details (judge.toml:53). A `gone[-1]` variant changes 0 graded observables across all 16 seasons.",
+    "fix": "In `_lever_retired` (test_output.py:2443-2451) also `_retire` a second plain reagent that shares an edition with `rid` at the same `retire_rank`, then confirm a `gone[-1]` variant flips `retired_reagent_*_findings`; refresh the TRUTH.md digest.",
+    "difficulty_effect": "harder (slightly: one more stated rule becomes graded)"
+  },
+  {
+    "finding": "Gate 02 DS-22. TRUTH.md misstates how many requisitions the isolated-rule seasons have.",
+    "id": "DS-22",
+    "label": "REAL",
+    "rule_quote": "02_Data_Solution_QC.md:78 \"DS-22 TRUTH.md describes the bundle that actually shipped. ... Read the `Verification` section against the weight registrations in `tests/test_output.py` ... and confirm the stated counts, weight totals and named negatives are the real ones.\" (ID and wording match.)",
+    "evidence_quote": "solution/TRUTH.md:105-107 \"Every reseeded season keeps the levers it does not own out of reach: V4 by abundant stock or A4 by caps no workshop reaches, no retired reagent, a reference other than `consumed`, and four requisitions.\" Scratch run: cl_partition has 2 (`_mut_partition`, test_output.py:2236-2238, drops slagmoor and verdigris), cl_quiet has 5 (`_trigger_quiet_rules`, 2309-2312, appends RQ05), the other non-ladder seasons 4. No grading impact.",
+    "fix": "In TRUTH.md:107 replace \"and four requisitions\" with \"and at most five requisitions (two in cl_partition, five in cl_quiet)\".",
+    "difficulty_effect": "none"
+  },
+  {
+    "finding": "Gate 03 TS-20. The negative for planting an import hook the grader would load, which is an attack on the verifier, has the \"rare, minor\" weight, while replaying answers has -3.",
+    "id": "TS-20",
+    "label": "REAL",
+    "rule_quote": "03_Tests_QC.md:51 \"TS-20 Weights map to importance semantically. ... Negatives: -5 = a red-line cheat; -3 = a serious secondary violation; -1 = rare, minor. ... Mild imbalance within the right ordering is a minor.\" (ID and wording match.)",
+    "evidence_quote": "tests/test_output.py:3133 `description=\"running the program plants a module or path hook where the grader would import it.\"`, 3188 `criteria.negative_rebinds_verifier_dependencies(weight=-1)`; replay at 3184 `weight=-3`. Planting a grader import hook is an attempt on the reward itself, the red-line case, not a minor one. The uid-4001 sandbox (2116-2121) makes success unlikely, but the weight grades the act.",
+    "fix": "test_output.py:3188 -> `criteria.negative_rebinds_verifier_dependencies(weight=-5)` (negative total 11, still below 155; reward.toml unchanged).",
+    "difficulty_effect": "none (an honest program never trips it)"
+  },
+  {
+    "finding": "Gate 04 JD-5. R5 puts three separately decidable code-quality facts into one binary criterion.",
+    "id": "JD-5",
+    "label": "REAL",
+    "rule_quote": "04_Judge_QC.md:71 \"JD-5 Each criterion names ONE observable behaviour ... If a judge would need to check two separate things, split it. ... Clearly compound criteria are a fail; a borderline case (two facets of one act) is a minor.\" Also 04_Judge_QC.md:110 JD-S6 \"A quality judgement is split into yes/no criteria, each naming one decidable fact.\"",
+    "evidence_quote": "tests/judge.toml:66 \"The agent writes /app/out/settle_vault.py as code a reviewer would accept: each settlement stage sits in a named function, every except clause names the exception it handles, and the file carries no dead, duplicated or debug code.\" These are three facts a judge decides separately. Severity note: JD-S6 asks for quality criteria to be split explicitly, so this could be graded fail rather than minor (PL call).",
+    "fix": "Split R5 into three binary criteria at weight 1 with importance \"important\" (JD-13 allows important at 1), so the judge positive total stays 19 and reward.toml weights.judge needs no change.",
+    "difficulty_effect": "easier (judge channel only: partial credit becomes possible)"
+  },
+  {
+    "finding": "Gate 04 JD-16. R7 (tests/judge.toml:92, the third-party import in /app/out/settle_vault.py) enforces a rule on a declared artifact that a deterministic AST check could settle.",
+    "id": "JD-16",
+    "label": "REAL",
+    "rule_quote": "04_Judge_QC.md:97 \"A format or output-shape rule, or a scope rule over declared artifacts, shows up in what the verifier receives, so a test can grade it as well ... When a constraint criterion enforces a rule a test could have checked and no test checks it, say so and name the assertion that would have worked. Warn rather than fail\" (ID and wording match.)",
+    "evidence_quote": "tests/judge.toml:92 \"The agent delivers /app/out/settle_vault.py with an import of a module from outside the Python standard library.\"; task.toml:2 declares `/app/out/settle_vault.py`; no test reads imports (test_output.py:2680-2684 only compiles; registrations 3139-3188). Running the program would not catch it either: the verifier image has third-party packages installed (tests/Dockerfile:7 `pip install --no-cache-dir harbor-rewardkit==0.2.1`).",
+    "fix": "Add a negative check that `ast`-parses PROGRAM and returns True when a level-0 Import/ImportFrom top module is not in `sys.stdlib_module_names`, register it at -3, and drop R7. Both positive totals stay the same, so reward.toml is unchanged. The report's \"update both reward.toml weights\" step is not needed.",
+    "difficulty_effect": "none"
+  },
+  {
+    "finding": "Gate 05 CL-5. Values are compared type-strictly, but nothing states the JSON type of the non-count numeric fields `grade` (vault_audit.json, 21 points) and `ordinal` (reconciliation.json, 18 points).",
+    "id": "CL-5 (numeric types)",
+    "label": "REAL",
+    "rule_quote": "Final_checklist.md:485 \"Each of those must either be stated in the contract (`instruction.md` or a spec file it points the agent to) or be compared in a way that does not care. ... Fail, and quote both the assertion and the sentence that should have promised it.\" and 05_Alignment_Integrity_QC.md:115 fail line \"every client feedback check CL-1..CL-10 (each one already shipped once and there is no lenient reading of any of them ...)\".",
+    "evidence_quote": "Assertion: test_output.py:2664-2666 `_same` compares `json.dumps(..., sort_keys=True)`, so \"1\" is not 1. Contract: record_shapes.md:24 \"Every count, unit and ember figure is a whole number.\" Neither `grade` (record_shapes.md:48) nor `ordinal` (:56) is a count, unit or ember figure, and no shipped example shows either field. The grader writes int for both in all 16 seasons (scratch run). Points: vault checks 3146/3151/3156/3161/3166/3171/3181 = 21; reconciliation 3147/3152/3157/3162/3167/3172 = 18. Severity note: the 05:115 fail line gives CL checks no lenient reading, so this is fail-level, not a warn.",
+    "fix": "After record_shapes.md:24 (and in RULEBOOK_TEXTS, test_output.py:1569) add \"Grades, tiers, ordinals and every other numeric column are written as JSON numbers.\"; refresh the TRUTH.md digest.",
+    "difficulty_effect": "none"
+  },
+  {
+    "finding": "Master's extra check: does tests/test_output.py let the dropped-privilege uid read every agent file it runs and every grader temp input (a 0600 agent file must still be gradable)?",
+    "id": "VERIFIER-PERMISSION",
+    "label": "REAL",
+    "rule_quote": "Master's note (P8 r1 prompt): \"a 0600 agent file must still be gradable\". No live QC ID owns readability; nearest is 03_Tests_QC.md:72 TS-28 \"it installs `util-linux` so the checks can run agent code under `setpriv` as an unprivileged user\".",
+    "evidence_quote": "Temp inputs: yes. `_open_to_sandbox` (test_output.py:2125-2142) sets every corpus to 0755/0644 and its parent to 0711, and is applied to data_dir and out_dir at 2190-2191. Agent program: no. `_run_delivered` runs `[sys.executable, str(PROGRAM)]` (2193) as uid 4001 (2116-2121), with PROGRAM = /app/out/settle_vault.py (1339-1340). Nothing changes PROGRAM's mode except the no-argument run at 2714 (out_dir = OUT), which comes after the run at 2698 and is undone by 2707/2721-2722 (`copytree` restores the original mode). Harbor uploads with `docker cp` (harbor environments/docker/docker_unix.py:142-147), which keeps mode bits: a scratch probe saw a 0600 file arrive as `600 UNKNOWN:root`. Live probe in the pinned python:3.12-slim image with the grader's own `_run_delivered`: program 0600 -> \"can't open file '/app/out/settle_vault.py': [Errno 13] Permission denied\"; 0644 -> ran; a 0600 grader temp input was read fine. Result: a correct program saved 0600 (for example via mkstemp plus os.replace) keeps only the 3 root-read checks, 3 of 155.",
+    "fix": "In `_run_delivered` (test_output.py:2186-2193), when running as root, copy PROGRAM into a fresh grader-made temp dir, call `_open_to_sandbox(that_dir, read_only=True)`, and run the copy. Then refresh the TRUTH.md digest.",
+    "difficulty_effect": "none (removes a spurious zero; does not change what a correct solution must do)"
+  }
+]

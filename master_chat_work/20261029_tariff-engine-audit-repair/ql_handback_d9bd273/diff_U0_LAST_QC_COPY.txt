@@ -1,0 +1,272 @@
+diff -U0 -r -x trajectories /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/solution/TRUTH.md /tmp/ql-tariff-engine-audit-repair-20261029T0359/x/tariff-engine-audit-repair/solution/TRUTH.md
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/solution/TRUTH.md	2026-10-27 21:40:22
++++ /tmp/ql-tariff-engine-audit-repair-20261029T0359/x/tariff-engine-audit-repair/solution/TRUTH.md	2026-10-28 15:08:06
+@@ -128,9 +128,11 @@
+-    `due`, within 10 seconds. The oracle sorts the amounts and looks for the fewest
+-    small vouchers whose total stays below the common unit (greatest common divisor) of
+-    the rest. The rest is searched in that unit: for each voucher in id order it keeps the
+-    set of unit counts the later vouchers reach (an integer used as a bit set), takes the
+-    top count not above the balance and walks the vouchers in id order, taking each one
+-    whose remainder is still reachable. The small vouchers are tried in every combination
+-    for what is left; the first id list of each part together is the first id list of the
+-    whole, and no smaller unit part can win because the small ones add up to less than one
+-    unit. This is exact on every input. Hidden corpora copy three
++    `due`, within 10 seconds. The oracle keeps, for each place in the
++    ascending id order, the totals the vouchers from there onwards reach without passing
++    the balance, in whichever of three forms those amounts make cheapest: as a set of
++    totals when the amounts repeat enough to keep it small, as one bit per cent when the
++    balance itself is the narrower bound, and otherwise by peeling the smallest amounts
++    off until everything left shares a factor larger than all of them, counting that
++    block in factor units and taking every subset of the few peeled ones. It then takes
++    the largest reachable total and walks the ids in ascending order, taking each voucher
++    the ids after it can still finish; taking the smallest id available at every step is
++    what makes the list that comes first, so no tied set is ever enumerated. This is
++    exact on every input. Hidden corpora copy three
+@@ -321 +323 @@
+-solve_py_sha256: c277d276ea39f30b1f727faff6de29dfc229aa4350b2fa01dc0662f79b66b637  # sha256 of solution/solve.py
++solve_py_sha256: b3a65364000d8b256a7002a16efbb2b16cdbf92499ffdea2d51fca09e52fa93b  # sha256 of solution/solve.py
+diff -U0 -r -x trajectories /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/solution/solve.py /tmp/ql-tariff-engine-audit-repair-20261029T0359/x/tariff-engine-audit-repair/solution/solve.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/solution/solve.py	2026-10-27 21:14:53
++++ /tmp/ql-tariff-engine-audit-repair-20261029T0359/x/tariff-engine-audit-repair/solution/solve.py	2026-10-28 14:59:34
+@@ -430,0 +431,123 @@
++SUM_LIMIT = 1 << 21
++CENT_LIMIT = 1 << 27
++PEEL_LIMIT = 20
++
++
++def _sum_width(amounts):
++    """How many totals the amounts could reach, giving up once past ``SUM_LIMIT``."""
++    repeats = {}
++    for amount in amounts:
++        repeats[amount] = repeats.get(amount, 0) + 1
++    width = 1
++    for count in repeats.values():
++        width *= count + 1
++        if width > SUM_LIMIT:
++            return 0
++    return width
++
++
++def _peel(amounts):
++    """The common factor of the block left when the smallest amounts are peeled off.
++
++    Peels the smallest amounts one at a time until everything still in the block shares a
++    factor larger than every amount peeled off. Returns 0 when no such factor turns up,
++    which means the amounts have no block structure to work with.
++    """
++    order = sorted(amounts)
++    for peeled in range(min(PEEL_LIMIT, len(order) - 1) + 1):
++        block = order[peeled:]
++        factor = gcd(*block)
++        if factor > 1 and (peeled == 0 or order[peeled - 1] < factor):
++            return factor
++    return 0
++
++
++class _BySums:
++    """The totals the vouchers from each position onwards reach, held as sets."""
++
++    def __init__(self, amounts, cap):
++        self.table = [{0}]
++        for amount in reversed(amounts):
++            later = self.table[-1]
++            self.table.append(later | {total + amount for total in later if total + amount <= cap})
++        self.table.reverse()
++
++    def best(self):
++        return max(self.table[0])
++
++    def reaches(self, index, total):
++        return total in self.table[index]
++
++
++class _ByCents:
++    """The same totals, held as one bit per cent."""
++
++    def __init__(self, amounts, cap):
++        mask = (1 << (cap + 1)) - 1
++        self.table = [1]
++        for amount in reversed(amounts):
++            later = self.table[-1]
++            self.table.append((later | (later << amount)) & mask)
++        self.table.reverse()
++
++    def best(self):
++        return self.table[0].bit_length() - 1
++
++    def reaches(self, index, total):
++        return bool(self.table[index] >> total & 1)
++
++
++class _ByUnits:
++    """The same totals, held as a bitmap of factor units beside the peeled amounts.
++
++    A total is reached from a position when some subset of the peeled amounts still there
++    adds up to a part of it, the rest divides evenly by the factor, and the block still
++    there reaches that many units.
++    """
++
++    def __init__(self, amounts, cap, factor):
++        self.cap = cap
++        self.factor = factor
++        units = (1 << (cap // factor + 1)) - 1
++        self.block = [1]
++        self.peeled = [{0}]
++        for amount in reversed(amounts):
++            if amount % factor:
++                later = self.peeled[-1]
++                self.peeled.append(later | {total + amount for total in later if total + amount <= cap})
++                self.block.append(self.block[-1])
++            else:
++                later = self.block[-1]
++                self.block.append((later | (later << (amount // factor))) & units)
++                self.peeled.append(self.peeled[-1])
++        self.block.reverse()
++        self.peeled.reverse()
++
++    def best(self):
++        top = 0
++        for small in self.peeled[0]:
++            seen = self.block[0] & ((1 << ((self.cap - small) // self.factor + 1)) - 1)
++            if seen:
++                top = max(top, small + (seen.bit_length() - 1) * self.factor)
++        return top
++
++    def reaches(self, index, total):
++        for small in self.peeled[index]:
++            rest = total - small
++            if rest >= 0 and rest % self.factor == 0 and self.block[index] >> (rest // self.factor) & 1:
++                return True
++        return False
++
++
++def _table(amounts, cap):
++    """Reachability in whichever of the three forms these amounts make cheapest."""
++    if _sum_width(amounts):
++        return _BySums(amounts, cap)
++    factor = _peel(amounts)
++    if factor and cap // factor <= CENT_LIMIT:
++        return _ByUnits(amounts, cap, factor)
++    if cap <= CENT_LIMIT:
++        return _ByCents(amounts, cap)
++    raise ValueError("no reachable-total form fits these vouchers")
++
++
+@@ -434,2 +557,4 @@
+-    Vouchers whose amounts share a common unit are searched in that unit; the few whose total stays
+-    below the unit are tried in every combination for what the unit part leaves over.
++    Nothing in the contract bounds the balance or the voucher count, so neither is taken to
++    be small. The winning total is rebuilt by walking the ids in ascending order and taking
++    each one the ids after it can still finish, so taking the smallest id available at every
++    step gives the list that comes first and no tied set is ever enumerated.
+@@ -437 +562,2 @@
+-    if target <= 0 or not vouchers:
++    usable = sorted((name, amount) for name, amount in vouchers if amount <= target)
++    if not usable:
+@@ -439,33 +565,10 @@
+-    items = sorted(vouchers, key=lambda item: (item[1], item[0]))
+-    common = [0] * (len(items) + 1)
+-    for place in range(len(items) - 1, -1, -1):
+-        common[place] = gcd(common[place + 1], items[place][1])
+-    best, low = None, 0
+-    for count in range(min(len(items), 20) + 1):
+-        unit = common[count]
+-        if count == len(items) or low < unit:
+-            cost = (target // unit if unit else 0) + (1 << count)
+-            if best is None or cost < best[0]:
+-                best = (cost, count, unit)
+-        if count < len(items):
+-            low += items[count][1]
+-    _, count, unit = best
+-    small, large = sorted(items[:count]), sorted(items[count:])
+-    chosen, rest = [], target
+-    if large:
+-        mask = (1 << (target // unit + 1)) - 1
+-        reach = [1] * (len(large) + 1)
+-        for place in range(len(large) - 1, -1, -1):
+-            reach[place] = reach[place + 1] | ((reach[place + 1] << (large[place][1] // unit)) & mask)
+-        left = reach[0].bit_length() - 1
+-        rest = target - left * unit
+-        for place, (voucher, cents) in enumerate(large):
+-            step = cents // unit
+-            if step <= left and (reach[place + 1] >> (left - step)) & 1:
+-                chosen.append(voucher)
+-                left -= step
+-    options = [(0, ())]
+-    for voucher, cents in small:
+-        options += [(total + cents, names + (voucher,)) for total, names in options if total + cents <= rest]
+-    top = max(total for total, _ in options)
+-    return sorted(chosen + list(min(names for total, names in options if total == top)))
++    table = _table([amount for _, amount in usable], target)
++    standing = table.best()
++    chosen = []
++    for index, (name, amount) in enumerate(usable):
++        if amount <= standing and table.reaches(index + 1, standing - amount):
++            chosen.append(name)
++            standing -= amount
++            if standing == 0:
++                break
++    return sorted(chosen)
+diff -U0 -r -x trajectories /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/tests/test_output.py /tmp/ql-tariff-engine-audit-repair-20261029T0359/x/tariff-engine-audit-repair/tests/test_output.py
+--- /Users/mac/Desktop/Terminal Bench/QC/copies/f054899/tariff-engine-audit-repair/tests/test_output.py	2026-10-27 21:15:34
++++ /tmp/ql-tariff-engine-audit-repair-20261029T0359/x/tariff-engine-audit-repair/tests/test_output.py	2026-10-28 15:02:35
+@@ -7932,7 +7932 @@
+-    data = _write_texts(_corpus_texts("fresh"), _scratch("missing-") / "data")
+-    (data / "meter_reads.jsonl").unlink()
+-    (data / "billing_periods.csv").unlink()
+-    done = _cli(_open_tree(data))
+-    assert done.returncode == 2, done.returncode
+-    assert done.stdout == "", "standard output must stay empty"
+-    assert done.stderr.strip() == "missing input: meter_reads.jsonl", done.stderr[-200:]
++    """The first missing input is the one named, for every adjacent pair of the stated order.
+@@ -7939,0 +7934,14 @@
++    Two files are taken away each time so that the order itself is what decides the answer;
++    an adjacent pair settles one link of the chain, and the chain is only graded when every
++    link is.
++    """
++    pairs = [(0, 2)] + [(place, place + 1) for place in range(len(INPUT_FILES) - 1)]
++    for earlier, later in pairs:
++        data = _write_texts(_corpus_texts("fresh"), _scratch("missing-") / "data")
++        (data / INPUT_FILES[earlier]).unlink()
++        (data / INPUT_FILES[later]).unlink()
++        done = _cli(_open_tree(data))
++        gone = (INPUT_FILES[earlier], INPUT_FILES[later])
++        assert done.returncode == 2, (gone, done.returncode)
++        assert done.stdout == "", (gone, "standard output must stay empty")
++        assert done.stderr.strip() == f"missing input: {INPUT_FILES[earlier]}", (gone, done.stderr[-200:])
+@@ -7940,0 +7949 @@
++
+@@ -7954,0 +7964,7 @@
++    """A shipped visible test function is gone, or one of them is skipped.
++
++    Only the shipped functions are watched: their own bodies and decorators, the decorators
++    of whatever encloses them, and module-level code that could skip the file. A test the
++    agent adds of its own accord is none of this rule's business, so a platform guard on a
++    new test is not read as skipping a shipped one.
++    """
+@@ -7956 +7972,2 @@
+-    if set(_test_functions(shipped)) - set(_test_functions(delivered)):
++    kept = set(_test_functions(shipped))
++    if kept - set(_test_functions(delivered)):
+@@ -7959,4 +7976,17 @@
+-    for node in ast.walk(tree):
+-        name = node.attr if isinstance(node, ast.Attribute) else node.id if isinstance(node, ast.Name) else ""
+-        if name in {"skip", "skipIf", "skipUnless", "skipTest", "SkipTest", "expectedFailure"}:
+-            return True
++    watched: list[ast.AST] = []
++    for statement in tree.body:
++        if not isinstance(statement, (ast.ClassDef, ast.FunctionDef)):
++            watched.extend(node for node in ast.walk(statement) if isinstance(node, ast.Raise))
++    for holder in ast.walk(tree):
++        if not isinstance(holder, (ast.ClassDef, ast.FunctionDef)):
++            continue
++        if not any(isinstance(node, ast.FunctionDef) and node.name in kept for node in ast.walk(holder)):
++            continue
++        watched.extend(holder.decorator_list)
++        if isinstance(holder, ast.FunctionDef) and holder.name in kept:
++            watched.extend(holder.body)
++    for root in watched:
++        for node in ast.walk(root):
++            name = node.attr if isinstance(node, ast.Attribute) else node.id if isinstance(node, ast.Name) else ""
++            if name in {"skip", "skipIf", "skipUnless", "skipTest", "SkipTest", "expectedFailure"}:
++                return True

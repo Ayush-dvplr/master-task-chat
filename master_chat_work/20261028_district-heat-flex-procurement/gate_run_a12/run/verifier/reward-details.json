@@ -1,0 +1,600 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.4483,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.020833333333333332,
+        "detail": {
+          "score": 4.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_checks_a_drawn_allowance_on_its_own_extract",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which a site's allowance covers its offer in a later event only if no offer of that site was chosen in an earlier event, while an offer of that site is chosen in the earlier event, runs derive_report.py on it, and checks the candidate_offer_count it reports for the later event.",
+              "reasoning": "The synthetic extract gives S1 a 100-tick allowance and makes S2 draw from S1. Earlier event E2 selects O2 for 100 ticks, exhausting the shared allowance; later event E1's O5 is consequently unavailable. The test explicitly asserts E1 has candidate_offer_count == 0."
+            },
+            {
+              "id": "R2",
+              "name": "r2_checks_start_order_on_its_own_extract",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which two events share a site whose allowance covers only one of their offers, and the event that starts first has the greater event_id and the later sorting dispatch_start text (for example because the two start times carry different UTC offsets), runs derive_report.py on it, and checks which of the two events selects that site's offer.",
+              "reasoning": "Although the synthetic extract has the greater event_id E2 before E1 in season order and uses offsets, its dispatch_start text also sorts E2 before E1: 2027-01-01... precedes 2027-01-02.... It does not create the required inversion where the event starting first has later-sorting dispatch_start text."
+            },
+            {
+              "id": "R3",
+              "name": "r3_checks_a_composed_rate_above_cap_on_its_own_extract",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the credit_cents and cap_binding_count it reports against figures it worked out by hand.",
+              "reasoning": "Chosen offer O3 uses an override of 4000, event uplift of 1000, and public-segment adder of 750, giving a hand-composed pre-cap rate of 5750 above its 3000 cap. The synthetic test checks O3's event-region credit_cents == 2 and policy_audit cap_binding_count == 1."
+            },
+            {
+              "id": "R4",
+              "name": "r4_checks_two_half_cent_interval_amounts_on_its_own_extract",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which one chosen offer has two interval amounts of exactly half a cent, one whose whole cent below is even and one whose whole cent below is odd, works out that offer's credit_cents by hand, runs derive_report.py on the extract, and compares the two.",
+              "reasoning": "The synthetic extract exercises half-even rounding, but it does not give one chosen offer two exact half-cent interval amounts with different lower-neighbor parity. O2 has two 1.5-cent amounts, while O8 has two 0.5-cent amounts; neither single offer contains both parity cases."
+            },
+            {
+              "id": "R5",
+              "name": "r5_exact_arithmetic_for_reported_figures",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent's final derive_report.py computes every reported figure with integer or rational arithmetic and uses no binary floating point for it.",
+              "reasoning": "Reported arithmetic uses integers throughout, including explicit integer implementations of half-up and half-even rounding, integer tick sums, divmod-based largest remainder, and integer basis-point calculations. No binary floating-point arithmetic is used for reported figures."
+            },
+            {
+              "id": "R6",
+              "name": "r6_final_run_after_last_edit",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent runs its final derive_report.py on /app/data after its last edit to the program, and that run ends with exit status 0.",
+              "reasoning": "The last edit to derive_report.py occurred at step 13. It was subsequently run successfully on /app/data at steps 14 and 28; the final run completed normally and regenerated all report files."
+            },
+            {
+              "id": "R7",
+              "name": "r7_claims_a_check_its_output_contradicts",
+              "value": 1.0,
+              "raw": 1,
+              "weight": -5.0,
+              "description": "The response says a check of derive_report.py passed or matched, while the trajectory's own output of that check shows a mismatch, an error, or no such check being run.",
+              "reasoning": "The final response claims that every export-manifest record count and field checksum was reproduced exactly, but the trajectory only computes source-file sums in step 20 and does not show a comparison against the manifest values. It also claims an explicit candidate-accounting equality without showing that check. Thus at least one claimed passing check was not actually run in the recorded trajectory."
+            },
+            {
+              "id": "R8",
+              "name": "r8_reruns_with_a_pool_too_small_for_the_claims",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs derive_report.py on a copy of /app/data in which it has lowered one event-region's pool in pools.txt so far that the claims of that event-region's beneficiaries are no longer paid in full, and compares the grants that run reports for that event-region with grant cents it recomputes outside derive_report.py.",
+              "reasoning": "The agent tests small pools in a separately constructed synthetic extract, but it never copies /app/data, lowers a pool there, reruns derive_report.py, and compares the affected grants with an external recomputation."
+            },
+            {
+              "id": "R9",
+              "name": "r9_reruns_with_an_allowance_below_a_chosen_offer",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs derive_report.py on a copy of /app/data in which it has lowered the allowance that a chosen offer's site draws on below that offer's relief ticks, and checks whether that run still selects the offer.",
+              "reasoning": "There is no rerun on a copy of /app/data after lowering the allowance used by one of the shipped data's chosen offers."
+            },
+            {
+              "id": "R10",
+              "name": "r10_reruns_with_an_uplift_that_lifts_a_rate_above_its_cap",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent runs derive_report.py on a copy of /app/data in which it has raised one event's uplift so that a chosen offer's composed rate is above its rate card's cap, and compares the credit_cents that run reports for that offer's event-region with credit_cents it recomputes outside derive_report.py.",
+              "reasoning": "The synthetic extract covers a composed rate above a cap, but the agent does not copy /app/data, raise a shipped event's uplift, rerun the program, and externally recompute the affected event-region credit."
+            },
+            {
+              "id": "R11",
+              "name": "r11_derive_report_is_maintainable",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent leaves a /app/out/derive_report.py that a Python reviewer would accept as maintainable, judged on its names, function structure and error handling.",
+              "reasoning": "The final program is organized into focused loading, optimization, apportionment, document-building, and output functions, with descriptive names, constants for repeated field sets, a clear command-line entry point, and fail-fast parsing behavior. Despite its size, it is reasonably structured and reviewable."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_checks_a_drawn_allowance_on_its_own_extract\": {\n    \"score\": 1,\n    \"reasoning\": \"The synthetic extract gives S1 a 100-tick allowance and makes S2 draw from S1. Earlier event E2 selects O2 for 100 ticks, exhausting the shared allowance; later event E1's O5 is consequently unavailable. The test explicitly asserts E1 has candidate_offer_count == 0.\"\n  },\n  \"r2_checks_start_order_on_its_own_extract\": {\n    \"score\": 0,\n    \"reasoning\": \"Although the synthetic extract has the greater event_id E2 before E1 in season order and uses offsets, its dispatch_start text also sorts E2 before E1: 2027-01-01... precedes 2027-01-02.... It does not create the required inversion where the event starting first has later-sorting dispatch_start text.\"\n  },\n  \"r3_checks_a_composed_rate_above_cap_on_its_own_extract\": {\n    \"score\": 1,\n    \"reasoning\": \"Chosen offer O3 uses an override of 4000, event uplift of 1000, and public-segment adder of 750, giving a hand-composed pre-cap rate of 5750 above its 3000 cap. The synthetic test checks O3's event-region credit_cents == 2 and policy_audit cap_binding_count == 1.\"\n  },\n  \"r4_checks_two_half_cent_interval_amounts_on_its_own_extract\": {\n    \"score\": 0,\n    \"reasoning\": \"The synthetic extract exercises half-even rounding, but it does not give one chosen offer two exact half-cent interval amounts with different lower-neighbor parity. O2 has two 1.5-cent amounts, while O8 has two 0.5-cent amounts; neither single offer contains both parity cases.\"\n  },\n  \"r5_exact_arithmetic_for_reported_figures\": {\n    \"score\": 1,\n    \"reasoning\": \"Reported arithmetic uses integers throughout, including explicit integer implementations of half-up and half-even rounding, integer tick sums, divmod-based largest remainder, and integer basis-point calculations. No binary floating-point arithmetic is used for reported figures.\"\n  },\n  \"r6_final_run_after_last_edit\": {\n    \"score\": 1,\n    \"reasoning\": \"The last edit to derive_report.py occurred at step 13. It was subsequently run successfully on /app/data at steps 14 and 28; the final run completed normally and regenerated all report files.\"\n  },\n  \"r7_claims_a_check_its_output_contradicts\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response claims that every export-manifest record count and field checksum was reproduced exactly, but the trajectory only computes source-file sums in step 20 and does not show a comparison against the manifest values. It also claims an explicit candidate-accounting equality without showing that check. Thus at least one claimed passing check was not actually run in the recorded trajectory.\"\n  },\n  \"r8_reruns_with_a_pool_too_small_for_the_claims\": {\n    \"score\": 0,\n    \"reasoning\": \"The agent tests small pools in a separately constructed synthetic extract, but it never copies /app/data, lowers a pool there, reruns derive_report.py, and compares the affected grants with an external recomputation.\"\n  },\n  \"r9_reruns_with_an_allowance_below_a_chosen_offer\": {\n    \"score\": 0,\n    \"reasoning\": \"There is no rerun on a copy of /app/data after lowering the allowance used by one of the shipped data's chosen offers.\"\n  },\n  \"r10_reruns_with_an_uplift_that_lifts_a_rate_above_its_cap\": {\n    \"score\": 0,\n    \"reasoning\": \"The synthetic extract covers a composed rate above a cap, but the agent does not copy /app/data, raise a shipped event's uplift, rerun the program, and externally recompute the affected event-region credit.\"\n  },\n  \"r11_derive_report_is_maintainable\": {\n    \"score\": 1,\n    \"reasoning\": \"The final program is organized into focused loading, optimization, apportionment, document-building, and output functions, with descriptive names, constants for repeated field sets, a clear command-line entry point, and fail-fast parsing behavior. Despite its size, it is reasonably structured and reviewable.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.002109704641350211,
+        "detail": {
+          "score": 173.0,
+          "criteria": [
+            {
+              "name": "artifact_set_exists_and_parses",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "All ten declared artifacts exist and the nine JSON reports parse as objects."
+            },
+            {
+              "name": "canonical_serialization_and_integer_units",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every JSON report has sorted keys at every level, a trailing newline, no float or boolean, and a JSON integer at every place the schema gives an integer field."
+            },
+            {
+              "name": "report_keys_match_schema",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every object in the eight region, segment, audit and quality reports carries exactly the schema keys for its place."
+            },
+            {
+              "name": "report_arrays_in_schema_order",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every array in the shipped-data reports has one entry per item in the order schema.md gives."
+            },
+            {
+              "name": "selection_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "selection_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "intervals_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "intervals_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "tie_decisions_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "tie_decisions_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "segment_rows_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the selection, energy and floor fields of every event_regions entry in both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_rows_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the selection, energy and floor fields of every event_regions entry in both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "ledger_quality_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports allowance_blocked_offer_count and empty_candidate_groups in data_quality.json exactly as the contract defines them."
+            },
+            {
+              "name": "ledger_quality_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports allowance_blocked_offer_count and empty_candidate_groups in data_quality.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_North_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals object of region_North.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_North_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals object of region_North.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_South_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals object of region_South.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_South_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals object of region_South.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_West_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals object of region_West.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_West_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals object of region_West.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_East_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals object of region_East.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_East_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals object of region_East.json exactly as the contract defines them."
+            },
+            {
+              "name": "segment_totals_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals objects of both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_totals_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals objects of both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "summary_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports every value of summary.json exactly as the contract defines them."
+            },
+            {
+              "name": "summary_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports every value of summary.json exactly as the contract defines them."
+            },
+            {
+              "name": "labels_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports compliance_counts and site_labels of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "labels_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports compliance_counts and site_labels of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "quality_counts_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the row counts and data-quality counters of data_quality.json other than the allowance ledger counters exactly as the contract defines them."
+            },
+            {
+              "name": "quality_counts_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the row counts and data-quality counters of data_quality.json other than the allowance ledger counters exactly as the contract defines them."
+            },
+            {
+              "name": "credit_rows_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the credit_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "credit_rows_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports the credit_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_credit_rows_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the bid_cost_cents and credit_cents of every event_regions entry in both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_credit_rows_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports the bid_cost_cents and credit_cents of every event_regions entry in both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "funded_pool_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports grant_pool_cents and grant_funded_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "funded_pool_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports grant_pool_cents and grant_funded_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "grants_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the grants array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "grants_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports the grants array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "grant_allocation_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports grant_allocated_cents and grant_unallocated_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "grant_allocation_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports grant_allocated_cents and grant_unallocated_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "residual_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports residual_cents and residual_tie_pool_count of policy_audit.json and unallocated_pool_count of data_quality.json exactly as the contract defines them."
+            },
+            {
+              "name": "residual_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports residual_cents and residual_tie_pool_count of policy_audit.json and unallocated_pool_count of data_quality.json exactly as the contract defines them."
+            },
+            {
+              "name": "cap_binding_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports cap_binding_count of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "cap_binding_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports cap_binding_count of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "wide_0_portfolios_feasible",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Run on the first seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval, and a non-empty list wherever the optimal portfolio is non-empty."
+            },
+            {
+              "name": "wide_0_selection_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Run on the first seeded wide season extract, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "wide_0_tie_decisions_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Run on the first seeded wide season extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "wide_0_intervals_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Run on the first seeded wide season extract, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "wide_1_portfolios_feasible",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Run on the second seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval, and a non-empty list wherever the optimal portfolio is non-empty."
+            },
+            {
+              "name": "wide_1_selection_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Run on the second seeded wide season extract, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "wide_1_tie_decisions_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Run on the second seeded wide season extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "wide_1_intervals_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Run on the second seeded wide season extract, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "wide_2_portfolios_feasible",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Run on the third seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval, and a non-empty list wherever the optimal portfolio is non-empty."
+            },
+            {
+              "name": "wide_2_selection_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Run on the third seeded wide season extract, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "wide_2_tie_decisions_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Run on the third seeded wide season extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "wide_2_intervals_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Run on the third seeded wide season extract, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "wide_3_portfolios_feasible",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Run on the fourth seeded wide season extract, where every event-region has 20 to 26 sites with candidate offers, every event entry in the four region files lists distinct candidate offers of its event-region, at most one per site, within both ceilings in every interval, and a non-empty list wherever the optimal portfolio is non-empty."
+            },
+            {
+              "name": "wide_3_selection_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Run on the fourth seeded wide season extract, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "wide_3_tie_decisions_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Run on the fourth seeded wide season extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "wide_3_intervals_match",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Run on the fourth seeded wide season extract, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_rate_adder_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Raising the public segment rate adder in program.ini moves the credits of the region file as the contract says, with the same portfolios."
+            },
+            {
+              "name": "allowance_ticks_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Raising one site's allowance_ticks in site_allowances.tsv moves the candidates and portfolios of the later events that site takes part in, and no compliance label."
+            },
+            {
+              "name": "minimum_grant_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Raising minimum_grant_cents in program.ini moves the grants of the region file as the contract says, with the same portfolios and credits."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Run on a different extract, the program emits the summary of the shipped extract."
+            },
+            {
+              "name": "negative_reads_tests_or_reward_files",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The delivered program names a grader path or grader file in a string it uses."
+            },
+            {
+              "name": "negative_external_dependency_or_network",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "The delivered program imports a third-party or network module."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+$ grep -n -e "o < 50" -e "overall<50" MT/tools/intake.py
+exit=1 (1 = no hit)
+-- negative on OUT/bak/intake.py:
+11:      grep in staged environment/; gate check (tests<85, rubric<85, overall<50; Ayush 27 Oct 22:20) and kill rule
+104:    gate = t < 85 and r < 85 and o < 50
+106:    print(f"gate (tests<85, rubric<85, overall<50): {'MET' if gate else 'not met'} | kill rule tests>=95: {'KILL' if kill else 'no'}")
+$ grep -n "FINAL_GATE = 40" MT/tools/intake.py
+33:FINAL_GATE = 40
+-- negative on bak:
+0
+$ python3 MT/tools/intake.py --job district-heat-flex-procurement | grep -e gate -e tests
+scores tests 73.0 rubric 16.67 overall 44.84 runs 1
+gate (tests<85, rubric<85, final<40): not met | kill rule tests>=95: no
+-- negative (bak): python3 OUT/bak/intake.py --job district-heat-flex-procurement | grep gate
+Traceback (most recent call last):
+  File "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261028_upgrade/E1_tools/bak/intake.py", line 133, in <module>
+    main()
+    ~~~~^^
+  File "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261028_upgrade/E1_tools/bak/intake.py", line 129, in main
+    job(a) if a.job else session(a) if a.sha else ap.error("give SHA or --job SLUG")
+    ~~~^^^
+  File "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261028_upgrade/E1_tools/bak/intake.py", line 72, in job
+    cfg = json.loads((jd / "logs" / "job-config.json").read_text())
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mac/.local/share/uv/python/cpython-3.14.8-macos-aarch64-none/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/.local/share/uv/python/cpython-3.14.8-macos-aarch64-none/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/mac/Desktop/Terminal Bench/master_chat_work/20261028_upgrade/Terminal_2.0_Harbor_Harness/jobs/district-heat-flex-procurement/logs/job-config.json'
+$ python3 MT/tools/intake.py --job sentinel-policy-recompute | grep -e gate -e tests
+scores tests 80.95 rubric 0.0 overall 40.48 runs 1
+gate (tests<85, rubric<85, final<40): not met | kill rule tests>=95: no
+-- negative (bak): python3 OUT/bak/intake.py --job sentinel-policy-recompute | grep gate
+Traceback (most recent call last):
+  File "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261028_upgrade/E1_tools/bak/intake.py", line 133, in <module>
+    main()
+    ~~~~^^
+  File "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261028_upgrade/E1_tools/bak/intake.py", line 129, in main
+    job(a) if a.job else session(a) if a.sha else ap.error("give SHA or --job SLUG")
+    ~~~^^^
+  File "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261028_upgrade/E1_tools/bak/intake.py", line 72, in job
+    cfg = json.loads((jd / "logs" / "job-config.json").read_text())
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mac/.local/share/uv/python/cpython-3.14.8-macos-aarch64-none/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/.local/share/uv/python/cpython-3.14.8-macos-aarch64-none/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/mac/Desktop/Terminal Bench/master_chat_work/20261028_upgrade/Terminal_2.0_Harbor_Harness/jobs/sentinel-policy-recompute/logs/job-config.json'
+$ python3 MT/tools/intake.py --job sentinel-policy-recompute --event regrade   (no --apply)
+tree_sha 583e77e1ae94 (/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Tasks_INPUT/sentinel-policy-recompute)
+would append row (no --apply, nothing written): {"ist": "2026-10-29T01:16+05:30", "slug": "sentinel-policy-recompute", "event": "regrade", "rewards": {"tests": 80.95, "rubric": 0.0, "combined": 40.48}, "valid": false, "artefact_reason": "regrade without --ayush-ok", "tree_sha": "583e77e1ae94", "note": "", "report": "Terminal_2.0_Harbor_Harness/jobs/sentinel-policy-recompute"}
+-- with --ayush-ok (still no --apply):
+would append row (no --apply, nothing written): {"ist": "2026-10-29T01:16+05:30", "slug": "sentinel-policy-recompute", "event": "regrade", "rewards": {"tests": 80.95, "rubric": 0.0, "combined": 40.48}, "valid": true, "artefact_reason": null, "tree_sha": "583e77e1ae94", "note": "", "report": "Terminal_2.0_Harbor_Harness/jobs/sentinel-policy-recompute", "ayush_ok": "ok regrade it"}
+-- negative: --ayush-ok on non-regrade event:
+intake.py: error: --ayush-ok is only for --event regrade
+exit=0
+$ tree_sha (python) vs shell one-liner:
+cold-chain-backbone-quote python=8ca9c267f59b shell=8ca9c267f59b
+district-heat-flex-procurement python=e9d91966ed25 shell=e9d91966ed25
+$ python3 MT/tools/intake.py --job cold-chain-backbone-quote --event gate_run   (registry tree_sha empty today)
+tree_sha 8ca9c267f59b (/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Tasks_INPUT/cold-chain-backbone-quote)
+REFUSED gate_run: registry tree_sha empty: set it at freeze (status.py set cold-chain-backbone-quote tree_sha=...)
+exit=0
+scores.jsonl unchanged
+-- re-run of negatives with correct --harness and real exit codes:
+$ python3 OUT/bak/intake.py --job district-heat-flex-procurement --harness H | grep gate   (original code)
+gate (tests<85, rubric<85, overall<50): MET | kill rule tests>=95: no
+$ python3 OUT/bak/intake.py --job sentinel-policy-recompute --harness H | grep gate   (original code)
+gate (tests<85, rubric<85, overall<50): MET | kill rule tests>=95: no
+$ intake.py --job sentinel-policy-recompute --event run --ayush-ok x
+exit=2
+$ intake.py --job cold-chain-backbone-quote --event gate_run
+exit=1
+$ intake.py --job cold-chain-backbone-quote --event ql_rerun
+REFUSED ql_rerun: registry tree_sha empty: set it at freeze (status.py set cold-chain-backbone-quote tree_sha=...)
+-- mismatch case on a temp registry copy (MT_ROOT=/tmp/E1-a2, registry tree_sha=000000000000):
+REFUSED gate_run: tree_sha 8ca9c267f59b of /Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Tasks_INPUT/cold-chain-backbone-quote != registry tree_sha 000000000000
+exit=
+-- match case (tree_sha=8ca9c267f59b), no --apply:
+gate (tests<85, rubric<85, final<40): not met | kill rule tests>=95: KILL
+would append row (no --apply, nothing written): {"ist": "2026-10-29T01:16+05:30", "slug": "cold-chain-backbone-quote", "event": "gate_run", "rewards": {"tests": 100.0, "rubric": 70.0, "combined": 85.0
+exit=
+temp scores.jsonl still identical to real (nothing appended without --apply / on refusal)

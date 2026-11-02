@@ -1,0 +1,178 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_runs_shipped_command_first"
+description = "The agent runs the shipped quoting command, python3 -m task with PYTHONPATH set to /app/repo/src, on /app/ci before its first edit to a file under /app/repo/src/task, and the trajectory shows the exit status or error output of that run."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_recounts_previously_failing"
+description = "The agent recounts the previously failing test names from the FAIL and ERROR lines of /app/ci/failing_tests.log by a command separate from the repaired package and compares that set with previously_failing in /app/out/test_fixes.json, and the trajectory shows both counts."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_reruns_with_one_link_changed"
+description = "The agent runs the repaired command on a copy of the book in which it changed the km or band of one named link in links.jsonl, and the trajectory shows the quote of that link's project before and after the change."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_runs_with_a_book_file_removed"
+description = "The agent runs the repaired command on a copy of the book with one of the five book files removed, and the trajectory shows a non-zero exit, the line E_MISSING_FILE with that file's name on standard error and an output directory holding no document."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_times_a_built_far_reaching_book"
+description = "The agent runs the repaired command on a book it builds itself in which one project has more than 20 cold rooms and open links that join sites at least 10 corridor positions apart, and the trajectory shows the elapsed time of that run next to the limit stated in api_contract.md."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_compares_two_runs_byte_for_byte"
+description = "The agent runs the repaired command twice on the same book into two output directories and compares all four documents of the two runs byte for byte, and the trajectory shows the result of that comparison."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_runs_a_built_tie_book"
+description = "The agent runs the repaired command on a book it builds itself in which two networks of one project share the smallest quote, and the trajectory shows the links the package picks for that project together with the two link vectors."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_names_a_defect_before_editing"
+description = "The agent names at least one defect of the shipped package under /app/repo/src/task together with the api_contract.md rule it breaks, in a message or command output that comes before its first edit to a file under /app/repo/src/task."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R9"
+name = "r9_core_module_is_maintainable"
+description = "The agent leaves /app/repo/src/task/core.py in a state a Python reviewer would accept as maintainable, judged on its names, its split into functions of one purpose each and its handling of a project with no network."
+type = "binary"
+weight = 5
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "state_change"
+importance = "critically_important"
+
+[[criterion]]
+id = "R10"
+name = "r10_lists_rejected_projects"
+description = "The response lists every project of /app/ci that /app/out/module_parser.json records as rejected, each with the code written there."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R11"
+name = "r11_claims_a_check_with_no_run"
+description = "The response claims a check, test or re-run passed with no run after the agent's last edit to /app/repo/src/task/core.py in the trajectory that shows it passing."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "important"
+
+[[criterion]]
+id = "R12"
+name = "r12_states_a_wrong_quote_or_code"
+description = "The response states a quote or a rejection code for a named project that differs from the value written for that project in /app/out/module_core.json or /app/out/module_parser.json."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "critically_important"
+
+[[criterion]]
+id = "R13"
+name = "r13_overstates_a_check_size"
+description = "The response states that a check covered more books, projects or regression cases than the run of that check after the agent's last edit to /app/repo/src/task/core.py shows in the trajectory."
+type = "binary"
+weight = -3
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "final_answer"
+importance = "important"

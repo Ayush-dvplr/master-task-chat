@@ -1,0 +1,17 @@
+# TODO board 6c287ec (scratch /tmp/peer_qc-20261024T1612)
+- [x] name_session.py run (start)
+- [x] copies made in scratch
+- [x] P1 precheck detbench
+- [x] P1 precheck estate
+- [x] P1 precheck kvec
+- [x] P1 table + finding judgments (J3/J4 regex FPs: estate R9 unsupported_success_claim, estate R10 except-clause, kvec R6 code quality; {{}} f-string FPs; S6 CRLF stricter than kit)
+- [x] P2 loss.py x3 saved
+- [x] P2 trajectory attribution detbench (judge 10x3 CONDUCT verification criteria, judge_response quoted; tests: 2 GT boxes + R2-R4 scores, AMPLIFICATION)
+- [x] P2 trajectory attribution estate (ROOT A AMBIGUITY ECS 258-261 vs 267; agent estatectl.py:3496-3504; R10 bare pass :340-341)
+- [x] P2 trajectory attribution kvec (judge R5 CONDUCT: never ran on altered copy, judge_response)
+- [x] P3 anatomy per task (facts in LOG 16:50)
+- [x] P3 read our templates (_COMMON_RULES_v3, P2_build_v3, LEVER_RULES_v1, QC_FIX_PLAYBOOK_v2, SYNTHESIS) + 2 bundles + GROUP_SUMMARY/LEVER_PLAN
+- [x] P3 design-choice table with checks.json ids
+- [x] P4 PEER_QC.md
+- [x] P4 result.json
+- [x] cleanup docker images + name_session end

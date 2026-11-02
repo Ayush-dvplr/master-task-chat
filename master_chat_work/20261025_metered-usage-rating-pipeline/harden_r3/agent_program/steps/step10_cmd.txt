@@ -1,0 +1,40 @@
+cd /app/data && python3 - <<'EOF'
+import re, collections, json
+acc=collections.Counter()
+for l in open('collector_central.csv',encoding='utf-8').read().splitlines()[1:]:
+    acc[l.split(',')[2]]+=1
+print('central acct forms', collections.Counter(re.sub(r'[A-Z0-9]','',a) for a in acc), len(acc))
+print([a for a in acc if not re.fullmatch(r'AC\d+',a)][:15])
+ids=[l.split(',')[0] for l in open('collector_central.csv',encoding='utf-8').read().splitlines()[1:]]
+print('central dup', len(ids)-len(set(ids)))
+# accounts.csv
+rows=[l.split(',') for l in open('accounts.csv',encoding='utf-8').read().splitlines()[1:] if l]
+print('accounts', len(rows), rows[:3])
+print('segments', collections.Counter(r[1] for r in rows), 'plans', collections.Counter(r[2] for r in rows))
+print('with parent', sum(1 for r in rows if r[3].strip()))
+accids=[r[0] for r in rows]
+print('acct id weird', [a for a in accids if not re.fullmatch(r'AC\d+',a)][:10])
+# parent chains depth
+pm={r[0]:r[3].strip() for r in rows}
+def depth(a,seen=()):
+    p=pm.get(a,'')
+    return 0 if not p else 1+depth(p)
+print('max depth', max(depth(a) for a in accids))
+pc=open('plan_changes.log',encoding='utf-8').read().splitlines()
+print('plan change lines', len(pc), pc[:2])
+print('unmatched', sum(1 for l in pc if re.search(r'account=(\S+)',l).group(1) not in set(accids)))
+print('pc forms', collections.Counter(re.sub(r'=\S+','=X',l.split(' ',1)[1]) for l in pc))
+EOF
+
+=== OBSERVATION ===
+central acct forms Counter({'': 1211, ' ': 48, '  ': 41}) 1300
+['  AC53553', ' AC49529', ' AC42367', ' AC50953', '  AC61820', '  AC24538', ' AC16032', ' AC29623', '  AC13849', '  AC47181', '  AC12977', '  AC49603', '  AC53157', '  AC64653', ' AC29392']
+central dup 32
+accounts 2405 [['AC38736', 'consumer', 'committed', ''], ['AC58823', 'consumer', 'payg', ''], ['AC13773', 'smb', 'payg', '']]
+segments Counter({'smb': 724, 'consumer': 675, 'corporate': 615, 'enterprise': 391}) plans Counter({'committed': 1470, 'payg': 935})
+with parent 0
+acct id weird []
+max depth 0
+plan change lines 2208 ['2026-09-01T00:09:22Z change account=AC53513 segment=smb', '2026-09-01T00:16:48Z change account=AC67080 plan=committed']
+unmatched 59
+pc forms Counter({'change account=X plan=X': 886, 'change account=X segment=X': 747, 'change account=X plan=X segment=X': 575})

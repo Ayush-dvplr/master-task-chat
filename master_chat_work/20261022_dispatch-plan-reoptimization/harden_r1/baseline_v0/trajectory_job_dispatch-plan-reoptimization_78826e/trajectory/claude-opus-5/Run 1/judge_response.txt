@@ -1,0 +1,74 @@
+--- r1_discovers_export_set_through_sources ---
+{"score":"yes","reasoning":"The agent explicitly queried the manifest database's `sources` table (steps 10 and 12) to map all 55 exports to their roles, formats, record counts, and authority. The delivered solver also discovers the manifest by locating a SQLite database containing the `sources` table and builds its source/role mapping from those rows rather than inferring roles from filenames."}
+
+--- r2_modifies_export_under_app_data ---
+{"score":"no","reasoning":"The trajectory only reads and verifies files under /app/data. All created, edited, and deleted paths are under /app/out or /tmp, and the MD5 checks confirm /app/data remained unchanged."}
+
+--- r3_solves_capital_selection_exact_bounded ---
+{"score":"yes","reasoning":"The solver models eligible retrofit projects as binary bounded choices and uses an exact 0/1 knapsack dynamic program under the funded capital envelope. Its DP indexes exact reachable capital amounts using the GCD of the budget and project costs—which equals or refines the applicable capital grid—and exhaustively compares feasible selections by value, then cost and the contract’s indicator tie-break. It does not use the incumbent’s greedy ratio policy."}
+
+--- r4_computes_objective_from_registers ---
+{"score":"yes","reasoning":"The solver rebuilds coefficients and decisions from the authoritative registers, then computes `total_objective` as the sum of production, setup, holding, handling, shortfall penalty, and selected capex. It writes that computed value to `objective.json`. `solver_run_report.json` is read only for the incumbent baseline and comparison artifacts, not as the corrected objective source."}
+
+--- r5_inflates_penalty_schedule_page_streams ---
+{"score":"yes","reasoning":"The agent explicitly extracted PDF stream bodies from penalty_schedule.pdf and inflated them with zlib.decompress in steps 17 and 18, revealing the R|PARAM schedule rows. The delivered solver also implements read_pdf using zlib.decompress on each compressed page stream before parsing the schedule parameters."}
+
+--- r6_reads_energy_surcharge_from_memo ---
+{"score":"yes","reasoning":"The agent explicitly opened amendment_memo.docx as a ZIP, parsed word/document.xml paragraph-by-paragraph, joined each paragraph's w:t text, inspected the R|PARAM rows, and identified the winning energy_surcharge as 214 bps. The reusable solver likewise reads DOCX paragraphs and obtains energy_surcharge from the memo's PARAM records."}
+
+--- r7_orders_planning_horizon_fiscal_ordinal ---
+{"score":"yes","reasoning":"The solver derives the horizon from the authoritative `period_order` role, selects the live winning row for each period, reads each winner's `fiscal_ordinal`, and constructs `periods = sorted(ordinal, key=lambda p: (ordinal[p], p))`. This yields the register-defined fiscal order P05–P24 followed by P01–P04, which is then used throughout planning and period-oriented artifacts."}
+
+--- r8_binds_row_lifecycle_log_ledger ---
+{"score":"yes","reasoning":"The solver groups lifecycle events by row_uid, orders in-cutoff void/restore entries by sequence, and sets the row's lifecycle state from the trailing action. is_live then checks lifecycle_voided(row_uid), so a final restore sets the state to not voided and revives a row previously killed by an earlier void entry."}
+
+--- r9_multiplies_dozen_columns_demand_shards ---
+{"score":"yes","reasoning":"The solver explicitly distinguishes dozen-valued demand columns from plain-unit columns. In demand_units(), it first checks book.alias_dozens and returns as_int(row[column]) * book.scale('units_dz'); the scale authority supplies units_dz=12. If no dozen column is present, it checks book.alias_units and returns the integer value unchanged. Thus demand shard rows carrying units_dz are multiplied by twelve, while units, qty, and planned_units remain at face value."}
+
+--- r10_expands_kcents_before_currency ---
+{"score":"yes","reasoning":"In solver.py, cost amounts are multiplied by the applicable scale first (`amount * book.scale(...)`, where `kcents` maps to 1000) and only then passed to `to_usd_cents(...)` for EUR conversion. This ordering is used for base costs, overrides, and amendments."}
+
+--- r11_accumulates_amendment_register_amend_id ---
+{"score":"yes","reasoning":"The solver calls `book.accumulated('cost_amendment', 'amend_id', pair_key, amendment_value)`, deduplicating live amendment rows by `amend_id` and summing their signed values per item-period key. During coefficient construction it adds that accumulated amendment to the base value first, then checks `override_rows` and assigns `value` directly from the override, replacing the amended value in the required order."}
+
+--- r12_solves_per_item_lot_sizing ---
+{"score":"yes","reasoning":"The solver implements `lot_size` as an exact backward dynamic programme over the full fiscal horizon. For each start period it enumerates every contiguous coverage block `[start, end)`, computes exact production, setup, and cumulative holding cost, adds the optimal suffix cost, and records the minimum transition. It then reconstructs the blocks and runs this DP independently for every in-scope item."}
+
+--- r13_fills_plants_cheapest_first_handling ---
+{"score":"yes","reasoning":"The sourcing allocation explicitly orders plants for each period with `sorted(plants, key=lambda p: (handling_rate[(p, period)], p))`, then exhausts each plant's available capacity before moving to the next. This fills lower handling rates first and breaks equal-rate ties by ascending plant code."}
+
+--- r14_lowers_plant_handling_rate_summed ---
+{"score":"yes","reasoning":"The solver first computes each plant-period handling rate with the zone uplift (`handling_pre`), then sums `savings_cents` for all selected/funded projects by plant in `plant_savings`, and finally sets each plant-period rate to `max(min_handling, handling_pre_rate - plant_savings[plant])`. Thus the summed unit savings are deducted after the zone uplift is applied."}
+
+--- r15_handles_every_caught_error_explicitly ---
+{"score":"yes","reasoning":"All exception handlers in solver.py specify concrete exception types, such as zlib.error, sqlite3.DatabaseError, UnicodeDecodeError, TypeError, and ValueError. Each handler explicitly recovers by continuing discovery/parsing, retaining fallback data, or returning a defined fallback value; there are no bare or silently unhandled except clauses."}
+
+--- r16_delivers_solver_free_of_dead_code ---
+{"score":"no","reasoning":"The delivered solver emits numerous diagnostic key=value lines (for example budget, candidates, cutoff, objective, selected projects, and mismatch counts) during execution, so debug-style print output remains. This violates the requirement even if its defined functions are otherwise used and there is no commented-out code."}
+
+--- r17_determines_item_scope_live_status ---
+{"score":"yes","reasoning":"The solver derives item scope from `book.winners('item_status', ...)`, which filters the authoritative primary item-status register through live-status rules (cutoff, sentinel, row void, and lifecycle void) before selecting winning revisions. The stale `item_status_mirror` has authority `mirror`, is excluded by the default role-source filter, and is used only for input accounting rather than scope."}
+
+--- r18_identifies_plant_book_mirror_csv ---
+{"score":"yes","reasoning":"The agent inspected the manifest and explicitly found item_registry_bak.csv and plant_book_mirror.csv with authority \"mirror\" and mirror-specific roles. Its solver excludes mirror-authority sources from governing calculations, and the final response identifies both files as genuinely stale sources."}
+
+--- r19_reads_sequence_cutoff_from_export ---
+{"score":"yes","reasoning":"The agent explicitly queried ledger_authority.sqlite cutoff_control in Step 13 and obtained plan_sequence_cutoff=8140. The delivered solver also loads the contract_config source (runbook_params.yaml) and sets self.cutoff from control['plan_sequence_cutoff']."}
+
+--- r20_inspects_sample_rows_least_three ---
+{"score":"yes","reasoning":"Before implementing the parsing approach in the survey script at Step 25 and solver at Step 32, the agent sampled rows from many register formats. Step 15 ran `head -2` on CSV, TSV, PSV, JSONL, NDJSON, and TXT registers, explicitly including pipe-separated files such as `dmd_block_b1.psv` and line-delimited JSON files such as `cost_amendments.jsonl` and `dmd_block_b2.jsonl`. Steps 16–24 further inspected XML, JSON, DOCX, XLSX, PDF, NDJSON, CSV, and pipe-delimited text structures. Thus at least three formats, including both required formats, were inspected before committing to parsers."}
+
+--- r21_runs_optimizer_least_twice_compares ---
+{"score":"yes","reasoning":"The optimizer was run repeatedly into separate output directories, including /tmp/t2 in step 42 and /tmp/t3 in step 43. Step 43 explicitly compared the complete artifacts with `diff -r /tmp/t2 /tmp/t3` and reported deterministic byte-identical results. Additional runs and a renamed-input generality comparison were also performed."}
+
+--- r22_works_coefficient_rebuild_documented_order ---
+{"score":"yes","reasoning":"The solver rebuilds the base coefficient first by expanding its scale and applying currency conversion, then applies amendments and any replacement override, and only afterward computes and adds the energy uplift with `uplift = rhu(value * applied, bps_denominator)`. This follows the documented order of base expansion before energy uplift."}
+
+--- r23_reconciles_declared_record_counts_manifest ---
+{"score":"yes","reasoning":"The agent read declared record counts from the manifest's sources table, independently measured each source through format-specific readers, recorded both record_count_declared and rows_seen in data_quality.json, and explicitly identified the remaining mismatches: item_registry_bak.csv (235 vs 240), plant_book_mirror.csv (247 vs 240), and void_register.csv (209 vs 206). It also corrected its initial JSON counting error for solver_run_report.json before final publication."}
+
+--- r24_adopts_4200000_cent_steering_figure ---
+{"score":"no","reasoning":"The agent explicitly rejected the 4,200,000-cent steering figure as unratified and instead used 2,855,000 cents from the capital programme as the capital envelope in the solver and published artifacts."}
+
+--- r25_republishes_per_key_coefficients_incumbent ---
+{"score":"no","reasoning":"The solver computes corrected per-key coefficients from authoritative unit-cost, amendment, override, FX, energy, setup, holding, demand, and lifecycle registers. It reads incumbent_plan_dump.jsonl only for comparison in coefficient_corrections.csv; validation reports all 528 corrected in-scope unit-cost coefficients differ from their incumbent values."}

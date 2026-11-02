@@ -1,0 +1,19 @@
+148a149,150
+> 
+> SHARED_CAP = 4
+306c308,320
+<         total, chosen = max_weight_independent_set(self.ids, adj, self.benefit)
+---
+>         # A shared crew can work on at most four proposals of a portfolio: keep
+>         # only its four most valuable proposals as candidates.
+>         crews = defaultdict(list)
+>         for pid in self.ids:
+>             if self.book.crews[self.crew[pid]] == "shared":
+>                 crews[self.crew[pid]].append(pid)
+>         out = set()
+>         for ps in crews.values():
+>             ranked = sorted(ps, key=lambda p: (-self.benefit[p], p))
+>             out |= set(ranked[SHARED_CAP:])
+>         keep = [p for p in self.ids if p not in out]
+>         adj = dict((p, adj[p] - out) for p in keep)
+>         total, chosen = max_weight_independent_set(keep, adj, self.benefit)

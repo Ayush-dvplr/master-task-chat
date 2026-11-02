@@ -1,0 +1,99 @@
+3a4
+> import contextlib
+4a6
+> import pwd
+5a8
+> import signal
+8a12,13
+> import threading
+> import time
+1189,1193c1194,1204
+<     try:
+<         proc = subprocess.run(
+<             _untrusted_command([sys.executable, "-I", str(PROGRAM), "--input", str(source), "--output", str(target)]),
+<             cwd=str(cwd), capture_output=True, text=True, timeout=RUN_LIMIT_SEC, check=False)
+<     except subprocess.TimeoutExpired:
+---
+>     command = _untrusted_command([sys.executable, "-I", str(PROGRAM), "--input", str(source), "--output", str(target)])
+>     with _RUN_LOCK:
+>         proc = subprocess.Popen(command, cwd=str(cwd), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+>                                 text=True, start_new_session=True)
+>         try:
+>             _out, err = proc.communicate(timeout=RUN_LIMIT_SEC)
+>         except subprocess.TimeoutExpired:
+>             err = None
+>         finally:
+>             _reap(proc)
+>     if err is None:
+1195c1206
+<     return {"returncode": proc.returncode, "stderr": proc.stderr, "out": target}
+---
+>     return {"returncode": proc.returncode, "stderr": err, "out": target}
+1197a1209,1242
+> _RUN_LOCK = threading.Lock()
+> 
+> 
+> def _dropped_uid_pids() -> list[int]:
+>     """Live processes of the uid the delivered program runs as (zombies excluded)."""
+>     uid = pwd.getpwnam("nobody").pw_uid
+>     found = []
+>     for entry in Path("/proc").iterdir():
+>         if not entry.name.isdigit():
+>             continue
+>         with contextlib.suppress(OSError):
+>             if entry.stat().st_uid == uid and (entry / "stat").read_text().rsplit(")", 1)[1].split()[0] != "Z":
+>                 found.append(int(entry.name))
+>     return found
+> 
+> 
+> def _reap(proc: subprocess.Popen) -> None:
+>     """Kill the run's own session, then every process left under the dropped uid, before the check returns."""
+>     with contextlib.suppress(ProcessLookupError, PermissionError):
+>         os.killpg(proc.pid, signal.SIGKILL)
+>     if os.geteuid() == 0:
+>         for _ in range(100):
+>             pids = _dropped_uid_pids()
+>             if not pids:
+>                 break
+>             for pid in pids:
+>                 with contextlib.suppress(ProcessLookupError, PermissionError):
+>                     os.kill(pid, signal.SIGKILL)
+>             time.sleep(0.02)
+>     proc.kill()
+>     with contextlib.suppress(subprocess.TimeoutExpired):
+>         proc.communicate(timeout=5)
+> 
+> 
+1371a1417,1434
+> def _check_missing_first_named() -> None:
+>     _full_run_ok()
+>     name = REF_FILES[random.Random(HIDDEN_SEED + 5).choice(REF_REGIONS)]
+>     files = {k: v for k, v in _hidden_files().items() if k not in (name, "accounts.csv")}
+>     run = _run(files, "missing-two")
+>     assert run["returncode"] not in (0, None), "exit status %r with %s and accounts.csv absent" % (run["returncode"], name)
+>     assert ("missing input: " + name) in str(run["stderr"]), "stderr lacks 'missing input: %s'" % name
+> 
+> 
+> def _check_missing_reference() -> None:
+>     _full_run_ok()
+>     name = random.Random(HIDDEN_SEED + 6).choice([k for k in REF_INPUTS if k not in REF_FILES.values()])
+>     files = {k: v for k, v in _hidden_files().items() if k != name}
+>     run = _run(files, "missing-reference")
+>     assert run["returncode"] not in (0, None), "exit status %r with %s absent" % (run["returncode"], name)
+>     assert ("missing input: " + name) in str(run["stderr"]), "stderr lacks 'missing input: %s'" % name
+> 
+> 
+1723a1787,1796
+> @criterion(description="The program completes the fresh month, and with one collector file and accounts.csv removed it exits non-zero with 'missing input: <collector file name>' on stderr.")
+> def missing_input_first_named(workspace: Path) -> bool:
+>     return _holds(_check_missing_first_named)
+> 
+> 
+> @criterion(description="The program completes the fresh month, and with one reference file removed and every collector present it exits non-zero with 'missing input: <file name>' on stderr.")
+> def missing_reference_file(workspace: Path) -> bool:
+>     return _holds(_check_missing_reference)
+> 
+> 
+2023a2097,2098
+> criteria.missing_input_first_named(weight=3)
+> criteria.missing_reference_file(weight=3)

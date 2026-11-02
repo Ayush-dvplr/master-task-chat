@@ -1,0 +1,222 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 1.0,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "test_output",
+        "weight": 0.01,
+        "detail": {
+          "score": 100.0,
+          "criteria": [
+            {
+              "name": "stream_interleaved",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--stream on a hidden manifest of two interleaved streams: every decoded segment document matches, with state kept per stream_id across files."
+            },
+            {
+              "name": "stream_new_run",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--stream on a hidden manifest where streams end a run and start a new one: state carries only past a segment with stream_continues set."
+            },
+            {
+              "name": "stream_revision_change",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--stream on a hidden run whose segments change revision, including a revision 0 continuation after a remapping revision: every document matches."
+            },
+            {
+              "name": "stream_remap_alias",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--stream on a hidden aliased stream under revisions 4 to 7: short keys are remapped before the alias lookup, unlisted key bytes are their own ids."
+            },
+            {
+              "name": "stream_reset_mid_run",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--stream on a hidden manifest with a reset frame in the middle of a run of one stream while another stream keeps its state: every document matches."
+            },
+            {
+              "name": "stream_eval_mix",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--stream on a hidden mixed manifest (four streams, several runs, all revisions): every decoded segment document matches."
+            },
+            {
+              "name": "stream_challenge_mix",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--stream on a second hidden mixed manifest drawn from another seed: every decoded segment document matches."
+            },
+            {
+              "name": "single_remapped_modes",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "decode.py on a hidden segment under a remapping revision on an aliased stream with all four modes, overlong deltas and long keys: document matches."
+            },
+            {
+              "name": "single_escapes_ext",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "decode.py on a hidden segment whose bodies and extension payloads carry 0xAA and 0x1B bytes, with opaque extensions out of type order: document matches."
+            },
+            {
+              "name": "salvage_state",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--salvage on a hidden segment with damaged frames followed by delta and dict frames: records, damage offsets and header_defect match."
+            },
+            {
+              "name": "salvage_mix",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "--salvage on a hidden segment with a header defect, several damaged spans, false sync bytes and a damaged last frame: the salvage document matches."
+            },
+            {
+              "name": "encode_unmodified",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "encode.py rebuilds three hidden segments byte for byte from their decode documents (overlong deltas, opaque extensions, escapes, long keys)."
+            },
+            {
+              "name": "encode_edited",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "encode.py on three decoded hidden segments with one delta or raw value edited: output equals the reference encoder's bytes."
+            },
+            {
+              "name": "encode_new_record",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "encode.py on decoded hidden segments with new records added (delta, dict, long-key raw with an opaque extension, reset): output equals the reference."
+            },
+            {
+              "name": "reject_magic_over_version",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A hidden segment with both a bad magic and a bad version, and a file shorter than 20 bytes, are each rejected as bad_magic."
+            },
+            {
+              "name": "reject_version_over_reserved",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A hidden segment with a bad version and a non zero reserved byte is rejected as unsupported_version with the version it carries."
+            },
+            {
+              "name": "reject_reserved_offset15",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A hidden segment whose only non zero reserved byte is offset 15, with an impossible record count, is rejected as reserved_not_zero at offset 15."
+            },
+            {
+              "name": "reject_count_bound",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A segment whose record count times 5 equals the bytes between header and trailer decodes; one more record is rejected as record_count_overflow."
+            },
+            {
+              "name": "reject_crc_fields",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "A hidden segment with an edited header field is rejected as trailer_crc_mismatch with the expected and found checksums."
+            },
+            {
+              "name": "reset_clears_state",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "decode.py on a hidden segment with a reset frame between delta and dict frames: the document matches."
+            },
+            {
+              "name": "report_decoded_examples",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "decoded_examples.jsonl: at least 4 self-built lines, no reserved name prefix, each decoded value equals the reference and decode.py's output, coverage met."
+            },
+            {
+              "name": "report_roundtrip",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "roundtrip_report.json: one entry per example line, hashes and lengths of the example bytes, and encode.py rebuilding each example's decoded value exactly."
+            },
+            {
+              "name": "report_error_analysis",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "error_analysis.json cases: the six mutations of the first example line give the reference error objects, and decode.py prints the same objects."
+            },
+            {
+              "name": "report_format",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "format_report.json carries every key the appendix lists with the values computed from the shipped catalog."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Penalty: decode.py answers the shipped catalog captures exactly but gets every fresh capture of the same shape wrong (answers looked up, not decoded)."
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Penalty: decode.py prints different documents for one hidden segment file across three runs on the same path."
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Penalty: decode.py prints different documents for the same hidden segment bytes saved under three different file names and extensions."
+            },
+            {
+              "name": "negative_reads_training_corpus_at_runtime",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Penalty: decode.py reads the reference tables from /app/data while it runs (field names follow a planted copy of the tables)."
+            },
+            {
+              "name": "negative_rebinds_verifier_dependencies",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "Penalty: the workspace holds a .pth file or a module named after a standard library or grader module (sitecustomize, zlib, json, rewardkit and so on)."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

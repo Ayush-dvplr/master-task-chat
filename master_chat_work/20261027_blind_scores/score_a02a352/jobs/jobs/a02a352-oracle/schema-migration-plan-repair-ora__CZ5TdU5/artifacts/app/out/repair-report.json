@@ -1,0 +1,84 @@
+{
+  "checks": [
+    {
+      "name": "visible tests pass on the repaired repository",
+      "passed": true
+    },
+    {
+      "name": "python -m migrakit run on the shipped inputs from a foreign folder",
+      "passed": true
+    },
+    {
+      "name": "8000 feed lines produced 8000 records",
+      "passed": true
+    },
+    {
+      "name": "probe: a batch whose receipt states one line too many is the only receipt mismatch",
+      "passed": true
+    },
+    {
+      "name": "probe: a line rejected with E_ALIAS_CYCLE counts in its batch receipt and keeps a null fingerprint",
+      "passed": true
+    },
+    {
+      "name": "probe: an E_PARSE line naming a manifest batch has a null batch and is left out of that batch receipt",
+      "passed": true
+    },
+    {
+      "name": "probe: a prerequisite value ' NULL' is not a null token, so the record still migrates with it",
+      "passed": true
+    },
+    {
+      "name": "probe: plan_migration on a built graph of 1,082 schemas returns within the stated time",
+      "passed": true
+    },
+    {
+      "name": "probe: on that graph the plan equals a cheapest plan found by a separate search",
+      "passed": true
+    },
+    {
+      "name": "probe: with edge costs above one million and two plans of equal cost the smaller edge-id list wins",
+      "passed": true
+    },
+    {
+      "name": "probe: a file the contract does not name, added to a contract folder, leaves records and summary unchanged",
+      "passed": true
+    },
+    {
+      "name": "probe: a manifest batch with no lines matches a receipt of 0 and 00000000 and no other receipt",
+      "passed": true
+    },
+    {
+      "name": "probe: a command-line run into an output folder holding an older, longer run leaves only the fresh records",
+      "passed": true
+    },
+    {
+      "name": "probe: python -m migrakit --help exits with status 0",
+      "passed": true
+    },
+    {
+      "name": "probe: a contract file that cannot be parsed stops load_contracts with a message naming that file",
+      "passed": true
+    },
+    {
+      "name": "probe: raising one edge cost in a copy of the shipped contracts changes the plan of a shipped record that used it",
+      "passed": true
+    }
+  ],
+  "fixes": [
+    "core.records: FieldView keeps an explicit null as its own state, so the state signature, the planner and the operations all see it (N1).",
+    "core.records: presence and fill read the per-field policy column first; an empty null_counts_as column falls back to null_semantics.ini [presence], not to absent (N2, N3, N4).",
+    "core.planner: search over (schema, field states) with a heap ordered by (cost, edge-id list); prerequisites are checked on the record after the previous step and schemas may repeat (M6 to M8, K14).",
+    "core.executor: corrections apply on first arrival at their pinned schema and every edge's prerequisites are re-checked; a failing edge ends the record as failed with E_PREREQ_FAILED (C4, M11).",
+    "pipeline: replay identity keyed on the canonical partner, and a record holds its identity once it passes the partner stage even if planning then fails; lines processed in received_seq order (K13, K16).",
+    "pipeline: a payload string becomes null only when it equals a null token exactly (N6).",
+    "pipeline: the batch receipt covers the records whose batch is set and takes the K4 fingerprint of each such line as received, including lines rejected at the partner stage (K13, K15, K17).",
+    "parser.identity: every merge link is followed and a loop raises E_ALIAS_CYCLE (P2, P3).",
+    "parser.feed: a line that is not JSON becomes an E_PARSE record and the run continues (K15).",
+    "parser.contracts: a partner's own token line is used exactly as written, so an empty line means no tokens and the default line applies only to partners without a line (N7).",
+    "cli: relative paths resolve against the caller's working directory; __main__.py added so python -m migrakit works (K10).",
+    "report.classify: status and code come from the execution result, so a failed execution stays failed (M11).",
+    "report.summary: categories by code first in taxonomy order, partners in partner_order.tsv rank order (T1 to T3)."
+  ],
+  "package": "migrakit"
+}

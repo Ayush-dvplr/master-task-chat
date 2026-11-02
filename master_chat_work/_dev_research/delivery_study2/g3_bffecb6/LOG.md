@@ -1,0 +1,16 @@
+# LOG bffecb6 (IST)
+- 16:16 started; session rename ok (opencode); HEAD a7d269df; QC report search: see A files
+- 16:18 IST map files read (LEVER_RULES_v2, QC_RULINGS, QC_FIX_PLAYBOOK_v2, LEAK_LIBRARY, DELIVERY_LEARNINGS, SYNTHESIS); starting Step 1
+- 16:20 IST A_0b27b9dc written (GENUINE tests / PARTLY judge, R6 artefact)
+- 16:24 IST A_7e0d8feb written (GENUINE)
+- 16:32 IST A_e13fd332 written (GENUINE tests / PARTLY judge)
+- 16:38 IST A_c55a1967 written (PARTLY: version skew QC_Fixed tree; recorded 76.62 vs ctrf 70.13). Scratch: unzipped agent tool.zip into $TMPDIR/opencode/c55zip to read cli.py (no execution), deleted at once.
+- 16:30 IST (after compaction) resuming A_56fe3bdd
+- 16:32 IST A_56fe3bdd written (GENUINE; baseline root INFERRED batch02 p56 88 vs 92; detections r2-r4 root unresolved statically). Starting C cards.
+- 16:36 IST C_0b27b9dc written
+- 16:37 IST C_7e0d8feb written
+- 16:38 IST (after compaction) starting C_e13fd332
+- 16:45 IST c55a1967: found the run's data predates QC-fix d7163d8a4 (3 atlas-policy comment rules added after run). A_c55a1967 revised: value failures ARTEFACT (hidden at run time). Writing C_e13 tick + C_c55.
+- 16:50 IST C_c55a1967 written. Starting C_56fe3bdd.
+- 16:46 IST C_56fe3bdd written. Starting GROUP_SUMMARY.
+- 16:48 IST GROUP_SUMMARY.md and result_bffecb6.json written (parses). DONE.

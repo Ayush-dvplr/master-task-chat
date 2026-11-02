@@ -1,0 +1,58 @@
+{
+  "package": "migrakit",
+  "fixes": [
+    "core/records.py kept explicit nulls out of the field view and let an empty null_counts_as or fill column fall back to the wrong default (N1 to N4).",
+    "core/planner.py enumerated simple paths, checked every prerequisite against the record's first state and tie-broke on plan length; it now searches (schema, field state) by cost level and tie-breaks on the edge id lists themselves (M6 to M9, K14). The shipped helpers _stand_in and _advance are the readable reference for the state transitions _Machine compiles.",
+    "The two helpers of the old path enumeration, core.planner._better and core.planner._enumerate_paths, are gone with it; they are not listed in changed_functions because they no longer exist.",
+    "core/executor.py applied every correction up front and never checked a prerequisite; corrections are now applied on first arrival at their pinned schema and a failing prerequisite stops the run (C4, M11).",
+    "pipeline.py processed the feed in line order, keyed replay identity on the raw partner value, trimmed payload strings before matching null tokens, only held an identity when execution started, and skipped the fingerprints of records that failed the partner stage in the batch receipts (K13, K16, N6).",
+    "parser/identity.py followed one merge link only and never reported a merge cycle (P2, P3).",
+    "parser/feed.py let a line that is not JSON raise instead of rejecting it with E_PARSE (K15).",
+    "parser/contracts.py merged the default null tokens into every partner line and fell back to the default list for a partner whose line is empty (N7).",
+    "cli.py resolved relative paths against the package folder instead of the working directory, and the package had no __main__.py, so python -m migrakit failed (K10).",
+    "report/classify.py called every planned record migrated instead of reporting the execution's own status and code (K13, K17).",
+    "report/summary.py counted by_category on statuses rather than taxonomy categories and listed partners by id instead of by partner_order.tsv rank (T1 to T3)."
+  ],
+  "checks": [
+    {
+      "name": "visible tests pass",
+      "passed": true
+    },
+    {
+      "name": "run on the shipped inputs is deterministic",
+      "passed": true
+    },
+    {
+      "name": "every record carries exactly the K17 keys",
+      "passed": true
+    },
+    {
+      "name": "summary carries the K18 keys and receipt_mismatches",
+      "passed": true
+    },
+    {
+      "name": "the shipped batch receipts all agree with the feed",
+      "passed": true
+    },
+    {
+      "name": "state_signature, plan_migration and execute_plan leave their arguments alone",
+      "passed": true
+    },
+    {
+      "name": "rejections raise MigrationError with the K12 code",
+      "passed": true
+    },
+    {
+      "name": "planner matches a brute-force search over random graphs",
+      "passed": true
+    },
+    {
+      "name": "python -m migrakit run writes records.jsonl and run_summary.json below the working directory",
+      "passed": true
+    },
+    {
+      "name": "python -m migrakit --help exits with status 0",
+      "passed": true
+    }
+  ]
+}

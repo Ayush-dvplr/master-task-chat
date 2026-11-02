@@ -1,0 +1,22 @@
+# LOG 5a44fec (IST)
+- 10:51 date ran; name_session.py 5a44fec -> "codex: no match" / "opencode: ['ses_e8e7eb093ffeRdc1rrmDhZtPx0']" (list does not show '5a44fec' literally; not retried).
+- 10:51 repo HEAD 2dfb1f8f7b86db305b1f6afa63279873e6e918e4.
+- 10:52 knowledge map read (LEVER_RULES_v1, LEAK_LIBRARY, QC_RULINGS, QC_FIX_PLAYBOOK_v2, QC kit rules).
+- 10:55 Step 1 scan: all 9 result.json exception_info=null; pytest pass/fail lists extracted from report.json; CTRF messages empty for all failures; no negative fired in any task.
+- 10:57 IST A_h3 written: GENUINE; golden decoded; 'admitted' = placed (oracle) vs selected (agent), 29/99 lost
+- 10:58 IST A_inference written: GENUINE; constants wrong (fpga etc.); ledger fractions recorded 0 (binarisation? INFERRED)
+- 11:01 IST A_keyframe written: PARTLY; same-gen authority tie unstated (oracle precedence authority-service), value gate _replay_landed zeroes ~22 pts
+- 11:03 IST A_registry written: ARTEFACT (H6 permission bug; QC re-grade 139/139)
+- 11:04 IST A_restoration written: GENUINE (calibration fit outside candidate space)
+- 11:06 IST A_tollgate written: GENUINE (chain value 3; dependency .py form 3 contested vs runbook 8.5)
+- 11:10 IST A_vault written: ARTEFACT (orphan_prior_entries: prose 'prior_path column' vs Mirror last-wins dict; shipped tsv has 40 duplicate refs; agent followed prose)
+- 11:13 IST A_yard written: PARTLY (H6 artefact on program tier; genuine 21/68 vessel family per QC re-grade)
+- 11:16 IST C_chainfold written (gamma lever: unstated empty best_checkpoint; beta/delta root not located statically)
+- 11:17 IST C_h3 written (lever: overloaded term 'admitted'; HIDDEN RULE)
+- 11:21 IST C_inference written (lever: withheld constants, no candidate list, digest-only signal; plus reset timing split across sections)
+- 11:24 IST C_keyframe written (lever: same-generation winner implied by one witnessed cohort pair; value gate 36/109)
+- 11:27 IST C_restoration written (lever: calibration fit unique only inside unstated candidate set)
+- 11:29 IST C_tollgate written (genuine 3 judgement field; contested 3 .py scope contradiction)
+- 11:26 IST C_yard written (PARTLY; genuine 21 vessel family; spec names wrong readings + wrong-reading negatives, none fired)
+- 11:25 IST GROUP_SUMMARY.md written (7 patterns)
+- 11:25 IST result_5a44fec.json written, parses; temp dir cleaned

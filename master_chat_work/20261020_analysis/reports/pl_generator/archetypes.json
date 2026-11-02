@@ -1,0 +1,1397 @@
+[
+ {
+  "archetype": "build-repair",
+  "purpose": "Repair a deliberately broken stdlib-only Python package shipped as project.zip and deliver a verified source archive plus truthful JSON reports.",
+  "agent_task": "Extract /app/data/project.zip, find and fix 7 layered defects (package-dir, missing __init__, import cycle, syntax, tomli, clamp, off-by-ones), write /app/out/package.zip, selftest.json, build_report.json, module_core.json, module_metrics.json, dependency_resolution.json, summary.json (keys in report_contract.md).",
+  "emitted_files": [
+   {
+    "path": "environment/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 975,
+    "lines": 26
+   },
+   {
+    "path": "environment/data/build.log",
+    "format": "log",
+    "bytes": 1237910,
+    "lines": 15371
+   },
+   {
+    "path": "environment/data/ci_config.yaml",
+    "format": "yaml",
+    "bytes": 466,
+    "lines": 12
+   },
+   {
+    "path": "environment/data/compiler_flags.json",
+    "format": "json",
+    "bytes": 193,
+    "lines": 8
+   },
+   {
+    "path": "environment/data/dependency_manifest.json",
+    "format": "json",
+    "bytes": 356,
+    "lines": 19
+   },
+   {
+    "path": "environment/data/expected_targets.json",
+    "format": "json",
+    "bytes": 456,
+    "lines": 20
+   },
+   {
+    "path": "environment/data/module_map.json",
+    "format": "json",
+    "bytes": 471,
+    "lines": 9
+   },
+   {
+    "path": "environment/data/project.zip",
+    "format": "zip",
+    "bytes": 4588,
+    "lines": null
+   },
+   {
+    "path": "environment/data/report_contract.md",
+    "format": "md",
+    "bytes": 3142,
+    "lines": 46
+   },
+   {
+    "path": "environment/data/scoring_fixtures.jsonl",
+    "format": "jsonl",
+    "bytes": 668600,
+    "lines": 5500
+   },
+   {
+    "path": "instruction.md",
+    "format": "md",
+    "bytes": 1891,
+    "lines": 5
+   },
+   {
+    "path": "solution/TRUTH.md",
+    "format": "md",
+    "bytes": 28678,
+    "lines": 422
+   },
+   {
+    "path": "solution/solve.py",
+    "format": "py",
+    "bytes": 11068,
+    "lines": 340
+   },
+   {
+    "path": "solution/solve.sh",
+    "format": "sh",
+    "bytes": 1130,
+    "lines": 39
+   },
+   {
+    "path": "task.toml",
+    "format": "toml",
+    "bytes": 1489,
+    "lines": 47
+   },
+   {
+    "path": "tests/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 274,
+    "lines": 9
+   },
+   {
+    "path": "tests/judge.toml",
+    "format": "toml",
+    "bytes": 9005,
+    "lines": 244
+   },
+   {
+    "path": "tests/reward.toml",
+    "format": "toml",
+    "bytes": 186,
+    "lines": 7
+   },
+   {
+    "path": "tests/test.sh",
+    "format": "sh",
+    "bytes": 304,
+    "lines": 10
+   },
+   {
+    "path": "tests/test_output.py",
+    "format": "py",
+    "bytes": 208068,
+    "lines": 754
+   }
+  ],
+  "datagen": "dependency_manifest.json, compiler_flags.json (seeded zip compression/timestamp), expected_targets.json, module_map.json, ci_config.yaml, scoring_fixtures.jsonl (5,500 labelled rows), build.log (~15k lines); project/ template zipped to project.zip.",
+  "tests_summary": "19 checks (15 pos = 51, 4 neg = -16): archive layout/metadata, offline import as child, hidden seeded manifests, tomllib, edge cases, 6 report files vs embedded references, shipped tests preserved, no network/monkeypatch; negatives: hardcoded answers, fake artifact, neutered tests, nondeterminism/monkeypatch.",
+  "reward": "0.5*sum(pass*w)/P_test + 0.5*sum(judge*w)/P_judge; reward.toml weights { test_output = 0.00980392156862745, judge = 0.012195121951219513 }",
+  "hardness_hooks": [
+   "P-001",
+   "P-003",
+   "P-004",
+   "P-008",
+   "P-009",
+   "P-010",
+   "P-016"
+  ],
+  "author_must_edit": [
+   "instruction.md first sentence has empty CONTAINER_NOUN/PRODUCER_SYSTEM slots ('summarize  manifests from a .')",
+   "package name is 'task'",
+   "project/README.md and pyproject description carry empty noun/producer",
+   "any added hardness, data formats, hidden cases, judge criteria",
+   "real --author name"
+  ],
+  "must_not_change": [
+   "task.toml (schema 1.4, network roles, user 1000:1000, null_floor, discrimination_weight)",
+   "task.toml artifacts == archetype.toml artifacts (vb \u00a71.12)",
+   "environment/Dockerfile pinned FROM, apt layer, 'RUN mkdir -p /app && chown 1000:1000 /app', final 'COPY data /app/data', uid 1000 agent, openhands-sdk venv",
+   "tests/ exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml",
+   "judge.toml 5-key header; >=8 criteria; weights in {\u00b11,\u00b13,\u00b15}; sum|neg| <= sum pos",
+   "negative_hardcoded_sample_answers registered negative",
+   "TRUTH.md 'archetype:' line, 8 sections, focal/drift/trap labels, solution sha256s",
+   "no TODO/FIXME/XXX/PLACEHOLDER/<TAG>/{{X}} anywhere incl. zip members",
+   "environment/data flat, >= min_inputs files"
+  ],
+  "validate_result": "validate_bundle.py (strict default) exit 0, GATE PASS, 39 passed, 0 failed, 0 warnings; generated with --category software-engineering --seed 101",
+  "measured_totals": {
+   "bundle_files": 20,
+   "bundle_bytes": 2179250,
+   "data_files": 9,
+   "data_bytes": 1916182,
+   "data_lines": 21120,
+   "largest_data_file": "environment/data/build.log",
+   "data_formats": [
+    "json",
+    "jsonl",
+    "log",
+    "md",
+    "yaml",
+    "zip"
+   ]
+  }
+ },
+ {
+  "archetype": "cli-config",
+  "purpose": "Repair a local stdlib CLI from tool.zip and use it to produce deterministic flat config, profiles and a truthful command transcript.",
+  "agent_task": "Extract /app/data/tool.zip, fix the CLI, run init/set/validate/export-report, write /app/out/config.json, report.json, tool.zip, profile_dev.json, profile_prod.json, validation_report.json, summary.json.",
+  "emitted_files": [
+   {
+    "path": "environment/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 971,
+    "lines": 24
+   },
+   {
+    "path": "environment/data/change_journal.jsonl",
+    "format": "jsonl",
+    "bytes": 2130331,
+    "lines": 21000
+   },
+   {
+    "path": "environment/data/config_contract.md",
+    "format": "md",
+    "bytes": 3007,
+    "lines": 54
+   },
+   {
+    "path": "environment/data/config_schema.json",
+    "format": "json",
+    "bytes": 239,
+    "lines": 8
+   },
+   {
+    "path": "environment/data/defaults.json",
+    "format": "json",
+    "bytes": 240,
+    "lines": 12
+   },
+   {
+    "path": "environment/data/env_overrides.json",
+    "format": "json",
+    "bytes": 205,
+    "lines": 12
+   },
+   {
+    "path": "environment/data/sample_config_dev.json",
+    "format": "json",
+    "bytes": 74,
+    "lines": 5
+   },
+   {
+    "path": "environment/data/sample_config_prod.json",
+    "format": "json",
+    "bytes": 74,
+    "lines": 5
+   },
+   {
+    "path": "environment/data/tool.zip",
+    "format": "zip",
+    "bytes": 3290,
+    "lines": null
+   },
+   {
+    "path": "environment/data/validation_rules.json",
+    "format": "json",
+    "bytes": 662,
+    "lines": 46
+   },
+   {
+    "path": "instruction.md",
+    "format": "md",
+    "bytes": 1512,
+    "lines": 5
+   },
+   {
+    "path": "solution/TRUTH.md",
+    "format": "md",
+    "bytes": 26676,
+    "lines": 405
+   },
+   {
+    "path": "solution/solve.py",
+    "format": "py",
+    "bytes": 11942,
+    "lines": 318
+   },
+   {
+    "path": "solution/solve.sh",
+    "format": "sh",
+    "bytes": 293,
+    "lines": 8
+   },
+   {
+    "path": "task.toml",
+    "format": "toml",
+    "bytes": 1450,
+    "lines": 47
+   },
+   {
+    "path": "tests/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 274,
+    "lines": 9
+   },
+   {
+    "path": "tests/judge.toml",
+    "format": "toml",
+    "bytes": 6927,
+    "lines": 190
+   },
+   {
+    "path": "tests/reward.toml",
+    "format": "toml",
+    "bytes": 187,
+    "lines": 7
+   },
+   {
+    "path": "tests/test.sh",
+    "format": "sh",
+    "bytes": 304,
+    "lines": 10
+   },
+   {
+    "path": "tests/test_output.py",
+    "format": "py",
+    "bytes": 387150,
+    "lines": 498
+   }
+  ],
+  "datagen": "validation_rules.json, change_journal.jsonl (21,000 rows, 6% bad keys, ~15% out-of-bounds, invalid modes, 2% string numbers); templates ship config_schema.json, defaults.json (seed-derived base_config + trailer), env_overrides.json, 2 sample configs, config_contract.md, tool/ (zipped).",
+  "tests_summary": "18 checks (14 pos = 48, 4 neg = -16): flat config equals value derived from defaults + valid journal ops, real CLI transcript, repaired-not-bypassed source markers, CLI validate round trip, trailer, profiles, validation_report, summary; negatives: embedded policy numbers, nested/dynamic config, fake transcript, network/secret.",
+  "reward": "0.5*sum(pass*w)/P_test + 0.5*sum(judge*w)/P_judge; reward.toml weights { test_output = 0.010416666666666666, judge = 0.016666666666666666 }",
+  "hardness_hooks": [
+   "P-003",
+   "P-005",
+   "P-008",
+   "P-009",
+   "P-010",
+   "P-016"
+  ],
+  "author_must_edit": [
+   "defaults.json/config_schema.json producer and container are empty strings",
+   "negative_hardcoded_sample_answers matches visible numbers (MAX_RECORDS_BASE/TIMEOUT_MS_BASE) in CLI source: false-positive risk",
+   "any added hardness, data formats, hidden cases, judge criteria",
+   "real --author name"
+  ],
+  "must_not_change": [
+   "task.toml (schema 1.4, network roles, user 1000:1000, null_floor, discrimination_weight)",
+   "task.toml artifacts == archetype.toml artifacts (vb \u00a71.12)",
+   "environment/Dockerfile pinned FROM, apt layer, 'RUN mkdir -p /app && chown 1000:1000 /app', final 'COPY data /app/data', uid 1000 agent, openhands-sdk venv",
+   "tests/ exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml",
+   "judge.toml 5-key header; >=8 criteria; weights in {\u00b11,\u00b13,\u00b15}; sum|neg| <= sum pos",
+   "negative_hardcoded_sample_answers registered negative",
+   "TRUTH.md 'archetype:' line, 8 sections, focal/drift/trap labels, solution sha256s",
+   "no TODO/FIXME/XXX/PLACEHOLDER/<TAG>/{{X}} anywhere incl. zip members",
+   "environment/data flat, >= min_inputs files"
+  ],
+  "validate_result": "validate_bundle.py (strict default) exit 0, GATE PASS, 41 passed, 0 failed, 0 warnings; generated with --category system-admin --seed 202",
+  "measured_totals": {
+   "bundle_files": 20,
+   "bundle_bytes": 2575808,
+   "data_files": 9,
+   "data_bytes": 2138122,
+   "data_lines": 21239,
+   "largest_data_file": "environment/data/change_journal.jsonl",
+   "data_formats": [
+    "json",
+    "jsonl",
+    "md",
+    "zip"
+   ]
+  }
+ },
+ {
+  "archetype": "data-pipeline",
+  "purpose": "Normalise heterogeneous CSV/JSONL/pipe-text feeds into canonical JSONL and aggregates with a reusable stdlib transform.",
+  "agent_task": "Write /app/out/transform.py (python3 transform.py [IN] [OUT]) plus normalized.jsonl, summary.json, data_quality.json, product_summary.json, 5 region_*.json, 4 segment_*.json per schema.md.",
+  "emitted_files": [
+   {
+    "path": "environment/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 857,
+    "lines": 12
+   },
+   {
+    "path": "environment/data/adjustments.jsonl",
+    "format": "jsonl",
+    "bytes": 368639,
+    "lines": 2300
+   },
+   {
+    "path": "environment/data/calendar.csv",
+    "format": "csv",
+    "bytes": 57744,
+    "lines": 2223
+   },
+   {
+    "path": "environment/data/channels.csv",
+    "format": "csv",
+    "bytes": 41979,
+    "lines": 2051
+   },
+   {
+    "path": "environment/data/customers.csv",
+    "format": "csv",
+    "bytes": 94443,
+    "lines": 2401
+   },
+   {
+    "path": "environment/data/fx_rates.csv",
+    "format": "csv",
+    "bytes": 322583,
+    "lines": 13441
+   },
+   {
+    "path": "environment/data/inventory.csv",
+    "format": "csv",
+    "bytes": 164128,
+    "lines": 5192
+   },
+   {
+    "path": "environment/data/legacy.txt",
+    "format": "txt",
+    "bytes": 207739,
+    "lines": 2518
+   },
+   {
+    "path": "environment/data/product_catalog.csv",
+    "format": "csv",
+    "bytes": 85581,
+    "lines": 2101
+   },
+   {
+    "path": "environment/data/refunds.csv",
+    "format": "csv",
+    "bytes": 202170,
+    "lines": 2601
+   },
+   {
+    "path": "environment/data/regions.csv",
+    "format": "csv",
+    "bytes": 50248,
+    "lines": 2301
+   },
+   {
+    "path": "environment/data/sales.csv",
+    "format": "csv",
+    "bytes": 554644,
+    "lines": 8201
+   },
+   {
+    "path": "environment/data/schema.md",
+    "format": "md",
+    "bytes": 6858,
+    "lines": 122
+   },
+   {
+    "path": "instruction.md",
+    "format": "md",
+    "bytes": 2450,
+    "lines": 13
+   },
+   {
+    "path": "solution/TRUTH.md",
+    "format": "md",
+    "bytes": 27064,
+    "lines": 408
+   },
+   {
+    "path": "solution/solve.py",
+    "format": "py",
+    "bytes": 9541,
+    "lines": 242
+   },
+   {
+    "path": "solution/solve.sh",
+    "format": "sh",
+    "bytes": 77,
+    "lines": 3
+   },
+   {
+    "path": "task.toml",
+    "format": "toml",
+    "bytes": 1721,
+    "lines": 47
+   },
+   {
+    "path": "tests/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 274,
+    "lines": 9
+   },
+   {
+    "path": "tests/judge.toml",
+    "format": "toml",
+    "bytes": 7655,
+    "lines": 207
+   },
+   {
+    "path": "tests/reward.toml",
+    "format": "toml",
+    "bytes": 186,
+    "lines": 7
+   },
+   {
+    "path": "tests/test.sh",
+    "format": "sh",
+    "bytes": 304,
+    "lines": 10
+   },
+   {
+    "path": "tests/test_output.py",
+    "format": "py",
+    "bytes": 885790,
+    "lines": 555
+   }
+  ],
+  "datagen": "11 files: regions 2,300, customers 2,400, product_catalog 2,100, inventory ~5,200, channels 2,050, fx_rates ~13,400, calendar 2,222, sales 8,200, refunds 2,600, adjustments.jsonl 2,300, legacy.txt 2,500; p=0.004 per-field corruption plus casing/whitespace noise; schema.md template.",
+  "tests_summary": "17 checks (13 pos = 51, 4 neg = -16): exact visible outputs, rerun transform elsewhere, hidden row order and currency case, canonical formatting, no network/shell, no writes outside out dir; negatives: hardcoded answers, embedded visible records, network/shell, nondeterminism.",
+  "reward": "0.5*sum(pass*w)/P_test + 0.5*sum(judge*w)/P_judge; reward.toml weights { test_output = 0.00980392156862745, judge = 0.015151515151515152 }",
+  "hardness_hooks": [
+   "P-001",
+   "P-005",
+   "P-008",
+   "P-009",
+   "P-010",
+   "P-016"
+  ],
+  "author_must_edit": [
+   "instruction.md has empty PRODUCER_SYSTEM slot ('pipeline that a  left behind')",
+   "any added hardness, data formats, hidden cases, judge criteria",
+   "real --author name"
+  ],
+  "must_not_change": [
+   "task.toml (schema 1.4, network roles, user 1000:1000, null_floor, discrimination_weight)",
+   "task.toml artifacts == archetype.toml artifacts (vb \u00a71.12)",
+   "environment/Dockerfile pinned FROM, apt layer, 'RUN mkdir -p /app && chown 1000:1000 /app', final 'COPY data /app/data', uid 1000 agent, openhands-sdk venv",
+   "tests/ exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml",
+   "judge.toml 5-key header; >=8 criteria; weights in {\u00b11,\u00b13,\u00b15}; sum|neg| <= sum pos",
+   "negative_hardcoded_sample_answers registered negative",
+   "TRUTH.md 'archetype:' line, 8 sections, focal/drift/trap labels, solution sha256s",
+   "no TODO/FIXME/XXX/PLACEHOLDER/<TAG>/{{X}} anywhere incl. zip members",
+   "environment/data flat, >= min_inputs files",
+   "min_inputs/min_outputs 10/10"
+  ],
+  "validate_result": "validate_bundle.py (strict default) exit 0, GATE PASS, 40 passed, 0 failed, 0 warnings; generated with --category data-processing --seed 303",
+  "measured_totals": {
+   "bundle_files": 23,
+   "bundle_bytes": 3092675,
+   "data_files": 12,
+   "data_bytes": 2156756,
+   "data_lines": 45452,
+   "largest_data_file": "environment/data/sales.csv",
+   "data_formats": [
+    "csv",
+    "jsonl",
+    "md",
+    "txt"
+   ]
+  }
+ },
+ {
+  "archetype": "domain-calculation",
+  "purpose": "Derive an exact reconciled domain report from flat CSV/JSON records with a reusable deterministic script.",
+  "agent_task": "Write /app/out/derive_report.py DATA_DIR OUT_DIR plus summary.json, policy_audit.json, data_quality.json, region_{North,South,West,East}.json, segment_{commercial,public}.json per schema.md.",
+  "emitted_files": [
+   {
+    "path": "environment/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 981,
+    "lines": 26
+   },
+   {
+    "path": "environment/data/calendar.csv",
+    "format": "csv",
+    "bytes": 55533,
+    "lines": 2196
+   },
+   {
+    "path": "environment/data/customers.csv",
+    "format": "csv",
+    "bytes": 97995,
+    "lines": 2501
+   },
+   {
+    "path": "environment/data/discount_rules.json",
+    "format": "json",
+    "bytes": 5682,
+    "lines": 322
+   },
+   {
+    "path": "environment/data/fx_rates.csv",
+    "format": "csv",
+    "bytes": 52367,
+    "lines": 2533
+   },
+   {
+    "path": "environment/data/policy.json",
+    "format": "json",
+    "bytes": 43,
+    "lines": 3
+   },
+   {
+    "path": "environment/data/rate_table.csv",
+    "format": "csv",
+    "bytes": 47590,
+    "lines": 2161
+   },
+   {
+    "path": "environment/data/regions.csv",
+    "format": "csv",
+    "bytes": 36587,
+    "lines": 2401
+   },
+   {
+    "path": "environment/data/schema.md",
+    "format": "md",
+    "bytes": 5622,
+    "lines": 90
+   },
+   {
+    "path": "environment/data/tax_rules.json",
+    "format": "json",
+    "bytes": 16393,
+    "lines": 911
+   },
+   {
+    "path": "environment/data/thresholds.json",
+    "format": "json",
+    "bytes": 238,
+    "lines": 15
+   },
+   {
+    "path": "environment/data/transactions.csv",
+    "format": "csv",
+    "bytes": 943210,
+    "lines": 12001
+   },
+   {
+    "path": "instruction.md",
+    "format": "md",
+    "bytes": 1918,
+    "lines": 7
+   },
+   {
+    "path": "solution/TRUTH.md",
+    "format": "md",
+    "bytes": 27312,
+    "lines": 408
+   },
+   {
+    "path": "solution/solve.py",
+    "format": "py",
+    "bytes": 8201,
+    "lines": 197
+   },
+   {
+    "path": "solution/solve.sh",
+    "format": "sh",
+    "bytes": 199,
+    "lines": 7
+   },
+   {
+    "path": "task.toml",
+    "format": "toml",
+    "bytes": 1533,
+    "lines": 47
+   },
+   {
+    "path": "tests/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 274,
+    "lines": 9
+   },
+   {
+    "path": "tests/judge.toml",
+    "format": "toml",
+    "bytes": 7388,
+    "lines": 206
+   },
+   {
+    "path": "tests/reward.toml",
+    "format": "toml",
+    "bytes": 187,
+    "lines": 7
+   },
+   {
+    "path": "tests/test.sh",
+    "format": "sh",
+    "bytes": 304,
+    "lines": 10
+   },
+   {
+    "path": "tests/test_output.py",
+    "format": "py",
+    "bytes": 595999,
+    "lines": 565
+   }
+  ],
+  "datagen": "discount_rules.json 320 codes, customers 2,500, regions 2,400 sites, tax_rules (default/region/900 site overrides), rate_table 2,160 text multipliers, fx_rates, calendar 2,200 with 1.2% holes, transactions 12,000 (8% credits, 0-8 day lag), thresholds.json, policy.json; schema.md template.",
+  "tests_summary": "20 checks (16 pos = 54, 4 neg = -16): summary/policy_audit/data_quality/region/segment files vs reference, hidden reseeded outputs, rounding/FX/discount/clamp, unprivileged run, canonical serialisation; negatives: hardcoded answers, missing sections, reads tests/reward, external dependency/network.",
+  "reward": "0.5*sum(pass*w)/P_test + 0.5*sum(judge*w)/P_judge; reward.toml weights { test_output = 0.009259259259259259, judge = 0.013157894736842105 }",
+  "hardness_hooks": [
+   "P-001",
+   "P-005",
+   "P-008",
+   "P-009",
+   "P-010",
+   "P-016"
+  ],
+  "author_must_edit": [
+   "instruction.md has empty CONTAINER_NOUN/PRODUCER_SYSTEM slots ('a  reconciliation extract from ,')",
+   "any added hardness, data formats, hidden cases, judge criteria",
+   "real --author name"
+  ],
+  "must_not_change": [
+   "task.toml (schema 1.4, network roles, user 1000:1000, null_floor, discrimination_weight)",
+   "task.toml artifacts == archetype.toml artifacts (vb \u00a71.12)",
+   "environment/Dockerfile pinned FROM, apt layer, 'RUN mkdir -p /app && chown 1000:1000 /app', final 'COPY data /app/data', uid 1000 agent, openhands-sdk venv",
+   "tests/ exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml",
+   "judge.toml 5-key header; >=8 criteria; weights in {\u00b11,\u00b13,\u00b15}; sum|neg| <= sum pos",
+   "negative_hardcoded_sample_answers registered negative",
+   "TRUTH.md 'archetype:' line, 8 sections, focal/drift/trap labels, solution sha256s",
+   "no TODO/FIXME/XXX/PLACEHOLDER/<TAG>/{{X}} anywhere incl. zip members",
+   "environment/data flat, >= min_inputs files",
+   "min_inputs/min_outputs 10/10"
+  ],
+  "validate_result": "validate_bundle.py (strict default) exit 0, GATE PASS, 40 passed, 0 failed, 0 warnings; generated with --category mathematics --seed 404",
+  "measured_totals": {
+   "bundle_files": 22,
+   "bundle_bytes": 1905556,
+   "data_files": 11,
+   "data_bytes": 1261260,
+   "data_lines": 25134,
+   "largest_data_file": "environment/data/transactions.csv",
+   "data_formats": [
+    "csv",
+    "json",
+    "md"
+   ]
+  }
+ },
+ {
+  "archetype": "format-recovery",
+  "purpose": "Implement a decoder and byte-exact encoder for a seeded binary container format from its complete written specification.",
+  "agent_task": "Write /app/decode.py and /app/encode.py (stdlib, no helpers, no /app/data reads at runtime) plus /app/out/decoded_examples.jsonl, format_report.json, roundtrip_report.json, error_analysis.json.",
+  "emitted_files": [
+   {
+    "path": "environment/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 978,
+    "lines": 26
+   },
+   {
+    "path": "environment/data/VAULT-capture-log.jsonl",
+    "format": "jsonl",
+    "bytes": 2203344,
+    "lines": 20000
+   },
+   {
+    "path": "environment/data/VAULT-container-format.md",
+    "format": "md",
+    "bytes": 6588,
+    "lines": 129
+   },
+   {
+    "path": "environment/data/VAULT-decoder-appendix.md",
+    "format": "md",
+    "bytes": 3787,
+    "lines": 58
+   },
+   {
+    "path": "environment/data/VAULT-encoder-notes.md",
+    "format": "md",
+    "bytes": 921,
+    "lines": 18
+   },
+   {
+    "path": "environment/data/VAULT-error-codes.md",
+    "format": "md",
+    "bytes": 731,
+    "lines": 16
+   },
+   {
+    "path": "environment/data/VAULT-glossary.md",
+    "format": "md",
+    "bytes": 858,
+    "lines": 19
+   },
+   {
+    "path": "environment/data/VAULT-varint-crc-primer.md",
+    "format": "md",
+    "bytes": 766,
+    "lines": 16
+   },
+   {
+    "path": "instruction.md",
+    "format": "md",
+    "bytes": 3663,
+    "lines": 24
+   },
+   {
+    "path": "solution/TRUTH.md",
+    "format": "md",
+    "bytes": 26284,
+    "lines": 394
+   },
+   {
+    "path": "solution/solve.py",
+    "format": "py",
+    "bytes": 11906,
+    "lines": 290
+   },
+   {
+    "path": "solution/solve.sh",
+    "format": "sh",
+    "bytes": 3180,
+    "lines": 85
+   },
+   {
+    "path": "task.toml",
+    "format": "toml",
+    "bytes": 1448,
+    "lines": 47
+   },
+   {
+    "path": "tests/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 274,
+    "lines": 9
+   },
+   {
+    "path": "tests/judge.toml",
+    "format": "toml",
+    "bytes": 8424,
+    "lines": 225
+   },
+   {
+    "path": "tests/reward.toml",
+    "format": "toml",
+    "bytes": 187,
+    "lines": 7
+   },
+   {
+    "path": "tests/test.sh",
+    "format": "sh",
+    "bytes": 304,
+    "lines": 10
+   },
+   {
+    "path": "tests/test_output.py",
+    "format": "py",
+    "bytes": 58069,
+    "lines": 1483
+   }
+  ],
+  "datagen": "Only <TAG>-capture-log.jsonl: 20,000 unlabelled {capture_id, hex} rows, ~9% damaged, generated by the verifier's own _build_capture_log; 6 spec .md templates rendered with the seed grammar.",
+  "tests_summary": "29 checks (24 pos = 72, 5 neg = -23): decode raw i16/i32, delta, dict, mixed, signed boundary, long/short keys, error paths bad magic/version/CRC with precedence, encoder round trip on samples and eval corpus, 4 report artifacts; negatives: hardcoded answers, filename dependence, reads /app/data at runtime, rebinds stdlib, nondeterminism.",
+  "reward": "0.5*sum(pass*w)/P_test + 0.5*sum(judge*w)/P_judge; reward.toml weights { test_output = 0.006944444444444444, judge = 0.014705882352941176 }",
+  "hardness_hooks": [
+   "P-001",
+   "P-002",
+   "P-005",
+   "P-008",
+   "P-009",
+   "P-010",
+   "P-012",
+   "P-016"
+  ],
+  "author_must_edit": [
+   "solve.sh Phase 1/2 loop over sample_/field_ files that do not ship (no-op)",
+   "any added hardness, data formats, hidden cases, judge criteria",
+   "real --author name"
+  ],
+  "must_not_change": [
+   "task.toml (schema 1.4, network roles, user 1000:1000, null_floor, discrimination_weight)",
+   "task.toml artifacts == archetype.toml artifacts (vb \u00a71.12)",
+   "environment/Dockerfile pinned FROM, apt layer, 'RUN mkdir -p /app && chown 1000:1000 /app', final 'COPY data /app/data', uid 1000 agent, openhands-sdk venv",
+   "tests/ exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml",
+   "judge.toml 5-key header; >=8 criteria; weights in {\u00b11,\u00b13,\u00b15}; sum|neg| <= sum pos",
+   "negative_hardcoded_sample_answers registered negative",
+   "TRUTH.md 'archetype:' line, 8 sections, focal/drift/trap labels, solution sha256s",
+   "no TODO/FIXME/XXX/PLACEHOLDER/<TAG>/{{X}} anywhere incl. zip members",
+   "environment/data flat, >= min_inputs files",
+   "magic/version/tag-prefixed names/extension/grammar consistent across spec, solve.py, test_output.py, capture log: regenerate rather than hand-edit"
+  ],
+  "validate_result": "validate_bundle.py (strict default) exit 0, GATE PASS, 49 passed, 0 failed, 0 warnings; generated with --category security --seed 505",
+  "measured_totals": {
+   "bundle_files": 18,
+   "bundle_bytes": 2331712,
+   "data_files": 7,
+   "data_bytes": 2216995,
+   "data_lines": 20256,
+   "largest_data_file": "environment/data/VAULT-capture-log.jsonl",
+   "data_formats": [
+    "jsonl",
+    "md"
+   ]
+  }
+ },
+ {
+  "archetype": "performance",
+  "purpose": "Write a fast, exact single-pass event aggregator and benchmark reports across five workloads.",
+  "agent_task": "Write /app/out/optimize.py (aggregate(events, rules) + CLI modes) and scenario_{visible,peak,steady,burst,latency}.json, perf_report.json, bottleneck_analysis.json, recommendations.json, data_quality.json per schema.md; median <= 0.70 x baseline.",
+  "emitted_files": [
+   {
+    "path": "environment/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 974,
+    "lines": 26
+   },
+   {
+    "path": "environment/data/accounts.csv",
+    "format": "csv",
+    "bytes": 40348,
+    "lines": 2201
+   },
+   {
+    "path": "environment/data/baseline_metrics.json",
+    "format": "json",
+    "bytes": 348,
+    "lines": 15
+   },
+   {
+    "path": "environment/data/cost_model.json",
+    "format": "json",
+    "bytes": 145,
+    "lines": 7
+   },
+   {
+    "path": "environment/data/events.csv",
+    "format": "csv",
+    "bytes": 121179,
+    "lines": 3701
+   },
+   {
+    "path": "environment/data/hardware_profile.json",
+    "format": "json",
+    "bytes": 223,
+    "lines": 8
+   },
+   {
+    "path": "environment/data/index_config.json",
+    "format": "json",
+    "bytes": 341,
+    "lines": 20
+   },
+   {
+    "path": "environment/data/query_plan.json",
+    "format": "json",
+    "bytes": 873,
+    "lines": 47
+   },
+   {
+    "path": "environment/data/rules.json",
+    "format": "json",
+    "bytes": 407,
+    "lines": 26
+   },
+   {
+    "path": "environment/data/schema.md",
+    "format": "md",
+    "bytes": 4729,
+    "lines": 72
+   },
+   {
+    "path": "environment/data/thresholds.json",
+    "format": "json",
+    "bytes": 314,
+    "lines": 17
+   },
+   {
+    "path": "environment/data/workload_burst.csv",
+    "format": "csv",
+    "bytes": 124487,
+    "lines": 3701
+   },
+   {
+    "path": "environment/data/workload_latency.csv",
+    "format": "csv",
+    "bytes": 125607,
+    "lines": 3701
+   },
+   {
+    "path": "environment/data/workload_peak.csv",
+    "format": "csv",
+    "bytes": 126021,
+    "lines": 3701
+   },
+   {
+    "path": "environment/data/workload_steady.csv",
+    "format": "csv",
+    "bytes": 122009,
+    "lines": 3701
+   },
+   {
+    "path": "instruction.md",
+    "format": "md",
+    "bytes": 2048,
+    "lines": 17
+   },
+   {
+    "path": "solution/TRUTH.md",
+    "format": "md",
+    "bytes": 26217,
+    "lines": 396
+   },
+   {
+    "path": "solution/solve.py",
+    "format": "py",
+    "bytes": 9642,
+    "lines": 216
+   },
+   {
+    "path": "solution/solve.sh",
+    "format": "sh",
+    "bytes": 519,
+    "lines": 16
+   },
+   {
+    "path": "task.toml",
+    "format": "toml",
+    "bytes": 1621,
+    "lines": 47
+   },
+   {
+    "path": "tests/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 274,
+    "lines": 9
+   },
+   {
+    "path": "tests/judge.toml",
+    "format": "toml",
+    "bytes": 7457,
+    "lines": 208
+   },
+   {
+    "path": "tests/reward.toml",
+    "format": "toml",
+    "bytes": 186,
+    "lines": 7
+   },
+   {
+    "path": "tests/test.sh",
+    "format": "sh",
+    "bytes": 304,
+    "lines": 10
+   },
+   {
+    "path": "tests/test_output.py",
+    "format": "py",
+    "bytes": 308717,
+    "lines": 595
+   }
+  ],
+  "datagen": "accounts.csv 2,200; events.csv + 4 workload_*.csv x 3,700 rows (25% hot accounts); rules, thresholds, baseline_metrics, cost_model, hardware_profile, query_plan, index_config JSON; schema.md template.",
+  "tests_summary": "17 checks (13 pos = 49, 4 neg = -16): import + aggregate, visible exact, hidden seeded workload exact, canonical CLI JSON, scenario and summary artifacts, tie-breaking, checksum, truthful perf report, stdlib/no tests access, unprivileged execution, repeated-median speed gate; negatives: hardcoded answers, reads tests/hidden paths, fake perf report, time/randomness tricks.",
+  "reward": "0.5*sum(pass*w)/P_test + 0.5*sum(judge*w)/P_judge; reward.toml weights { test_output = 0.01020408163265306, judge = 0.013157894736842105 }",
+  "hardness_hooks": [
+   "P-001",
+   "P-007",
+   "P-008",
+   "P-009",
+   "P-010",
+   "P-011",
+   "P-016"
+  ],
+  "author_must_edit": [
+   "instruction.md has empty CONTAINER_NOUN/PRODUCER_SYSTEM slots ('a deterministic  workload from a ,')",
+   "any added hardness, data formats, hidden cases, judge criteria",
+   "real --author name"
+  ],
+  "must_not_change": [
+   "task.toml (schema 1.4, network roles, user 1000:1000, null_floor, discrimination_weight)",
+   "task.toml artifacts == archetype.toml artifacts (vb \u00a71.12)",
+   "environment/Dockerfile pinned FROM, apt layer, 'RUN mkdir -p /app && chown 1000:1000 /app', final 'COPY data /app/data', uid 1000 agent, openhands-sdk venv",
+   "tests/ exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml",
+   "judge.toml 5-key header; >=8 criteria; weights in {\u00b11,\u00b13,\u00b15}; sum|neg| <= sum pos",
+   "negative_hardcoded_sample_answers registered negative",
+   "TRUTH.md 'archetype:' line, 8 sections, focal/drift/trap labels, solution sha256s",
+   "no TODO/FIXME/XXX/PLACEHOLDER/<TAG>/{{X}} anywhere incl. zip members",
+   "environment/data flat, >= min_inputs files",
+   "min_inputs/min_outputs 10/10"
+  ],
+  "validate_result": "validate_bundle.py (strict default) exit 0, GATE PASS, 40 passed, 0 failed, 0 warnings; generated with --category optimization --seed 606",
+  "measured_totals": {
+   "bundle_files": 25,
+   "bundle_bytes": 1024990,
+   "data_files": 14,
+   "data_bytes": 667031,
+   "data_lines": 20918,
+   "largest_data_file": "environment/data/workload_peak.csv",
+   "data_formats": [
+    "csv",
+    "json",
+    "md"
+   ]
+  }
+ },
+ {
+  "archetype": "repo-patch",
+  "purpose": "Repair a broken local Python repository (5 layers) and deliver a patched archive plus truthful repair reports.",
+  "agent_task": "Extract /app/data/repo.zip, fix packaging, missing __init__, cycle, parser, report; write /app/out/patched-repo.zip, repair-report.json, module_core.json, module_parser.json, module_report.json, test_fixes.json, summary.json.",
+  "emitted_files": [
+   {
+    "path": "environment/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 857,
+    "lines": 12
+   },
+   {
+    "path": "environment/data/api_contract.md",
+    "format": "md",
+    "bytes": 2697,
+    "lines": 45
+   },
+   {
+    "path": "environment/data/build_config.json",
+    "format": "json",
+    "bytes": 291,
+    "lines": 20
+   },
+   {
+    "path": "environment/data/failing_tests.log",
+    "format": "log",
+    "bytes": 1512686,
+    "lines": 25599
+   },
+   {
+    "path": "environment/data/lint_report.json",
+    "format": "json",
+    "bytes": 114429,
+    "lines": 4933
+   },
+   {
+    "path": "environment/data/package_manifest.json",
+    "format": "json",
+    "bytes": 216,
+    "lines": 13
+   },
+   {
+    "path": "environment/data/regression_cases.jsonl",
+    "format": "jsonl",
+    "bytes": 783787,
+    "lines": 2403
+   },
+   {
+    "path": "environment/data/repo.zip",
+    "format": "zip",
+    "bytes": 2195,
+    "lines": null
+   },
+   {
+    "path": "instruction.md",
+    "format": "md",
+    "bytes": 1613,
+    "lines": 5
+   },
+   {
+    "path": "solution/TRUTH.md",
+    "format": "md",
+    "bytes": 30723,
+    "lines": 450
+   },
+   {
+    "path": "solution/solve.py",
+    "format": "py",
+    "bytes": 10307,
+    "lines": 192
+   },
+   {
+    "path": "solution/solve.sh",
+    "format": "sh",
+    "bytes": 77,
+    "lines": 3
+   },
+   {
+    "path": "task.toml",
+    "format": "toml",
+    "bytes": 1472,
+    "lines": 47
+   },
+   {
+    "path": "tests/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 274,
+    "lines": 9
+   },
+   {
+    "path": "tests/judge.toml",
+    "format": "toml",
+    "bytes": 7784,
+    "lines": 208
+   },
+   {
+    "path": "tests/reward.toml",
+    "format": "toml",
+    "bytes": 187,
+    "lines": 7
+   },
+   {
+    "path": "tests/test.sh",
+    "format": "sh",
+    "bytes": 304,
+    "lines": 10
+   },
+   {
+    "path": "tests/test_output.py",
+    "format": "py",
+    "bytes": 238650,
+    "lines": 516
+   }
+  ],
+  "datagen": "package_manifest.json, build_config.json (zip compression/timestamp/mode), lint_report.json (~700 issues), regression_cases.jsonl (2,403 labelled), failing_tests.log (~25k lines); repo/ template zipped.",
+  "tests_summary": "20 checks (16 pos = 54, 4 neg = -16): metadata, offline import as unprivileged child, hidden JSON and CSV ledgers, safe deterministic archive, layout, sorted output, visible tests preserved, truthful report, module reports, test_fixes coverage, summary, no network/monkeypatch; negatives: hardcoded answers, fake report without patch, deleted tests, network/monkeypatch.",
+  "reward": "0.5*sum(pass*w)/P_test + 0.5*sum(judge*w)/P_judge; reward.toml weights { test_output = 0.009259259259259259, judge = 0.015151515151515152 }",
+  "hardness_hooks": [
+   "P-001",
+   "P-003",
+   "P-004",
+   "P-008",
+   "P-009",
+   "P-010",
+   "P-016"
+  ],
+  "author_must_edit": [
+   "package name is 'task'",
+   "any added hardness, data formats, hidden cases, judge criteria",
+   "real --author name"
+  ],
+  "must_not_change": [
+   "task.toml (schema 1.4, network roles, user 1000:1000, null_floor, discrimination_weight)",
+   "task.toml artifacts == archetype.toml artifacts (vb \u00a71.12)",
+   "environment/Dockerfile pinned FROM, apt layer, 'RUN mkdir -p /app && chown 1000:1000 /app', final 'COPY data /app/data', uid 1000 agent, openhands-sdk venv",
+   "tests/ exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml",
+   "judge.toml 5-key header; >=8 criteria; weights in {\u00b11,\u00b13,\u00b15}; sum|neg| <= sum pos",
+   "negative_hardcoded_sample_answers registered negative",
+   "TRUTH.md 'archetype:' line, 8 sections, focal/drift/trap labels, solution sha256s",
+   "no TODO/FIXME/XXX/PLACEHOLDER/<TAG>/{{X}} anywhere incl. zip members",
+   "environment/data flat, >= min_inputs files"
+  ],
+  "validate_result": "validate_bundle.py (strict default) exit 0, GATE PASS, 41 passed, 0 failed, 0 warnings; generated with --category debugging --seed 707",
+  "measured_totals": {
+   "bundle_files": 18,
+   "bundle_bytes": 2708549,
+   "data_files": 7,
+   "data_bytes": 2416301,
+   "data_lines": 33072,
+   "largest_data_file": "environment/data/failing_tests.log",
+   "data_formats": [
+    "json",
+    "jsonl",
+    "log",
+    "md",
+    "zip"
+   ]
+  }
+ },
+ {
+  "archetype": "service-interaction",
+  "purpose": "Start a zipped local HTTP service simulator and drive it through both CLI and API to a required end state with an evidence transcript.",
+  "agent_task": "Extract /app/data/service.zip to /app/service, start the simulator on localhost, replay the approved plan via client CLI and HTTP API, write /app/out/final_state.json, report.json, scenario_{alpha,beta,mode}.json, transcript_summary.json, summary.json.",
+  "emitted_files": [
+   {
+    "path": "environment/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 980,
+    "lines": 24
+   },
+   {
+    "path": "environment/data/api_contract.md",
+    "format": "md",
+    "bytes": 3040,
+    "lines": 53
+   },
+   {
+    "path": "environment/data/approvals.csv",
+    "format": "csv",
+    "bytes": 95356,
+    "lines": 2401
+   },
+   {
+    "path": "environment/data/auth_policy.json",
+    "format": "json",
+    "bytes": 165,
+    "lines": 6
+   },
+   {
+    "path": "environment/data/expected_schema.json",
+    "format": "json",
+    "bytes": 552,
+    "lines": 36
+   },
+   {
+    "path": "environment/data/request_log.jsonl",
+    "format": "jsonl",
+    "bytes": 3216443,
+    "lines": 21000
+   },
+   {
+    "path": "environment/data/scenarios.json",
+    "format": "json",
+    "bytes": 425,
+    "lines": 17
+   },
+   {
+    "path": "environment/data/seed_config.json",
+    "format": "json",
+    "bytes": 209,
+    "lines": 10
+   },
+   {
+    "path": "environment/data/service.zip",
+    "format": "zip",
+    "bytes": 3163,
+    "lines": null
+   },
+   {
+    "path": "instruction.md",
+    "format": "md",
+    "bytes": 1407,
+    "lines": 5
+   },
+   {
+    "path": "solution/TRUTH.md",
+    "format": "md",
+    "bytes": 27558,
+    "lines": 412
+   },
+   {
+    "path": "solution/solve.py",
+    "format": "py",
+    "bytes": 8329,
+    "lines": 223
+   },
+   {
+    "path": "solution/solve.sh",
+    "format": "sh",
+    "bytes": 194,
+    "lines": 7
+   },
+   {
+    "path": "task.toml",
+    "format": "toml",
+    "bytes": 1451,
+    "lines": 47
+   },
+   {
+    "path": "tests/Dockerfile",
+    "format": "Dockerfile",
+    "bytes": 274,
+    "lines": 9
+   },
+   {
+    "path": "tests/judge.toml",
+    "format": "toml",
+    "bytes": 7060,
+    "lines": 190
+   },
+   {
+    "path": "tests/reward.toml",
+    "format": "toml",
+    "bytes": 175,
+    "lines": 7
+   },
+   {
+    "path": "tests/test.sh",
+    "format": "sh",
+    "bytes": 304,
+    "lines": 10
+   },
+   {
+    "path": "tests/test_output.py",
+    "format": "py",
+    "bytes": 663579,
+    "lines": 435
+   }
+  ],
+  "datagen": "approvals.csv 2,400 rows (46 approved), request_log.jsonl 21,000 shuffled rows (only approved requests + idempotent duplicates replay), expected_schema.json gets 1-2 random extra required fields; templates api_contract.md, auth_policy.json, scenarios.json, seed_config.json, service/{simulator,client}.py zipped.",
+  "tests_summary": "18 checks (14 pos = 48, 4 neg = -18): flat deterministic final state equals plan re-derived from shipped log, mixed CLI+API evidence, transcript order, checksum of delivered state, trailer once, no external network, bounded files, scenario and summary files; negatives: hardcoded answers, no real transcript, external target, nested/nondeterministic state.",
+  "reward": "0.5*sum(pass*w)/P_test + 0.5*sum(judge*w)/P_judge; reward.toml weights { test_output = 0.010416666666666666, judge = 0.015625 }",
+  "hardness_hooks": [
+   "P-005",
+   "P-006",
+   "P-007",
+   "P-008",
+   "P-009",
+   "P-010",
+   "P-016"
+  ],
+  "author_must_edit": [
+   "seed_config.json producer and container are empty strings",
+   "any added hardness, data formats, hidden cases, judge criteria",
+   "real --author name"
+  ],
+  "must_not_change": [
+   "task.toml (schema 1.4, network roles, user 1000:1000, null_floor, discrimination_weight)",
+   "task.toml artifacts == archetype.toml artifacts (vb \u00a71.12)",
+   "environment/Dockerfile pinned FROM, apt layer, 'RUN mkdir -p /app && chown 1000:1000 /app', final 'COPY data /app/data', uid 1000 agent, openhands-sdk venv",
+   "tests/ exactly Dockerfile, test.sh, test_output.py, judge.toml, reward.toml",
+   "judge.toml 5-key header; >=8 criteria; weights in {\u00b11,\u00b13,\u00b15}; sum|neg| <= sum pos",
+   "negative_hardcoded_sample_answers registered negative",
+   "TRUTH.md 'archetype:' line, 8 sections, focal/drift/trap labels, solution sha256s",
+   "no TODO/FIXME/XXX/PLACEHOLDER/<TAG>/{{X}} anywhere incl. zip members",
+   "environment/data flat, >= min_inputs files"
+  ],
+  "validate_result": "validate_bundle.py (strict default) exit 0, GATE PASS, 41 passed, 0 failed, 0 warnings; generated with --category machine-learning --seed 808",
+  "measured_totals": {
+   "bundle_files": 19,
+   "bundle_bytes": 4030664,
+   "data_files": 8,
+   "data_bytes": 3319353,
+   "data_lines": 23621,
+   "largest_data_file": "environment/data/request_log.jsonl",
+   "data_formats": [
+    "csv",
+    "json",
+    "jsonl",
+    "md",
+    "zip"
+   ]
+  }
+ }
+]

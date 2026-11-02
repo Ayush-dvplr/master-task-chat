@@ -1,0 +1,281 @@
+# regrade.txt  board 36f01dd  Sat Oct 24 12:06:03 IST 2026
+Docker: 'docker ps' empty before start (no foreign containers). Images built from scratch COPY of tests/ only.
+Verifier image: tests/Dockerfile (python:3.12-slim + harbor-rewardkit==0.2.1) built from /tmp/fd-survey-raking-disclosure-audit-20261024T1156/tests_nojudge = copy of tests/ with judge.toml REMOVED and reward.toml = { test_output = 0.0078125 } (1/128) so no LLM judge is ever called.
+Grading command in every run: docker run -v <out>:/app/out -v <logs>:/logs fdsurvey-verifier:local bash -c 'chmod -R go-rwx /tests; rewardkit /tests --workspace /app --output /logs/reward.json'
+(the tests build the shipped + 3 hidden extracts themselves via build_case(); /app/data is not read by the tests)
+
+## 1. Agent outputs (run_1/artifacts/app/out, 22 reports + derive_survey.py)
+$ tail regrade_agent.log
+docker run --name fdsurvey-regrade-agent -v $S/agent_out:/app/out -v   bash -  0.01s user 0.01s system 0% cpu 20.939 total
+$ python3 summ.py logs_agent/reward-details.json <delivered verifier/reward-details.json>
+score 53.0 vs 53.0
+differing: []
+score 53.0
+artifact_set_exists_and_parses                w=+1 value=1.0
+report_serialization_format                   w=+1 value=1.0
+unseen_run_writes_complete_report_set         w=+1 value=1.0
+shipped_frame_to_design_reports               w=+5 value=1.0
+shipped_weighting_reports                     w=+5 value=0.0
+shipped_replication_and_estimates             w=+5 value=0.0
+shipped_disclosure_reports                    w=+5 value=0.0
+challenge_frame                               w=+5 value=1.0
+challenge_benchmarks                          w=+5 value=1.0
+challenge_dispositions                        w=+5 value=1.0
+challenge_adjustment                          w=+5 value=0.0
+challenge_trimming                            w=+5 value=0.0
+challenge_estimates                           w=+5 value=0.0
+challenge_disclosure                          w=+5 value=0.0
+second_frame                                  w=+5 value=1.0
+second_benchmarks                             w=+5 value=1.0
+second_dispositions                           w=+5 value=1.0
+second_adjustment                             w=+5 value=0.0
+second_trimming                               w=+5 value=0.0
+second_estimates                              w=+5 value=0.0
+second_disclosure                             w=+5 value=0.0
+third_frame                                   w=+5 value=1.0
+third_benchmarks                              w=+5 value=1.0
+third_dispositions                            w=+5 value=1.0
+third_adjustment                              w=+5 value=0.0
+third_trimming                                w=+5 value=0.0
+third_estimates                               w=+5 value=0.0
+third_disclosure                              w=+5 value=0.0
+negative_hardcoded_sample_answers             w=-5 value=0.0
+negative_nondeterministic_output              w=-3 value=0.0
+negative_filename_dependent_behaviour         w=-3 value=0.0
+negative_input_row_order_dependence           w=-3 value=0.0
+negative_reuses_shipped_margin_order          w=-5 value=0.0
+negative_writes_outside_declared_artifacts    w=-3 value=0.0
+negative_uses_a_third_party_library           w=-3 value=0.0
+=> 53/128 = 41.41 %, identical per test to the recorded verifier run (REGRADE MATCHES).
+
+## 2. Oracle: solution/solve.sh run as uid 1000 in the same python:3.12-slim image, /app/data = copy of environment/data (read-only), /solution mounted
+$ time docker run --rm --user 1000:1000 -v data:/app/data:ro -v solution:/solution:ro -v oracle_out:/app/out fdsurvey-verifier:local bash /solution/solve.sh
+   -> 7.28 s wall including container start; 23 files in /app/out
+(note: environment/Dockerfile image NOT built, it installs openhands-sdk; the oracle is stdlib-only python3.12, same base image digest family)
+docker run --name fdsurvey-regrade-oracle -v $S/oracle_out:/app/out -v   bash  0.02s user 0.01s system 0% cpu 31.043 total
+score 128.0
+artifact_set_exists_and_parses                w=+1 value=1.0
+report_serialization_format                   w=+1 value=1.0
+unseen_run_writes_complete_report_set         w=+1 value=1.0
+shipped_frame_to_design_reports               w=+5 value=1.0
+shipped_weighting_reports                     w=+5 value=1.0
+shipped_replication_and_estimates             w=+5 value=1.0
+shipped_disclosure_reports                    w=+5 value=1.0
+challenge_frame                               w=+5 value=1.0
+challenge_benchmarks                          w=+5 value=1.0
+challenge_dispositions                        w=+5 value=1.0
+challenge_adjustment                          w=+5 value=1.0
+challenge_trimming                            w=+5 value=1.0
+challenge_estimates                           w=+5 value=1.0
+challenge_disclosure                          w=+5 value=1.0
+second_frame                                  w=+5 value=1.0
+second_benchmarks                             w=+5 value=1.0
+second_dispositions                           w=+5 value=1.0
+second_adjustment                             w=+5 value=1.0
+second_trimming                               w=+5 value=1.0
+second_estimates                              w=+5 value=1.0
+second_disclosure                             w=+5 value=1.0
+third_frame                                   w=+5 value=1.0
+third_benchmarks                              w=+5 value=1.0
+third_dispositions                            w=+5 value=1.0
+third_adjustment                              w=+5 value=1.0
+third_trimming                                w=+5 value=1.0
+third_estimates                               w=+5 value=1.0
+third_disclosure                              w=+5 value=1.0
+negative_hardcoded_sample_answers             w=-5 value=0.0
+negative_nondeterministic_output              w=-3 value=0.0
+negative_filename_dependent_behaviour         w=-3 value=0.0
+negative_input_row_order_dependence           w=-3 value=0.0
+negative_reuses_shipped_margin_order          w=-5 value=0.0
+negative_writes_outside_declared_artifacts    w=-3 value=0.0
+negative_uses_a_third_party_library           w=-3 value=0.0
+=> 128/128 = 100 % (ORACLE 100)
+
+## 3. Nop: empty /app/out
+docker run --name fdsurvey-regrade-nop -v $S/nop_out:/app/out -v   bash -c   0.01s user 0.01s system 0% cpu 17.924 total
+score 0.0
+artifact_set_exists_and_parses                w=+1 value=0.0
+report_serialization_format                   w=+1 value=0.0
+unseen_run_writes_complete_report_set         w=+1 value=0.0
+shipped_frame_to_design_reports               w=+5 value=0.0
+shipped_weighting_reports                     w=+5 value=0.0
+shipped_replication_and_estimates             w=+5 value=0.0
+shipped_disclosure_reports                    w=+5 value=0.0
+challenge_frame                               w=+5 value=0.0
+challenge_benchmarks                          w=+5 value=0.0
+challenge_dispositions                        w=+5 value=0.0
+challenge_adjustment                          w=+5 value=0.0
+challenge_trimming                            w=+5 value=0.0
+challenge_estimates                           w=+5 value=0.0
+challenge_disclosure                          w=+5 value=0.0
+second_frame                                  w=+5 value=0.0
+second_benchmarks                             w=+5 value=0.0
+second_dispositions                           w=+5 value=0.0
+second_adjustment                             w=+5 value=0.0
+second_trimming                               w=+5 value=0.0
+second_estimates                              w=+5 value=0.0
+second_disclosure                             w=+5 value=0.0
+third_frame                                   w=+5 value=0.0
+third_benchmarks                              w=+5 value=0.0
+third_dispositions                            w=+5 value=0.0
+third_adjustment                              w=+5 value=0.0
+third_trimming                                w=+5 value=0.0
+third_estimates                               w=+5 value=0.0
+third_disclosure                              w=+5 value=0.0
+negative_hardcoded_sample_answers             w=-5 value=0.0
+negative_nondeterministic_output              w=-3 value=0.0
+negative_filename_dependent_behaviour         w=-3 value=0.0
+negative_input_row_order_dependence           w=-3 value=0.0
+negative_reuses_shipped_margin_order          w=-5 value=0.0
+negative_writes_outside_declared_artifacts    w=-3 value=0.0
+negative_uses_a_third_party_library           w=-3 value=0.0
+=> 0/128 = 0 %
+
+## 4. Single-mistake patch proof (agent derive_survey.py, reference-wave band)
+$ diff agent_out/derive_survey.py patched_out/derive_survey.py
+1244c1244,1246
+<             if iv2 is not None and iv2["hours"] is not None:
+---
+>             if iv3["hours"] is not None:
+>                 band_ref = band_of_hours(ref["bands"], iv3["hours"])
+>             elif iv2 is not None and iv2["hours"] is not None:
+$ docker run --rm --user 1000:1000 ... python3 /app/out/derive_survey.py /app/data /app/out   (patched script on the shipped extract)
+$ cmp each of 22 reports oracle_out vs patched_out -> 0 differ (compared 22); agent_out vs oracle_out -> 14 differ:
+   agent-vs-oracle DIFF closure_report.json
+   agent-vs-oracle DIFF cv_screening.json
+   agent-vs-oracle DIFF disclosure_audit.tsv
+   agent-vs-oracle DIFF estimates_activity_by_region.csv
+   agent-vs-oracle DIFF estimates_band_transition.csv
+   agent-vs-oracle DIFF estimates_hours_by_sector.csv
+   agent-vs-oracle DIFF estimates_tenure_by_wquintile.csv
+   agent-vs-oracle DIFF final_weights.csv
+   agent-vs-oracle DIFF primary_suppression.json
+   agent-vs-oracle DIFF raking_trace.json
+   agent-vs-oracle DIFF replicate_summary.csv
+   agent-vs-oracle DIFF secondary_suppression.json
+   agent-vs-oracle DIFF variance_components.json
+   agent-vs-oracle DIFF weight_diagnostics.json
+reward: 1.0
+score 128.0
+artifact_set_exists_and_parses                w=+1 value=1.0
+report_serialization_format                   w=+1 value=1.0
+unseen_run_writes_complete_report_set         w=+1 value=1.0
+shipped_frame_to_design_reports               w=+5 value=1.0
+shipped_weighting_reports                     w=+5 value=1.0
+shipped_replication_and_estimates             w=+5 value=1.0
+shipped_disclosure_reports                    w=+5 value=1.0
+challenge_frame                               w=+5 value=1.0
+challenge_benchmarks                          w=+5 value=1.0
+challenge_dispositions                        w=+5 value=1.0
+challenge_adjustment                          w=+5 value=1.0
+challenge_trimming                            w=+5 value=1.0
+challenge_estimates                           w=+5 value=1.0
+challenge_disclosure                          w=+5 value=1.0
+second_frame                                  w=+5 value=1.0
+second_benchmarks                             w=+5 value=1.0
+second_dispositions                           w=+5 value=1.0
+second_adjustment                             w=+5 value=1.0
+second_trimming                               w=+5 value=1.0
+second_estimates                              w=+5 value=1.0
+second_disclosure                             w=+5 value=1.0
+third_frame                                   w=+5 value=1.0
+third_benchmarks                              w=+5 value=1.0
+third_dispositions                            w=+5 value=1.0
+third_adjustment                              w=+5 value=1.0
+third_trimming                                w=+5 value=1.0
+third_estimates                               w=+5 value=1.0
+third_disclosure                              w=+5 value=1.0
+negative_hardcoded_sample_answers             w=-5 value=0.0
+negative_nondeterministic_output              w=-3 value=0.0
+negative_filename_dependent_behaviour         w=-3 value=0.0
+negative_input_row_order_dependence           w=-3 value=0.0
+negative_reuses_shipped_margin_order          w=-5 value=0.0
+negative_writes_outside_declared_artifacts    w=-3 value=0.0
+negative_uses_a_third_party_library           w=-3 value=0.0
+=> 128/128: the one 2-line patch restores all 75 lost test points (15 tests: 3 shipped + 12 hidden).
+
+## What-if re-run (judge side), host Python Python 3.14.8, no container
+Agent's own what-if commands from trajectory steps 47, 48, 56, 58, 59 extracted to whatif/stepNN.sh, paths rewritten to the scratch data copy.
+amod = agent derive_survey.py unchanged; pmod = same script with the one wave-3-hours branch added (diff above).
+$ for v in amod pmod; do for s in 47 48 56 58 59; do bash run_${v}_$s.sh | tail -12; done; done
+=== amod step47
+baseline primary 33 secondary 12 rounds {'activity_by_region': 3, 'band_transition': 2, 'hours_by_sector': 2, 'tenure_by_wquintile': 2}
+baseline suppressed cells 45 of 89
+Q3 changed 4
+Q4 changed 4
+Q8 secondary 11 total suppressed 44 rounds {'activity_by_region': 1, 'band_transition': 1, 'hours_by_sector': 1, 'tenure_by_wquintile': 1}
+trigger 10500 strata trimmed 8 {'CE1': 10788, 'CE2': 10818, 'EA1': 10630, 'EA2': 10827, 'NR1': 10703, 'NR2': 10574, 'ST1': 10759, 'ST2': 10441, 'WE1': 10563, 'WE2': 10468}
+trigger 10600 strata trimmed 6 {'CE1': 10788, 'CE2': 10818, 'EA1': 10630, 'EA2': 10827, 'NR1': 10703, 'NR2': 10574, 'ST1': 10759, 'ST2': 10441, 'WE1': 10563, 'WE2': 10468}
+=== amod step48
+Q1 mode=each: 4 True 867452 [2453351241, 160627832, 9897265, 867452]
+   final total 331499999998
+Q5 order rulefile end: 4 True 1080669
+   raked total 331500000002 final total 331500000002
+Q7 max reps iters 4 full 4 all conv True
+=== amod step56
+Q3 min_count=17 changed 4
+    (('band_transition', 'B4|B3'), 'P', 'S', 16, 2346)
+    (('hours_by_sector', 'construct|B2'), 'P', 'S', 16, 2456)
+    (('hours_by_sector', 'services|B2'), 'P', 'S', 15, 2696)
+    (('hours_by_sector', 'services|B4'), 'P', 'S', 15, 2081)
+   primary 41 secondary 8
+Q4 max_cv=2800 changed 4
+    (('activity_by_region', 'seeking|CE'), 'S', 'P', 19, 1452)
+    (('activity_by_region', 'seeking|NR'), 'P', 'S', 20, 3140)
+    (('tenure_by_wquintile', 'mortgaged|Q5'), 'P', 'S', 28, 3064)
+    (('tenure_by_wquintile', 'rented_private|Q2'), 'P', 'S', 27, 3290)
+   primary 39 secondary 8
+=== amod step58
+naive iters 4 dev 867448
+match weights True
+stratum preserved True
+=== amod step59
+full iters 13 False
+reps 36
+ok
+
+real	0m5.579s
+user	0m3.596s
+sys	0m0.035s
+=== pmod step47
+baseline primary 34 secondary 10 rounds {'activity_by_region': 3, 'band_transition': 1, 'hours_by_sector': 2, 'tenure_by_wquintile': 2}
+baseline suppressed cells 44 of 89
+Q3 changed 4
+Q4 changed 5
+Q8 secondary 9 total suppressed 43 rounds {'activity_by_region': 1, 'band_transition': 1, 'hours_by_sector': 1, 'tenure_by_wquintile': 1}
+trigger 10500 strata trimmed 5 {'CE1': 10627, 'CE2': 10684, 'EA1': 10446, 'EA2': 10650, 'NR1': 10511, 'NR2': 10359, 'ST1': 10586, 'ST2': 10338, 'WE1': 10431, 'WE2': 10417}
+trigger 10600 strata trimmed 3 {'CE1': 10627, 'CE2': 10684, 'EA1': 10446, 'EA2': 10650, 'NR1': 10511, 'NR2': 10359, 'ST1': 10586, 'ST2': 10338, 'WE1': 10431, 'WE2': 10417}
+=== pmod step48
+Q1 mode=each: 13 False 5393301 [4067211643, 2280549175, 1298820502, 744966056, 429053649, 247698847, 143197700, 82850383, 47957152, 27766958, 16079433, 9312190, 5393301]
+   final total 331499999999
+Q5 order rulefile end: 11 True 3453826
+   raked total 331499999995 final total 331499999995
+Q7 max reps iters 15 full 14 all conv True
+=== pmod step56
+    (('band_transition', 'B4|B3'), 'P', 'S', 15, 2739)
+    (('hours_by_sector', 'agri|B4'), 'P', 'S', 16, 2443)
+    (('hours_by_sector', 'manuf|B3'), 'P', 'S', 16, 2078)
+    (('hours_by_sector', 'public|B3'), 'P', 'S', 15, 2435)
+   primary 41 secondary 7
+Q4 max_cv=2800 changed 5
+    (('activity_by_region', 'seeking|CE'), 'S', 'P', 19, 1479)
+    (('activity_by_region', 'seeking|NR'), 'P', 'S', 20, 2975)
+    (('tenure_by_wquintile', 'mortgaged|Q3'), 'P', 'S', 26, 3058)
+    (('tenure_by_wquintile', 'rented_private|Q3'), 'P', 'S', 23, 1552)
+    (('tenure_by_wquintile', 'rented_social|Q2'), 'P', 'S', 33, 3216)
+   primary 40 secondary 7
+=== pmod step58
+naive iters 13 dev 5393296
+match weights True
+stratum preserved True
+=== pmod step59
+full iters 13 False
+reps 36
+ok
+
+real	0m7.200s
+user	0m3.115s
+sys	0m0.061s
+
+amod reproduces the trajectory observations and the step-62 answers (867452, 4, 331500000002, 6, 4, 44).
+pmod prints the judge's figures: Q1 5393301, Q4 5, Q5 331499999995, Q6 (trigger 10600) 3, Q7 15, Q8 43; Q3 stays 4.

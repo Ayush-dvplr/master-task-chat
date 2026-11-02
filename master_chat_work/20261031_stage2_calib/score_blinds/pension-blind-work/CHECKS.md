@@ -1,0 +1,10 @@
+# CHECKS (de212ed)
+BLIND_DIR = /Users/mac/Desktop/Terminal Bench/_runs/20261031/stage2-calib/blind-pension-20261031T1552-1540 (commands run with workdir=BLIND_DIR)
+
+- `python3 master_chat_tasks/tools/name_session.py de212ed` | n/a | codex: no match; opencode: ['ses_e6e77c684fferhR5uNSxzB5QTy'] (renamed)
+- `find . -type f` | BLIND_DIR | instruction.md, environment/Dockerfile, 10 files in environment/data; no work/TODO.md existed (created)
+- `cat Dockerfile policy.json plans.json; wc -l *.jsonl; head/tail *.jsonl` | environment/ | valuation 2025-01-01, days_per_year 365, material 250000; 2 plans; 35 jsonl rows; seeded bad rows MEM-BAD, SR-BAD, SAL-BAD, LV-BAD, EL-BAD, cancelled SVC-X
+- `cp app/calculate_pension.py out/calculate_pension.py && /usr/bin/time -p perl -e 'alarm 600; exec @ARGV' python3 out/calculate_pension.py environment/data out` | environment/data | EXIT=0, real 0.06 s (user 0.02, sys 0.02); 9 reports written to out/
+- `python3 - <<self-check>>` (format + controls) | out/*.json, environment/data | all 9 reports byte-equal to json.dumps(sort_keys, indent=2)+"\n"; top-level keys match contract for all 9; per member sum(atom accrual)=base_accrual, sum(atom credited_days)=credited_days, base+reval=accrued, last cola_ledger balance_after=accrued (MEM-101/102/201: 8/7/7 atoms, all True); plan rollups equal member sums (PLAN-A, PLAN-B True); audit chain recomputed from 64 zeros matches final_hash; manifest counts 3 members/3 effective services/22 atoms = ledger length; 10 input file sha256/bytes match; ALL_OK True
+- `cat out/member_benefits.json data_quality.json plan_rollups.json exception_register.json` | out/ | payable MEM-101 359369, MEM-102 253790, MEM-201 316957; 5 issues (INVALID_ELECTION EL-BAD, INVALID_LEAVE LV-BAD, INVALID_MEMBER MEM-BAD, INVALID_SALARY SAL-BAD, INVALID_SERVICE SR-BAD); 3 MATERIAL_BENEFIT rows; plan payable A 613159, B 316957
+- `cmp app/calculate_pension.py out/calculate_pension.py; grep -c Users/mac app/calculate_pension.py; read final_hash` | app/, out/ | SAME; 0 hard-coded host paths; final_hash 44d8a2a09a13ab9b894332ff1d76df60ca5ac80e45ad6e0035a74af73ec10df6

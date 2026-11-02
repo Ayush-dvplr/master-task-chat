@@ -1,0 +1,56 @@
+12a13
+> import signal
+5634a5636,5642
+> 
+> 
+> def _kill_group(process: subprocess.Popen) -> None:
+>     try:
+>         os.killpg(process.pid, signal.SIGKILL)
+>     except (ProcessLookupError, PermissionError):
+>         return  # the group has already exited
+5636a5645,5659
+> def _group_run(command: list[str], env: dict[str, str], cwd: Path, timeout: float) -> subprocess.CompletedProcess:
+>     """Run agent code in its own session; its whole process group is killed when the call ends."""
+>     with subprocess.Popen(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
+>                           cwd=str(cwd), start_new_session=True) as process:
+>         try:
+>             stdout, stderr = process.communicate(timeout=timeout)
+>         except subprocess.TimeoutExpired:
+>             _kill_group(process)
+>             process.wait()
+>             raise
+>         finally:
+>             _kill_group(process)
+>     return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
+> 
+> 
+5638,5639c5661
+<     return subprocess.run(_untrusted_command(command), text=True, capture_output=True, env=env,
+<                           cwd=str(cwd), timeout=120)
+---
+>     return _group_run(_untrusted_command(command), env, cwd, 120)
+7222,7223c7244
+<             done = subprocess.run(command, text=True, capture_output=True, env=_env(_repo()),
+<                                   cwd=str(_scratch("cwd-")), timeout=STATEMENT_SECONDS)
+---
+>             done = _group_run(command, _env(_repo()), _scratch("cwd-"), STATEMENT_SECONDS)
+7501,7502c7522
+<             done = subprocess.run(command, text=True, capture_output=True, env=_env(_repo()),
+<                                   cwd=str(_scratch("cwd-")), timeout=STATEMENT_SECONDS)
+---
+>             done = _group_run(command, _env(_repo()), _scratch("cwd-"), STATEMENT_SECONDS)
+7803a7824
+>     command = [sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", "test_visible.py"]
+7805,7806c7826
+<     done = _run([sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", "test_visible.py"],
+<                 _env(root), root)
+---
+>     done = _run(command, _env(root), root)
+7808a7829,7831
+>     repo = _repo()
+>     done = _run(command, _env(repo), repo)
+>     assert done.returncode == 0, f"delivered tests/test_visible.py: {done.stderr[-600:]}"
+8015c8038
+< @criterion(description="The delivered package passes the shipped visible tests with the two contract-wrong tests corrected")
+---
+> @criterion(description="The delivered package passes its delivered tests/test_visible.py and the shipped visible tests with the two contract-wrong tests corrected")

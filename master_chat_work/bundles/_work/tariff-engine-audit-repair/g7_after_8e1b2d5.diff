@@ -1,0 +1,353 @@
+--- g7_before_8e1b2d5/test_output.py	2026-10-27 12:25:55
++++ ../../tariff-engine-audit-repair/tests/test_output.py	2026-10-27 21:15:34
+@@ -41,6 +41,11 @@
+ ]
+ INPUT_FILES = ("meter_reads.jsonl", "accounts.csv", "billing_periods.csv", "rate_card.json")
+ CORRECTED = ["test_commitment_credit_base", "test_partial_period_standing_charge"]
++CONTRACT_TEST_EDITS = (
++    ('[("M1", "standing", 0, 14, "8.68")]', '[("M1", "standing", 0, 14, "9.30")]'),
++    ('self.assertEqual(_money(invoice["credit"]), "0.99")', 'self.assertEqual(_money(invoice["credit"]), "0.00")'),
++    ('self.assertEqual(_money(invoice["total"]), "47.75")', 'self.assertEqual(_money(invoice["total"]), "48.74")'),
++)
+ REUSED_IDS = ("A0003", "A0010", "A0042")
+ _SETPRIV = ["setpriv", "--reuid=nobody", "--regid=nogroup", "--clear-groups"]
+ 
+@@ -349,88 +354,89 @@
+         'DVBkiX17IDp59RKXwg4UpaheYteQD/qQnn/9frT/9v8Dchk+Vw=='
+     ),
+     'ci/api_contract.md': (
+-        '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'
+     ),
+     'ci/billing_periods.csv': (
+         'eNqVvUuuJUuOHdqvUdwBnDywP43NTEiA1JDUkCaQKFVDQH0enkrQ9GVcNHfjvsedjOhEBbJ4PWzbl1xcXPz7P/7jv/2ff/33'
+@@ -7716,12 +7722,11 @@
+     assert not wrong, f"{len(wrong)} invoices with wrong heads or subtotals, first {wrong[0]}"
+ 
+ 
+-def _check_settlement(corpus: str) -> None:
++def _check_settlement(corpus: str, keys: tuple[str, ...] = ("credit", "total")) -> None:
+     owned = _owned(corpus)
+     want = _by_account(_expected(corpus), owned)
+     got = _by_account(_got(corpus), owned)
+     assert list(got) == list(want), "invoice accounts or order differ"
+-    keys = ["credit", "total"] if corpus != "shipped" else ["subtotal", "credit", "total"]
+     wrong = [a for a in want if not _same([got[a][k] for k in keys], [want[a][k] for k in keys])]
+     assert not wrong, f"{len(wrong)} invoices with wrong {'/'.join(keys)}, first {wrong[0]}"
+ 
+@@ -7762,9 +7767,8 @@
+     return sorted(rel.removeprefix("repo/") for rel in _SHIPPED_DATA if rel.startswith("repo/"))
+ 
+ 
+-def _check_archive_and_metadata() -> None:
++def _check_archive_layout() -> None:
+     config = json.loads((_data_dir() / "ci" / "build_config.json").read_text())["archive"]
+-    manifest = json.loads((_data_dir() / "ci" / "package_manifest.json").read_text())
+     method = {"stored": zipfile.ZIP_STORED, "deflated": zipfile.ZIP_DEFLATED}[config["compression"]]
+     with zipfile.ZipFile(_artifact("patched-repo.zip")) as zf:
+         infos = zf.infolist()
+@@ -7776,6 +7780,10 @@
+         assert info.date_time == tuple(config["timestamp"]), info.filename
+         assert info.compress_type == method, info.filename
+         assert (info.external_attr >> 16) & 0o777 == int(config["mode"], 8), info.filename
++
++
++def _check_metadata() -> None:
++    manifest = json.loads((_data_dir() / "ci" / "package_manifest.json").read_text())
+     project = tomllib.loads((_repo() / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+     assert project["version"] == manifest["version"], "pyproject version"
+     assert project["requires-python"] == manifest["requires_python"], "requires-python"
+@@ -7795,12 +7803,25 @@
+                 assert root not in {"socket", "urllib", "http", "ssl", "ftplib", "smtplib", "sitecustomize"}, root
+ 
+ 
+-def _check_visible_tests_pass() -> None:
+-    repo = _repo()
+-    done = _run([sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"],
+-                _env(repo), repo)
++def _contract_visible_suite() -> tuple[Path, int]:
++    """The shipped visible tests with only the two contract-wrong tests corrected, held by the verifier."""
++    text = (_data_dir() / "repo" / "tests" / "test_visible.py").read_text(encoding="utf-8")
++    for old, new in CONTRACT_TEST_EDITS:
++        assert text.count(old) == 1, old
++        text = text.replace(old, new)
++    root = _scratch("visible-suite-")
++    shutil.copytree(_repo() / "src", root / "src")
++    (root / "tests").mkdir()
++    (root / "tests" / "test_visible.py").write_text(text, encoding="utf-8")
++    return _open_tree(root), len(_test_functions(text))
++
++
++def _check_visible_tests_pass() -> None:
++    root, count = _contract_visible_suite()
++    done = _run([sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests", "-p", "test_visible.py"],
++                _env(root), root)
+     assert done.returncode == 0, done.stderr[-600:]
+-    assert "Ran 0 tests" not in done.stderr
++    assert f"Ran {count} tests" in done.stderr, done.stderr[-200:]
+ 
+ 
+ def _test_functions(text: str) -> dict[str, str]:
+@@ -7901,6 +7922,9 @@
+     assert isinstance(checks, list) and checks
+     assert all(set(c) == {"name", "passed"} and isinstance(c["name"], str) and type(c["passed"]) is bool for c in checks)
+     assert any(c["passed"] is True for c in checks)
++
++
++def _check_previously_failing() -> None:
+     assert _load_json("test_fixes.json")["previously_failing"] == _previously_failing()
+ 
+ 
+@@ -7960,12 +7984,17 @@
+ 
+ # ---------------------------------------------------------------- criteria
+ 
+-@criterion(description="patched-repo.zip follows build_config.json and the repaired metadata matches package_manifest.json")
+-def archive_and_metadata_follow_build_config(workspace: Path) -> bool:
+-    return _holds(_check_archive_and_metadata)
++@criterion(description="patched-repo.zip follows the archive settings of build_config.json")
++def archive_follows_build_config(workspace: Path) -> bool:
++    return _holds(_check_archive_layout)
+ 
+ 
+-@criterion(description="The delivered tests/test_visible.py passes against the delivered package")
++@criterion(description="The repaired package matches package_manifest.json: version, Python requirement, standard-library only")
++def package_matches_manifest(workspace: Path) -> bool:
++    return _holds(_check_metadata)
++
++
++@criterion(description="The delivered package passes the shipped visible tests with the two contract-wrong tests corrected")
+ def delivered_visible_tests_pass(workspace: Path) -> bool:
+     return _holds(_check_visible_tests_pass)
+ 
+@@ -7990,11 +8019,16 @@
+     return _holds(_check_summary)
+ 
+ 
+-@criterion(description="repair-report.json has its stated shape and previously_failing matches failing_tests.log")
+-def repair_report_and_failing_cases(workspace: Path) -> bool:
++@criterion(description="repair-report.json has its stated shape")
++def repair_report_has_stated_shape(workspace: Path) -> bool:
+     return _holds(_check_repair_report)
+ 
+ 
++@criterion(description="test_fixes.json previously_failing names the failing cases of failing_tests.log")
++def previously_failing_matches_log(workspace: Path) -> bool:
++    return _holds(_check_previously_failing)
++
++
+ @criterion(description="The exception list for the shipped /app/ci files is exact")
+ def shipped_exceptions_exact(workspace: Path) -> bool:
+     return _holds(lambda: _check_exceptions("shipped"))
+@@ -8005,11 +8039,21 @@
+     return _holds(lambda: _check_lines("shipped", ("standing",)))
+ 
+ 
+-@criterion(description="Every energy line, subtotal, credit and total for the shipped /app/ci files is exact")
+-def shipped_energy_and_settlement_exact(workspace: Path) -> bool:
+-    return _holds(lambda: (_check_lines("shipped", ("energy",)), _check_settlement("shipped")))
++@criterion(description="Every energy line for the shipped /app/ci files is exact")
++def shipped_energy_lines_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_lines("shipped", ("energy",)))
++
++
++@criterion(description="Every invoice subtotal for the shipped /app/ci files is exact")
++def shipped_subtotals_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_settlement("shipped", ("subtotal",)))
++
+ 
++@criterion(description="Every invoice credit and total for the shipped /app/ci files is exact")
++def shipped_credits_and_totals_exact(workspace: Path) -> bool:
++    return _holds(lambda: _check_settlement("shipped"))
+ 
++
+ @criterion(description="The exception list for a fresh corpus of other periods is exact")
+ def fresh_exceptions_exact(workspace: Path) -> bool:
+     return _holds(lambda: _check_exceptions("fresh"))
+@@ -8522,16 +8566,20 @@
+     return _fires(_visible_test_removed)
+ 
+ 
+-criteria.archive_and_metadata_follow_build_config(weight=3)
++criteria.archive_follows_build_config(weight=1)
++criteria.package_matches_manifest(weight=1)
+ criteria.delivered_visible_tests_pass(weight=3)
+ criteria.corrected_tests_name_the_changed_tests(weight=3)
+ criteria.regression_rows_match_contract(weight=3)
+ criteria.module_notes_follow_contract(weight=1)
+ criteria.summary_lists_inputs_and_artifacts(weight=1)
+-criteria.repair_report_and_failing_cases(weight=1)
++criteria.repair_report_has_stated_shape(weight=1)
++criteria.previously_failing_matches_log(weight=1)
+ criteria.shipped_exceptions_exact(weight=3)
+ criteria.shipped_standing_lines_exact(weight=5)
+-criteria.shipped_energy_and_settlement_exact(weight=5)
++criteria.shipped_energy_lines_exact(weight=3)
++criteria.shipped_subtotals_exact(weight=1)
++criteria.shipped_credits_and_totals_exact(weight=1)
+ criteria.fresh_exceptions_exact(weight=3)
+ criteria.fresh_energy_lines_exact(weight=5)
+ criteria.fresh_standing_lines_exact(weight=5)

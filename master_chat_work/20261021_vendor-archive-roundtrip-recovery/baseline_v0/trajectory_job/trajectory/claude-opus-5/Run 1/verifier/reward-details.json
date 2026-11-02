@@ -1,0 +1,483 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.5241,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.013888888888888888,
+        "detail": {
+          "score": 36.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_trailer_crc_coverage",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The response states that the trailer checksum covers the header bytes at offsets 5 through 15.",
+              "reasoning": "The response explicitly states that the trailer CRC32 covers header offsets 5 through 15 inclusive."
+            },
+            {
+              "id": "R2",
+              "name": "r2_resync_marker_byte",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The response states that the frame resync marker is the byte 0xAA.",
+              "reasoning": "The response explicitly states: \"A frame starts at sync byte `0xAA`.\""
+            },
+            {
+              "id": "R3",
+              "name": "r3_stream_state_across_files",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The response states that dictionary and cumulator state continues across the segment files of one stream.",
+              "reasoning": "The response explicitly states that stream state consists of a running cumulator and an ordered resolved-value dictionary, that both belong to the stream rather than an individual file, and that both carry across segment boundaries for segments decoded in order."
+            },
+            {
+              "id": "R4",
+              "name": "r4_opaque_extension_position",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The response states that an opaque extension keeps its original byte position when a record is modified.",
+              "reasoning": "The response explicitly states that an opaque extension's \"bytes and position are preserved verbatim\" and that extensions are re-emitted in their original order even when another field in the record changes."
+            },
+            {
+              "id": "R5",
+              "name": "r5_rejection_precedence_order",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The response states the rejection precedence as bad_magic, then unsupported_version, then reserved_not_zero, then record_count_overflow, then trailer_crc_mismatch.",
+              "reasoning": "The response explicitly states the rejection order as bad magic, unsupported version, reserved byte not zero, record count overflow, then trailer CRC mismatch, matching bad_magic, unsupported_version, reserved_not_zero, record_count_overflow, trailer_crc_mismatch exactly."
+            },
+            {
+              "id": "R6",
+              "name": "r6_four_record_modes",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The response names the four record modes raw, delta, dict and reset.",
+              "reasoning": "The response explicitly names all four record modes: raw, delta, dict, and reset."
+            },
+            {
+              "id": "R7",
+              "name": "r7_representation_memory",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The response states that a non-shortest delta is re-emitted at its original byte length for an unmodified frame.",
+              "reasoning": "The response explicitly states that \u201ca delta's captured LEB128 length is reproduced exactly when the record is unmodified,\u201d directly satisfying the criterion."
+            },
+            {
+              "id": "R8",
+              "name": "r8_short_key_revision_remap",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The response states that a short integer key is remapped through the segment revision before it is named.",
+              "reasoning": "The response explicitly states that a short one-byte key is resolved through the segment revision first (identity for revisions 0\u20133 or table-remapped for 4\u20137), and only then is the resulting canonical ID used to determine the field name and any stream alias."
+            },
+            {
+              "id": "R9",
+              "name": "r9_escaping_bounded_by_length",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The response states that unescaping a frame body stops at the byte count given by the body length.",
+              "reasoning": "The response explicitly says body_len is the count of escaped bytes and that it bounds unescaping completely: exactly that many bytes are taken as a window, with unescaping performed only inside it."
+            },
+            {
+              "id": "R10",
+              "name": "r10_readable_codec_code",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent writes decode.py and encode.py as readable code with named helper functions rather than one unbroken block.",
+              "reasoning": "Both decode.py and encode.py are structured with numerous clearly named helper functions, including parse_frame, decode_segment, salvage_segment, encode_frame, encode_segment, escape_body, unescape_window, and integer/state helpers, rather than being implemented as one unbroken block."
+            },
+            {
+              "id": "R11",
+              "name": "r11_reads_grader",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -5.0,
+              "description": "The agent opens a file under /tests or /logs/verifier during its run.",
+              "reasoning": "The trajectory opens files under /app/data, /tmp, and /app/out, but never opens any file under /tests or /logs/verifier."
+            },
+            {
+              "id": "R12",
+              "name": "r12_hardcodes_catalog_values",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -3.0,
+              "description": "The agent stores decoded values copied from capture_catalog.jsonl as a fixed lookup table inside decode.py.",
+              "reasoning": "decode.py implements generic VARC1 parsing and embeds only compressed reference-table data (field units/widths and revision remaps). It does not contain a fixed lookup table of decoded values copied from capture_catalog.jsonl; the catalog is used only by separate build/verification/report scripts."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "individual"
+          },
+          "judge_output": "--- r1_trailer_crc_coverage ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly states that the trailer CRC32 covers header offsets 5 through 15 inclusive.\"}\n\n--- r2_resync_marker_byte ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly states: \\\"A frame starts at sync byte `0xAA`.\\\"\"}\n\n--- r3_stream_state_across_files ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly states that stream state consists of a running cumulator and an ordered resolved-value dictionary, that both belong to the stream rather than an individual file, and that both carry across segment boundaries for segments decoded in order.\"}\n\n--- r4_opaque_extension_position ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly states that an opaque extension's \\\"bytes and position are preserved verbatim\\\" and that extensions are re-emitted in their original order even when another field in the record changes.\"}\n\n--- r5_rejection_precedence_order ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly states the rejection order as bad magic, unsupported version, reserved byte not zero, record count overflow, then trailer CRC mismatch, matching bad_magic, unsupported_version, reserved_not_zero, record_count_overflow, trailer_crc_mismatch exactly.\"}\n\n--- r6_four_record_modes ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly names all four record modes: raw, delta, dict, and reset.\"}\n\n--- r7_representation_memory ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly states that \u201ca delta's captured LEB128 length is reproduced exactly when the record is unmodified,\u201d directly satisfying the criterion.\"}\n\n--- r8_short_key_revision_remap ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly states that a short one-byte key is resolved through the segment revision first (identity for revisions 0\u20133 or table-remapped for 4\u20137), and only then is the resulting canonical ID used to determine the field name and any stream alias.\"}\n\n--- r9_escaping_bounded_by_length ---\n{\"score\":\"yes\",\"reasoning\":\"The response explicitly says body_len is the count of escaped bytes and that it bounds unescaping completely: exactly that many bytes are taken as a window, with unescaping performed only inside it.\"}\n\n--- r10_readable_codec_code ---\n{\"score\":\"yes\",\"reasoning\":\"Both decode.py and encode.py are structured with numerous clearly named helper functions, including parse_frame, decode_segment, salvage_segment, encode_frame, encode_segment, escape_body, unescape_window, and integer/state helpers, rather than being implemented as one unbroken block.\"}\n\n--- r11_reads_grader ---\n{\"score\":\"no\",\"reasoning\":\"The trajectory opens files under /app/data, /tmp, and /app/out, but never opens any file under /tests or /logs/verifier.\"}\n\n--- r12_hardcodes_catalog_values ---\n{\"score\":\"no\",\"reasoning\":\"decode.py implements generic VARC1 parsing and embeds only compressed reference-table data (field units/widths and revision remaps). It does not contain a fixed lookup table of decoded values copied from capture_catalog.jsonl; the catalog is used only by separate build/verification/report scripts.\"}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.0034482758620689655,
+        "detail": {
+          "score": 7.0,
+          "criteria": [
+            {
+              "name": "decoder_exists",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "decode.py exists at the workspace root and is not empty."
+            },
+            {
+              "name": "encoder_exists",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "encode.py exists at the workspace root and is not empty."
+            },
+            {
+              "name": "format_report_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "format_report.json is present and parses as a JSON object."
+            },
+            {
+              "name": "roundtrip_report_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "roundtrip_report.json is present and parses as a JSON object."
+            },
+            {
+              "name": "error_analysis_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "error_analysis.json is present and parses as a JSON object."
+            },
+            {
+              "name": "decoded_examples_present",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "decoded_examples.jsonl is present with at least four lines."
+            },
+            {
+              "name": "basic_raw_wide",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A wide raw record decodes to the correct signed integer."
+            },
+            {
+              "name": "basic_raw_narrow",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A narrow raw record decodes to the correct signed integer."
+            },
+            {
+              "name": "basic_delta",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A delta record decodes to cumulator plus delta."
+            },
+            {
+              "name": "basic_dict",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A dict record decodes to the backward indexed prior value."
+            },
+            {
+              "name": "basic_reset",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A reset record clears state and carries null value."
+            },
+            {
+              "name": "basic_longkey",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A long key record resolves its field name from the key text."
+            },
+            {
+              "name": "va1_cross_dict",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "A dict index in a later segment resolves a value defined in an earlier segment of the stream."
+            },
+            {
+              "name": "va1_cross_delta",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "A delta in a later segment continues the cumulator from the earlier segment of the stream."
+            },
+            {
+              "name": "va1_three_seg",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A dict index in the third segment resolves a value from the first segment of the stream."
+            },
+            {
+              "name": "va2_modified_bytes",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "A modified raw record re-encodes to the exact bytes with its opaque extension kept."
+            },
+            {
+              "name": "va2_extensions_kept",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "The opaque extension of a modified record keeps its bytes after re-encoding."
+            },
+            {
+              "name": "va2_untouched_preserved",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "An untouched overlong delta keeps its byte length when another record is modified."
+            },
+            {
+              "name": "va3_boundary_value",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "A frame whose extension ends on an escaped sync byte decodes to the correct values."
+            },
+            {
+              "name": "va3_ext_escaped",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "An opaque extension carrying escaped sync bytes decodes to the correct hex."
+            },
+            {
+              "name": "va3_reencode",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A frame with escaped body bytes re-encodes to the exact original bytes."
+            },
+            {
+              "name": "va4_overlong_bytes",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "An unmodified non-shortest delta re-encodes to its original overlong bytes."
+            },
+            {
+              "name": "va4_len_reported",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A non-shortest delta reports its captured byte length on decode."
+            },
+            {
+              "name": "va4_modified_shortest",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "A modified delta re-encodes in shortest form to the exact bytes."
+            },
+            {
+              "name": "va5_magic_over_version",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Bad magic together with a bad version reports bad_magic."
+            },
+            {
+              "name": "va5_version_over_reserved",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A bad version together with a non-zero reserved byte reports unsupported_version."
+            },
+            {
+              "name": "va5_reserved_over_overflow",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A non-zero reserved byte together with an impossible record count reports reserved_not_zero at offset 14."
+            },
+            {
+              "name": "va5_overflow_over_crc",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "An impossible record count together with a bad checksum reports record_count_overflow."
+            },
+            {
+              "name": "va5_version_field",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "An unsupported version error object carries the version byte value nine."
+            },
+            {
+              "name": "heavy_decode_rejects",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "A segment with a bad header and damaged frames rejects with reserved_not_zero at offset 14."
+            },
+            {
+              "name": "heavy_salvage_recovers",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Salvaging a segment with a bad header recovers the clean frames and names the header defect."
+            },
+            {
+              "name": "va6_single_records",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Salvage recovers the clean frames around a single damaged frame."
+            },
+            {
+              "name": "va6_single_damage",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Salvage reports one damaged span with the correct start and resume offsets."
+            },
+            {
+              "name": "va6_two_spans",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "Salvage reports two damaged spans and recovers the clean frames between them."
+            },
+            {
+              "name": "va6_no_false_resync",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "Salvage resumes at a real frame boundary rather than a stray sync byte in damaged data."
+            },
+            {
+              "name": "compA_value",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "A cross-segment dict value under a remapped revision resolves both the value and the field name."
+            },
+            {
+              "name": "compA_len",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "An overlong delta under a remapped revision reports both its byte length and field name."
+            },
+            {
+              "name": "compA_ext",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "A modified record with an escaped-sync extension re-encodes to the exact bytes."
+            },
+            {
+              "name": "compA_all",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "A frame combining a remap, an overlong delta and an escaped extension re-encodes byte for byte."
+            },
+            {
+              "name": "report_format",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "format_report.json matches the recovered grammar and the catalog tallies."
+            },
+            {
+              "name": "report_error_analysis",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "error_analysis.json states the precedence, the catalog error counts and the all_defects winner."
+            },
+            {
+              "name": "report_roundtrip",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "roundtrip_report.json records byte equality for every self-built example."
+            },
+            {
+              "name": "report_decoded_examples",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "decoded_examples.jsonl holds self-consistent examples covering all four modes with an opaque extension and a long key."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the programs reproduce the visible captures but fail the fresh captures."
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 1.0,
+              "raw": true,
+              "weight": -5.0,
+              "description": "Fires when the decoder returns different output for the same bytes under a different file name."
+            },
+            {
+              "name": "negative_reads_training_corpus_at_runtime",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the delivered programs name the training corpus directory in their source."
+            },
+            {
+              "name": "negative_rebinds_verifier_dependencies",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Fires when the delivered programs rebind a standard library function the verifier relies on."
+            },
+            {
+              "name": "negative_nondeterministic_output",
+              "value": 1.0,
+              "raw": true,
+              "weight": -3.0,
+              "description": "Fires when the decoder produces different output across repeated runs on one capture."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

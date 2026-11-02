@@ -1,0 +1,78 @@
+{
+  "board": "f272f70",
+  "status": "done",
+  "id": "80202e15-2d10-5eef-b823-ce74567dee0f",
+  "slug": "slo-credit-closeout",
+  "scores": {"tests": 2.38, "rubric": 66.67, "combined": 34.52},
+  "regrade_matches": true,
+  "oracle_100": true,
+  "oracle_note": "210/210 only with the generator SHA pin restored; the delivered (masked) bundle scores the oracle 197/210 = 93.81% because masking rewrote 5 slug strings inside GENERATOR_SOURCES (tests/test_output.py:59,:206,:546,:4115,:4458) and _generator_ok (:5842-5846) fails",
+  "nop_score": 0,
+  "kit": {"fails": 0, "minors": 0, "warns": 1},
+  "breaks_our_rules": [
+    "48 tests > 35 cap and 5 accepted warns (_COMMON_RULES_v3.md:56, knowledge/KNOWLEDGE.md:38)",
+    "one Opus run only, gate needs 2 (_COMMON_RULES_v3.md:55)",
+    "hidden-input tier 13/210 = 6.2%, shipped-output weight 93.8% (P2_build_v3.md:82 needs hidden >= 50%, shipped-only <= 5%)",
+    "visible-tier concept/slice asserts are whole-population digests on shipped data, not reseeded per downstream doc (P2_build_v3.md:80-81)",
+    "one mistake billed across up to 35 tests (TS-26, P2_build_v3.md:86, _COMMON_RULES_v3.md:43)",
+    "rules not stated in any visible file: fx_rate null on MET, merged-account calendar-site tie (_COMMON_RULES_v3.md:25)",
+    "ambiguous 'window start' for quarantine (P2_build_v3.md:43)",
+    "test.sh chmod 755 /logs/verifier (knowledge/KNOWLEDGE.md:76 wants 700)",
+    "no grading statement in instruction for state whole-doc grading (P2_build_v3.md:98)"
+  ],
+  "loss_by_class": {
+    "GENUINE": 105,
+    "HIDDEN RULE": 35,
+    "AMBIGUITY": 65,
+    "CONDUCT": 6,
+    "AMPLIFICATION": 0,
+    "JUDGE ERROR": 0,
+    "ARTEFACT": 0,
+    "units": "test points of 210 (GENUINE/HIDDEN RULE/AMBIGUITY) and judge points of 18 (CONDUCT); amplification is the mechanism of every test loss (5 mistakes on ~5,600 of 21,021 records cost 205/210), not a separate bucket"
+  },
+  "distinct_mistakes": 7,
+  "points_per_mistake": [
+    {"id": "A", "what": "fx_rate filled on MET records (5523 records)", "class": "AMBIGUITY", "test_points": 55, "tests_touched": 35},
+    {"id": "B", "what": "internal_flag not alias-resolved (41 subs)", "class": "GENUINE", "test_points": 45, "tests_touched": 21},
+    {"id": "C", "what": "calendar site keyed by raw account, not merged account (2 claims + cascade)", "class": "HIDDEN RULE", "test_points": 35, "tests_touched": 12},
+    {"id": "D", "what": "lower-case wave id in deploy_events.log not normalised, ROLLBACK to v1 missed (2 records)", "class": "GENUINE", "test_points": 60, "tests_touched": 11},
+    {"id": "E", "what": "quarantine checked at 5-min bucket start not record window_start (hidden month, 1 record)", "class": "AMBIGUITY", "test_points": 10, "tests_touched": 2},
+    {"id": "R6", "what": "final answer claims control harness all bad=0, never re-run after fix", "class": "CONDUCT", "judge_points": 3},
+    {"id": "R9", "what": "silently swallowed broad exceptions in transform.py", "class": "CONDUCT", "judge_points": 3}
+  ],
+  "verdict": "PARTLY",
+  "adopt": [
+    "hidden next-month regeneration from embedded seeded generator, agent transform re-run with --prior as uid 65534",
+    "rules by reference to a 100-file corpus with decoys, drafts and mirrors",
+    "general identifier-variant rule exercised in a rarely joined event-log field",
+    "audit control register the agent can self-check against",
+    "small exact HELD-close gate",
+    "judge negatives for false verification claims (R6) and code quality (R9)",
+    "full output schema stated in the instruction"
+  ],
+  "avoid": [
+    "48 checks over the 35 cap",
+    "93.8% of test weight on shipped-data outputs",
+    "nullable output field with unstated null condition",
+    "unstated tie-break between merged-account rows",
+    "no-arg default judged instead of tested",
+    "slug text inside SHA-pinned generator source (masking broke the hidden tier)",
+    "chmod 755 on /logs/verifier"
+  ],
+  "template_edits": [
+    "LEVER_RULES_v1.md:43 replace '70 tests and 70 criteria (QC WARN above 35 is recorded)' with 35/35 and zero warns",
+    "P2_build_v3.md:81 allow concept projections recomputed on reseeded hidden inputs to count as whole-document grading",
+    "P2_build_v3.md:86 each slice digest covers only its own trap fields, not whole records",
+    "_COMMON_RULES_v3.md:25 add audit: every nullable output field states its null condition; every merge/alias source states which row wins",
+    "P2_build_v3.md:41 add lever pattern: one general normalisation rule applied in a rarely joined event-log field",
+    "P2_build_v3.md:113 no slug or author string inside SHA-pinned tests text; oracle must score 100% on the masked copy"
+  ],
+  "unverified": [
+    "that the agent read source_register.md:66 (step 5 has no recorded observation)",
+    "0.3869 in result.json came from an earlier 10-criterion judge (inferred from peer mining A:3, B:28; arithmetic fits 0.5*5/210 + 0.5*0.75)",
+    "spread of a second Opus run (estimate 30-60 combined)",
+    "negative_reads_training_corpus_at_runtime cannot fire on macOS host (no /app/data); not exercised",
+    "mistake E proven by diff isolation only (sole remaining September diff), not patch-proved",
+    "Docker images not built: containers not started by me were running, so all grading used a host venv"
+  ]
+}

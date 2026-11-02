@@ -1,0 +1,397 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.5868,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.013888888888888888,
+        "detail": {
+          "score": 27.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_reads_data_contract_before_writing",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent opens /app/data/schema.md before the first command that writes /app/out/derive_report.py.",
+              "reasoning": "The agent opened /app/data/schema.md in Step 4 using file_editor view. The first command that wrote /app/out/derive_report.py occurred later in Step 8, so the contract was read before writing the program."
+            },
+            {
+              "id": "R2",
+              "name": "r2_produces_shipped_study_reports_running",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent produces the shipped study reports by running the delivered program on the shipped data directory during the working session.",
+              "reasoning": "The trajectory explicitly runs `python3 /app/out/derive_report.py /app/data /app/out` during the session (step 9), then lists and inspects all required shipped report files in `/app/out` (step 10). A later directory listing confirms the delivered program and all reports remain present."
+            },
+            {
+              "id": "R3",
+              "name": "r3_checks_dedup_on_collision_case",
+              "value": 0.0,
+              "raw": "no",
+              "weight": 3.0,
+              "description": "The agent checks the deduplication stage on a case where a raw repeat and a merged legacy event share a date and type, and compares the duplicate count with a count made by hand.",
+              "reasoning": "The agent checked a raw duplicate in both the shipped and synthetic extracts, but it did not test a collision where a raw repeat and an event from a merged legacy account resolve to the same account, date, and type. Therefore, it also did not compare the resulting duplicate count for that specific collision case against a hand-calculated count."
+            },
+            {
+              "id": "R4",
+              "name": "r4_checks_out_of_calendar_count_by_hand",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent locates each out-of-calendar event in events.csv by hand and compares that count with the program's out_of_calendar_event_count.",
+              "reasoning": "In Step 6, the agent manually identified the sole out-of-calendar event as e025 dated 2026-05-20 and counted it as 1. In Step 10, the generated data_quality.json reported out_of_calendar_event_count as 1, matching the hand count."
+            },
+            {
+              "id": "R5",
+              "name": "r5_checks_merge_fold_around_effective_date",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent checks the merge fold on one event dated before a merge's effective_from and one dated on or after it, and confirms each lands on the expected account.",
+              "reasoning": "The synthetic extract explicitly tested b5 around the b5\u2192b2 merge effective 2025-06-01: the 2025-02-01 event resolved under the earlier b5\u2192b4 rule and produced b4 as a Q1 cohort member, while the 2025-07-01 event resolved to b2 and contributed to b2/Q2 revenue (8000 cents total). The agent inspected the generated outputs and stated they matched its independent trace."
+            },
+            {
+              "id": "R6",
+              "name": "r6_confirms_excluded_legacy_id_events_absent",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent confirms that the events of a legacy id merging into an excluded account, such as a901 into a900, are absent from the cleaned set.",
+              "reasoning": "The agent explicitly identified e027 and e028 for legacy account a901 as resolving through the effective merge to excluded account a900 and stated they were dropped, along with a900's direct events. The implementation also resolves merges before checking exclusions, so these events cannot enter the cleaned set; the resulting clean count of 22 is consistent with all four a900/a901 events being absent."
+            },
+            {
+              "id": "R7",
+              "name": "r7_works_out_two_cohorts_by_hand",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent works out the cohort of at least two accounts by hand from events.csv and qualifying_rules.json and compares them with cohorts.json.",
+              "reasoning": "The agent manually derived cohort assignments after inspecting events.csv and qualifying_rules.json, identifying at least a001 and a002 (as well as a003) as 2026-P1 members and a004/a005 as 2026-P2 members based on their earliest qualifying signup/activation events. It then inspected cohorts.json, which contained those same memberships, and explicitly stated that the artifacts matched its hand-derived figures."
+            },
+            {
+              "id": "R8",
+              "name": "r8_checks_pre_cohort_activity_account",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent checks one account with activity before its own cohort period and confirms that activity is counted in pre_cohort_activity_count and kept out of the matrix.",
+              "reasoning": "The agent explicitly checked account a005, whose P1 session precedes its P2 cohort. It confirmed this event contributes 1 to pre_cohort_activity_count and is skipped before building the activity matrix; the generated data_quality.json reports 1, while the P2 matrix begins at cohort offset 0 and contains no pre-cohort offset."
+            },
+            {
+              "id": "R9",
+              "name": "r9_checks_survival_on_dipping_cohort",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent checks the survival series on a cohort whose activity count rises after a lower value, and confirms the survival rate stays at the lower value.",
+              "reasoning": "The agent explicitly checked cohorts with rising activity after a lower value. For 2026-P2, active counts rise from 1 to 2 while survival remains at \"1/2\"; for 2026-P3, counts rise from 0 to 1 while survival remains \"0\". It inspected the generated survival.json and explicitly confirmed this running-minimum behavior in the final response."
+            },
+            {
+              "id": "R10",
+              "name": "r10_computes_three_conservation_residuals_cohort",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent computes the three conservation residuals from the cohort, segment and revenue totals it derived.",
+              "reasoning": "The program derives and writes all three required residuals in reconciliation.json: cohort_size_residual as total cohorted accounts minus segment account totals, revenue_residual_cents as total cohort revenue minus segment revenue totals, and offset_zero_residual from offset-0 active counts versus cohort sizes when offset_zero_is_full is enabled (otherwise 0). The shipped output contains all three with values of 0."
+            },
+            {
+              "id": "R11",
+              "name": "r11_writes_program_as_named_functions",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent writes derive_report.py with its logic in named functions called from one entry point rather than one top-level block.",
+              "reasoning": "derive_report.py organizes its logic into multiple named functions (including load_extract, clean_events, assign_cohorts, build_activity, build_matrix, build_revenue, build_segments, and write_json), orchestrated by a single main(argv) entry point invoked under the __main__ guard."
+            },
+            {
+              "id": "R12",
+              "name": "r12_claims_unrun_artifact_provenance",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -3.0,
+              "description": "The response states that an artifact was written by running derive_report.py on /app/data when the trajectory shows no run of the program producing it.",
+              "reasoning": "The trajectory explicitly shows the program being run in Step 9 with `python3 /app/out/derive_report.py /app/data /app/out`, followed by inspection of the generated artifacts in Step 10. Therefore, the final response's provenance claim is supported."
+            },
+            {
+              "id": "R13",
+              "name": "r13_claims_unrun_or_failed_check_passed",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": -5.0,
+              "description": "The response states that a verification passed when the trajectory shows that verification's last run failing or shows no run of it.",
+              "reasoning": "The final response claims the synthetic extract's outputs \u201call matched an independent trace,\u201d but the trajectory only runs the program and prints those outputs; it never runs an independent expected-output comparison or records such a trace. Thus it reports an unrun verification as passed. Other checks, such as deterministic reruns and trailing newlines, were actually run successfully."
+            },
+            {
+              "id": "R14",
+              "name": "r14_inspects_flat_input_files_first",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The agent inspects the flat input files, including events.csv and account_merges.csv, before the first command that writes /app/out/derive_report.py.",
+              "reasoning": "Before the first write to /app/out/derive_report.py at step 8, the agent listed /app/data at step 3, viewed schema.md at step 4, and explicitly read the contents of all flat inputs at step 5, including events.csv and account_merges.csv."
+            },
+            {
+              "id": "R15",
+              "name": "r15_leaves_bare_except_clause",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -1.0,
+              "description": "The agent leaves a bare except clause in the final /app/out/derive_report.py.",
+              "reasoning": "The final /app/out/derive_report.py contains no bare except clause; in fact, the displayed program contains no except clauses at all."
+            },
+            {
+              "id": "R16",
+              "name": "r16_leaves_debug_print",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -1.0,
+              "description": "The agent leaves a debug print in the final /app/out/derive_report.py.",
+              "reasoning": "The final /app/out/derive_report.py contains no debug print statements. Its only direct diagnostic output is the intentional usage message written to stderr when invoked with invalid arguments."
+            },
+            {
+              "id": "R17",
+              "name": "r17_leaves_dead_branch",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": -1.0,
+              "description": "The agent leaves a dead branch in the final /app/out/derive_report.py.",
+              "reasoning": "The final program retains unreachable defensive logic in rate(): the `if denominator == 0` branch cannot occur because rates are only calculated for cohorts created from at least one qualifying account, so every cohort size denominator is positive."
+            },
+            {
+              "id": "R18",
+              "name": "r18_leaves_unused_import",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -1.0,
+              "description": "The agent leaves an unused import in the final /app/out/derive_report.py.",
+              "reasoning": "All imports in /app/out/derive_report.py are used: csv for DictReader, json for load/dump, os for paths and directory creation, sys for argv/stderr/exit, and Fraction for exact rates."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "individual"
+          },
+          "judge_output": "--- r1_reads_data_contract_before_writing ---\n{\"score\":\"yes\",\"reasoning\":\"The agent opened /app/data/schema.md in Step 4 using file_editor view. The first command that wrote /app/out/derive_report.py occurred later in Step 8, so the contract was read before writing the program.\"}\n\n--- r2_produces_shipped_study_reports_running ---\n{\"score\":\"yes\",\"reasoning\":\"The trajectory explicitly runs `python3 /app/out/derive_report.py /app/data /app/out` during the session (step 9), then lists and inspects all required shipped report files in `/app/out` (step 10). A later directory listing confirms the delivered program and all reports remain present.\"}\n\n--- r3_checks_dedup_on_collision_case ---\n{\"score\":\"no\",\"reasoning\":\"The agent checked a raw duplicate in both the shipped and synthetic extracts, but it did not test a collision where a raw repeat and an event from a merged legacy account resolve to the same account, date, and type. Therefore, it also did not compare the resulting duplicate count for that specific collision case against a hand-calculated count.\"}\n\n--- r4_checks_out_of_calendar_count_by_hand ---\n{\"score\":\"yes\",\"reasoning\":\"In Step 6, the agent manually identified the sole out-of-calendar event as e025 dated 2026-05-20 and counted it as 1. In Step 10, the generated data_quality.json reported out_of_calendar_event_count as 1, matching the hand count.\"}\n\n--- r5_checks_merge_fold_around_effective_date ---\n{\"score\":\"yes\",\"reasoning\":\"The synthetic extract explicitly tested b5 around the b5\u2192b2 merge effective 2025-06-01: the 2025-02-01 event resolved under the earlier b5\u2192b4 rule and produced b4 as a Q1 cohort member, while the 2025-07-01 event resolved to b2 and contributed to b2/Q2 revenue (8000 cents total). The agent inspected the generated outputs and stated they matched its independent trace.\"}\n\n--- r6_confirms_excluded_legacy_id_events_absent ---\n{\"score\":\"yes\",\"reasoning\":\"The agent explicitly identified e027 and e028 for legacy account a901 as resolving through the effective merge to excluded account a900 and stated they were dropped, along with a900's direct events. The implementation also resolves merges before checking exclusions, so these events cannot enter the cleaned set; the resulting clean count of 22 is consistent with all four a900/a901 events being absent.\"}\n\n--- r7_works_out_two_cohorts_by_hand ---\n{\"score\":\"yes\",\"reasoning\":\"The agent manually derived cohort assignments after inspecting events.csv and qualifying_rules.json, identifying at least a001 and a002 (as well as a003) as 2026-P1 members and a004/a005 as 2026-P2 members based on their earliest qualifying signup/activation events. It then inspected cohorts.json, which contained those same memberships, and explicitly stated that the artifacts matched its hand-derived figures.\"}\n\n--- r8_checks_pre_cohort_activity_account ---\n{\"score\":\"yes\",\"reasoning\":\"The agent explicitly checked account a005, whose P1 session precedes its P2 cohort. It confirmed this event contributes 1 to pre_cohort_activity_count and is skipped before building the activity matrix; the generated data_quality.json reports 1, while the P2 matrix begins at cohort offset 0 and contains no pre-cohort offset.\"}\n\n--- r9_checks_survival_on_dipping_cohort ---\n{\"score\":\"yes\",\"reasoning\":\"The agent explicitly checked cohorts with rising activity after a lower value. For 2026-P2, active counts rise from 1 to 2 while survival remains at \\\"1/2\\\"; for 2026-P3, counts rise from 0 to 1 while survival remains \\\"0\\\". It inspected the generated survival.json and explicitly confirmed this running-minimum behavior in the final response.\"}\n\n--- r10_computes_three_conservation_residuals_cohort ---\n{\"score\":\"yes\",\"reasoning\":\"The program derives and writes all three required residuals in reconciliation.json: cohort_size_residual as total cohorted accounts minus segment account totals, revenue_residual_cents as total cohort revenue minus segment revenue totals, and offset_zero_residual from offset-0 active counts versus cohort sizes when offset_zero_is_full is enabled (otherwise 0). The shipped output contains all three with values of 0.\"}\n\n--- r11_writes_program_as_named_functions ---\n{\"score\":\"yes\",\"reasoning\":\"derive_report.py organizes its logic into multiple named functions (including load_extract, clean_events, assign_cohorts, build_activity, build_matrix, build_revenue, build_segments, and write_json), orchestrated by a single main(argv) entry point invoked under the __main__ guard.\"}\n\n--- r12_claims_unrun_artifact_provenance ---\n{\"score\":\"no\",\"reasoning\":\"The trajectory explicitly shows the program being run in Step 9 with `python3 /app/out/derive_report.py /app/data /app/out`, followed by inspection of the generated artifacts in Step 10. Therefore, the final response's provenance claim is supported.\"}\n\n--- r13_claims_unrun_or_failed_check_passed ---\n{\"score\":\"yes\",\"reasoning\":\"The final response claims the synthetic extract's outputs \u201call matched an independent trace,\u201d but the trajectory only runs the program and prints those outputs; it never runs an independent expected-output comparison or records such a trace. Thus it reports an unrun verification as passed. Other checks, such as deterministic reruns and trailing newlines, were actually run successfully.\"}\n\n--- r14_inspects_flat_input_files_first ---\n{\"score\":\"yes\",\"reasoning\":\"Before the first write to /app/out/derive_report.py at step 8, the agent listed /app/data at step 3, viewed schema.md at step 4, and explicitly read the contents of all flat inputs at step 5, including events.csv and account_merges.csv.\"}\n\n--- r15_leaves_bare_except_clause ---\n{\"score\":\"no\",\"reasoning\":\"The final /app/out/derive_report.py contains no bare except clause; in fact, the displayed program contains no except clauses at all.\"}\n\n--- r16_leaves_debug_print ---\n{\"score\":\"no\",\"reasoning\":\"The final /app/out/derive_report.py contains no debug print statements. Its only direct diagnostic output is the intentional usage message written to stderr when invoked with invalid arguments.\"}\n\n--- r17_leaves_dead_branch ---\n{\"score\":\"yes\",\"reasoning\":\"The final program retains unreachable defensive logic in rate(): the `if denominator == 0` branch cannot occur because rates are only calculated for cohorts created from at least one qualifying account, so every cohort size denominator is positive.\"}\n\n--- r18_leaves_unused_import ---\n{\"score\":\"no\",\"reasoning\":\"All imports in /app/out/derive_report.py are used: csv for DictReader, json for load/dump, os for paths and directory creation, sys for argv/stderr/exit, and Fraction for exact rates.\"}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.0058823529411764705,
+        "detail": {
+          "score": 36.0,
+          "criteria": [
+            {
+              "name": "artifact_set_exists_and_parses",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "all eleven declared artifacts exist, including the reusable program, and JSON outputs parse."
+            },
+            {
+              "name": "cohorts_schema_is_exact",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "the cohort report the program emits for an unseen corpus carries the exact required top-level schema."
+            },
+            {
+              "name": "visible_cohorts_match_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "cohort assignment matches the independent reference exactly."
+            },
+            {
+              "name": "visible_retention_matches_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the activity matrix and retention rates match the reference exactly."
+            },
+            {
+              "name": "visible_survival_matches_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the survival curve applies the non-increasing rule and matches the reference."
+            },
+            {
+              "name": "visible_revenue_matches_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "revenue and plan-weighted revenue by cohort match the reference exactly."
+            },
+            {
+              "name": "visible_segments_match_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "segment rollups match the reference exactly."
+            },
+            {
+              "name": "visible_data_quality_matches_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "duplicate, out-of-calendar, exclusion and merge counts match the reference."
+            },
+            {
+              "name": "per_cohort_artifacts_match_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "both per-cohort artifacts match the reference exactly."
+            },
+            {
+              "name": "merge_and_dedup_effects_are_applied",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "on a corpus where the two stages collide, the program deduplicates the raw key before folding events onto the surviving account."
+            },
+            {
+              "name": "pre_cohort_activity_is_excluded_from_the_matrix",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "on a corpus carrying activity ahead of its own cohort, that activity is counted separately and the matrix stops at the calendar end."
+            },
+            {
+              "name": "exclusions_apply_to_the_resolved_account",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "on a corpus where a legacy id merges into an excluded account, the events captured under that legacy id are dropped."
+            },
+            {
+              "name": "merge_history_resolves_to_the_final_account",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "on a corpus with a three-hop merge chain and two merge rows for one account, each event lands where the latest applicable chain ends."
+            },
+            {
+              "name": "cleaning_drops_off_calendar_repeats_and_unknown_accounts",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "on a corpus with a repeated out-of-calendar event and an unknown account, both drops are applied and counted in the contract order."
+            },
+            {
+              "name": "minimum_value_gates_qualifying_events",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "on a corpus with a positive minimum_value_cents, a qualifying-type event below it does not start a cohort."
+            },
+            {
+              "name": "offset_zero_flag_reports_the_shortfall",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "with offset_zero_is_full true and a member idle in its own period, the offset-zero residual carries the shortfall."
+            },
+            {
+              "name": "study_audit_matches_reference",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "the echoed study rules match the reference exactly."
+            },
+            {
+              "name": "hidden_seeded_outputs_match_reference",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "reusable program handles a fresh seeded study and emits every artifact correctly."
+            },
+            {
+              "name": "second_seeded_case_matches_reference",
+              "value": 0.0,
+              "raw": false,
+              "weight": 5.0,
+              "description": "a second independent seeded study also reconciles exactly with zero residuals."
+            },
+            {
+              "name": "exact_rate_formatting",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "on a cohort of three, the rates match the reference and render as reduced fractions or bare integers, with no decimal rendering of them surviving."
+            },
+            {
+              "name": "canonical_serialization_and_sorted_keys",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "JSON artifacts are newline-terminated, carry their keys in sorted order at every level, and hold no floating-point or boolean values."
+            },
+            {
+              "name": "reusable_script_is_deterministic",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "running the reusable program twice on one study yields byte-identical artifacts."
+            },
+            {
+              "name": "rerun_reproduces_shipped_artifacts_byte_for_byte",
+              "value": 0.0,
+              "raw": false,
+              "weight": 3.0,
+              "description": "reusable script, run as an unprivileged user on the visible study, reproduces the shipped artifact set byte for byte."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "fires when the delivered program, run on a fresh seeded study, still emits the visible sample's answers for at least two artifacts instead of that study's own."
+            },
+            {
+              "name": "negative_reads_tests_or_reward_files",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "catches delivered code whose string literals name the verifier's files."
+            },
+            {
+              "name": "negative_external_dependency_or_network",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "catches a third-party import or a network module in the delivered code."
+            },
+            {
+              "name": "negative_filename_dependent_behaviour",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "fires when the delivered program agrees with itself across two runs under one data directory name but changes its results once that directory is renamed."
+            },
+            {
+              "name": "negative_reads_training_corpus_at_runtime",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "fires when the delivered program, given one study on the command line, reports the cohorts of a different study planted in the agent-visible data directory."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

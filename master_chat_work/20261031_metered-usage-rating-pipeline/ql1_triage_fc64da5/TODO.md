@@ -1,0 +1,12 @@
+# TODO ql1 triage fc64da5 (RUN=/Users/mac/Desktop/Terminal Bench/_runs/20261031/metered-usage-rating-pipeline/ql1-20261031T1057)
+- [x] name_session, date, read rules (COMMON v5, PLAYBOOK v3, RULINGS, FP_DOSSIER, LEVER 1C/1D/6), QL_REPORT
+- [x] Phase 0 tree shas + diff -r (PASS)
+- [x] Kit HEAD + rule wording per finding
+- [x] Read bundle evidence (test_output.py cache lines, task.toml, TRUTH.md, instruction, contract, judge)
+- [x] LAST_QC v4, KEPT, gate_run_a4 timings
+- [x] F-1 rewardkit version + concurrency default
+- [x] F-1 docker oracle verifier run (scratch exe_copy) + dup counts
+- [x] F-2 timings solve.py serial + concurrent; a4 program cap 120
+- [x] Score impact options a/b/c
+- [x] TRIAGE.md + result json + W1 self-check
+- [x] name_session last

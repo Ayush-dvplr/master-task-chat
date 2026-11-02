@@ -1,0 +1,497 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.6852,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.018518518518518517,
+        "detail": {
+          "score": 10.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_checks_a_drawn_allowance_on_its_own_extract",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which a site's allowance covers its offer in a later event only if no offer of that site was chosen in an earlier event, while an offer of that site is chosen in the earlier event, runs derive_report.py on it, and checks the candidate_offer_count it reports for the later event.",
+              "reasoning": "The synthetic extract exercises allowance blocking through the S006\u2192S002\u2192S001 chain, but it never directly checks the later event's candidate_offer_count. It checks only the global candidate total, allowance-blocked count, and EV-A/N candidate count."
+            },
+            {
+              "id": "R2",
+              "name": "r2_checks_start_order_on_its_own_extract",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which two events share a site whose allowance covers only one of their offers, and the event that starts first has the greater event_id and the later sorting dispatch_start text (for example because the two start times carry different UTC offsets), runs derive_report.py on it, and checks which of the two events selects that site's offer.",
+              "reasoning": "EV-A and EV-B represent equal instants and test the descending-event_id tie rule. They do not create two distinct instants where the chronologically earlier event has the greater event_id and lexically later dispatch_start text."
+            },
+            {
+              "id": "R3",
+              "name": "r3_checks_a_composed_rate_above_cap_on_its_own_extract",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the credit_cents and cap_binding_count it reports against figures it worked out by hand.",
+              "reasoning": "The synthetic rate-card data contains no non-null override value. It therefore does not test a chosen offer combining override, non-zero uplift, and non-zero segment adder above a cap, despite the final response claiming override-card coverage."
+            },
+            {
+              "id": "R4",
+              "name": "r4_checks_a_half_cent_interval_amount_on_its_own_extract",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent constructs its own extract in which one interval amount of a chosen offer's credit is exactly half a cent, works out that offer's credit_cents by hand, runs derive_report.py on the extract, and compares the two.",
+              "reasoning": "The synthetic extract makes chosen offer OB1 earn exactly 1.5 cents for an interval, expects half-to-even rounding to 2 cents, runs derive_report.py, and checks EV-B/N credit_cents equals 2."
+            },
+            {
+              "id": "R5",
+              "name": "r5_allowance_ledger_in_one_named_function",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent's final derive_report.py keeps the walk of the season's events that draws down site allowances in one named function, separate from the function that chooses a single event-region's portfolio.",
+              "reasoning": "The named run() function owns the season-order walk, candidate filtering against remaining allowances, and allowance drawdown. The single event-region portfolio choice is isolated in solve()."
+            },
+            {
+              "id": "R6",
+              "name": "r6_exact_arithmetic_for_reported_figures",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent's final derive_report.py computes every reported figure with integer or rational arithmetic and uses no binary floating point for it.",
+              "reasoning": "Reported energy, rates, credits, ratios, optimisation components, and grants are computed entirely with Python integers and divmod-based rounding. No binary floating-point arithmetic is used for reported figures."
+            },
+            {
+              "id": "R7",
+              "name": "r7_final_run_after_last_edit",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent runs its final derive_report.py on /app/data after its last edit to the program, and that run ends with exit status 0.",
+              "reasoning": "After the final derive_report.py edits, the agent ran python3 out/derive_report.py data out in step 55; it completed successfully in about 0.8 seconds."
+            },
+            {
+              "id": "R8",
+              "name": "r8_claims_a_check_its_output_contradicts",
+              "value": 1.0,
+              "raw": 1,
+              "weight": -5.0,
+              "description": "The response says a check of derive_report.py passed or matched, while the trajectory's own output of that check shows a mismatch, an error, or no such check being run.",
+              "reasoning": "The final response says the passing synthetic checks covered override cards, but the synthetic generator supplies None for every override and emits no override elements. It also claims every manifest field_sum was checked although the shown trajectory only checks selected sums. Thus it claims checks for which no corresponding check was run."
+            },
+            {
+              "id": "R9",
+              "name": "r9_recomputes_grant_cents_outside_the_program",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent independently recomputes every beneficiary's grant cents for at least three event-regions outside derive_report.py, from the funded pool and the program.ini grants keys, and compares them with the grants its region documents report.",
+              "reasoning": "The external synthetic harness hard-codes hand-derived funded-pool and grant expectations and compares region-document grants for well over three event-regions, including EV-A/N, EV-B/N, EV-C/N, EV-A/S, EV-D/S, EV-E/S, and EV-F/S."
+            },
+            {
+              "id": "R10",
+              "name": "r10_recomputes_remaining_allowance_outside_the_program",
+              "value": 0.0,
+              "raw": 0,
+              "weight": 3.0,
+              "description": "The agent independently recomputes, outside derive_report.py, the remaining allowance that each chosen offer's site drew on when its event was reached, following draws_from in site_allowances.tsv, and compares it with the offers its region documents select.",
+              "reasoning": "Although the brute-force harness replays candidate eligibility and allowance consumption and the synthetic extract tests one blocked chain, the trajectory does not explicitly and independently calculate the remaining allowance for each chosen offer's draw root and compare those values against all region selections."
+            },
+            {
+              "id": "R11",
+              "name": "r11_recomputes_credit_cents_outside_the_program",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 3.0,
+              "description": "The agent independently recomputes the credit_cents of the chosen offers outside derive_report.py, from their credited relief ticks and effective rates, and compares them with the credit_cents its region documents report.",
+              "reasoning": "The synthetic harness provides hand-derived region credit expectations for all four selected offers\u2014OA2=6, OA4=9, OB1=2, and OC2=1000\u2014and compares them with the corresponding region-event credit_cents outputs."
+            },
+            {
+              "id": "R12",
+              "name": "r12_derive_report_is_maintainable",
+              "value": 1.0,
+              "raw": 1,
+              "weight": 1.0,
+              "description": "The agent leaves a /app/out/derive_report.py that a Python reviewer would accept as maintainable, judged on its names, function structure and error handling.",
+              "reasoning": "The final program has clear parsing methods, named rounding and grant helpers, a distinct portfolio solver and season walk, descriptive variables and docstrings, and fail-fast behavior for malformed schema data. Its more complex DFS is localized and commented."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "batched"
+          },
+          "judge_output": "{\n  \"r1_checks_a_drawn_allowance_on_its_own_extract\": {\n    \"score\": 0,\n    \"reasoning\": \"The synthetic extract exercises allowance blocking through the S006\u2192S002\u2192S001 chain, but it never directly checks the later event's candidate_offer_count. It checks only the global candidate total, allowance-blocked count, and EV-A/N candidate count.\"\n  },\n  \"r2_checks_start_order_on_its_own_extract\": {\n    \"score\": 0,\n    \"reasoning\": \"EV-A and EV-B represent equal instants and test the descending-event_id tie rule. They do not create two distinct instants where the chronologically earlier event has the greater event_id and lexically later dispatch_start text.\"\n  },\n  \"r3_checks_a_composed_rate_above_cap_on_its_own_extract\": {\n    \"score\": 0,\n    \"reasoning\": \"The synthetic rate-card data contains no non-null override value. It therefore does not test a chosen offer combining override, non-zero uplift, and non-zero segment adder above a cap, despite the final response claiming override-card coverage.\"\n  },\n  \"r4_checks_a_half_cent_interval_amount_on_its_own_extract\": {\n    \"score\": 1,\n    \"reasoning\": \"The synthetic extract makes chosen offer OB1 earn exactly 1.5 cents for an interval, expects half-to-even rounding to 2 cents, runs derive_report.py, and checks EV-B/N credit_cents equals 2.\"\n  },\n  \"r5_allowance_ledger_in_one_named_function\": {\n    \"score\": 1,\n    \"reasoning\": \"The named run() function owns the season-order walk, candidate filtering against remaining allowances, and allowance drawdown. The single event-region portfolio choice is isolated in solve().\"\n  },\n  \"r6_exact_arithmetic_for_reported_figures\": {\n    \"score\": 1,\n    \"reasoning\": \"Reported energy, rates, credits, ratios, optimisation components, and grants are computed entirely with Python integers and divmod-based rounding. No binary floating-point arithmetic is used for reported figures.\"\n  },\n  \"r7_final_run_after_last_edit\": {\n    \"score\": 1,\n    \"reasoning\": \"After the final derive_report.py edits, the agent ran python3 out/derive_report.py data out in step 55; it completed successfully in about 0.8 seconds.\"\n  },\n  \"r8_claims_a_check_its_output_contradicts\": {\n    \"score\": 1,\n    \"reasoning\": \"The final response says the passing synthetic checks covered override cards, but the synthetic generator supplies None for every override and emits no override elements. It also claims every manifest field_sum was checked although the shown trajectory only checks selected sums. Thus it claims checks for which no corresponding check was run.\"\n  },\n  \"r9_recomputes_grant_cents_outside_the_program\": {\n    \"score\": 1,\n    \"reasoning\": \"The external synthetic harness hard-codes hand-derived funded-pool and grant expectations and compares region-document grants for well over three event-regions, including EV-A/N, EV-B/N, EV-C/N, EV-A/S, EV-D/S, EV-E/S, and EV-F/S.\"\n  },\n  \"r10_recomputes_remaining_allowance_outside_the_program\": {\n    \"score\": 0,\n    \"reasoning\": \"Although the brute-force harness replays candidate eligibility and allowance consumption and the synthetic extract tests one blocked chain, the trajectory does not explicitly and independently calculate the remaining allowance for each chosen offer's draw root and compare those values against all region selections.\"\n  },\n  \"r11_recomputes_credit_cents_outside_the_program\": {\n    \"score\": 1,\n    \"reasoning\": \"The synthetic harness provides hand-derived region credit expectations for all four selected offers\u2014OA2=6, OA4=9, OB1=2, and OC2=1000\u2014and compares them with the corresponding region-event credit_cents outputs.\"\n  },\n  \"r12_derive_report_is_maintainable\": {\n    \"score\": 1,\n    \"reasoning\": \"The final program has clear parsing methods, named rounding and grant helpers, a distinct portfolio solver and season walk, descriptive variables and docstrings, and fail-fast behavior for malformed schema data. Its more complex DFS is localized and commented.\"\n  }\n}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.002890173410404624,
+        "detail": {
+          "score": 173.0,
+          "criteria": [
+            {
+              "name": "artifact_set_exists_and_parses",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "All ten declared artifacts exist and the nine JSON reports parse as objects."
+            },
+            {
+              "name": "canonical_serialization_and_integer_units",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every JSON report has sorted keys at every level, a trailing newline, no float or boolean, and a JSON integer at every place the schema gives an integer field."
+            },
+            {
+              "name": "report_keys_match_schema",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every object in the eight region, segment, audit and quality reports carries exactly the schema keys for its place."
+            },
+            {
+              "name": "report_arrays_in_schema_order",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "Every array in the shipped-data reports has one entry per item in the order schema.md gives."
+            },
+            {
+              "name": "selection_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "selection_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the candidate_offer_count and selected_offer_ids of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "intervals_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "intervals_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the intervals array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "tie_decisions_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "tie_decisions_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the tie_decisions entries of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "segment_rows_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the selection, energy and floor fields of every event_regions entry in both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_rows_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the selection, energy and floor fields of every event_regions entry in both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "ledger_quality_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports allowance_blocked_offer_count and empty_candidate_groups in data_quality.json exactly as the contract defines them."
+            },
+            {
+              "name": "ledger_quality_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports allowance_blocked_offer_count and empty_candidate_groups in data_quality.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_North_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals object of region_North.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_North_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals object of region_North.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_South_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals object of region_South.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_South_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals object of region_South.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_West_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals object of region_West.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_West_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals object of region_West.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_East_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals object of region_East.json exactly as the contract defines them."
+            },
+            {
+              "name": "region_totals_East_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals object of region_East.json exactly as the contract defines them."
+            },
+            {
+              "name": "segment_totals_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the totals objects of both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_totals_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the totals objects of both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "summary_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports every value of summary.json exactly as the contract defines them."
+            },
+            {
+              "name": "summary_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports every value of summary.json exactly as the contract defines them."
+            },
+            {
+              "name": "labels_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports compliance_counts and site_labels of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "labels_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports compliance_counts and site_labels of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "quality_counts_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the row counts and data-quality counters of data_quality.json other than the allowance ledger counters exactly as the contract defines them."
+            },
+            {
+              "name": "quality_counts_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with draws_from chains and planted grant pools, the program reports the row counts and data-quality counters of data_quality.json other than the allowance ledger counters exactly as the contract defines them."
+            },
+            {
+              "name": "credit_rows_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the credit_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "credit_rows_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports the credit_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_credit_rows_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the bid_cost_cents and credit_cents of every event_regions entry in both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "segment_credit_rows_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports the bid_cost_cents and credit_cents of every event_regions entry in both segment files exactly as the contract defines them."
+            },
+            {
+              "name": "funded_pool_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports grant_pool_cents and grant_funded_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "funded_pool_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports grant_pool_cents and grant_funded_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "grants_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports the grants array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "grants_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports the grants array of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "grant_allocation_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports grant_allocated_cents and grant_unallocated_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "grant_allocation_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports grant_allocated_cents and grant_unallocated_cents of every event entry in the four region files exactly as the contract defines them."
+            },
+            {
+              "name": "residual_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports residual_cents and residual_tie_pool_count of policy_audit.json and unallocated_pool_count of data_quality.json exactly as the contract defines them."
+            },
+            {
+              "name": "residual_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports residual_cents and residual_tie_pool_count of policy_audit.json and unallocated_pool_count of data_quality.json exactly as the contract defines them."
+            },
+            {
+              "name": "cap_binding_match",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Run on the shipped extract, the program reports cap_binding_count of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "cap_binding_match_hard",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "Run on a seeded season extract with planted grant pools and no draws_from rows, the program reports cap_binding_count of policy_audit.json exactly as the contract defines them."
+            },
+            {
+              "name": "segment_rate_adder_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Raising the public segment rate adder in program.ini moves the credits of the region file as the contract says, with the same portfolios."
+            },
+            {
+              "name": "allowance_ticks_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Raising one site's allowance_ticks in site_allowances.tsv moves the candidates and portfolios of the later events that site takes part in, and no compliance label."
+            },
+            {
+              "name": "minimum_grant_mutation",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "Raising minimum_grant_cents in program.ini moves the grants of the region file as the contract says, with the same portfolios and credits."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "Run on a different extract, the program emits the summary of the shipped extract."
+            },
+            {
+              "name": "negative_reads_tests_or_reward_files",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "The delivered program names a grader path or grader file in a string it uses."
+            },
+            {
+              "name": "negative_external_dependency_or_network",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "The delivered program imports a third-party or network module."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

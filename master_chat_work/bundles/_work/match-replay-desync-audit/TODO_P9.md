@@ -1,0 +1,27 @@
+# TODO: P9 v2 r1 match-replay-desync-audit
+
+- [x] P0.1 copy SOURCE -> BUNDLE, jobs -> OUT/baseline_v0
+- [x] P0.2 tree sha + baselines.json
+- [x] P0.3 WORK files
+- [x] P1.1 Phase A genuineness (verifier logs, permission errors, reward formula)
+- [x] P1.2 root cause 1-4
+- [x] P1.3 lever table
+- [x] P1.4 solve autopsy
+- [x] P1.5 copy reflex program to OUT/agent_program
+- [x] P1.6 LEAK_LIBRARY rows
+- [x] P1.7 choose levers, write OUT/DIAGNOSIS.md, reply DIAGNOSIS READY (waiting for go)
+- [x] P2.0 go received 18:18
+- [x] P2.1 read generator settle code + solve.py settle code + notes text embedding
+- [x] P2.2 notes: charter-scale Caps -> running allowance; engine-rules Windows renewal sentence (data + STATIC_NOTE_TEXT)
+- [x] P2.3 generator: _fit_plan allowance; heavy hidden corpora; planted seats; regenerate shipped data, check shipped unchanged/allowance non-binding
+- [x] P2.4 solve.py allowance; oracle passes locally
+- [x] P2.5 tests: weights (shipped w1), G6 mutation tests, G7 messages, negatives <=5/act
+- [x] P2.6 instruction: drop l3 promise, l11 figure list, add G5 sentence
+- [x] P2.7 judge.toml rewrite J1-J5 batched; reward.toml weights
+- [x] P2.8 format: test.sh chown/chmod, Dockerfile pip line, _grant_read
+- [x] P2.9 TRUTH.md, DESIGN, LEVERS, QC_DEFENCE, XREF + xref_check 0
+- [x] P3.1 stacking_check.py -> OUT/STACKING_CHECK.md parts a-d
+- [x] P3.2 reflex gate on final tests (agent + adapted) + single-lever table
+- [x] P3.3 QC 4 scripts + validator advisory + playground static, QL rule git diff 2690e960
+- [x] P3.4 Docker block (warm image, exe_copy plain/owner-only: oracle x3, owner-only, chmod 600, nop, stub, forgery)
+- [x] Reports + result json + name_session last

@@ -1,0 +1,584 @@
+[
+ {
+  "component": "qc",
+  "id": "IN-S7",
+  "kind": "reworded",
+  "old": "Any input path the prompt does promise under /app/data/ actually exists in environment/",
+  "new": "Any input path the prompt does promise under an input COPY destination (/app/data/, /app/repo/, ...) actually exists in environment/",
+  "impact": "Script-owned by instruction_qc.py C4/C5 (script unchanged; C4 already resolves any COPY). Prompts may name /app/<dir>/ paths for every input directory.",
+  "templates": [
+   "P5",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "DS-1",
+  "kind": "reworded",
+  "old": "All input lives in environment/data/ and at least one file exists there; environment/ holds only the Dockerfile and data/. Script-owned.",
+  "new": "All input lives in one or more input directories under environment/ (any names), each holding at least one file and each copied into the image by environment/Dockerfile; environment/ holds only the Dockerfile and those directories. Script-owned (structure_qc S3, S4).",
+  "impact": "Builders may split input into named dirs (repo/, ci/, fixtures/). Each dir needs its own COPY line. Severity FAIL, threshold >=1 file per dir.",
+  "templates": [
+   "P2",
+   "P4",
+   "P7",
+   "knowledge/qc_authoring_checklist",
+   "knowledge/archetypes.md"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "DS-2",
+  "kind": "reworded",
+  "old": "Deleting environment/data/ must make the task unsolvable.",
+  "new": "Deleting the input directories must make the task unsolvable, and so must deleting any single one of them; a directory the agent need not open is residue (fail).",
+  "impact": "Stricter for multi-dir bundles: every input directory must be load-bearing. Manual, FAIL.",
+  "templates": [
+   "P2",
+   "P5",
+   "P9",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "DS-4",
+  "kind": "reworded",
+  "old": "Nothing in environment/data/ may contain ... the expected final output.",
+  "new": "Nothing in any environment/ input directory may contain ... the expected final output.",
+  "impact": "Answer-leak scan now covers every input directory. Manual, FAIL.",
+  "templates": [
+   "P5",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "DS-9",
+  "kind": "reworded",
+  "old": "Must copy data/ into the image at the path the instruction uses (/app/data).",
+  "new": "Must copy every input directory into the image at the path the instruction uses (conventionally /app/<dir>, e.g. /app/data, /app/repo).",
+  "impact": "Manual, FAIL when instruction and image disagree. Instruction paths must match each COPY destination.",
+  "templates": [
+   "P2",
+   "P7",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "DS-16",
+  "kind": "reworded",
+  "old": "The oracle MAY read environment/ (... where /app/data exists).",
+  "new": "The oracle MAY read environment/ (... where the input directories exist).",
+  "impact": "Allowance only; no action.",
+  "templates": []
+ },
+ {
+  "component": "qc",
+  "id": "TS-1",
+  "kind": "reworded",
+  "old": "Nothing under tests/ may unconditionally read /app/data at grade time.",
+  "new": "Nothing under tests/ may unconditionally read an agent input path (/app/data or any other input COPY destination) at grade time.",
+  "impact": "Tests must embed every input dir they need (generator {{SHIPPED:<dir>}}); no grade-time read of /app/repo, /app/ci etc. FAIL, script D1.",
+  "templates": [
+   "P5",
+   "P2",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "TS-S7",
+  "kind": "reworded",
+  "old": "Nothing under tests/ reads /app/data unconditionally.",
+  "new": "Nothing under tests/ reads an agent input path (/app/data or any COPY destination of an input directory) unconditionally.",
+  "impact": "Script-owned (tests_qc D1). Same action as TS-1.",
+  "templates": [
+   "P5"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "D1",
+  "kind": "threshold",
+  "old": "tests_qc D1 flags any unconditional '/app/data' string under tests/",
+  "new": "D1 flags any unconditional string naming /app/data or any destination environment/Dockerfile COPYs an input directory to (input_mounts); COPY . (whole context) is NOT expanded at HEAD (8c37863a fix reverted by the merge)",
+  "impact": "Wider net: strings like '/app/repo/...' in test_output.py now FAIL unless guarded. FAIL.",
+  "templates": [
+   "P2",
+   "P5",
+   "P7"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "AL-11",
+  "kind": "reworded",
+  "old": "tests reading anything agent-writable (/app/data reads crash - Gate 03; ...)",
+  "new": "tests reading anything agent-writable (input-path reads such as /app/data crash - Gate 03; ...)",
+  "impact": "Wording only.",
+  "templates": []
+ },
+ {
+  "component": "qc",
+  "id": "JD-schema (04 annotations table)",
+  "kind": "removed",
+  "old": "annotations keys: mode, type (effect: VALUE/EFFECT/ABSENCE/INVARIANT/ORDERING/DIVERGENCE), evidence, residue, kind (outcome/constraint/conduct), category, evaluation_target, importance, + contract_sentence/contract_file (constraint) or serves (conduct); kind=constraint iff category=instruction following",
+  "new": "annotations keys exactly: mode, type (the category: task completion, instruction following, tool use, agent behavior, factuality and hallucination, safety and boundaries), evaluation_target, importance. category, kind, serves, residue, evidence, contract_sentence, contract_file are retired and FAIL.",
+  "impact": "Every judge.toml criterion must carry exactly the 4 keys in order; put the old category value in type. Constraint criteria are marked only by type = \"instruction following\".",
+  "templates": [
+   "P2",
+   "P4",
+   "P7",
+   "P9",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "JD-S8",
+  "kind": "reworded",
+  "old": "[criterion.annotations] carrying mode, type, evidence, residue, kind, category, evaluation_target, importance in that order, then contract_sentence/contract_file or serves (script J6)",
+  "new": "[criterion.annotations] carrying exactly mode, type, evaluation_target, importance in that order, nothing else; retired keys fail (script J6)",
+  "impact": "Script-owned, FAIL. Old-shape judge.toml now fails J6 on every criterion.",
+  "templates": [
+   "P2",
+   "P4",
+   "P5",
+   "P7",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "J6",
+  "kind": "threshold",
+  "old": "ANNOTATION_BASE 8 keys + kind-dependent extras",
+  "new": "ANNOTATION_KEYS = [mode, type, evaluation_target, importance]; hint lists retired keys",
+  "impact": "Script FAIL; see JD-S8.",
+  "templates": [
+   "P2",
+   "P7"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "JD-S9",
+  "kind": "reworded",
+  "old": "type from the effect set, residue one plain sentence, safety category with 'and', kind and category agreeing (script J7)",
+  "new": "type from the category set with 'safety and boundaries' spelled with 'and'; evaluation_target and importance from their sets (script J7)",
+  "impact": "Script-owned, FAIL. residue/kind/category checks gone.",
+  "templates": [
+   "P2",
+   "P7"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "J7",
+  "kind": "threshold",
+  "old": "type in EFFECTS; residue sentence check; kind in KINDS; category in CATEGORIES; kind/category agreement",
+  "new": "type in CATEGORIES ('safety & boundaries' fails); evaluation_target, importance in sets",
+  "impact": "Script FAIL; see JD-S9.",
+  "templates": [
+   "P2",
+   "P7"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "JD-15",
+  "kind": "reworded",
+  "old": "The file declares its own answer in annotations.kind, and that declaration is a claim to check",
+  "new": "Classify each criterion yourself from its description; its annotations type is a claim to check ... an unstated standard labelled `constraint` escapes the conduct test, and a stated rule labelled `conduct` escapes JD-16 (HEAD keeps the labels `constraint`/`conduct`, which are no longer type values; 8c37863a's correction to `instruction following` was reverted by the merge)",
+  "impact": "Manual, FAIL thresholds unchanged. Reviewers compare their outcome/constraint/conduct reading against type; for constraints the label is type = \"instruction following\". Treat the stale `constraint`/`conduct` label words as meaning that.",
+  "templates": [
+   "P5",
+   "P8",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "JD-16",
+  "kind": "reworded",
+  "old": "a constraint criterion carries kind = \"constraint\" and category = \"instruction following\"; a tool-use constraint labelled category = \"tool use\" breaks that agreement",
+  "new": "a constraint criterion carries annotations type = \"instruction following\"; a genuine tool-use constraint labelled type = \"tool use\" is mislabelled",
+  "impact": "No quoted contract_sentence/contract_file in the file any more; the reviewer still must find and quote the sentence (JD-16.1). Builders should keep the sentence in LEVERS/TRUTH so a reviewer can find it.",
+  "templates": [
+   "P2",
+   "P5",
+   "P7",
+   "P8",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "IN-15",
+  "kind": "reworded",
+  "old": "bde868c4: list every criterion whose annotations carry type = \"instruction following\"",
+  "new": "HEAD (same as 9b8229f6): list every criterion whose annotations carry kind = \"constraint\" (which always comes with category = \"instruction following\")",
+  "impact": "Net unchanged vs 9b8229f6, but now refers to retired keys that J6 fails, so a literal reading finds no constraint criteria. Reviewers must read it as type = \"instruction following\". Upstream defect: report to PL.",
+  "templates": [
+   "P5",
+   "P8",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "H5",
+  "kind": "threshold",
+  "old": "bde868c4: chown root + chmod 755 /logs/verifier is ok; 700 warns",
+  "new": "HEAD (same as 9b8229f6): chown root + chmod 700 /logs/verifier is ok; anything else warns",
+  "impact": "Net unchanged vs 9b8229f6; reverts bde868c4. All 4 current bundles use 755 and now WARN H5. Severity WARN. Decide with PL which mode to ship (Harbor host-read issue on Linux was the reason for 755).",
+  "templates": [
+   "P2",
+   "P7",
+   "_COMMON_RULES",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "TS-28",
+  "kind": "reworded",
+  "old": "bde868c4: chown root:root plus chmod 755 ... A bundle that still uses 700 earns an H5 warn",
+  "new": "HEAD (same as 9b8229f6): chown root:root plus chmod 700",
+  "impact": "Net unchanged vs 9b8229f6; reverts bde868c4. Same action as H5.",
+  "templates": [
+   "P2",
+   "P7"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "FC-S3",
+  "kind": "reworded",
+  "old": "environment/data/ exists and holds the input the agent works on, at least one file.",
+  "new": "environment/ holds the Dockerfile and one or more input directories (any names) and nothing else; every input directory holds at least one file and is copied into the image by a COPY/ADD in environment/Dockerfile.",
+  "impact": "Script-owned (structure_qc S4), FAIL.",
+  "templates": [
+   "P2",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "Final_checklist tree + harness fact 1",
+  "kind": "reworded",
+  "old": "environment/data/ holds ALL input; data lives at /app/data because of COPY data /app/data",
+  "new": "<input-dir>/ ... one or more directories, any names, each COPYed; each lands where its COPY puts it; no input dir exists in the grading container",
+  "impact": "Context text; same action as DS-1/TS-1.",
+  "templates": [
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "S3",
+  "kind": "threshold",
+  "old": "environment/ allowed entries {Dockerfile, data}",
+  "new": "environment/ allows Dockerfile plus any non-hidden directory; a loose file fails",
+  "impact": "Script FAIL. Loose files directly under environment/ still fail.",
+  "templates": [
+   "P2"
+  ]
+ },
+ {
+  "component": "qc",
+  "id": "S4",
+  "kind": "threshold",
+  "old": "environment/data/ exists and holds at least one file",
+  "new": "at least one input directory; every one non-empty and a COPY/ADD source in environment/Dockerfile; COPY . is NOT recognised at HEAD (8c37863a whole-context fix reverted), so a bundle using COPY . /app fails S4",
+  "impact": "Script FAIL. Use one explicit COPY per input directory.",
+  "templates": [
+   "P2",
+   "P7",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "archetype.toml [[inputs]] / datagen_input",
+  "kind": "template",
+  "old": "no input declaration; every archetype implied environment/data -> /app/data",
+  "new": "[[inputs]] dir/mount entries (default data -> /app/data) plus optional datagen_input (default first input); generator dies on bad names, duplicate dirs/mounts, mount '/' or '/app'",
+  "impact": "Custom archetypes or bundles must declare their input dirs; datagen.py writes into datagen_input.",
+  "templates": [
+   "knowledge/archetypes.md",
+   "P2"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "repo-patch layout",
+  "kind": "template",
+  "old": "environment/data/{repo/ -> repo.zip (source_archives), api_contract.md, context files}; COPY data /app/data; instruction: extract /app/data/repo.zip",
+  "new": "environment/repo/ (COPY --chown=1000:1000 repo /app/repo) + environment/ci/ (api_contract.md + 5 datagen context files, COPY ci /app/ci); source_archives removed; datagen_input = ci; instruction, contract, TRUTH and solve.py use /app/repo and /app/ci; solve.py copytree instead of zip extract",
+  "impact": "Any repo-patch bundle must ship repo/ + ci/ with exactly those COPY lines, or validator FAILs §1.4 and §5.5 (schema-migration-plan-repair does today).",
+  "templates": [
+   "P2",
+   "P4",
+   "P7",
+   "knowledge/archetypes.md"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "service-interaction layout",
+  "kind": "template",
+  "old": "environment/data/{service/ -> service.zip (source_archives), contract, plan files}; COPY data /app/data; instruction: extract service.zip to /app/service",
+  "new": "environment/service/ (COPY service /app/service) + environment/data/ (COPY data /app/data); source_archives removed; datagen_input = data; instruction says /app/service already holds simulator and client (no extraction)",
+  "impact": "Same class of change as repo-patch: service-interaction bundles need service/ + data/ and two COPY lines.",
+  "templates": [
+   "P2",
+   "P4",
+   "knowledge/archetypes.md"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "judge.toml templates (all 8)",
+  "kind": "template",
+  "old": "8-key annotations with effect type, evidence, residue, kind, category (+contract_sentence/contract_file or serves)",
+  "new": "4-key annotations: mode, type (category), evaluation_target, importance",
+  "impact": "Copy the 4-key shape; generator refuses any other key list (_judge_criteria).",
+  "templates": [
+   "P2",
+   "P4",
+   "P7"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "TRUTH.md templates + provenance block",
+  "kind": "template",
+  "old": "provenance carried authored_by: harbor-generator, status: generated_reference, archetype, generator_seed, trailer_token; prose said 'drawn from generator seed {{SEED_HEX}}' and 'archetype'",
+  "new": "those 5 keys dropped; prose says 'specific to this task instance'; verified_by text shortened",
+  "impact": "TRUTH.md must not narrate production; matches DS-27.",
+  "templates": [
+   "P2",
+   "P4",
+   "P7",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "§15.5",
+  "kind": "reworded",
+  "old": "provenance has non-empty uuid, instance_id, task_name, fix_patch_sha256, solve_py_sha256, language, authored_by, status",
+  "new": "provenance has non-empty uuid, instance_id, task_name, fix_patch_sha256, solve_py_sha256, language; FAIL if authored_by, status, archetype, generator_seed or trailer_token present; FAIL if TRUTH.md text matches generate_bundle|harbor-generator|archetype(s)|scaffold|generator seed|datagen|'this bundle/task was built/generated/...' (QC DS-27)",
+  "impact": "Resolves the old VB 15.5 vs DS-27 conflict (Q13). Never write the word 'archetype', 'scaffold' or 'datagen' anywhere in TRUTH.md. Severity FAIL.",
+  "templates": [
+   "P2",
+   "P4",
+   "P7",
+   "_COMMON_RULES",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "§1.4",
+  "kind": "reworded",
+  "old": "environment/ contains exactly Dockerfile and data/",
+  "new": "environment/ contains exactly Dockerfile and the detected archetype's declared [[inputs]] dirs (title still says 'data/ only')",
+  "impact": "Validator enforces the archetype's layout, not QC's open layout: a custom-artifact bundle falls back to format-recovery (data only). Severity FAIL.",
+  "templates": [
+   "P2",
+   "P7",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "§5.5",
+  "kind": "reworded",
+  "old": "the only COPY is 'COPY data /app/data' and it is the last non-comment line",
+  "new": "COPY lines (flags like --chown stripped) are exactly 'COPY <dir> <mount>' for each declared input, and the last line is one of them (title still says 'data only')",
+  "impact": "Severity FAIL. Order of the input COPY lines is free; nothing may follow them.",
+  "templates": [
+   "P2",
+   "P7",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "§1.7",
+  "kind": "threshold",
+  "old": "environment/data is flat (no subdirectories) and has at least one file",
+  "new": "every environment/ input directory is non-empty; subdirectories allowed",
+  "impact": "The 'keep data flat' rule is gone from the validator. Severity FAIL.",
+  "templates": [
+   "P1",
+   "P2",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "§1.12 / archetype detection",
+  "kind": "reworded",
+  "old": "archetype read from TRUTH.md provenance 'archetype:' line, fallback format-recovery",
+  "new": "archetype = the unique template whose archetype.toml artifacts equal task.toml artifacts (sorted), fallback format-recovery; --archetype overrides (its help text is stale)",
+  "impact": "Detection now depends on the artifact list. A bundle with custom artifacts is checked as format-recovery and FAILs §1.12 (emberforge does). A bundle that keeps an archetype's artifacts gets that archetype's layout rules.",
+  "templates": [
+   "P2",
+   "P7",
+   "knowledge/archetypes.md"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "§1.13",
+  "kind": "threshold",
+  "old": "environment/data flat file count >= min_inputs",
+  "new": "file count over all input directories, recursive, >= min_inputs",
+  "impact": "Files inside repo/ trees now count toward min_inputs.",
+  "templates": [
+   "P2"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "§5.6",
+  "kind": "reworded",
+  "old": "no file under environment/data > 100 MB",
+  "new": "no input file in any input directory > 100 MB",
+  "impact": "Severity FAIL; same limit.",
+  "templates": []
+ },
+ {
+  "component": "generator",
+  "id": "§6.3 / visible corpus",
+  "kind": "reworded",
+  "old": "solution audit and visible-corpus text read environment/data only",
+  "new": "read every input directory",
+  "impact": "None for builders.",
+  "templates": []
+ },
+ {
+  "component": "generator",
+  "id": "validate_bundle.py --semantic",
+  "kind": "cli",
+  "old": "built images from the bundle itself and read /logs/verifier/reward.txt",
+  "new": "builds from an exe_copy.py tests-only copy (judge removed) and reads reward.json['reward']; needs no API key",
+  "impact": "--semantic is usable without OPENAI_API_KEY (not run here; UNVERIFIED that it now works end to end).",
+  "templates": [
+   "P6",
+   "_COMMON_RULES"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "playground.py --ablation / --jobs",
+  "kind": "cli",
+  "old": "ablation reran the oracle once per file in /app/data",
+  "new": "--ablation sample (default: one unit per input dir + up to 8 hash-picked), full (every unit), off; --jobs N (default 2) parallel containers; a tree dir (repo/) is one unit; a full pass recorded in memory for identical data is reused; report field 'ablation' and check D4-ablation",
+  "impact": "Default runs are now sampled; run --ablation full once before sign-off and quote the mode.",
+  "templates": [
+   "P3",
+   "P4",
+   "P6",
+   "P9"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "playground A3-judge-contract",
+  "kind": "removed",
+  "old": "A3 FAIL when a judge contract_sentence is not verbatim in instruction.md",
+  "new": "check removed (no contract_sentence key exists)",
+  "impact": "Nothing checks constraint sentences mechanically any more; reviewers do it under JD-16/IN-15.",
+  "templates": [
+   "P3",
+   "P5"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "playground archetype detection",
+  "kind": "reworded",
+  "old": "read 'archetype:' from TRUTH.md to find ablation_max",
+  "new": "validate_bundle.detect_archetype (artifacts match); unknown -> ablation_max 0.5",
+  "impact": "Custom-artifact bundles get the 0.5 default ablation ceiling unless --ablation-max is passed.",
+  "templates": [
+   "P3",
+   "P6"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "generate_bundle.py layout and judge guards",
+  "kind": "template",
+  "old": "no layout check; any judge annotation keys accepted",
+  "new": "_check_input_layout dies unless environment/ = Dockerfile + declared inputs, each non-empty and COPYed to its mount; _judge_criteria dies on non-4-key annotations",
+  "impact": "Generator refuses old-shape templates/bundles.",
+  "templates": [
+   "P2"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "{{SHIPPED_DATA}} / {{SHIPPED:<dir>}}",
+  "kind": "template",
+  "old": "{{SHIPPED_DATA}} embedded environment/data",
+  "new": "{{SHIPPED_DATA}} embeds the datagen_input dir; {{SHIPPED:<dir>}} embeds any other declared input",
+  "impact": "Common rule 6 must re-embed every embedded input dir, not only data/.",
+  "templates": [
+   "_COMMON_RULES",
+   "P4",
+   "P7",
+   "P9"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "shared trailer token",
+  "kind": "template",
+  "old": "harbor:<archetype>:<FORMAT_TAG>:<seed hex>",
+  "new": "<format_tag lower>:<sha256(archetype:tag:seed)[:16]>",
+  "impact": "Same seed now yields a different trailer than before; regenerated bundles are not byte-identical to older ones.",
+  "templates": [
+   "P4"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "{{TRUTH_DATA_FILE_LIST}} / task_memory.input_files",
+  "kind": "template",
+  "old": "files listed as /app/data/<name>; memory keyed by bare file name",
+  "new": "files listed at their image path for every input dir; memory keyed '<dir>/<path>'",
+  "impact": "TRUTH data lists and gen_memory rows change shape.",
+  "templates": [
+   "P2"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "test.sh templates + CHEAT_VECTORS #9",
+  "kind": "template",
+  "old": "bde868c4: chmod 755 /logs/verifier",
+  "new": "HEAD (same as 9b8229f6): chmod 700 /logs/verifier",
+  "impact": "Net unchanged vs 9b8229f6; the merge reverted 8c37863a/bde868c4. Generated bundles get 700; current bundles have 755 (H5 WARN).",
+  "templates": [
+   "P2",
+   "P7",
+   "knowledge/qc_authoring_checklist"
+  ]
+ },
+ {
+  "component": "generator",
+  "id": "data volume (playground A5)",
+  "kind": "threshold",
+  "old": ">=2,000 lines per record file and >=20,000 total, over /app/data",
+  "new": "same numbers, over every file of every input directory (tree units expanded)",
+  "impact": "No new numbers; repo/ source files now count toward the 20k total.",
+  "templates": []
+ }
+]

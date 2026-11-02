@@ -1,0 +1,13 @@
+# TODO 5f2e150 (P12 v3 fix r2) started 23:21 IST 24 Oct
+- [x] rename session, tree sha e56aea87b39e verified, rules read
+- [x] copy agent program p2 to WORK/agent_program_p2, before copies to WORK/trap/before_p12r2, lock taken
+- [x] P1.2 re-run CM-B and CM-A probes in verifier image; reproducer into OUT/RECHECK_FIX.md
+- [x] F1 add survivor families (per artifact, visible w3 + _hard w5), reward.toml
+- [x] F2 W9 check commitment-protocol.md:205-209, QC_DEFENCE verdict
+- [x] F3 record-layouts.md section 1 sentence if oracle byte-identical
+- [x] F4 reference + generator fuzz 300 seeds
+- [x] P2.2 score agent p2 on AFTER tests; one-rule variants A B C H7 before/after
+- [x] F5 bookkeeping RULE_COVERAGE COST_TABLE DESIGN LEVERS XREF JUDGE_MAP; TRUTH.md last
+- [x] xref_check, precheck CLEAN, kit 4 scripts, validate_bundle, stacking_check
+- [x] Docker block: oracle x3, owner, nop, stub
+- [x] deliverables RECHECK_FIX.md PL_NOTE.md result json; unlock; rename

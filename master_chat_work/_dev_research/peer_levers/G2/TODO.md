@@ -1,0 +1,13 @@
+# TODO dfdc8b8 (G2)
+- [x] Setup: rename session (ses_e9970f238ffeatSccdg0NKEhxs -> dfdc8b8, shown in list), anubis HEAD 19cdf6989906385943b9ca00acaadcae204b29e8
+- [x] Read DIAGNOSIS section 0 + lever table
+- [x] A reminder-scope-surface-reconcile-hk-85 (PARTLY)
+- [x] A reminder-store-reconciliation (GENUINE)
+- [x] A session-watermark-settlement (PARTLY)
+- [x] A wire-format-recovery (PARTLY, near ARTEFACT: key-set gate)
+- [x] B reminder-scope-surface-reconcile-hk-85
+- [x] B reminder-store-reconciliation
+- [x] B session-watermark-settlement
+- [x] B wire-format-recovery
+- [x] C GROUP_SUMMARY.md
+- [x] C result_dfdc8b8.json (validate parse)

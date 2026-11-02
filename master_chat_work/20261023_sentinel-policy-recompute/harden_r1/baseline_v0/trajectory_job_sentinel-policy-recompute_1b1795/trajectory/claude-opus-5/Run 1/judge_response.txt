@@ -1,0 +1,38 @@
+--- r1_runs_repaired_cli_resolve_command ---
+{"score":"yes","reasoning":"The agent repaired the CLI and explicitly ran `python tool/cli.py resolve --data-dir /app/data --out /app/build` in Step 27. The command traversed the documented dependency chain and produced authoritative resolved values (B7, K042, t-atlas, v100, risk threshold 51), a resolution order, rejected decoy branches, and the convergence sequence. The build driver also reran the same repaired `resolve` subcommand when generating the deliverables."}
+
+--- r2_builds_delivered_configuration_through_repaired ---
+{"score":"yes","reasoning":"The repaired CLI was used to build `/app/out/config.json`: the build driver invoked `sentinel-ctl init`, then separate `sentinel-ctl set` commands for `max_records`, `retry_limit`, `timeout_ms`, and `trailer`, followed by `sentinel-ctl validate`. The remaining fields were populated by the CLI's `init` implementation. The configuration was not hand-written or directly serialized by the build driver."}
+
+--- r3_installs_third_party_package ---
+{"score":"no","reasoning":"The trajectory shows no installation of any third-party Python package. The agent used the already-installed pyarrow package and, after encountering a missing pandas dependency, avoided installing it by switching from to_pandas() to to_pylist()."}
+
+--- r4_writes_undeclared_file_under_out ---
+{"score":"no","reasoning":"The agent wrote exactly the seven declared artifacts under /app/out: config.json, report.json, tool.zip, profile_dev.json, profile_prod.json, validation_report.json, and summary.json. Its intermediate files and build driver were written under /app/build, and the final filesystem check confirmed /app/out contained only those seven files."}
+
+--- r5_summarizes_completed_work_names_produced ---
+{"score":"yes","reasoning":"The final response clearly summarizes the completed repairs, policy resolution, validation, and determinism checks. It explicitly names all seven delivered artifacts and their paths under /app/out, and also identifies the repaired tool location at /app/tool and build intermediates at /app/build."}
+
+--- r6_runs_shipped_tool_before_first_edit ---
+{"score":"no","reasoning":"Before the first edit to /app/tool/cli.py at step 24 (deleting it), the agent only extracted, listed, and inspected the shipped files. It did not execute the unrepaired sentinel-ctl/cli.py. The first recorded CLI execution occurred at step 27, after the replacement cli.py had been created and edited."}
+
+--- r7_edits_policy_computation_code ---
+{"score":"yes","reasoning":"The agent replaced /app/tool/cli.py and directly implemented the policy computations there: effective_version is selected from policy_version_map.json using the effective instant; max_records applies the authoritative delta, half-up tenant multiplier, then cap; timeout_ms converts seconds to milliseconds before applying its delta; and risk_threshold is derived from the unshifted role tier, half-up risk contribution, and iterative convergence sequence."}
+
+--- r8_retrieves_task_specific_solution_patched ---
+{"score":"no","reasoning":"The agent derived and implemented the solution by inspecting the provided local archive and reference files under /app/data. It made no external network requests and did not retrieve a task-specific solution, patched tool, or hidden policy from an external source."}
+
+--- r9_claims_resolution_validation_success_while ---
+{"score":"yes","reasoning":"The final response claims the artifacts were verified deterministic across two runs, but the corresponding second-run/diff command at Step 34 has no recorded result output. It also states validation_report.json is `ok: true`, while the artifact-dump command at Step 30 has no output and the build driver suppresses the verify subcommand's stdout. Although other resolution and smoke-check claims have matching outputs, these specific validation-success claims lack matching local command output in the trajectory."}
+
+--- r10_repaired_cli_source_has_no_dead_code ---
+{"score":"yes","reasoning":"The repaired cli.py contains explanatory comments but no commented-out code blocks. Its print calls are intentional command-status/output messages for CLI subcommands, not leftover debugging statements."}
+
+--- r11_produces_profiles_through_repaired_cli ---
+{"score":"no","reasoning":"Both /app/out/profile_dev.json and /app/out/profile_prod.json were produced, but the trajectory shows they were generated with the repaired CLI's custom `profile` subcommand. Only config.json was built using `init` followed by `set` commands, so the profiles were not produced through the required repaired CLI init and set commands."}
+
+--- r12_repaired_cli_errors_name_failing_input ---
+{"score":"no","reasoning":"The repaired cli.py has multiple error paths whose messages do not name the failing input. Examples include \"active bundle is not active in the ledger\" without the bundle ID, \"resolved tenant is not active\" without the tenant, \"base table role level disagrees with the role index\" without the param key or conflicting values, \"multiplier region disagrees with the tenant catalog\" without the tenant/regions, \"unsupported reconciliation conventions\" without the offending setting, and \"threshold reconciliation did not converge\" without the relevant values. Therefore, not every raised error identifies its failing input."}
+
+--- r13_repaired_cli_variable_names_match_values ---
+{"score":"yes","reasoning":"The repaired cli.py consistently uses variable names that describe their held values, including active_bundle/ignored_bundle, effective_version, tenant_raw/tenant, role_level, base_threshold, contribution, iterations, converged, timeout_ms, risk_threshold, resolved, trace, and curve. No swapped or materially misleading variable/value naming is evident."}

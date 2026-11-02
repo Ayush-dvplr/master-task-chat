@@ -1,0 +1,14 @@
+# TODO 1f91f8f (P12 fix QL1) ; work dir ql1/ ; prev TODO in g37_a4/TODO_prev_1e969db.md
+- [x] 0a date, rename (opencode listed ses_e6f3..., not 1f91f8f), rules read
+- [x] 0b kit HEAD; backup BUNDLE -> WORK/ql1_bbc865f36130/; copy Tasks_INPUT task.toml; tree = 88bd0a39d67b
+- [x] 0c read TRIAGE, QL_REPORT, v4, KEPT; copy KEPT to OUT
+- [x] 0d QC_DEFENCE/XREF update; xref_check 0
+- [x] 0e trap baseline
+- [x] 1  Phase 1 rows (F-1, F-2, M-1, M-2, W-1..W-5) into OUT/RECHECK_FIX.md
+- [x] 2a F-1 cache guard (tests_template) + G7 diff
+- [x] 2b F-2 RUN_LIMIT 15->20 tests, contract :49, TRUTH template
+- [x] 2c M-2 instruction.md:28
+- [x] 2d regen tests, TRUTH (M-1), xref, precheck, stacking, RULE_COVERAGE
+- [x] 2e trap survival + vacuity + a4 re-score (Docker, dockfree)
+- [x] 2f fix gate Docker oracle x3 / owner / nop + verifier wall
+- [x] 2g sync Tasks_INPUT, reports, result json

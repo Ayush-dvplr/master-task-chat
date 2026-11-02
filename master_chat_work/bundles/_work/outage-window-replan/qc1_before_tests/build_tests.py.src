@@ -1,0 +1,75 @@
+"""Assemble BUNDLE/tests/test_output.py from the hidden generator, the reference engine and the checks.
+
+usage: python3 -B build_tests.py
+"""
+import ast
+import base64
+import zlib
+from pathlib import Path
+
+WORK = Path(__file__).resolve().parent
+BUNDLE = WORK.parent.parent / "outage-window-replan"
+DATA_FILES = ["assets.jsonl", "requests.json", "published_plan.json", "customers.csv", "load_forecast.tsv",
+              "crew_roster.jsonl", "network_constraints.json", "region_calendar.json", "control_room.log",
+              "risk_policy.toml"]
+
+
+def node_name(node):
+    if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+        return node.name
+    if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name):
+        return node.targets[0].id
+    return None
+
+
+def extract(path, keep=None, drop=()):
+    src = path.read_text()
+    lines = src.splitlines()
+    parts = []
+    for node in ast.parse(src).body:
+        if isinstance(node, (ast.Import, ast.ImportFrom, ast.If)):
+            continue
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+            continue
+        name = node_name(node)
+        if name in drop or (keep is not None and name not in keep):
+            continue
+        start = node.lineno - 1
+        if getattr(node, "decorator_list", None):
+            start = node.decorator_list[0].lineno - 2
+        parts.append("\n".join(lines[start:node.end_lineno]))
+    return "\n\n\n".join(parts)
+
+
+def main():
+    gen = extract(WORK / "tests_src" / "hgen.py")
+    assert gen.count("def build(seed") == 1 and "build(" not in gen.replace("def build(seed", "")
+    gen = gen.replace("def build(seed", "def build_inputs(seed")
+    engine = extract(WORK / "proto" / "solve_proto.py",
+                     drop={"H", "REGIONS", "TYPES", "solve_lane", "reason_of", "main"})
+    lane = extract(WORK / "proto" / "lane.py", keep={"SCALE", "Lane", "sweep", "optimal_options", "reference"})
+    assert lane.count('self.defer = d.get("defer", DEFER_FACTOR)') == 1
+    lane = lane.replace('self.defer = d.get("defer", DEFER_FACTOR)', 'self.defer = d["defer"]')
+    assert "DEFER_FACTOR" not in lane and "self.defer = d" in lane
+    blobs = []
+    for name in DATA_FILES:
+        raw = (BUNDLE / "environment" / "data" / name).read_bytes()
+        blobs.append('    "%s": "%s",' % (name, base64.b64encode(zlib.compress(raw, 9)).decode()))
+    head = (WORK / "tests_src" / "head.py").read_text()
+    checks = (WORK / "tests_src" / "checks.py").read_text()
+    text = "\n\n\n".join([
+        head.rstrip(),
+        "# ---- seeded generator for fresh input sets ----\n\n" + gen,
+        "# ---- reference reading of the contract ----\n\n" + engine,
+        "# ---- exact lane optimiser (forward and backward day sweep, then a fixing pass) ----\n\n" + lane,
+        "_SHIPPED_DATA: dict[str, str] = {\n" + "\n".join(blobs) + "\n}",
+        checks.rstrip(),
+    ]) + "\n"
+    out = BUNDLE / "tests" / "test_output.py"
+    out.write_text(text)
+    compile(text, str(out), "exec")
+    print("wrote", out, len(text.splitlines()), "lines")
+
+
+if __name__ == "__main__":
+    main()

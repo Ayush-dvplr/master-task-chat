@@ -1,0 +1,11 @@
+# LOG 3bfed9f (IST)
+- 10:51 session renamed (opencode ses_e8e7e88e1ffeQUKseVa1z7xSbM); repo HEAD 2dfb1f8f7b86db305b1f6afa63279873e6e918e4; OUT created
+- 10:53 IST map read complete (LEVER_RULES, LEAK_LIBRARY, QC_RULINGS, PLAYBOOK, kit ids); compaction #1 done; starting Step 1
+- 10:56 IST A_4a5f9738 written (GENUINE); starting A_4ee62df1
+- 11:02 IST A_4ee62df1 written (PARTLY; root: spine replayed all envs; anchor gate 19 stated, _real_work gate 15 unstated); starting A_8da8ba3d
+- 11:01 IST A_8da8ba3d written (GENUINE). Starting A_9bbcb50f.
+- 11:04 IST A_9bbcb50f and A_a5b17048 written (both ARTEFACT); Step 1 done; C cards for 9bbc/a5b1 skipped; starting C_4a5f9738
+- 11:09 IST C_4a5f9738 written (main lever: coord action=note carve-out fitted to 188-row observation residue; 752 group decisions coord->core). Starting C_4ee62df1.
+- 11:12 IST C_4ee62df1 written (main lever: base spine scope by omission; zone ops applied to shared state). Starting C_8da8ba3d.
+- 11:14 IST C_8da8ba3d written (main lever: silent pbkdf fault w/o contradiction, agent explicitly declined; PEM format rewritten). Starting GROUP_SUMMARY.
+- 11:19 IST GROUP_SUMMARY.md and result_3bfed9f.json written (parses). DONE.

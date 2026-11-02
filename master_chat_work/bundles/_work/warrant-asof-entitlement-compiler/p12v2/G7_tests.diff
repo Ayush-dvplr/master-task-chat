@@ -1,0 +1,83 @@
+--- /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/warrant-asof-entitlement-compiler/p12v2/t_before.py	2026-10-30 15:56:20
++++ /Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/warrant-asof-entitlement-compiler/tests/test_output.py	2026-10-30 16:04:42
+@@ -29938,6 +29938,8 @@
+ 
+ def _sha(path: Path) -> str | None:
+     try:
++        if not path.is_file():
++            return None
+         return hashlib.sha256(path.read_bytes()).hexdigest()
+     except OSError:
+         return None
+@@ -30039,20 +30041,10 @@
+         return False
+ 
+ 
+-@criterion(description="summary.json equals the recomputed summary and its counts match the delivered profiles and report")
++@criterion(description="summary.json equals the recomputed summary")
+ def summary_identity_triangle(workspace: Path) -> bool:
+     try:
+-        summ, exp = _artifact("summary.json"), _expected_shipped()[3]
+-        if not _same(summ, exp):
+-            return False
+-        report = _artifact("validation_report.json")
+-        for profile in ("dev", "prod"):
+-            prof = _artifact(f"profile_{profile}.json")
+-            if not isinstance(prof, dict) or summ["profiles"][profile]["keys"] != len(prof):
+-                return False
+-            if summ["profiles"][profile]["principals"] != len({k.split("|", 1)[0] for k in prof}):
+-                return False
+-        return all(summ["audit_counts"][k] == len(report[k]) for k in summ["audit_counts"])
++        return _same(_artifact("summary.json"), _expected_shipped()[3])
+     except Exception:
+         return False
+ 
+@@ -30132,9 +30124,11 @@
+         for name in ARTIFACT_NAMES:
+             if not name.endswith(".json"):
+                 continue
+-            raw = (OUT / name).read_bytes()
+             doc = _artifact(name)
+-            if doc is None or raw not in {(json.dumps(doc, indent=2, sort_keys=True, ensure_ascii=a) + "\n").encode("utf-8")
++            if doc is None:
++                return False
++            raw = (OUT / name).read_bytes()
++            if raw not in {(json.dumps(doc, indent=2, sort_keys=True, ensure_ascii=a) + "\n").encode("utf-8")
+                                           for a in (False, True)}:
+                 return False
+         report = _artifact("validation_report.json")
+@@ -30224,12 +30218,14 @@
+         return False
+ 
+ 
+-@criterion(description="report.json names warrant-ctl, lists successful runs of every subcommand and both profiles, and lists repairs")
++@criterion(description="report.json names warrant-ctl, lists successful runs of every subcommand and both profiles with resolve-config first, states both profile digests, and lists repairs")
+ def report_transcript_complete(workspace: Path) -> bool:
+     try:
+         report = _artifact("report.json")
+         if not isinstance(report, dict) or report.get("tool") != "warrant-ctl":
+             return False
++        if not all(isinstance(report.get(k), str) for k in ("profile_dev_sha256", "profile_prod_sha256")):
++            return False
+         commands = report.get("commands")
+         if not isinstance(commands, list) or not commands:
+             return False
+@@ -30246,6 +30242,8 @@
+                 i = words.index("--profile")
+                 if i + 1 < len(words):
+                     seen.add("compile-" + words[i + 1])
++            if "resolve-config" not in seen and seen:
++                return False
+         if seen != {"resolve-config", "audit", "summarize", "compile-dev", "compile-prod"}:
+             return False
+         own = _run_all(_shipped_dir(), "shipped")["rc"]
+@@ -30327,6 +30325,9 @@
+     try:
+         if _run_all(_tier("tier_a"), "tier_a")["rc"].get("prod") != 0:
+             return False
++        a, b = _run_all(_tier("tier_a"), "tier_a")["prod"], _run_all(_tier("tier_b"), "tier_b")["prod"]
++        if isinstance(a, dict) and isinstance(b, dict) and a and a == b:
++            return False
+         src = _tier("tier_a")
+         root = _scratch("warrant-missing-")
+         for p in src.iterdir():

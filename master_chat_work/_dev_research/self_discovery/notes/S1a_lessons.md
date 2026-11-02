@@ -1,0 +1,52 @@
+# S1a lessons.jsonl (master_chat_tasks/lessons.jsonl, 64 lines) — candidate findings
+
+P = /Users/mac/Desktop/Terminal Bench/master_chat_tasks/lessons.jsonl
+
+- L1: "district-heat v1 passed every gate but was 3/10 hard; documenting every hidden rule (for QC solvability) let a careful model implement all. Do not rely on \"rule written far from use\"." -> lever_leaked (placement) + conflict (QC solvability vs hardness)
+- L4: "reviewer \"3/10, solved in 15 min\" on a task that really scored overall <50. Reviewer ratings are not a hardness gate." -> process_failure/qc
+- L6: "emberforge real run: reviewer (judge) passed 100% while tests were 68%." -> judge generic criteria
+- L8: "district-heat: every 'rule written far from use' lever leaked (only_H1 0.92, all_lazy 0.59, reviewer 3/10)."
+- L10: "every lever was HIDDEN-ONLY on data, yet S4=1.0 because each rule had its own 1-rule case and 58/98 weight sat on checks any lazy reading passes."
+- L11: "district-heat real run <50 overall while tests were likely 0.92-1.0: the judge, not the tests, made the score."
+- L12/L17: P9 diagnoses proposed visible checks at weight 1; "live TS-20 calls a core test at weight 1 wrong" -> conflict (ours vs QC TS-20)
+- L14: "emberforge: the ONLY lever that held in a real run (L7) was a hidden-only composition of two refusals at one forge, with the rule in a different file from its uses; all isolated rules leaked even when hidden-only."
+- L15: "calibration_reference_bundle.json confirmed as an answer key (5 settled records); agent printed it (step 8) and diffed shapes against it (step 22)." -> agent_behaviour (reads shipped outputs)
+- L16: "40 gen points were all-or-nothing over whole outputs, so one gap cost 8 checks." (CL-4)
+- L18: "P9 Phase 3 gate (validator + playground 0 FAIL) cannot be met by a non-generator bundle (VB 1.12 N/A, A5 volume)." -> conflict
+- L20: "one lever (LV-MR-1) gated 79 of 156 points" -> cap 25%
+- L21: defect lists in contract act as recipe ("F1..F13 in the contract")
+- L23: "a withheld parameter shared by visible and hidden data is a shortcut" (hardcoded-draw 0.2516)
+- L24: "S4 must assume every DERIVABLE lever is read correctly"
+- L25: "Go messages must state the rule for ALL criteria, not list ids; sessions apply named items literally." -> process_failure
+- L26: stale _work generator scripts would undo migration -> process_failure
+- L28: "S4b (right on every single rule) scored 0.97 and 0.77; compositions held only 23-32% of weight even after the P2 go asked for them."
+- L29: "vendor-archive: tests and solve.py contradict format_contract.md (raw frame running total); found only by P3." -> bundle_bug
+- L30: "schema-migration: 14 points paid by the unrepaired shipped code; a docstring-only edit paid module-claim checks."
+- L31: "All 10 schema-migration levers DERIVABLE from visible data; vendor 3 of 7."
+- L32: "Docker verifier ran agent code as nobody on root-owned 0600 temp files; local rewardkit runs ... could never see it." bundle_bug
+- L33: "vendor-archive real run: judge 100% and real tests ~89% while P3 S4 predicted 0.648"
+- L34: "OpenHands file editor writes 0600 files; verifier runs the program as another uid, so a correct agent scored 1.94% on tests." bundle_bug HIGH
+- L35: judge stated-facts from visible season all met
+- L36: "All 4 bundles failed the PL QC on judge criteria that restate contract or test facts (JD-8/CL-3)"
+- L37: "emberforge after harden r1: build-time careful baseline S4 0.168, real claude-opus-5 run 0.942 on tests. vendor: P3 S4 0.648, real 0.890. Our solver baselines under-predict a real frontier run by 0.25-0.77."
+- L38: "low scorers withhold rule counts, evidence-file names and trap topics; ours state all three"
+- L39: low scorers grade whole downstream docs; ours isolate rules (43-58 checks)
+- L40: omission-defined rules / decoy docs cost 67-86 pts in low scorers
+- L41/L44: "3 of 10 'Pass@1 below 30' tasks were broken grades; corrected 47-72% overall. The most step-by-step instruction scored 100% on tests."
+- L42: "district-heat r1: both real runs used the full 7200 s agent budget (load-testing an exact search against a 30 s limit) and produced no score." bundle_bug/timeouts
+- L43/L45: UPSTREAM CHANGED fingerprint block; pending.db said running when session stopped -> process_failure
+- L46: chmod 755 change reverted within a day; 34 bundles migrated -> process_failure
+- L47: "first Docker oracle runs scored 0.11-0.28 because the new kill-by-uid cleanup killed other checks' agent processes running in parallel (same uid)" -> bundle_bug
+- L48: "emberforge r1: every lever leaked because each rule's full composition sat in one sentence, and a calibration slice pinned the answer"
+- L49: verifier cold build >15 min, Harbor timeout 900 s -> tooling
+- L50: result json used kit sha as 'sha' -> process
+- L51/L52: "cohort-retention went 58.67 -> 100"; "v0 scores were permission-trap artefacts (cohort v0 without trap = 87.5; vendor corrected replay 21 Oct tests 88.97...). Tasks were never hard; harden r1 levers (one explicit sentence each, trap spelled out in the rule) leaked on first write."
+- L53: used trap-affected scores as baselines -> process_failure
+- L54: "Many QC/fix rounds (P11/P12 x3 per task) were spent polishing tasks whose difficulty had never been proven on a real run; 3 of 3 then scored 100"
+- L56: "Levers written as one plain sentence next to their use, some with the trap explained; the agent coded every rule right on first write"
+- L57: issued same-style harden prompt after first 100 before root cause
+- L59: "Cohort pilot: single-lever solvers show L2 (identifier normalisation / make-it-match) carries most difficulty (0.24-0.46 alone); L1 control alone leaves 0.85-0.89"
+- L60: background subagents writing deliverables crash silently
+- L61: stacking_check.py counted 24 tests vs 19
+- L63: P12 prompts went out with generic fix rules only
+- L64: follow-up prompts lacked rename step

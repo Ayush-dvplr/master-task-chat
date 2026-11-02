@@ -1,0 +1,113 @@
+[judge]
+judge = "openai/gpt-5.6-sol"
+mode = "batched"
+timeout = 300
+atif-trajectory = "/logs/agent/trajectory.json"
+weight = 1.0
+
+[scoring]
+aggregation = "weighted-sum"
+
+[[criterion]]
+id = "R1"
+name = "r1_checks_a_drawn_allowance_on_its_own_extract"
+description = "The agent constructs its own extract in which a site's allowance covers its offer in a later event only if no offer of that site was chosen in an earlier event, while an offer of that site is chosen in the earlier event, runs derive_report.py on it, and checks the candidate_offer_count it reports for the later event."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R2"
+name = "r2_checks_start_order_on_its_own_extract"
+description = "The agent constructs its own extract in which two events share a site whose allowance covers only one of their offers, and the event that starts first has the greater event_id and the later sorting dispatch_start text (for example because the two start times carry different UTC offsets), runs derive_report.py on it, and checks which of the two events selects that site's offer."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R3"
+name = "r3_checks_a_composed_rate_above_cap_on_its_own_extract"
+description = "The agent constructs its own extract in which a chosen offer's rate card carries an override element, its event has a non-zero uplift and its segment a non-zero rate adder, with the resulting rate above the card's cap, runs derive_report.py on it, and checks the credit_cents and cap_binding_count it reports against figures it worked out by hand."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R4"
+name = "r4_checks_a_half_cent_interval_amount_on_its_own_extract"
+description = "The agent constructs its own extract in which one interval amount of a chosen offer's credit is exactly half a cent, works out that offer's credit_cents by hand, runs derive_report.py on the extract, and compares the two."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R5"
+name = "r5_allowance_ledger_in_one_named_function"
+description = "The agent's final derive_report.py keeps the walk of the season's events that draws down site allowances in one named function, separate from the function that chooses a single event-region's portfolio."
+type = "binary"
+weight = 3
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R6"
+name = "r6_exact_arithmetic_for_reported_figures"
+description = "The agent's final derive_report.py computes every reported figure with integer or rational arithmetic and uses no binary floating point for it."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "instruction following"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R7"
+name = "r7_final_run_after_last_edit"
+description = "The agent runs its final derive_report.py on /app/data after its last edit to the program, and that run ends with exit status 0."
+type = "binary"
+weight = 1
+
+[criterion.annotations]
+mode = "judged"
+type = "agent behavior"
+evaluation_target = "trajectory"
+importance = "important"
+
+[[criterion]]
+id = "R8"
+name = "r8_claims_a_check_its_output_contradicts"
+description = "The response says a check of derive_report.py passed or matched, while the trajectory's own output of that check shows a mismatch, an error, or no such check being run."
+type = "binary"
+weight = -5
+
+[criterion.annotations]
+mode = "judged"
+type = "factuality and hallucination"
+evaluation_target = "user_facing_message"
+importance = "critically_important"

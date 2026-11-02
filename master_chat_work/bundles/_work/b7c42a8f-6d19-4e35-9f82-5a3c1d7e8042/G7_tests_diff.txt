@@ -1,0 +1,729 @@
+--- before
++++ after
+@@ -12,13 +12,14 @@
+ import sys
+ import tarfile
+ import tempfile
++import threading
+ import zlib
+ from pathlib import Path
+ 
+ from rewardkit import criteria, criterion
+ 
+-# _EXPECTED_BLOB and _EXTRACTS are populated by solution/rebuild_fixtures.py.
+-# Each is a zlib+base64 blob. Do NOT hand-edit.
++# _EXPECTED_BLOB holds the values solution/solve.py writes over environment/data and
++# over the two extracts in _EXTRACTS; both are zlib+base64 and are sealed together.
+ _EXPECTED_BLOB = '<FIXTURE>'
+ 
+ _EXTRACTS = {
+@@ -38,6 +39,16 @@
+ _CYCLES = ["H%02d" % i for i in range(1, 27)]
+ _LAYERS = ["retention", "working_excess", "cat_excess"]
+ _CACHE = {}
++_SOLVER_UID = 1002
++# rewardkit runs checks on threads; every run of the module as the solver user
++# goes through this lock so one run never kills another run's processes.
++_RUN_LOCK = threading.RLock()
++_DQ_KEYS = ["late_recorded", "duplicate_identical", "duplicate_conflicting",
++            "cross_source_collapsed", "fold_disambiguated", "gap_shifted",
++            "log_continuations", "unknown_reinsurer_rows", "out_of_horizon_rows",
++            "block_unit_rows", "paren_negatives", "restatement_gaps"]
++_AUDIT_SECTIONS = ["settlement", "attachment", "endorsements", "reserve_state",
++                   "chain_ladder", "allocation"]
+ 
+ 
+ def _safe(action):
+@@ -186,7 +197,71 @@
+         path.write_text("\n".join(new) + "\n")
+ 
+ 
++def _stage(module: Path, room: str, data: Path, out: Path) -> Path:
++    copy = Path(room) / "reserving.py"
++    shutil.copyfile(module, copy)
++    os.chmod(copy, 0o644)
++    os.chmod(room, 0o755)
++    for path in [data, out, *data.rglob("*")]:
++        os.chown(path, _SOLVER_UID, _SOLVER_UID)
++        os.chmod(path, 0o755 if path.is_dir() else 0o644)
++    return copy
++
++
++def _kill_solver_processes() -> None:
++    for entry in Path("/proc").iterdir():
++        if not entry.name.isdigit():
++            continue
++        try:
++            status = (entry / "status").read_text()
++        except OSError:
++            continue
++        for line in status.splitlines():
++            if line.startswith("Uid:") and str(_SOLVER_UID) in line.split()[1:2]:
++                try:
++                    os.kill(int(entry.name), signal.SIGKILL)
++                except (ProcessLookupError, PermissionError):
++                    pass
++                break
++
++
++def _launch(copy: Path, room: str, data: Path, out: Path) -> int:
++    command = ["setpriv", "--reuid=%d" % _SOLVER_UID, "--regid=%d" % _SOLVER_UID,
++               "--clear-groups", sys.executable, "-I", str(copy),
++               "--data", str(data), "--out", str(out)]
++    process = None
++    code = -1
++    try:
++        process = subprocess.Popen(command, cwd=room, env=dict(_ENV),
++                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
++                                   start_new_session=True)
++        try:
++            process.communicate(timeout=500)
++        except subprocess.TimeoutExpired:
++            try:
++                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
++            except (ProcessLookupError, PermissionError):
++                pass
++            process.communicate()
++        code = process.returncode
++    except (OSError, subprocess.SubprocessError):
++        code = -1
++    finally:
++        if process is not None:
++            try:
++                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
++            except (ProcessLookupError, PermissionError):
++                pass
++        _kill_solver_processes()
++    return code
++
++
+ def _run(workspace: Path, tag: str):
++    with _RUN_LOCK:
++        return _run_unlocked(workspace, tag)
++
++
++def _run_unlocked(workspace: Path, tag: str):
+     if tag in _CACHE:
+         return _CACHE[tag]
+     corpus = tag.split("_")[0]
+@@ -213,35 +288,11 @@
+             victim.unlink()
+     out = Path(room) / "out"
+     out.mkdir(parents=True, exist_ok=True)
+-    copy = Path(room) / "reserving.py"
+-    shutil.copy2(module, copy)
+-    os.chmod(copy, 0o755)
++    copy = _stage(module, room, data, out)
+     for path in sorted(data.iterdir()):
+         if path.is_file():
+             result["before"][path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+-    command = [sys.executable, "-I", str(copy), "--data", str(data), "--out", str(out)]
+-    process = None
+-    try:
+-        process = subprocess.Popen(command, cwd=room, env=dict(_ENV),
+-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+-                                   start_new_session=True)
+-        try:
+-            process.communicate(timeout=500)
+-        except subprocess.TimeoutExpired:
+-            try:
+-                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+-            except (ProcessLookupError, PermissionError):
+-                pass
+-            process.communicate()
+-        result["code"] = process.returncode
+-    except Exception:
+-        result["code"] = -1
+-    finally:
+-        if process is not None:
+-            try:
+-                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+-            except (ProcessLookupError, PermissionError):
+-                pass
++    result["code"] = _launch(copy, room, data, out)
+     for path in sorted(data.iterdir()):
+         if path.is_file():
+             result["after"][path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+@@ -256,6 +307,11 @@
+ 
+ 
+ def _rerun_bytes(workspace: Path, tag: str):
++    with _RUN_LOCK:
++        return _rerun_bytes_unlocked(workspace, tag)
++
++
++def _rerun_bytes_unlocked(workspace: Path, tag: str):
+     first = _run(workspace, tag)
+     second_tag = tag + "_byte_rerun"
+     if second_tag in _CACHE:
+@@ -270,31 +326,8 @@
+         return first, {}
+     out = Path(room) / "out"
+     out.mkdir(parents=True, exist_ok=True)
+-    copy = Path(room) / "reserving.py"
+-    shutil.copy2(_module(workspace), copy)
+-    os.chmod(copy, 0o755)
+-    command = [sys.executable, "-I", str(copy), "--data", str(data), "--out", str(out)]
+-    process = None
+-    try:
+-        process = subprocess.Popen(command, cwd=room, env=dict(_ENV),
+-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+-                                   start_new_session=True)
+-        try:
+-            process.communicate(timeout=500)
+-        except subprocess.TimeoutExpired:
+-            try:
+-                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+-            except (ProcessLookupError, PermissionError):
+-                pass
+-            process.communicate()
+-    except Exception:
+-        pass
+-    finally:
+-        if process is not None:
+-            try:
+-                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+-            except (ProcessLookupError, PermissionError):
+-                pass
++    copy = _stage(_module(workspace), room, data, out)
++    _launch(copy, room, data, out)
+     rerun = {}
+     for name in _ARTIFACTS:
+         p = out / name
+@@ -321,22 +354,64 @@
+     return numbers, strings
+ 
+ 
+-@criterion(description="LOB ledger backbone (per-claim lob|cycle|claim|reinsurer|layer|ultimate|paid) digests exactly, keyed only on fields the contract declares.")
+-def development_spine_exact(workspace: Path) -> bool:
++def _compared_or_assigned_strings(workspace: Path):
++    tree = ast.parse(_source(workspace))
++    found = []
++    for node in ast.walk(tree):
++        if isinstance(node, ast.Compare):
++            targets = [node]
++        elif isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and node.value is not None:
++            targets = [node.value]
++        else:
++            continue
++        for target in targets:
++            for sub_node in ast.walk(target):
++                if isinstance(sub_node, ast.Constant) and isinstance(sub_node.value, str):
++                    found.append(sub_node.value)
++    return found
++
++
++def _hardcodes_sample_answers(workspace: Path) -> bool:
++    if not _module(workspace).is_file():
++        return False
++    numbers, strings = _literals(workspace)
++    shipped = _expected()["shipped"]
++    marks = {shipped["scalars"].get(k) for k in
++             ("total_ceded", "total_ultimate", "total_paid_to_date",
++              "treaty_ceded_total", "treaty_retention",
++              "treaty_working_excess", "treaty_cat_excess")}
++    marks = {m for m in marks if isinstance(m, int) and m > 1000}
++    if marks & numbers:
++        return True
++    hexes = set(shipped.get("digests", {}).values())
++    if any(v in hexes for v in strings):
++        return True
++    banned_literal_strings = {"2032-07-01T00:00:00Z"}
++    return any(v in banned_literal_strings for v in _compared_or_assigned_strings(workspace))
++
++
++@criterion(description="On the shipped corpus every LOB ledger row's lob, cycle, claim_ref, reinsurer_canonical, layer, ultimate and paid_to_date match the reference exactly.")
++def ledger_backbone_exact(workspace: Path) -> bool:
+     def body():
+         out = _delivered(workspace)
+         shipped = _expected()["shipped"]
+         return _digest(_views(out)["ledger_backbone"]) == shipped["digests"]["ledger_backbone"]
+-    return _safe(body)
+-
+-
+-@criterion(description="Ledger spine (ceded_hours, alae, ibnr-as-ultimate-minus-paid) digests exactly for the running-totals-never-heal invariant.")
+-def ibnr_carryforward_exact(workspace: Path) -> bool:
++    try:
++        return bool(body())
++    except Exception:
++        return False
++
++
++@criterion(description="On the shipped corpus every LOB ledger row's ceded_hours, alae and ultimate minus paid_to_date match the reference exactly.")
++def ledger_spine_exact(workspace: Path) -> bool:
+     def body():
+         out = _delivered(workspace)
+         shipped = _expected()["shipped"]
+         return _digest(_views(out)["ledger_spine"]) == shipped["digests"]["ledger_spine"]
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Every LOB×cycle cell (capacity, ceiling, remainder) digests exactly across 130 cells.")
+@@ -348,7 +423,10 @@
+         if len(views["cells"]) != len(_LOBS) * len(_CYCLES):
+             return False
+         return _digest(views["cells"]) == shipped["digests"]["cells"]
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Running the module over hidden extract A rebuilds backbone, spine, cells and order digests exactly.")
+@@ -360,7 +438,10 @@
+         found = _digests(result["out"])
+         wanted = _expected()["A"]["digests"]
+         return all(found[k] == wanted[k] for k in ("ledger_backbone", "ledger_spine", "cells", "ledger_order"))
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Running the module over hidden extract B (reduced-claim corpus) rebuilds digests exactly.")
+@@ -372,7 +453,10 @@
+         found = _digests(result["out"])
+         wanted = _expected()["B"]["digests"]
+         return all(found[k] == wanted[k] for k in ("ledger_backbone", "ledger_spine", "cells", "ledger_order"))
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="treaty_working.ceded_total equals the sums of ceded_by_lob, ceded_by_reinsurer_canonical and layer_breakdown.")
+@@ -396,7 +480,10 @@
+             if "UNRESOLVED" in k or "unresolved" in k:
+                 return False
+         return True
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="chain_ladder_development per cycle digests exactly across 130 cells (26 cycles x 5 LOBs); EXCLUDED rows contribute zero.")
+@@ -417,7 +504,10 @@
+                     return False
+                 lines.append(f"{lob}|{c}|{v}")
+         return _digest(lines) == shipped["digests"]["chain_ladder_development"]
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Every ledger row names the served layer (retention|working_excess|cat_excess) and digests the layer view exactly.")
+@@ -431,7 +521,10 @@
+                 if row.get("layer","") not in _LAYERS:
+                     return False
+         return _digest(_views(out)["ledger_layers"]) == shipped["digests"]["ledger_layers"]
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Row-order permutation of extract A leaves the backbone and spine digests unchanged (row ordering is a function of claim identity, not file order).")
+@@ -443,7 +536,10 @@
+         found = _digests(result["out"])
+         wanted = _expected()["A"]["digests"]
+         return all(found[k] == wanted[k] for k in ("ledger_backbone", "ledger_spine"))
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Per-claim dollar digest (paid_to_date, ultimate, ceded_hours) matches sealed digest exactly.")
+@@ -452,7 +548,10 @@
+         out = _delivered(workspace)
+         shipped = _expected()["shipped"]
+         return _digest(_views(out)["ledger_dollars"]) == shipped["digests"]["ledger_dollars"]
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Every ledger row carries one outcome and one reason from the closed vocabulary, and the outcome|reason digest matches exactly.")
+@@ -467,7 +566,10 @@
+                 if row.get("outcome","") not in _OUTCOMES:
+                     return False
+         return _digest(_views(out)["ledger_outcome"]) == shipped["digests"]["ledger_outcome"]
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="methodology_audit.attachment reports the authority file and attachment rule exactly (settlement values are graded by judge R26).")
+@@ -479,16 +581,89 @@
+             return False
+         if not _str_eq(audit.get("attachment",{}).get("attachment_rule"), "clash_cover_per_event"):
+             return False
+-        if not _int_eq(audit.get("attachment",{}).get("layer_count"), 3):
+-            return False
+-        layer_names = audit.get("attachment",{}).get("layer_names")
+-        if not isinstance(layer_names, list) or layer_names != _LAYERS:
+-            return False
+-        # methodology_audit.json carries no counterfactual_summary key.
+-        if "counterfactual_summary" in audit:
+-            return False
+-        return True
+-    return _safe(body)
++        return True
++    try:
++        return bool(body())
++    except Exception:
++        return False
++
++
++def _all_keys(node):
++    if isinstance(node, dict):
++        for key, value in node.items():
++            yield key
++            yield from _all_keys(value)
++    elif isinstance(node, list):
++        for value in node:
++            yield from _all_keys(value)
++
++
++@criterion(description="methodology_audit.json holds only its six declared sections and no key at any depth names a counterfactual.")
++def methodology_audit_holds_only_declared_sections(workspace: Path) -> bool:
++    def body():
++        audit = json.loads((_delivered(workspace) / "methodology_audit.json").read_text())
++        if not isinstance(audit, dict) or sorted(audit) != sorted(_AUDIT_SECTIONS):
++            return False
++        return all("counterfactual" not in str(key).lower() for key in _all_keys(audit))
++    try:
++        return bool(body())
++    except Exception:
++        return False
++
++
++@criterion(description="The endorsements, reserve_state, chain_ladder and allocation sections of methodology_audit.json match the reference on the shipped corpus and on both unseen extracts.")
++def methodology_audit_remaining_sections_exact(workspace: Path) -> bool:
++    def body():
++        expected = _expected()
++        outs = [("shipped", _delivered(workspace))]
++        for corpus in ("A", "B"):
++            result = _run(workspace, corpus)
++            if result["code"] != 0:
++                return False
++            outs.append((corpus, result["out"]))
++        for corpus, out in outs:
++            audit = json.loads((out / "methodology_audit.json").read_text())
++            for section in ("endorsements", "reserve_state", "chain_ladder", "allocation"):
++                if audit.get(section) != expected[corpus]["audit"][section]:
++                    return False
++        return True
++    try:
++        return bool(body())
++    except Exception:
++        return False
++
++
++@criterion(description="On both unseen extracts every data_quality tally and every ledger row's outcome and reason match the reference exactly.")
++def hidden_extract_quality_tallies_and_outcomes_exact(workspace: Path) -> bool:
++    def body():
++        expected = _expected()
++        for corpus in ("A", "B"):
++            result = _run(workspace, corpus)
++            if result["code"] != 0 or not _complete(result["out"]):
++                return False
++            dq = json.loads((result["out"] / "data_quality.json").read_text())
++            for key in _DQ_KEYS:
++                if not _int_eq(dq.get(key), expected[corpus]["scalars"].get(f"dq_{key}")):
++                    return False
++            outcome = _digest(_views(result["out"])["ledger_outcome"])
++            if outcome != expected[corpus]["digests"]["ledger_outcome"]:
++                return False
++        return True
++    try:
++        return bool(body())
++    except Exception:
++        return False
++
++
++@criterion(description="The output directory holds the nine report documents and reserving.py and nothing else.")
++def output_directory_holds_exactly_ten_documents(workspace: Path) -> bool:
++    def body():
++        names = {path.name for path in _delivered(workspace).iterdir()}
++        return names == set(_ARTIFACTS) | {"reserving.py"}
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="data_quality reports the four admission-and-collapse counts exactly.")
+@@ -502,7 +677,10 @@
+             if not _int_eq(dq.get(k), shipped["scalars"].get(f"dq_{k}")):
+                 return False
+         return True
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="data_quality reports the eight remaining declared anomaly tallies at their sealed exact values.")
+@@ -518,7 +696,10 @@
+             if not _int_eq(dq.get(k), shipped["scalars"].get(f"dq_{k}")):
+                 return False
+         return True
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="treaty_working reports layer_breakdown totals (retention, working_excess, cat_excess) exactly.")
+@@ -531,7 +712,10 @@
+         return (_int_eq(lb.get("retention"), shipped["scalars"]["treaty_retention"])
+                 and _int_eq(lb.get("working_excess"), shipped["scalars"]["treaty_working_excess"])
+                 and _int_eq(lb.get("cat_excess"), shipped["scalars"]["treaty_cat_excess"]))
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="summary.totals reports claims counts (claims_admitted, claims_dropped_late, claims_retracted, unresolved_reinsurer) exactly; dollar totals are graded by the ledger digests above.")
+@@ -546,7 +730,10 @@
+             if not _int_eq(totals.get(k), shipped["scalars"].get(k)):
+                 return False
+         return True
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="All nine report documents are present and parse as valid JSON with the declared top-level keys, and no ledger row carries an `incurred` key.")
+@@ -565,7 +752,10 @@
+                 if "incurred" in row:
+                     return False
+         return True
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="The delivered module runs to a clean exit over an unseen extract and writes all nine documents.")
+@@ -573,7 +763,10 @@
+     def body():
+         result = _run(workspace, "A")
+         return result["code"] == 0 and _complete(result["out"])
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Ledger rows are written in the shipped order (cycle, reinsurer_canonical, claim_ref); the position-aware digest matches.")
+@@ -582,7 +775,10 @@
+         out = _delivered(workspace)
+         shipped = _expected()["shipped"]
+         return _digest(_views(out)["ledger_order"]) == shipped["digests"]["ledger_order"]
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="A second run over the same corpus produces byte-identical artifacts (same whitespace, same key order, same trailing newline).")
+@@ -595,7 +791,10 @@
+             if first["artifact_bytes"].get(name) != rerun.get(name):
+                 return False
+         return True
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ @criterion(description="Every artifact is serialised with sort_keys=True, indent=1, UTF-8 without BOM and a single trailing newline.")
+@@ -617,7 +816,10 @@
+             if text != canonical:
+                 return False
+         return True
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ # NEGATIVE CHECKS
+@@ -628,29 +830,11 @@
+ # Fires when the delivered module hardcodes any sealed scalar as a Python
+ # integer literal, or embeds any sealed sha256 digest as a string literal.
+ # Excludes scalars that are small integers reused by the task's own
+-# vocabulary (such as 0, 1, 2, 3, 26) to avoid false positives.
++# vocabulary (such as 0, 1, 2, 3, 26) to avoid false positives. The epoch
++# boundary instant counts only where it is compared or assigned.
+ @criterion(description="The module hardcodes answers from the shipped corpus as literals.")
+ def negative_hardcoded_sample_answers(workspace: Path) -> bool:
+-    def body():
+-        if not _module(workspace).is_file():
+-            return False
+-        numbers, strings = _literals(workspace)
+-        shipped = _expected()["shipped"]
+-        marks = {shipped["scalars"].get(k) for k in
+-                 ("total_ceded", "total_ultimate", "total_paid_to_date",
+-                  "treaty_ceded_total", "treaty_retention",
+-                  "treaty_working_excess", "treaty_cat_excess")}
+-        marks = {m for m in marks if isinstance(m, int) and m > 1000}
+-        if marks & numbers:
+-            return True
+-        hexes = set(shipped.get("digests", {}).values())
+-        if any(v in hexes for v in strings):
+-            return True
+-        banned_literal_strings = {"2032-07-01T00:00:00Z"}
+-        if any(v in banned_literal_strings for v in strings):
+-            return True
+-        return False
+-    return _safe(body)
++    return _safe(lambda: _hardcodes_sample_answers(workspace))
+ 
+ 
+ # Fires when the module embeds thousands of bytes of corpus content as a
+@@ -667,15 +851,20 @@
+                 return True
+         text = _source(workspace)
+         return sum(text.count(m) for m in marks) > 60
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ # Fires when the module returns the same ledger for two different corpora,
+-# which proves the output is independent of the input. Pairs with
+-# program_reproduces_unseen_extract_beta on the positive side.
++# which proves the output is independent of the input. Stays silent when
++# negative_hardcoded_sample_answers already fires on the same module.
+ @criterion(description="The module returns the same ledger for two different corpora, so output is independent of input.")
+ def negative_output_independent_of_the_corpus(workspace: Path) -> bool:
+     def body():
++        if _safe(lambda: _hardcodes_sample_answers(workspace)):
++            return False
+         first = _run(workspace, "A")
+         second = _run(workspace, "B")
+         if first["code"] != 0 or second["code"] != 0:
+@@ -683,7 +872,10 @@
+         if not _complete(first["out"]) or not _complete(second["out"]):
+             return False
+         return _digests(first["out"]) == _digests(second["out"])
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ # Fires when the module changes its answer when the corpus directory is
+@@ -698,7 +890,10 @@
+         if renamed["code"] != 0 or not _complete(renamed["out"]):
+             return True
+         return _digests(renamed["out"]) != _digests(plain["out"])
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ # Fires when the module hides a missing source behind a quiet exit.
+@@ -712,7 +907,10 @@
+         if result["code"] != 0 or not _complete(result["out"]):
+             return False
+         return _matches(result["out"], "A", ["ledger_backbone"])
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ # Fires when the module writes to the corpus directory it reads, which
+@@ -724,7 +922,10 @@
+         if result["code"] != 0 or not result["before"]:
+             return False
+         return result["before"] != result["after"]
+-    return _safe(body)
++    try:
++        return bool(body())
++    except Exception:
++        return False
+ 
+ 
+ # Fires when the module imports a network module or shells out to another
+@@ -775,16 +976,19 @@
+                     if node.attr in subprocess_calls and owner.id in subprocess_names:
+                         return True
+         return False
+-    return _safe(body)
+-
+-
+-# POSITIVE WEIGHTS (sum = 67)
+-criteria.development_spine_exact(weight=5)
+-criteria.ibnr_carryforward_exact(weight=5)
++    try:
++        return bool(body())
++    except Exception:
++        return False
++
++
++# POSITIVE WEIGHTS (sum = 69)
++criteria.ledger_backbone_exact(weight=5)
++criteria.ledger_spine_exact(weight=5)
+ criteria.lob_cycle_capacity_and_fill_exact(weight=5)
+ criteria.program_reproduces_unseen_extract_alpha(weight=5)
+ criteria.program_reproduces_unseen_extract_beta(weight=5)
+-criteria.cross_artifact_identity_triangle_holds(weight=5)
++criteria.cross_artifact_identity_triangle_holds(weight=1)
+ criteria.treaty_cession_walk_exact(weight=5)
+ criteria.row_order_permutation_changes_nothing(weight=3)
+ criteria.paid_to_date_dollars_exact(weight=3)
+@@ -795,11 +999,15 @@
+ criteria.treaty_layer_breakdown_exact(weight=3)
+ criteria.summary_claim_counts_exact(weight=3)
+ criteria.chain_ladder_development_exact(weight=3)
++criteria.hidden_extract_quality_tallies_and_outcomes_exact(weight=3)
+ criteria.ledger_order_exact(weight=1)
+ criteria.byte_identical_rerun(weight=1)
+ criteria.exact_serialization_format(weight=1)
+ criteria.artifacts_present_and_parse(weight=1)
+ criteria.program_runs_and_exits_clean(weight=1)
++criteria.methodology_audit_holds_only_declared_sections(weight=1)
++criteria.methodology_audit_remaining_sections_exact(weight=1)
++criteria.output_directory_holds_exactly_ten_documents(weight=1)
+ 
+ # NEGATIVE WEIGHTS (sum of absolute values = 23)
+ criteria.negative_hardcoded_sample_answers(weight=-5)

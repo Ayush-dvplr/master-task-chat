@@ -1,0 +1,19 @@
+# LOG (IST)
+- 17:55 date; name_session.py 60e9db0 -> "codex: no match / opencode: ['ses_e87d3bfc9ffe0yLVpKPMYUefnI']"
+- 17:56 read _COMMON_RULES_v4, LEVER_RULES_v3, LEAK_LIBRARY, QC_RULINGS, QC_FIX_PLAYBOOK_v2, KNOWLEDGE, IDEA.md, checks.json (condensed via python)
+- 17:57 fingerprint check /tmp/fp_check.py: pl_generator 160 files 0 diffs, qc 12 files 0 diffs
+- 18:05 wrote PREMORTEM.md
+- 18:09 BRANCH_FIRE.md, QC_DEFENCE.md, DESIGN_SUMMARY.md written; invocation set to python3 /app/out/transform.py --data --out any cwd; DESIGN READY issued
+- 18:44 go received; DESIGN.md section 8 master changes (partitioned 9 hidden months x 2 families, toy examples, decoy sentences, processors.json values)
+- 18:56 IST docs_src written (RULES, group_standard, group_standard_2023, reference_data, output_schema, 5 handbooks) with toy examples per quiet rule on invented values.
+- 19:05 IST resume after compaction; writing gen/fcgen.py (generator) and proto/solve_proto.py.
+- 19:27 IST resume after compaction; date ok; TODO first unticked 0b.0; docs_src present; gen/ proto/ empty. Writing gen/fcgen.py.
+- 20:50 IST resume after compaction; gen/ proto/ still empty; writing fcgen.py now
+- 20:56 IST gen/fcgen.py written (856 lines); first run test
+- 21:05 IST proto copied: WORK/proto/{solve_proto.py,gen_proto.py,hidden_11,22,33,out_*,fire_*.json,manifest_h*.json}; BRANCH_FIRE.md measured (all 15 quiet 0 shipped, fire on 3 seeds); QC_DEFENCE D2/D4/D6/D7/D8 quoted with file:line; hygiene grep clean on design_blind; DESIGN BLIND READY issued, waiting for master blind program path.
+- 21:24 blind program run on ship/h11/h22/h33: h11,h33 all DIFF, h22 rc1 (lumen widened stamp/card/site: format hole). Fixed LUMEN_FIXED widths + handbook_lumen.md:4-7 field classes + real previous-holder accounts; regenerated /tmp/fcs; proto rerun.
+- 21:28 blind rerun: 13/13 EXACT on ship, h11, h22, h33 -> Phase 0b step 4 redesign.
+- 21:33 DESIGN_BLIND.md written; DESIGN.md section 9 (R2: S3 unique fit 11.4-11.5, U1-U5, Q16, unstated-case asserts, judge P-g); PREMORTEM s6; QC_DEFENCE D12-D13; BRANCH_FIRE R2 rows; DESIGN_SUMMARY R2; DESIGN READY (R2) issued.
+- 21:46 IST GO for R2 received (master 21:45): accept section 9; 11.4 refers to rejection rules by section, ledger order points to its one definition, no numbered procedure; U3 >=2 reasons incl superseded copy; COST_TABLE measured on prototype (5 wrong readings + first-fit everywhere); refresh design_blind; stop DESIGN BLIND READY.
+- 21:59 IST R2 gen/proto done: fcgen.py 1077 lines (R43, U1, U2, U2r, U3a/b/c, U4, U5, Q16, check_stated_cases asserts); proto FC_WRONG readings firstfit, filestream, allparsed, refnotfirst, q16recompute, nowindow; shipped exact under all; COST_TABLE.md written (min single reading 16.5%); U2/U1 placement swapped (U2 H1 H4 H9, U1 H2 H5 H8); 11.5 now points to ledger order of docs/output_schema.md; design_blind refreshed (diff SAME with /tmp/fcs/ship); BRANCH_FIRE R2 measured; QC_DEFENCE D2 line ref 166-167. DESIGN BLIND READY (2nd read).
+- 02:03 IST 27 Oct: read 2 blind program exact 13/13 on ship, h11, h22, h33 (0 rows differ); DESIGN_BLIND.md read 2 section + lessons written; STOP: DESIGN BLIND EXACT (no third redesign, Ayush decides).

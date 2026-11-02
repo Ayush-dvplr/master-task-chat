@@ -1,0 +1,155 @@
+# regrade 9bd1ca1 (collateral-gated-settlement-ladder), 24 Oct 2026 IST
+# Image: docker build -t fdcgsl-verifier:local <copy>/tests  (tests/Dockerfile: python:3.12-slim + harbor-rewardkit==0.2.1). docker ps was empty before start.
+# Driver (scratch work/driver.py): imports /tests/test_output.py, calls t._guard(t._check_<name>) for every criteria.<name>(weight=w) line 1087-1108; LLM judge NOT run.
+
+## driver.py
+import importlib.util, json, sys, re
+spec = importlib.util.spec_from_file_location("t", "/tests/test_output.py")
+t = importlib.util.module_from_spec(spec); spec.loader.exec_module(t)
+src = open("/tests/test_output.py").read()
+weights = [(m.group(1), int(m.group(2))) for m in re.finditer(r"^criteria\.(\w+)\(weight=(-?\d+)\)", src, re.M)]
+pos = sum(w for _, w in weights if w > 0); kept = 0; rows = []
+only = set(sys.argv[1:])
+for name, w in weights:
+    if only and name not in only: continue
+    fn = "_check_" + (name.replace("negative_", "negative_weight_", 1))
+    ok = t._guard(getattr(t, fn))
+    if ok: kept += w
+    rows.append((name, w, ok))
+    print(f"{'PASS' if ok else 'fail'} {w:+d} {name}", flush=True)
+print(json.dumps({"kept": kept, "positive_total": pos, "pct": round(100*kept/pos, 2)}))
+
+## 1. Agent outputs (run_1/artifacts/app/out copied to scratch agent_app/out)
+$ docker run --rm -v $S/agent_app:/app -v driver.py:/driver.py:ro fdcgsl-verifier:local python /driver.py
+PASS +1 artifacts_exist
+PASS +1 output_serialization_is_canonical
+PASS +1 data_quality_lists_every_input_file
+PASS +1 product_summary_lists_every_catalogue_sku
+PASS +5 collateral_gate_blocks_exactly_the_right_events
+fail +5 normalized_stream_is_exact
+fail +5 summary_totals_are_exact
+fail +5 region_rollups_are_exact
+fail +5 segment_rollups_are_exact
+fail +5 product_summary_is_exact
+fail +5 data_quality_ledger_is_exact
+fail +5 fx_carry_forward_and_predated_currency_are_exact
+fail +5 utc_day_shift_and_fiscal_period_are_exact
+fail +5 counterparty_dedup_segment_is_exact
+PASS +5 half_cent_money_rounds_half_up
+PASS +5 orphan_links_use_raw_sales_ids
+PASS +5 corrections_log_overrides_are_applied
+fail +5 reusable_transform_settles_a_relocated_book
+fail +5 permuted_rows_and_shifted_rates_settle_identically
+fail -5 negative_memorized_shipped_book
+fail -3 negative_network_dependency_or_shell_cheat
+fail -3 negative_nondeterministic_output
+{"kept": 24, "positive_total": 79, "pct": 30.38}
+=> 24/79 = 30.38%, matches recorded ctrf.json (8/22 passed) and reward-details test_output 24.
+
+## 2. Oracle: solve.sh in same image, /app/data = copy of environment/data
+$ docker run --rm -v $S/oracle_app:/app -v <copy>/solution:/solution:ro fdcgsl-verifier:local bash /solution/solve.sh   (wall 1.41 s)
+$ docker run --rm -v $S/oracle_app:/app ... python /driver.py
+PASS +1 artifacts_exist
+PASS +1 output_serialization_is_canonical
+PASS +1 data_quality_lists_every_input_file
+PASS +1 product_summary_lists_every_catalogue_sku
+PASS +5 collateral_gate_blocks_exactly_the_right_events
+PASS +5 normalized_stream_is_exact
+PASS +5 summary_totals_are_exact
+PASS +5 region_rollups_are_exact
+PASS +5 segment_rollups_are_exact
+PASS +5 product_summary_is_exact
+PASS +5 data_quality_ledger_is_exact
+PASS +5 fx_carry_forward_and_predated_currency_are_exact
+PASS +5 utc_day_shift_and_fiscal_period_are_exact
+PASS +5 counterparty_dedup_segment_is_exact
+PASS +5 half_cent_money_rounds_half_up
+PASS +5 orphan_links_use_raw_sales_ids
+PASS +5 corrections_log_overrides_are_applied
+PASS +5 reusable_transform_settles_a_relocated_book
+PASS +5 permuted_rows_and_shifted_rates_settle_identically
+fail -5 negative_memorized_shipped_book
+fail -3 negative_network_dependency_or_shell_cheat
+fail -3 negative_nondeterministic_output
+{"kept": 79, "positive_total": 79, "pct": 100.0}
+docker run --rm --name fdcgsl-oracle-grade -v $S/oracle_app:/app -v   python   0.02s user 0.01s system 0% cpu 8.428 total
+=> 79/79 = 100%, no negative fired.
+
+## 3. Nop: empty /app/out
+fail +1 artifacts_exist
+fail +1 output_serialization_is_canonical
+fail +1 data_quality_lists_every_input_file
+fail +1 product_summary_lists_every_catalogue_sku
+fail +5 collateral_gate_blocks_exactly_the_right_events
+fail +5 normalized_stream_is_exact
+fail +5 summary_totals_are_exact
+fail +5 region_rollups_are_exact
+fail +5 segment_rollups_are_exact
+fail +5 product_summary_is_exact
+fail +5 data_quality_ledger_is_exact
+fail +5 fx_carry_forward_and_predated_currency_are_exact
+fail +5 utc_day_shift_and_fiscal_period_are_exact
+fail +5 counterparty_dedup_segment_is_exact
+fail +5 half_cent_money_rounds_half_up
+fail +5 orphan_links_use_raw_sales_ids
+fail +5 corrections_log_overrides_are_applied
+fail +5 reusable_transform_settles_a_relocated_book
+fail +5 permuted_rows_and_shifted_rates_settle_identically
+fail -5 negative_memorized_shipped_book
+fail -3 negative_network_dependency_or_shell_cheat
+fail -3 negative_nondeterministic_output
+{"kept": 0, "positive_total": 79, "pct": 0.0}
+docker run --rm --name fdcgsl-nop-grade -v $S/nop_app:/app -v   python   0.01s user 0.01s system 0% cpu 3.504 total
+=> 0/79 = 0%.
+
+## Patch proof (mistake #1 only: remove quoted-string coercion of amount_minor)
+$ diff agent_app/out/transform.py patched_app/out/transform.py
+508,512c508
+<         if isinstance(minor, str):
+<             if not INT_RE.match(minor.strip()):
+<                 return "skip", None
+<             minor = int(minor.strip())
+<         elif not isinstance(minor, int):
+---
+>         if not isinstance(minor, int):
+
+$ docker run --rm --name fdcgsl-patched -v $S/patched_app/out:/app/out -v $B/environment/data:/app/data:ro -v $S/work/driver.py:/driver.py:ro fdcgsl-verifier:local bash -c "python /app/out/transform.py /app/data /app/out; python /driver.py"
+    },
+    "by_source": {
+      "adjustments.jsonl": 5762976589,
+      "legacy.txt": -2438153527,
+      "refunds.tsv": -3712277075,
+      "sales.csv": 5246847339
+    },
+    "event_count": 10958,
+    "ladder_closing_usd_cents": 7613931289,
+    "net_units": 38711,
+    "orphan_refund_count": 112,
+    "skipped_count": 1324,
+    "total_usd_cents": 4859393326
+  }
+}
+PASS +1 artifacts_exist
+PASS +1 output_serialization_is_canonical
+PASS +1 data_quality_lists_every_input_file
+PASS +1 product_summary_lists_every_catalogue_sku
+PASS +5 collateral_gate_blocks_exactly_the_right_events
+PASS +5 normalized_stream_is_exact
+PASS +5 summary_totals_are_exact
+PASS +5 region_rollups_are_exact
+PASS +5 segment_rollups_are_exact
+PASS +5 product_summary_is_exact
+PASS +5 data_quality_ledger_is_exact
+PASS +5 fx_carry_forward_and_predated_currency_are_exact
+PASS +5 utc_day_shift_and_fiscal_period_are_exact
+PASS +5 counterparty_dedup_segment_is_exact
+PASS +5 half_cent_money_rounds_half_up
+PASS +5 orphan_links_use_raw_sales_ids
+PASS +5 corrections_log_overrides_are_applied
+PASS +5 reusable_transform_settles_a_relocated_book
+PASS +5 permuted_rows_and_shifted_rates_settle_identically
+fail -5 negative_memorized_shipped_book
+fail -3 negative_network_dependency_or_shell_cheat
+fail -3 negative_nondeterministic_output
+{"kept": 79, "positive_total": 79, "pct": 100.0}
+NOTE: in driver output, a negative printed 'fail -N' means its check assertion failed = the negative did NOT fire (no deduction); kept stays at positive total.

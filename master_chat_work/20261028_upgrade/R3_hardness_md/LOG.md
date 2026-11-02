@@ -1,0 +1,6 @@
+# LOG R3 hardness.md verify (board 0036eb5)
+- 2026-10-28 20:51 IST: session renamed (opencode ses_e7ce66281ffewkH71vPrpPcJUJ). Copied /Users/mac/Downloads/hardness.md -> OUT/hardness_source.md, sha256 905675474b066ca1ee6beae386c5a6953c5845444a217041008845b722605148 (matches source, 21042 bytes, 434 lines).
+- 21:41 IST resumed after compaction. Doc 85-set = git commit 95f8fb386 (27 Oct 18:23 IST) of Anubis_Tasks_Samples: 85 dirs, 83 opus-5 + 2 opus-5-5 reports (11750b7a, 4ef4340d); all headline figures exact (s03_snapshot.py). Working tree = those 85 + 7 later dirs, additions only (git diff --name-status).
+- s01: recompute of tests/judge/final matches stored value on 90/90 opus-5 reports; alt judge-negative semantics fails 89/90.
+- s04 (doc85/cur90), s05 (confounds, recipe, <40 profile), s06 (stage-1 overlap: 86 shared ids, 85/86 report.json byte-identical, 0b27b9dc differs but same final) run; outputs in /tmp/R3-hardness-work/.
+- 22:49 IST: both explore agents errored (30 s); W5 and prior-study read done directly. s08_ours.py: 26 valid probe/gate rows, 10 gate runs, 1 < 40; 4 doc tasks are ours (42e79476 dispatch, b47fd5f7 emberforge, 8fbe0e42 match-replay, b5c7b14c caldermoor). s07_tables.py wrote claims.csv (68: 41 C / 18 P / 5 W / 4 U), levers.csv (11 + 3 new; PROVEN L2, L6), result_0036eb5.json. FINDINGS.md written. /tmp/R3-hardness-* removed. DONE.

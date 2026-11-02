@@ -1,0 +1,34 @@
+# LOG harden r2 cb8dada
+- 11:29 rename: codex no match; opencode ['ses_e6a4ec0a6ffedV8woIzac138g8']
+- 11:30 fingerprints OK; kit HEAD 5574d77eb9f22c207ba05fd8f9ac31d42ba45271; BUNDLE tree cd11476e6e14
+- 11:31 old TODO/LOG renamed *_harden_c3aca8d.md; created h2_a1/proto, OUT, R
+- 11:32 compaction; re-read prompt; wrote TODO.md/LOG.md
+- 11:33 a1 add() skips a==b (h1_a1/a1_program L270-272); permits members dedup L294-295: self-pair branches handled.
+- 11:34 TRIP: listed trajectory steps (76); wrote OUT/TRIP.md.
+- 11:35 extracted first-write (step 11) -> h2_a1/firstwrite_program.py; allbutone_program.py = ref solve.py with sweep_order -> bfs(min(vertices)).
+- 11:36 proto_gen2.py + drive2.sh; dockfree START=yes; kill1 started (N1 815301 H1x20, N2 822402 H2x20, N3 833503 H3x20; progs a1 fw abo dae elim vebest; CAP 40; ref unbusy+busy).
+- 11:45 kill1 ALL_DONE (rep20, N1-N3 seeds 815301/822402/833503): ref unbusy .96/.89/.73 busy .87/.74/.62; a1 T@40/T@40/39.95 EXACT(>20 => TIMEOUT); fw T/T/T; abo T@40/32.28/21.60 (all >20); dae T/T/T; elim 4.95/5.23/4.29 EXACT; vebest 4.45/4.63/3.90 EXACT. Peak MB a1<=61, fw<=472, abo<=338, elim<=95. Next kill2 rep30.
+- 11:52 kill2 ALL_DONE (rep30, same seeds, 100 rounds/60 large): ref unbusy 1.20/1.11/0.97 busy 1.12/1.11/0.95; a1 T@60 x3; abo 42.86/54.89/42.46 EXACT (>20 => TIMEOUT); elim 7.93/7.55/6.51; vebest 6.86/6.51/5.93 EXACT. Peak MB a1<=71, abo<=605, elim<=117. Chosen: rep30.
+- 11:55 DESIGN.md written (OUT, 56 lines, rep30, Lever 2 none found, pred a1 20.56). Sent DESIGN READY; waiting for go.
+- 11:58 go received (master corrections 1 verifier slow path, 2 fork survivor, 3 QC rows). TODO P2 expanded.
+- 11:58 assemble roundtrip == old test_output.py (cmp). hidden_meta.json H1-H3 rep30 (backup h2_a1/hidden_meta.before.json, test_output.before.py). assemble -> 1518 lines; digest outside _BOOKS e026caaf... identical before/after (h2_a1/digest_checks.py). Pins H1 016b460e.., H2 542d3484.., H3 adc9493b..
+- 12:02 gen300 (logs/gen300.log): 300 seeds 0 errors, 60 large/100 rounds every book, 19/19 fault kinds, pinned books == kill-table books (True x3).
+- 12:03 fork probe built: h2_a1/forker/derive_report.py, h2_a1/forkcheck.py; verifier image cb8dada_verif (tests/Dockerfile).
+- 12:04 corr2 fix: tests_template.py imports signal,time; _launch uses Popen(start_new_session=True), communicate(timeout=BOOK_SECONDS), _stop_untrusted (killpg + SIGKILL every non-zombie uid nobody process when root, up to 20 passes). Reassembled test_output.py 1568 lines (_launch L1163, _stop_untrusted L1183). digest_checks2.py b1d31eb43bec before == after (1422 lines).
+- 12:05 fork2 (probe + setsid escapee): TimeoutExpired 20.07 s, SURVIVORS 0 (only zombies of pid 1 probe). logs/fork2.log.
+- 12:06 corr1 started: vboth.sh, oracle then a1 full tests-only verifier (tests copy without judge.toml) in cb8dada_verif.
+- 12:07 _stop_untrusted iterates sorted(Path("/proc").iterdir()) (TS-11 wording); reassembled; digest_checks2 still b1d31eb4.
+- 12:07 corr1 oracle full tests-only verifier (cb8dada_verif, tests copy without judge.toml, reward.toml weights test_output 1/108): reward 1.0, 108/108, VERIFIER_SECONDS 40.85.
+- 12:09 corr1 a1 program as delivered: reward 0.2778 = 30/108, VERIFIER_SECONDS 146.65 (<= 2430). Lost: all 21 H1-H3 checks + reruns_identical (78). Negatives 0.
+- 12:08 LEVERS.md r2 section appended (kill table, 78/108 = 72%).
+- 12:12 costrun started (a1 fw abo dae elim vebest, full tests-only verifier on final tests, logs/ct_<p>.log, done marker logs/costrun.done).
+- 12:14 QC_DEFENCE.md r2 section (TS-11/Law-1 v3.5, TS-11 cap, TS-19, IN-17, IN-15/16, DS-21, TS-23, TS-26, JD-5/8, AL-2/27, CL-2, CL-3, DS-22); EVIDENCE_MAP.md r2 rows.
+- 12:16 STACKING_CHECK.md written (OUT, hand TS-26 PASS). truth_facts.py written; launched cb8dada_tf after dockfree printed START=no by a chained command mistake; removed it within ~30 s (docker rm -f), no output used. Will relaunch when START=yes.
+- 12:18 hardengate dir _runs/20261101/flood-repair-portfolio/hardengate-20261101T121818: exe_copy plain/owner/stub rc 0; forgery copy (plain + solve.sh: real solve.py docs saved to /app/out/_saved, derive_report.py copier); lane1.sh (oracle x3), lane2.sh (owner), lane3.sh (nop, stub, forgery) with OPENAI_API_KEY=unused and yes |.
+- 12:19 precheck: 2 FIND on EVIDENCE_MAP r2 rows (no shipped file:line for TS-19, TS-26); rows rewritten (contract.md:11-12 + proposals.csv:1312; contract.md:62); precheck rerun PRECHECK CLEAN (rc 0, NOTE SELF_CHECKS missing only).
+- 12:21 lane1 started (dockfree START=yes, logs/lane1.log).
+- 12:25-12:37 lane1 ALL_DONE oracle 1.0 x3 verifier 124.27/139.64/151.49 s; lane2 owner 1.0 125.21 s; lane3 started (START=yes): nop-1 0.0 (109.39 s), stub-1 done, forgery-1 running.
+- 12:30 costrun COST_ALL_DONE: a1 30/108 167 s, fw 3, abo 30, dae 30, elim 83, vebest 108; COST_TABLE.md r2 section written. truth_facts ALL_DONE (9 of 180 hidden large rounds tie-decided).
+- 12:38 truth_update.py run twice (idempotent) on TRUTH.md -> 043e5b280055; xref_check 0 findings; precheck rerun PRECHECK CLEAN.
+- 12:40 lane3 ALL_DONE: nop 0.0 (109.39 s), stub 0.0093 = 1/108 (91.12 s), forgery 0.1481 = 16/108 (96.05 s). Tasks_INPUT synced, diff -rq empty, tree 931f8f817d76 both.
+- 12:43 OUT/HARDEN_REPORT.md and OUT/result_cb8dada.json written (json parses, no dashes/CR). No cb8dada containers or child processes left. Final rename next.

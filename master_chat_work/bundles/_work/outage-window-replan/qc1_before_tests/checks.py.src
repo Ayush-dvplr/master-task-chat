@@ -1,0 +1,479 @@
+# ---- harness ----
+
+OUT = Path("/app/out")
+SCRIPT = OUT / "derive_report.py"
+DOC_NAMES = ["policy_audit.json", "summary.json", "data_quality.json", "segment_commercial.json",
+             "segment_public.json", "region_North.json", "region_South.json", "region_West.json",
+             "region_East.json"]
+_SETPRIV = ["setpriv", "--reuid=nobody", "--regid=nogroup", "--clear-groups"]
+_RUN_SECONDS = 90
+_FRESH_SEEDS = {"h2": 70413, "h3": 88261}
+_LOCK = threading.Lock()
+_MEMO: dict[str, dict] = {}
+
+
+def _root_only_tests_present() -> bool:
+    try:
+        st = Path("/tests").stat()
+    except OSError:
+        return False
+    return st.st_uid == 0 and (st.st_mode & 0o077) == 0
+
+
+def _grant_read(argument: str) -> None:
+    """Make an agent-written path readable before the uid drop.
+
+    Agent editors write through a temp file in the same directory and rename it, so a
+    program the agent wrote can land at mode 0600 (owner-only). The checks run that
+    program as an unprivileged user, which then cannot open it, and a correct submission
+    would score zero for a reason that has nothing to do with the task. The verifier runs
+    as root, so widening the mode is always allowed here and it changes no graded content.
+    """
+    if not argument.startswith("/app"):
+        return
+    path = Path(argument)
+    try:
+        if path.exists():
+            path.chmod(path.stat().st_mode | (0o555 if path.is_dir() else 0o444))
+        for parent in path.parents:
+            if parent == Path("/"):
+                break
+            parent.chmod(parent.stat().st_mode | 0o555)
+            if parent == Path("/app"):
+                break
+    except OSError as exc:
+        print("could not widen the mode of %s: %s" % (argument, exc), file=sys.stderr)
+
+
+def _untrusted_command(command: list[str]) -> list[str]:
+    if os.name != "posix" or not hasattr(os, "geteuid"):
+        if _root_only_tests_present():
+            raise RuntimeError("cannot drop privileges on this platform")
+        return command
+    if os.geteuid() != 0:
+        if _root_only_tests_present():
+            raise RuntimeError("checks must run as root to drop privileges")
+        return command
+    for argument in command:
+        _grant_read(argument)
+    return [*_SETPRIV, *command]
+
+
+def _seal(root: Path) -> None:
+    for path in sorted(root.rglob("*")):
+        path.chmod(0o755 if path.is_dir() else 0o644)
+    root.chmod(0o755)
+
+
+def _write_tree(files: dict[str, bytes], root: Path | None = None) -> Path:
+    if root is None:
+        root = Path(tempfile.mkdtemp(prefix="inputs-"))
+    root.mkdir(parents=True, exist_ok=True)
+    for name, raw in files.items():
+        (root / name).write_bytes(raw)
+    _seal(root)
+    return root
+
+
+def _shipped_files() -> dict[str, bytes]:
+    return {name: zlib.decompress(base64.b64decode(blob)) for name, blob in _SHIPPED_DATA.items()}
+
+
+def _expected(data: Path) -> dict[str, object]:
+    season, audit = derive(read_inputs(str(data)))
+    scratch = tempfile.mkdtemp(prefix="expected-")
+    try:
+        write_outputs(season, audit, scratch)
+        return {name: json.loads(Path(scratch, name).read_text()) for name in DOC_NAMES}
+    finally:
+        shutil.rmtree(scratch)
+
+
+def solve_lane(rs, inc, prec, cap, fac, black, defer):
+    pos = {r["id"]: k for k, r in enumerate(rs)}
+    lane = Lane(dict(
+        H=H, cap=cap, factor=fac, blackout=sorted(black), defer=defer,
+        reqs=[dict(id=r["id"], crews=r["crews"], dur=r["dur"], e=r["e"], l=r["l"], w=r["w"], pub=r["pub"])
+              for r in rs],
+        incompat=[(min(pos[a], pos[b]), max(pos[a], pos[b])) for a, b in inc],
+        prec=[(pos[a], pos[b]) for a, b in prec]))
+    plan = reference(lane)
+    if not lane.feasible(plan):
+        raise RuntimeError("reference plan infeasible")
+    return tuple(plan)
+
+
+def _run_program(data: Path, workdir: Path | None = None) -> dict:
+    """Run the delivered program with the stated command; collect its documents."""
+    out = Path(tempfile.mkdtemp(prefix="replan-out-"))
+    out.chmod(0o777)
+    if workdir is None:
+        workdir = Path(tempfile.mkdtemp(prefix="elsewhere-"))
+    workdir.mkdir(parents=True, exist_ok=True)
+    workdir.chmod(0o777)
+    command = _untrusted_command(["python3", str(SCRIPT), "--data", str(data), "--out", str(out)])
+    result = {"returncode": None, "stderr": "", "docs": {}, "note": ""}
+    try:
+        proc = subprocess.run(command, cwd=workdir, capture_output=True, text=True, timeout=_RUN_SECONDS)
+    except subprocess.TimeoutExpired:
+        result["note"] = "the program did not finish within %d seconds" % _RUN_SECONDS
+        return result
+    result["returncode"] = proc.returncode
+    result["stderr"] = proc.stderr
+    for name in DOC_NAMES:
+        path = out / name
+        if path.is_file():
+            try:
+                result["docs"][name] = json.loads(path.read_text())
+            except ValueError as exc:
+                result["docs"][name] = ("not valid JSON", str(exc))
+    shutil.rmtree(out, ignore_errors=True)
+    return result
+
+
+def _memo(key: str, build) -> dict:
+    with _LOCK:
+        if key not in _MEMO:
+            _MEMO[key] = build()
+        return _MEMO[key]
+
+
+def _fresh(key: str) -> dict:
+    def build() -> dict:
+        files = {name: text.encode() for name, text in build_inputs(_FRESH_SEEDS[key]).items()}
+        data = _write_tree(files)
+        return {"expected": _expected(data), "run": _run_program(data)}
+    return _memo(key, build)
+
+
+def _shipped() -> dict:
+    def build() -> dict:
+        data = _write_tree(_shipped_files())
+        return {"data": data, "expected": _expected(data)}
+    return _memo("shipped", build)
+
+
+def _altered() -> dict:
+    def build() -> dict:
+        files = _shipped_files()
+        rng = random.Random(4421)
+        for name in ("customers.csv", "load_forecast.tsv"):
+            lines = files[name].decode().splitlines(keepends=True)
+            body = lines[1:]
+            rng.shuffle(body)
+            files[name] = "".join(lines[:1] + body).encode()
+        for name in ("crew_roster.jsonl", "assets.jsonl"):
+            lines = files[name].decode().splitlines(keepends=True)
+            rng.shuffle(lines)
+            files[name] = "".join(lines).encode()
+        policy = files["risk_policy.toml"].decode()
+        if "public = 2\n" not in policy:
+            raise RuntimeError("risk_policy.toml has no public = 2 line to alter")
+        files["risk_policy.toml"] = policy.replace("public = 2\n", "public = 3\n").encode()
+        data = _write_tree(files)
+        return {"expected": _expected(data), "run": _run_program(data)}
+    return _memo("altered", build)
+
+
+def _relocated() -> dict:
+    def build() -> dict:
+        base = Path(tempfile.mkdtemp(prefix="moved-"))
+        base.chmod(0o755)
+        data = _write_tree(_shipped_files(), base / "archive" / "2026" / "inputs")
+        for parent in (base / "archive", base / "archive" / "2026"):
+            parent.chmod(0o755)
+        return {"run": _run_program(data, base / "cwd")}
+    return _memo("relocated", build)
+
+
+def _without_customers() -> dict:
+    def build() -> dict:
+        files = _shipped_files()
+        del files["customers.csv"]
+        return {"run": _run_program(_write_tree(files))}
+    return _memo("missing", build)
+
+
+def _first_difference(expected, got, path: str = "$") -> str | None:
+    if type(expected) is not type(got):
+        return path
+    if isinstance(expected, dict):
+        for key in sorted(set(expected) | set(got)):
+            if key not in expected or key not in got:
+                return "%s.%s" % (path, key)
+            found = _first_difference(expected[key], got[key], "%s.%s" % (path, key))
+            if found:
+                return found
+        return None
+    if isinstance(expected, list):
+        for index, (left, right) in enumerate(zip(expected, got)):
+            found = _first_difference(left, right, "%s[%d]" % (path, index))
+            if found:
+                return found
+        if len(expected) != len(got):
+            return "%s[%d]" % (path, min(len(expected), len(got)))
+        return None
+    return None if expected == got else path
+
+
+def _same_document(name: str, expected: dict, got) -> None:
+    if not expected:
+        raise AssertionError("%s: nothing to compare" % name)
+    if got is None:
+        raise AssertionError("%s: document not written" % name)
+    where = _first_difference(expected, got)
+    if where is not None:
+        raise AssertionError("%s: first difference at %s" % (name, where))
+
+
+def _check_delivered(name: str) -> None:
+    path = OUT / name
+    if not path.is_file():
+        raise AssertionError("%s: not delivered" % path)
+    _same_document(name, _shipped()["expected"][name], json.loads(path.read_text()))
+
+
+def _check_run(case: dict, name: str) -> None:
+    run = case["run"]
+    if run["returncode"] is None:
+        raise AssertionError(run["note"])
+    if run["returncode"] != 0:
+        raise AssertionError("exit status %d: %s" % (run["returncode"], run["stderr"][-400:]))
+    _same_document(name, case["expected"][name], run["docs"].get(name))
+
+
+def _check_fresh(key: str, name: str) -> None:
+    _check_run(_fresh(key), name)
+
+
+def _check_altered() -> None:
+    _check_run(_altered(), "policy_audit.json")
+
+
+def _check_relocated() -> None:
+    case = {"run": _relocated()["run"], "expected": _shipped()["expected"]}
+    _check_run(case, "summary.json")
+
+
+def _check_missing_input() -> None:
+    if not SCRIPT.is_file():
+        raise AssertionError("%s: not delivered" % SCRIPT)
+    run = _without_customers()["run"]
+    if run["returncode"] is None:
+        raise AssertionError(run["note"])
+    if run["returncode"] == 0:
+        raise AssertionError("exit status 0 with customers.csv missing")
+    if "customers.csv" not in run["stderr"]:
+        raise AssertionError("the error output does not name customers.csv")
+
+
+_NETWORK_MODULES = {"socket", "ssl", "http", "urllib", "ftplib", "smtplib", "poplib",
+                    "imaplib", "telnetlib", "xmlrpc", "asyncio", "socketserver"}
+
+
+def _check_outside_library_import() -> None:
+    """Holds when the delivered program imports a module from outside the Python 3
+    standard library or a network module. The instruction states: "Use the Python 3
+    standard library only, with no network access." The weight is negative, so it
+    counts only against a program that does this."""
+    tree = ast.parse(SCRIPT.read_text(encoding="utf-8"), filename=str(SCRIPT))
+    found = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names = [a.name for a in node.names]
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            names = [node.module]
+        else:
+            continue
+        for name in names:
+            root = name.split(".")[0]
+            if root not in sys.stdlib_module_names or root in _NETWORK_MODULES:
+                found.append(name)
+    if not found:
+        raise AssertionError("no outside or network import")
+    print("outside or network imports: %s" % ", ".join(sorted(set(found))), file=sys.stderr)
+
+
+def _check_hardcoded_sample_answers() -> None:
+    """Holds when the delivered program's source carries three or more asset ids that the
+    shipped answers single out (deferred, moved or rejected records of /app/data). The
+    instruction states: "It reads only the data directory it is given". The weight is
+    negative, so it counts only against a program that does this."""
+    source = SCRIPT.read_text(encoding="utf-8")
+    docs = _shipped()["expected"]
+    marked = {row["asset_id"] for row in docs["policy_audit.json"]["requests"]
+              if row["status"] == "deferred" or row["moved"]}
+    marked |= {row["asset_id"] for row in docs["data_quality.json"]["rejected"]}
+    hits = sorted(a for a in marked if a in source)
+    if len(hits) < 3:
+        raise AssertionError("no shipped answer ids in the program source")
+    print("shipped answer ids in source: %s" % ", ".join(hits), file=sys.stderr)
+
+
+def _holds(check, *args) -> bool:
+    try:
+        check(*args)
+    except Exception as exc:
+        print("%s%s: %s" % (check.__name__, args, exc), file=sys.stderr)
+        return False
+    return True
+
+
+# ---- criteria ----
+
+@criterion(description="The delivered policy_audit.json for /app/data matches the contract exactly.")
+def shipped_policy_audit(workspace: Path) -> bool:
+    return _holds(_check_delivered, "policy_audit.json")
+
+
+@criterion(description="The delivered summary.json for /app/data matches the contract exactly.")
+def shipped_summary(workspace: Path) -> bool:
+    return _holds(_check_delivered, "summary.json")
+
+
+@criterion(description="The delivered data_quality.json for /app/data matches the contract exactly.")
+def shipped_data_quality(workspace: Path) -> bool:
+    return _holds(_check_delivered, "data_quality.json")
+
+
+@criterion(description="Fresh input set h2: region_North.json matches the contract exactly.")
+def h2_region_north(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "region_North.json")
+
+
+@criterion(description="Fresh input set h2: region_South.json matches the contract exactly.")
+def h2_region_south(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "region_South.json")
+
+
+@criterion(description="Fresh input set h2: region_West.json matches the contract exactly.")
+def h2_region_west(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "region_West.json")
+
+
+@criterion(description="Fresh input set h2: region_East.json matches the contract exactly.")
+def h2_region_east(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "region_East.json")
+
+
+@criterion(description="Fresh input set h2: policy_audit.json matches the contract exactly.")
+def h2_policy_audit(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "policy_audit.json")
+
+
+@criterion(description="Fresh input set h2: segment_commercial.json matches the contract exactly.")
+def h2_segment_commercial(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "segment_commercial.json")
+
+
+@criterion(description="Fresh input set h2: segment_public.json matches the contract exactly.")
+def h2_segment_public(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "segment_public.json")
+
+
+@criterion(description="Fresh input set h2: summary.json matches the contract exactly.")
+def h2_summary(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "summary.json")
+
+
+@criterion(description="Fresh input set h2: data_quality.json matches the contract exactly.")
+def h2_data_quality(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h2", "data_quality.json")
+
+
+@criterion(description="Fresh input set h3: region_North.json matches the contract exactly.")
+def h3_region_north(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "region_North.json")
+
+
+@criterion(description="Fresh input set h3: region_South.json matches the contract exactly.")
+def h3_region_south(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "region_South.json")
+
+
+@criterion(description="Fresh input set h3: region_West.json matches the contract exactly.")
+def h3_region_west(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "region_West.json")
+
+
+@criterion(description="Fresh input set h3: region_East.json matches the contract exactly.")
+def h3_region_east(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "region_East.json")
+
+
+@criterion(description="Fresh input set h3: policy_audit.json matches the contract exactly.")
+def h3_policy_audit(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "policy_audit.json")
+
+
+@criterion(description="Fresh input set h3: segment_commercial.json matches the contract exactly.")
+def h3_segment_commercial(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "segment_commercial.json")
+
+
+@criterion(description="Fresh input set h3: segment_public.json matches the contract exactly.")
+def h3_segment_public(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "segment_public.json")
+
+
+@criterion(description="Fresh input set h3: summary.json matches the contract exactly.")
+def h3_summary(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "summary.json")
+
+
+@criterion(description="Fresh input set h3: data_quality.json matches the contract exactly.")
+def h3_data_quality(workspace: Path) -> bool:
+    return _holds(_check_fresh, "h3", "data_quality.json")
+
+
+@criterion(description="A copy of /app/data with rows reordered and the public class weight changed gives the exact policy_audit.json.")
+def altered_copy_policy_audit(workspace: Path) -> bool:
+    return _holds(_check_altered)
+
+
+@criterion(description="A copy of /app/data in another directory, run from a third directory, gives the exact summary.json.")
+def relocated_copy_summary(workspace: Path) -> bool:
+    return _holds(_check_relocated)
+
+
+@criterion(description="With customers.csv missing the program exits non-zero and its error output names customers.csv.")
+def missing_customers_named(workspace: Path) -> bool:
+    return _holds(_check_missing_input)
+
+
+@criterion(description="Penalises a delivered program that imports a module from outside the Python 3 standard library or a network module.")
+def negative_outside_library_import(workspace: Path) -> bool:
+    return _holds(_check_outside_library_import)
+
+
+@criterion(description="Penalises a delivered program whose source carries three or more asset ids of the deferred, moved or rejected records of the shipped data.")
+def negative_hardcoded_sample_answers(workspace: Path) -> bool:
+    return _holds(_check_hardcoded_sample_answers)
+
+
+criteria.shipped_policy_audit(weight=3)
+criteria.shipped_summary(weight=3)
+criteria.shipped_data_quality(weight=3)
+criteria.h2_region_north(weight=5)
+criteria.h2_region_south(weight=5)
+criteria.h2_region_west(weight=5)
+criteria.h2_region_east(weight=5)
+criteria.h2_policy_audit(weight=5)
+criteria.h2_segment_commercial(weight=3)
+criteria.h2_segment_public(weight=3)
+criteria.h2_summary(weight=3)
+criteria.h2_data_quality(weight=3)
+criteria.h3_region_north(weight=5)
+criteria.h3_region_south(weight=5)
+criteria.h3_region_west(weight=5)
+criteria.h3_region_east(weight=5)
+criteria.h3_policy_audit(weight=5)
+criteria.h3_segment_commercial(weight=3)
+criteria.h3_segment_public(weight=3)
+criteria.h3_summary(weight=3)
+criteria.h3_data_quality(weight=3)
+criteria.altered_copy_policy_audit(weight=3)
+criteria.relocated_copy_summary(weight=3)
+criteria.missing_customers_named(weight=3)
+criteria.negative_outside_library_import(weight=-3)
+criteria.negative_hardcoded_sample_answers(weight=-5)

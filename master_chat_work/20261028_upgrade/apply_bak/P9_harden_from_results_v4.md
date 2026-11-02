@@ -1,0 +1,78 @@
+# P9 Harden from harness results, template v4 (27 Oct 2026 18:45)
+
+v4 changes (Ayush decisions 1, 4, 6, 7, 8, "proceed" 27 Oct; pipeline v4 PLAN `master_chat_work/_dev_research/pipeline_v4/PLAN.md`): _COMMON_RULES_v5 and QC_FIX_PLAYBOOK_v3; Phase 1 starts with the trajectory read-out (TRIP table, `tools/trajectory_readout.py`, KNOWLEDGE.md section T); used only when a run on frozen QC-passed bytes missed the gate with tests 100 (new test lever) or when Ayush asks; never re-run the same bytes; kill test in Docker only with WRONG / TIMEOUT / CRASH split (Law-1); J3a honesty negative in every judge; next step is 3 fresh blind reads, one QC, freeze, 1 run.
+
+v2 changes (SETUP_PLAN_v1 Part 1, IMPROVEMENT_PLAN_v1 A2/B1/C1/C2/E3; shape taken from the LP1 pilot prompts issued 08:45): Phase A genuineness check first; diagnosis with the 4-cause root-cause section; trajectory autopsy; reflex program saved as `agent_program/`; hardening per `knowledge/LEVER_RULES_v1.md` (never pasted); STACKING_CHECK + reflex gate (<= 0.20); pause after diagnosis for "go" (SETUP Part 3.4); board-id rename, compaction rules, result json; "Lessons for the master".
+
+v2 in-place 25 Oct (QC push 5574d77e, Ayush decisions 1-11): _COMMON_RULES_v3, LEVER_RULES_v2, QC_FIX_PLAYBOOK_v2; Phase A diffs the staged tests and ctrf ids against the repo first; reflex gate replaced by precheck CLEAN + 3 blind reads before the next probe; G5 = exactness clause only; IN-17 and AL-27 in QC_DEFENCE; no fuzz of the old program as evidence; no round after LAST.
+v3 (26 Oct, board 720e1d7): LEVER_RULES_v3; diagnosis covers the judge half (probe pass or fail per criterion); hardening may add breadth, a degenerate shipped instance, S3/S5/S6 sources, or rebuild the judge as a probe band with no test change; peer evidence from delivery_study2.
+
+Use this when a real run scored above the gate, or when Ayush says "make it harder". The input can be a score, a pass_summary file, a Harbor job folder, or a full trajectory. Master fills `[[...]]`, checks it against `knowledge/PROMPT_CHECKLIST.md`, and issues it to `prompts/issued/<slug>/P9_r<round>.md`.
+
+=== PASTE BELOW ===
+
+You are hardening one Harbor 0.24 bundle using real harness results. First you prove the score is genuine and diagnose exactly what let the agent score. Then you replace or add levers per LEVER_RULES, never by hiding rules. Edit in place; never regenerate and never use `--force`. Board id: `[[SHA]]`. This prompt is saved at `[[PROMPT_PATH]]`. Harden round [[ROUND]] of 3. If an earlier round of this task was marked LAST, stop and report "ROUND LIMIT".
+
+## Rules that survive compaction
+- First thing: rename this session to `[[SHA]]`:
+  python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/name_session.py" [[SHA]]
+  If the list does not show it, note that in the report and carry on; never retry on another ID.
+- Tools are always available. Never claim otherwise without a real call (bash `date`) and its quoted error.
+- After every compaction: run `date`, re-read this prompt, then `WORK/TODO.md`, and continue from the first unticked item. Never re-run a finished Docker block; check its log for ALL_DONE first. Copy this section word for word into any compaction summary.
+- Keep `WORK/TODO.md` and `WORK/LOG.md` current after every step. Read files in pieces of at most 50 KB; list trajectory steps with python/jq, never print a whole trajectory.
+- Read first, in full:
+  - `/Users/mac/Desktop/Terminal Bench/master_chat_tasks/prompts/templates/_COMMON_RULES_v5.md`;
+  - `/Users/mac/Desktop/Terminal Bench/master_chat_tasks/prompts/issued/_adhoc/20261022_round_notes.md` sections C, E, F, G;
+  - `/Users/mac/Desktop/Terminal Bench/master_chat_tasks/knowledge/LEVER_RULES_v3.md` (THE authority for the determinate test, design shapes, hardness sources, levers, writing, grading, judge probe band, holes list, STACKING_CHECK and the probe gate);
+  - `/Users/mac/Desktop/Terminal Bench/master_chat_tasks/knowledge/LEAK_LIBRARY.md`, `QC_RULINGS.md` and `QC_FIX_PLAYBOOK_v3.md` (same folder);
+  - then `WORK/DESIGN.md`, `LEVERS.md`, `QC_DEFENCE.md`, `XREF.md` and the latest `baselines.json`.
+- Never commit, push, pull or open a PR. Read-only git only. Edit only BUNDLE, WORK and OUT. Never edit the harness clone, the QC kit, `QC assigned/`, `my tasks/`, `QC_*/bundles/`, `jobs/`, or the Anubis repo.
+
+## Inputs
+- BUNDLE (edit here): `/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/[[SLUG]]/`
+- WORK: `/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/[[SLUG]]/`
+- RESULTS (any subset, read only): score `[[SCORE_OR_NONE]]`; summary `[[PASS_SUMMARY_PATH_OR_NONE]]`; job folder `[[JOB_DIR_OR_NONE]]`; trajectory `[[TRAJECTORY_PATH_OR_NONE]]`
+- Shape and hardness sources for this round (LEVER_RULES v3 sections 1 and 1A; a set no other live task uses), or "judge rebuild only" (probe band, no test change): [[SOURCES]]
+- Master's notes (levers that leaked elsewhere, earlier artefacts): [[MASTER_NOTES]]
+- Peer evidence (patterns only, never copy text/data/code): `/Users/mac/Desktop/Terminal Bench/master_chat_work/_dev_research/peer_levers/G1..G5/GROUP_SUMMARY.md` and `/Users/mac/Desktop/Terminal Bench/master_chat_work/_dev_research/delivery_study2/g1_be971df..g4_af78147/GROUP_SUMMARY.md`
+- Live QC kit: `/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Input_Bundle_QC/` (record `git rev-parse HEAD` once).
+- OUT: `/Users/mac/Desktop/Terminal Bench/master_chat_work/[[DATE]]_[[SLUG]]/harden_r[[ROUND]]/`
+
+## Phase 1: diagnose (no edits)
+0. **Trajectory read-out first** (KNOWLEDGE.md section T). Run `python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/trajectory_readout.py" "<run folder>" --out OUT/TRIP.md` on the run folder (`jobs/[[SLUG]]/trajectory/claude-opus-5/Run N/`), then complete the table by reading: one row per lost or easy point `| step | what the agent did | what the docs require (file:line) | check/criterion | class |`, classes LOST_GRADED, WRONG_UNGRADED, EASY, SKIPPED, FALSE_CLAIM (the tool leaves WRONG_UNGRADED to you). Read check values from `verifier/reward-details.json` (report.json "passed" on negatives is unreliable). Then write: why it scored this (points per lever family, first-write step, stress tests, slowness noticed, self-checks) and which QC-safe edit each row supports (section T edit table).
+1. **Phase A, is the score genuine?** First diff the run's staged `tests/` and the ctrf test ids against the repo BUNDLE (a run on a stale or different tree is ARTEFACT). Then run copy vs BUNDLE (`diff -rq`; harness staging differences only), `result.json` exception_info, timeouts, verifier errors, `Permission denied`/`Errno 13`, missing files, crashes in test-stdout, judge actually reading the response. Verdict GENUINE / ARTEFACT / PARTLY with quotes. If ARTEFACT, write it and stop with "ARTEFACT: <reason>" (the score is not a baseline).
+2. **Root cause (4 causes, each answered YES / NO / PARTLY with evidence):**
+   - Cause 1, run error or wrong copy: was the run made on the current bundle tree, with no errors?
+   - Cause 2, harness or rescoring change: did the harness, reward formula or kit change between the baseline and this run, or was the baseline itself an artefact?
+   - Cause 3, our QC/fix rounds made it easier: list every file changed since the last hard baseline; for each, did it put a rule, figure or separating example in front of the agent?
+   - Cause 4, levers weak by design: for each rule or lever, the rule text and location, the trajectory step where the agent got it right, and what gave it away (rule next to its use, trap explained, shipped separating example, a shipped instance that fires the hard branch, a stated limit that hands over the method, self-test). For the judge half: per criterion, PASS or FAIL and the step that decided it; name every figure or rule-restating criterion the agent passed for free (J1, J8).
+   Name the PRIMARY CAUSE and the contributing ones.
+3. **Lever table** from `reward-details.json` plus the trajectory: check or criterion, points, earned, levers or probe template, HELD/LEAKED. Then the arithmetic: final = (tests + rubric) / 2, and the final a probe-band judge rebuild alone would give at the peer probe pass rate (25%, LEVER_RULES v3 J2).
+4. **Trajectory autopsy** (B1): what the agent read and in which order; when it wrote the program and whether it ever changed the graded logic; its self-tests and which levers they covered; time per phase.
+5. **Agent program:** save the agent's final program and outputs (from the trajectory artifacts or `/app/out`) as `OUT/agent_program/` for the diagnosis. Never fuzz it against a changed bundle as evidence (LEVER_RULES G10, section 6); it diagnoses only the bundle version it was written for.
+6. Add one line per LEAKED lever to a `LEAK_LIBRARY rows` section of the diagnosis (lever, how it was written, the step it leaked at, the planned fix); the master copies them into `knowledge/LEAK_LIBRARY.md`.
+7. Write `OUT/DIAGNOSIS.md`, then stop: say "DIAGNOSIS READY: <path>" and wait for Ayush to reply "go" (he may pass on changes from the master chat). If the master's notes say "no go needed", continue.
+
+## Phase 2: harden per LEVER_RULES_v3
+- Implement the shape and sources above (sections 1 and 1A), fitted to the domain naturally. In `WORK/LEVERS.md` record for each rule or lever: the rule text with file:line, the reflex reading (from the autopsy and the agent program), the constructed hidden cases, the checks the wrong reading fails, and how it interacts with the others. Update `WORK/BRANCH_FIRE.md` and `WORK/RULE_TRACE.md`. Never add a hole from section 8 (unstated rule, silent value form, unstated invocation) to make a lever bite.
+- Determinate test 0b and writing W1-W12 (sections 0b, 2). Remove every giveaway found in Phase 1, including every IN-17 announcement sentence (01:47: name the discovery and the input that establishes it) and any self-check paragraph or "other scales" wording. Every rule with no sentence gets a `WORK/EVIDENCE_MAP.md` row; L11 also `WORK/UNIQUENESS.md`.
+- Grading G1-G13 (section 3): whole-document exact tests on hidden reseeded inputs with exactness stated (CL-4 exemption FC:491), per-row ownership (G1a), G3 shares by shape, negatives only for cheating acts (<= 5 per act) each quoting its stated sentence and none rc-sensitive, the G5 exactness clause plus the rerun promise, at least 2 mutation tests counted only where the plain hidden run is exact (G6), the stated invocation (G8a), assertion messages in ctrf, RULE_COVERAGE per AL-2 unit and established ordering (G11), no count caps, core weights never 1.
+- Judge J1-J10 (section 4): probe band of 8-16 w3 trajectory probes from templates P-a to P-h, J2b guards, J3a-c, behavioural J4, JUDGE_MAP with oracle-shows rows and the judge estimate; `[judge] mode = "batched"`; probe wording never in instruction.md.
+- Mandatory format kept: `chown root` + `chmod 755 /logs/verifier`; tests/Dockerfile pip line exactly `RUN pip install --no-cache-dir harbor-rewardkit==0.2.1 litellm==1.105.0`; `_grant_read` (H6/TS-30).
+- `WORK/QC_DEFENCE.md`: one entry per new lever and cascade (rule ids incl. IN-17, AL-1, AL-27, CL-4, quoted live rule, why it passes, safe fallback = QC_FIX_PLAYBOOK row id + its DO fix written out for this lever), written before any QC.
+- Apply common rule 6 after any data edit. Update DESIGN.md ("Harden round [[ROUND]]"), LEVERS.md, TRUTH.md, QC_DEFENCE.md, XREF.md. Run `python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/xref_check.py" "<BUNDLE>" "<WORK>/XREF.md"` until it prints 0 findings. Never rename the slug.
+
+## Phase 3: STACKING_CHECK, then gates (once)
+1. Run `python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/stacking_check.py" "<BUNDLE>"`, correct its hints by reading the code, and write `OUT/STACKING_CHECK.md` (LEVER_RULES section 5, parts a to d).
+1b. Kill table (LEVER_RULES v3.4 Law-1): every new test lever re-run on the final generator output against the agent program, every blind program and every generic solver, in Docker only (`--memory 4g --cpus 2`, `perl -e 'alarm N'` wall cap; common rule Always 16), each loss marked WRONG / TIMEOUT / CRASH in `WORK/KILL_TEST.md`. A lever whose strong solvers lose only by TIMEOUT or CRASH counts only under LEVER_RULES v3.5 (no shipped input slow, limit stated, cost 10-30% confined to lever checks); otherwise add a WRONG stage or report PILOT_WEAK. [v3.6: Ayush 27 Oct 22:30, new gate tests < 85, rubric < 85, final < 50] See LEVER_RULES_v3 1C v3.6 bullet: a test lever now costs 25-40% of positive test points, and a plain first-write program and the all-but-one program aim at tests <= 75. Blind bar: each of the 3 fresh blind reads scores tests <= 80, its losses WRONG output or v3.5 hidden-scale loss. Judge: probe band with predicted probe mid 15-20. Overnight auto runs: the master may send "go" at DESIGN READY when the kill table passes (every generic solver and every blind program loses >= 15% of lever points, shipped inputs fast, reference <= 1/4 of the stated limit); otherwise Needs Ayush.
+2. Cost table (G10, with the design judge estimate) and `tools/precheck.sh BUNDLE` until `PRECHECK CLEAN`. The judge keeps the J3a honesty negative (claims a check passed, or outputs byte-identical, with no run after the last edit; -3; disjoint from every other negative). No reflex gate: the master issues 3 blind reads (tests and judge estimate) before the next probe (LEVER_RULES v3 section 6).
+3. Run the 4 QC scripts and the validator with 0 FAIL. QL rule: list each check changed in `git diff 5574d77e HEAD -- Input_Bundle_QC/` as PASS or FIXED.
+4. Warm the verifier image (round notes G), then one Docker block, tests only, from copies built by the live kit's `exe_copy.py` (plain and `--owner-only`): oracle x3 = 1.000 (oracle x3 per Ayush, kit asks x5), owner-only 1.000, nop 0.000, plus stub and forgery. Clash rules: lock `/tmp/opencode-logs/locks/[[SLUG]].lock`; TS with seconds + random hex; no `--delete`, no prune; one nohup chain with ALL_DONE; waits under 4 minutes; kill-by-uid only inside your own container; max 2 Docker-heavy jobs (check `docker ps`).
+
+## Deliverables
+- `OUT/DIAGNOSIS.md`, `OUT/STACKING_CHECK.md`, `OUT/agent_program/`, `OUT/HARDEN_REPORT.md` (before/after lever table, counts, weight shares, cost table, PRECHECK last line, gates, what was not run, and last `## Lessons for the master`, max 5 lines).
+- `OUT/result_[[SHA]].json`: {"sha":"[[SHA]]","slug":"[[SLUG]]","step":"P9 r[[ROUND]]","status":"DONE|ARTEFACT|PILOT_WEAK|PAUSED|ROUND_LIMIT","phase_a":"GENUINE|ARTEFACT|PARTLY","primary_cause":N,"levers":[],"tests":N,"criteria":N,"isolated_share":x,"whole_doc_share":x,"shipped_only_share":x,"stacking":"PASS|FAIL","oracle":[],"owner":x,"nop":x,"stub":x,"forgery":x,"xref_findings":0,"qc_fail":0,"tree_sha":"<first 12>","report":"<path>"}. The `sha` value is the board id. It must parse.
+
+Stop after 3 harden rounds in total. Report "ROUND LIMIT".
+
+Final reply (10 lines max): Phase A verdict and primary cause; levers and where each rule is written; counts; weight shares; stacking result; PRECHECK last line; gates; report path. Next step (v4 order): master issues 3 fresh P13 blind reads with judge estimates (round counts only with >= 10% loss by WRONG output), then one full QC with a fix-all pass, QC recheck, freeze, then 1 harness run on the frozen bytes.

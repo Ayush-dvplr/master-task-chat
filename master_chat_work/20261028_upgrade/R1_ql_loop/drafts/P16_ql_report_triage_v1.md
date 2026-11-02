@@ -1,0 +1,47 @@
+# P16 QL QC report triage, template v1 DRAFT (R1 086e1b4, 28 Oct 2026)
+
+Master: use this when the QL (Sugam) pastes a QC report for one of our tasks, usually a pushed one. Before issuing, save his text verbatim to `master_chat_work/_ql/[[SLUG]]/[[TS]]_report/QL_REPORT.md` with the header line `IST <time> | from <QL> | task [[SLUG]] | frozen tree [[TREE_SHA]]`, and number the findings `QL[[N]]-F1..Fk` in his order. Fill every `[[...]]` and check the prompt against `knowledge/PROMPT_CHECKLIST.md`. Issue it with `tools/issue.py [[SLUG]] ql <draft> <OUT>` (kind `ql`, spec T1). This session edits nothing in the bundle. REAL findings are fixed afterwards by P12 v4, using this session's directions block.
+
+=== PASTE BELOW ===
+
+You are triaging a QC report that our QL wrote on one Harbor 0.24 bundle. Board id: `[[SHA]]`. This prompt is saved at `[[PROMPT_PATH]]`. You decide, with evidence, which findings are real. You fix nothing.
+
+## Rules that survive compaction (copy word for word into any compaction summary)
+- First thing and last thing: `python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/name_session.py" [[SHA]]`.
+- Tools work in every turn. Get IST time with `TZ=Asia/Kolkata date`. After compaction: run date, re-read this prompt, then `OUT/TODO.md`, and continue from the first unticked item.
+- Read in full first: `master_chat_tasks/prompts/templates/_COMMON_RULES_v5.md`, `knowledge/QC_FIX_PLAYBOOK_v3.md`, `knowledge/QC_RULINGS.md`, `knowledge/FP_DOSSIER.md` (if present), and `knowledge/LEVER_RULES_v3.md` sections Law-1 and freeze.
+- READ ONLY everywhere. Write only in OUT and `/tmp/[[SLUG]]-qltriage-<TS>/`. Use read-only git only. No Docker, no harness, nothing paid.
+- Keep `OUT/TODO.md` (ticks) and `OUT/LOG.md` (IST time, command, result) current. Read at most 50 KB per read.
+- Every claim cites file:line or command output. Mark guesses INFERRED and unchecked items UNVERIFIED.
+
+## Inputs
+- QL_REPORT: `[[QL_REPORT_PATH]]` (verbatim, numbered)
+- BUNDLE (frozen, read only): `/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/[[SLUG]]/`
+- TASKS_INPUT: `/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Tasks_INPUT/[[SLUG]]/`
+- OUTPUT_RFP: `/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Output_RFP/[[SLUG]]/`
+- LAST_QC: report `[[LAST_QC_REPORT]]`, KEPT `[[KEPT_PATH_OR_NONE]]`, copy `[[LAST_QC_COPY]]`, QC_DEFENCE `[[QC_DEFENCE_PATH_OR_NONE]]`
+- Kit: `Terminal_2.0_Harbor_Harness/Input_Bundle_QC/` (record `git rev-parse --short=8 HEAD`). Checks: `master_chat_work/20261024_process/qc_reverse/A/checks.json`.
+- OUT: `[[OUT]]`
+
+## Phase 0: same bytes
+1. Compute the tree sha (`find . -type f | LC_ALL=C sort | xargs shasum -a 256 | shasum -a 256 | cut -c1-12`) of BUNDLE, TASKS_INPUT, OUTPUT_RFP (excluding trajectories/) and LAST_QC_COPY. All must equal `[[TREE_SHA]]`, except that LAST_QC_COPY may differ by the lines the post-QC edits made. Run `diff -U0 -r` and save it as `OUT/POST_QC_DIFF.diff`. If anything else differs, STOP: `BLOCKED: bytes differ`.
+
+## Phase 1: one row per finding (no count cap)
+For each `QL<n>-F<k>`:
+1. Quote the finding.
+2. Name the kit rule by ID AND quote its wording with kit file:line (checks.json). If no rule fits, say "no kit line".
+3. Cite the bundle evidence as file:line, and run the script-owned check if one exists (quote the output).
+4. Look it up in QC_RULINGS, FP_DOSSIER and QC_DEFENCE. Apply carry-over: if the line is unchanged since LAST_QC and was PASSed or KEPT there, the finding must name a live kit line that the earlier reason misses. Otherwise it is FALSE POSITIVE (carry-over).
+5. Label it: REAL / FALSE POSITIVE / PARTLY (the core is real but the scope or the proposed fix is wrong; say which part) / OUT OF SCOPE (asks for something no kit line demands, a SUGGEST, playbook row SUGGEST).
+6. For REAL and PARTLY, write a direction line in playbook section 2 format: `<id> | FIX / KEEP / REBUT | row <id> | <file:line>: <what> -> <to what> | levers: <L>=none/harder/easier | compensation: none / <check>`. Never paste the QL's "Fix:" text (G1). Name what changes in score terms for any lever that is not `none`.
+7. For FALSE POSITIVE, write the reply sentence in plain words, with the kit line and the bundle line that answer it.
+
+## Deliverables in OUT
+- `TRIAGE.md`: a `| id | label | kit rule + wording file:line | evidence file:line | precedent | reason |` table, then `## Directions for P12` (one line per REAL/PARTLY), `## Reply notes` (one plain sentence per finding, no lever, trap or tool names), `## Freeze impact` (which frozen files a fix would touch, and whether tests/ or judge.toml change, which means a new run is needed), and `## Lessons for the master` (at most 5 lines).
+- `result_[[SHA]].json`: `{"sha","slug","step":"ql-triage","status":"DONE|BLOCKED","findings":k,"real":n,"false_positive":n,"partly":n,"out_of_scope":n,"lever_touch":[ids],"tests_or_judge_change":bool,"tree_sha","report"}`. It must parse.
+
+## Stops
+- `BLOCKED: bytes differ` (Phase 0).
+- `ASK: rule change` when a finding asks for something that conflicts with _COMMON_RULES_v5 or a QL ruling in QC_RULINGS. Write the row, then stop.
+
+Final reply: at most 8 lines. Give the counts by label, whether tests or judge change, and end with `done: <OUT>/TRIAGE.md`.

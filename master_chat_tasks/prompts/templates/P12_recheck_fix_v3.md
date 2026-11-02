@@ -1,0 +1,70 @@
+# P12 Recheck + fix QC findings, one bundle per session, template v3 (24 Oct 2026)
+
+v3 changes (MASTER_UPGRADE_PLAN_v1 Part 1, 24 Oct): _COMMON_RULES_v3 and QC_FIX_PLAYBOOK_v2; reflex program removed (trap survival is per lever only); REAL minors/warns fixed when the fix keeps every lever, else KEEP with evidence; no count caps (24 Oct 12:50); noise check against the previous QC copy before any fix (U13); side-effect re-check per FIX (U4); NEW-CHECK hygiene; precheck.sh must end CLEAN; at most 2 P12 rounds per QC, enforced by tools/issue.py.
+v2 changes (SETUP_PLAN_v1 Part 1.2/1.3, IMPROVEMENT_PLAN_v1 A2/C3/E3): no fix may undo a lever or add a giveaway; each fix is labelled with its effect on EVERY lever; the reflex program is re-run after the fixes, and a score above 0.20 is compensated in the same lever family before finishing; QC rulings on lever-touching rules are listed for `knowledge/QC_RULINGS.md`; "Lessons for the master". Everything else is v1 unchanged (rename, compaction rules, oracle x3, clash rules, result json).
+
+Master duty before issuing (Ayush 10:53 23 Oct, major gap): read the QC report's fail/minor/warn list and write [[FIX_DIRECTIONS]]: one line per finding with FIX (the exact difficulty-keeping fix: file, what to change, to what), KEEP (one-line reason) or REBUT (why it is a false positive). Prefer fixing the oracle/data/judge wording over loosening a lever; never copy the report's "Fix:" line without checking it keeps the difficulty. A P12 prompt with an empty or generic directions block is not issued. Each line cites a row of `knowledge/QC_FIX_PLAYBOOK_v2.md`, the kit line from `qc_reverse/A/checks.json` (U4) and, for a FIX, the ids FIX_SIDE_EFFECTS lists for it; it uses the playbook section 2 format (Ayush 11:00 23 Oct: clear QC without softening the levers).
+
+Runs after a P11 QC, in a NEW session (never the QC session). Master fills [[...]], checks it against `knowledge/PROMPT_CHECKLIST.md`, and issues it with `tools/issue.py <slug> fix <draft> <OUT>` (it refuses a third fix round after one QC). Next: one P11 re-run; stop at the first PASS (zero findings, or proven false positives in FP_DOSSIER); then the gate runs through the harness queue.
+
+=== PASTE BELOW ===
+
+You are rechecking and then fixing the QC findings of ONE Harbor 0.24 bundle: `[[SLUG]]`. Board id: `[[SHA]]`. This prompt is saved at `[[PROMPT_PATH]]`.
+
+## Rules that survive compaction
+- First thing: rename this session to `[[SHA]]`:
+  python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/name_session.py" [[SHA]]
+  If the list does not show it, note that in the report and carry on; never retry on another ID.
+- Tools are always available. Never claim otherwise without a real call (bash `date`) and its quoted error.
+- After every compaction: run `date`, re-read this prompt, then `WORK/TODO.md`, and continue from the first unticked item. Never re-run a finished Docker block; check its log for ALL_DONE first. Copy this section word for word into any compaction summary.
+- Keep `WORK/TODO.md` and `WORK/LOG.md` current after every step. Read files in pieces of at most 50 KB.
+- Read first, in full: `/Users/mac/Desktop/Terminal Bench/master_chat_tasks/prompts/templates/_COMMON_RULES_v4.md`, then `/Users/mac/Desktop/Terminal Bench/master_chat_tasks/prompts/issued/_adhoc/20261022_round_notes.md` sections C, E, F, G, then `/Users/mac/Desktop/Terminal Bench/master_chat_tasks/knowledge/LEVER_RULES_v3.md`, `QC_RULINGS.md` and `QC_FIX_PLAYBOOK_v2.md` (same folder). The playbook is the rule for how each finding is fixed: its DO column, never its NEVER column.
+- Never commit, push, pull or open a PR. Read-only git only. Never edit the harness clone, the QC kit, `QC assigned/`, `my tasks/`, or any QC copy under `QC/copies/`. Edit only BUNDLE and WORK.
+
+## Inputs
+- BUNDLE (edit here): `[[BUNDLE]]`
+- WORK: `[[WORK]]`
+- QC report: `[[QC_REPORT]]` (and its `result_*.json` if present)
+- Previous QC round's bundle copy (for the noise diff, common rule Always 13; NONE for a first round): `[[PREV_QC_COPY_OR_NONE]]`
+- Last probe or real run loss table from `tools/loss.py` (NONE if no run): `[[LOSS_TABLE_OR_NONE]]`. A fix may not remove a check or hidden input that lost points there.
+- QC kit (live rules): `/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Input_Bundle_QC/`. Record `git -C "/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness" rev-parse HEAD` once. The live kit is the authority, even if newer than the report's kit; say so in a row whose rule changed.
+- OUT: `[[OUT]]`
+
+## Master's fix directions (one line per QC finding)
+[[FIX_DIRECTIONS]]
+Follow these unless your Phase 1 recheck proves one wrong (false positive, or the fix would make the task easier); then do the difficulty-keeping alternative and explain it in RECHECK_FIX.md under "Deviations from master directions".
+
+## Phase 0: defence and cross-reference files (only if missing)
+1. `WORK/QC_DEFENCE.md`: one entry per lever and per deliberate design choice: what it is, why it is there (which wrong reading it punishes), which QC check it could trip, why that is not a defect (quote the rule), and the safe fix if QC insists (one that keeps the difficulty). Build it from DESIGN.md, LEVERS.md, TRUTH.md and the bundle. Mark anything you inferred as INFERRED.
+2. `WORK/XREF.md`: a ```json block `{"entries":[{"key":"","value":"","files":[...],"retired":[...]}]}` with every value that appears in more than one file: task name, slug, file and folder names, field and key names the instruction or tests use, stated figures, check IDs, judge figures. Then run `python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/xref_check.py" "<BUNDLE>" "<WORK>/XREF.md"`; it must print 0 findings before you change anything.
+3. Trap baseline (QC_FIX_PLAYBOOK_v2 section 3 step 1): record, per lever, the points lost by its single wrong-reading variant on the current tests.
+
+## Phase 1: recheck every finding (no Docker)
+For every ❌, 🟡 and ⚠️ in the report (and every FAIL row of its QL coverage table):
+1. Quote the finding. Find the rule in the live kit by ID AND wording; quote it with file:line (say if the ID or wording changed).
+2. Read every bundle file the rule concerns; quote evidence with file:line. If the rule is script-owned, run that script on BUNDLE and quote the line.
+3. Read the matching QC_DEFENCE entry, any QC_RULINGS row and any FP_DOSSIER row for the same rule. Then the noise check (Always 13): if the cited lines are byte-identical to PREV_QC_COPY and that round passed this check, label FALSE_POSITIVE (variance), quote the diff, use playbook row NOISE.
+4. Label: REAL, FALSE_POSITIVE (quote both sides) or UNSURE (write the exact PL question).
+5. Decide (Ayush rule 21:27):
+   - REAL ❌: fix.
+   - FALSE_POSITIVE ❌: do not fix; write a one-paragraph rebuttal with quotes.
+   - 🟡 / ⚠️: the goal is "pass the QC with genuine and minimum minors or warn" (Ayush 24 Oct 12:50). Fix every REAL one whose fix keeps every lever. KEEP a FALSE_POSITIVE, or a REAL one whose only fix weakens a lever, with verifiable evidence (kit line + file:line or diff); "not a major concern" is no longer a reason.
+   - Suggestion findings (add a hint, example, explanation, move a rule closer): playbook v2 row SUGGEST. A KEEP resting on a lever, an authority or a count cap never held with QC; if no verifiable evidence exists, state the rule once, neutrally, in its governing file (row IN-15), never pointing at the trap. Every KEEP goes into `OUT/PL_NOTE.md`.
+   - No count cap (Ayush 24 Oct 12:50): a TS-23/A3 warn for more than 35 checks is a KEEP with the count; never merge or drop a check to get under 35 (playbook row TS-23).
+6. For each fix, choose the option that keeps the difficulty: the master's direction, else the QC_DEFENCE "safe fix", else the playbook row's DO fix. Never apply a playbook NEVER fix, even if the report's "Fix:" line says so; record the row id used. Label its effect on EVERY lever in LEVERS.md: none, harder, easier, unknown. A fix may never undo a lever or add a giveaway: no trap explanation, no rule count, no worked example that separates the readings, no rule moved next to its use, no figure stated (LEVER_RULES W1, W2, W6, J1). For easier/unknown, add a compensating check or lever in the same family. Stop and report "PAUSED: <id>" only if no compensation exists.
+Write each row to `OUT/RECHECK_FIX.md` as you finish it.
+
+## Phase 2: apply, then verify once
+1. Make the smallest change per fix. Keep tests, weights, `reward.toml`, LEVERS.md, TRUTH.md and QC_DEFENCE.md in step. After any data edit apply common rule 6.
+2. Any rename or changed value: update every file listed for it in XREF.md, move the old value to `retired`, and re-run xref_check.py: 0 findings. Never rename the slug or the bundle folder.
+3. Re-run the manual checks behind every fixed ID, the side-effect ids FIX_SIDE_EFFECTS lists for it (Always 14), and NEW-CHECK hygiene on every added, split or merged test or criterion (Always 12; playbook rows NEW-CHECK, JD-5). Then `tools/precheck.sh BUNDLE` until its last line is `PRECHECK CLEAN`. precheck.sh (24 Oct 13:40) also fails a shipped `__pycache__`/`.pyc` (S5), a TRUTH.md sha256 that does not match its file (DS-22: rewrite them by script as your last edit), a 0 row in `_work/<slug>/RULE_COVERAGE.md` (AL-27; write that file when fixing an AL-27 finding), and a judge.toml without a J3 honesty negative or a J4 code-quality criterion.
+4. STACKING_CHECK after the fixes: run `python3 "/Users/mac/Desktop/Terminal Bench/master_chat_tasks/tools/stacking_check.py" "<BUNDLE>"` and update `OUT/STACKING_CHECK.md` (LEVER_RULES section 5) if tests or judge changed.
+5. Trap-survival check (QC_FIX_PLAYBOOK_v2 section 3): re-run every single-lever variant on the fixed tests; each lever must keep at least 90% of its before loss and no separating hidden case may be removed (nor any check or input that lost points in LOSS_TABLE). Else compensate from playbook section 4, max 2 tries, then "PAUSED: trap <L> <before> -> <after>".
+6. Warm the verifier image first (round notes G, "Warm the verifier image"): `docker build` the copy's tests/ (and environment/ if slow) in the background and wait for it, so Harbor's 900 s start limit never covers a cold download. Then: If tests/, solution/, environment/ or data changed: one Docker block, tests only, from copies built by the live kit's `exe_copy.py` (plain and `--owner-only`): oracle x3 = 1.000, owner-only x1 = 1.000, nop x1 = 0.000. Clash rules (round notes G): bundle lock, TS with seconds + random hex, no `--delete`, max 2 Docker-heavy jobs (check `docker ps`), one nohup chain with ALL_DONE, waits under 4 minutes. If nothing in those folders changed, skip Docker and say so.
+
+## Deliverables
+- `OUT/RECHECK_FIX.md`: table (ID, label, rule quote, evidence quote, decision fix/keep/rebut, playbook row, effect per lever, compensation, files changed), then gate results, a `## Side effects` table (FIX id, ids re-checked, result), a `## Noise keeps` list (finding, diff evidence) for FP_DOSSIER, a `## Trap survival` table (playbook section 3 step 5), and a section `QC_RULINGS rows` with one line per finding on IN-15, IN-16, TS-13, TS-19, TS-20, TS-26, AL-28, JD-7 or JD-15 (rule, our design, QC verdict, our label, reason) for the master to copy. Last: `## Lessons for the master` (max 5 lines, common rules format).
+- `OUT/PL_NOTE.md`: false positives (rebuttals), kept minors (reasons), UNSURE questions. Short, plain words, ready for Ayush to send.
+- `OUT/result_[[SHA]].json`: {"sha":"[[SHA]]","slug":"[[SLUG]]","step":"P12","status":"DONE|PAUSED","real":N,"false_positive":N,"unsure":N,"fixed":N,"kept_minor":N,"paused_ids":[],"lever_effects":{"<lever>":"none|harder|easier|compensated"},"noise_keeps":N,"side_effect_findings":N,"precheck":"CLEAN|<n> findings","trap_survival":"PASS|FAIL","lever_loss":{"<lever>":[before,after]},"stacking":"PASS|FAIL","oracle":[],"owner":x,"nop":x,"xref_findings":0,"qc_fail":0,"tree_sha":"<sha256 over sorted paths+contents, first 12>","report":"<path>"}. It must parse.
+
+Final reply (8 lines max): counts REAL / FP / UNSURE, fixed, kept (with evidence), paused IDs, trap survival, oracle x3 / owner / nop, PRECHECK last line, report path. Next step: master issues the P11 re-run.

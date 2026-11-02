@@ -1,0 +1,20 @@
+cd /tmp && rm -rf rel && mkdir rel && cd rel && cp -r /app/data ./in && python3 /app/out/transform.py --input ./in --output ./nested/out && ls nested/out | wc -l && diff nested/out/summary.json /app/out/summary.json && echo "relative paths OK"; python3 - <<'EOF'
+import json, re, shutil, subprocess
+from decimal import Decimal
+base = Decimal(json.load(open('/app/out/region_south.json'))['credit_base'])
+shutil.rmtree('/tmp/tiny2', ignore_errors=True); shutil.copytree('/app/data', '/tmp/tiny2')
+x = open('/tmp/tiny2/commitments.xml').read()
+x = re.sub(r'<pool region="south"[^/]*/>', f'<pool region="south" amount="{base+10}" minimum="{base + Decimal("0.10")}"/>', x)
+open('/tmp/tiny2/commitments.xml','w').write(x)
+subprocess.run(['python3','/app/out/transform.py','--input','/tmp/tiny2','--output','/tmp/tiny2out'], check=True)
+d = json.load(open('/tmp/tiny2out/region_south.json'))
+print('south pool>base => credit==base?', d['credit_applied'], d['credit_base'], 'tiny shortfall true_up:', d['true_up'], 'minimum', d['minimum'])
+subprocess.run(['python3','/tmp/verify.py','/tmp/tiny2','/tmp/tiny2out'], check=True)
+EOF
+
+=== OBSERVATION ===
+13
+relative paths OK
+south pool>base => credit==base? 70191.54 70191.54 tiny shortfall true_up: 0.00 minimum 70191.64
+all documents match the independent recomputation
+accepted lines: 15154 charge: 603715.90 credit: 173071.71 true_up: 0.00 net: 430644.19

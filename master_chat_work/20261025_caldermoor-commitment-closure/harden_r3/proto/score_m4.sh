@@ -1,0 +1,5 @@
+#!/bin/bash
+for lab in A B C H7; do
+docker run --rm --name cmr3-m4-$lab-$RANDOM --network none --cpus 4 -m 6g -e PYTHONDONTWRITEBYTECODE=1 -v "/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/caldermoor-commitment-closure/tests":/tests:ro -v "/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/_work/caldermoor-commitment-closure/fz":/fz:ro -v "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261025_caldermoor-commitment-closure/harden_r3/proto/m4":/proto:ro -v "/Users/mac/Desktop/Terminal Bench/master_chat_work/bundles/caldermoor-commitment-closure/environment/data":/app/data:ro warm-caldermoor-commitment-closure python3 /fz/score.py /proto/$lab/reconcile.py /tests $lab >> "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261025_caldermoor-commitment-closure/harden_r3/proto/score_m4.jsonl" 2>> "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261025_caldermoor-commitment-closure/harden_r3/proto/score_m4.err"
+done
+echo ALL_DONE >> "/Users/mac/Desktop/Terminal Bench/master_chat_work/20261025_caldermoor-commitment-closure/harden_r3/proto/score_m4.err"

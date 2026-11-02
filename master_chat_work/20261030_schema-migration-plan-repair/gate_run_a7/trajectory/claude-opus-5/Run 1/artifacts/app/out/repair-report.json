@@ -1,0 +1,90 @@
+{
+  "package": "migrakit",
+  "fixes": [
+    "core/records.py: FieldView.from_payload kept an explicit null as a value state and dropped it; it now reports the three states of N1 (absent, null, value).",
+    "core/records.py: null_counts_as fell back to 'absent' for a field whose null_counts_as column is empty; it now falls back to [presence] explicit_null of null_semantics.ini (N2).",
+    "core/records.py: fill_mode ignored the fill column of field_policy.tsv; it now prefers that column and falls back to [fill] mode (N3, N4).",
+    "core/planner.py: the search enumerated simple paths only, tested every prerequisite against the record as received, and broke ties by plan length; it is now a Dijkstra over (schema, field state) that may revisit a schema, checks prerequisites on the state reached (M6, M7) and breaks equal cost by comparing the edge id lists (M8).",
+    "core/planner.py: _better compares (cost, edge ids) instead of (cost, length).",
+    "core/planner.py: the search skips schemas from which the canonical schema cannot be reached at all, so an unreachable record is rejected without exploring the graph (K14).",
+    "core/executor.py: execute_plan applied every correction before the first edge and never checked a prerequisite; corrections are now applied on the first arrival at their pinned schema (C4) and a failing prerequisite stops execution with E_PREREQ_FAILED, the reached schema, the failed edge and the number of completed steps (M11).",
+    "pipeline.py: _ordered returned the feed order; lines are now processed in received_seq order of their batch, then by feed line (K13).",
+    "pipeline.py: _replace_tokens compared trimmed values; a value must now equal a token exactly (N6).",
+    "pipeline.py: _receipt_mismatches skipped records whose partner failed and relied on the record fingerprint field; it now counts every parsed record of a batch and XORs the fingerprint of the line as received (K13).",
+    "pipeline.py: _Run._admit keyed the replay identity by the partner value as written instead of the canonical partner id, and only remembered a holder when execution started (K16).",
+    "parser/identity.py: resolve_partner followed a single merge link; it now follows the whole chain and raises E_ALIAS_CYCLE when it returns to a partner already visited (P2, P3).",
+    "parser/feed.py: read_feed raised on a line that is not JSON; such a line is now reported as a problem so the run rejects it with E_PARSE and continues (K15).",
+    "parser/contracts.py: _token_lists merged the default tokens into every partner line and tokens_for fell back to the default line for a partner whose line is empty; a partner line now replaces the default line exactly, empty included (N7).",
+    "parser/contracts.py: Registry.reaching was added to cache, per domain, the schemas from which a target schema is reachable when prerequisites are ignored.",
+    "cli.py: _resolve took relative paths from the package folder; they are now taken from the caller's working directory (K10).",
+    "src/migrakit/__main__.py was added so that python -m migrakit runs the command line (K10); it holds no function.",
+    "report/classify.py: classify_result reported every planned record as migrated; it now reports the status and code of the execution result.",
+    "report/summary.py: build_summary counted by_category by record status instead of by taxonomy category (T1, T2) and listed partners sorted by id instead of by their rank in partner_order.tsv (T3)."
+  ],
+  "checks": [
+    {
+      "name": "visible_tests_pass",
+      "passed": true
+    },
+    {
+      "name": "contract_conformance_suite_passes",
+      "passed": true
+    },
+    {
+      "name": "public_api_importable",
+      "passed": true
+    },
+    {
+      "name": "shipped_run_receipts_match_manifest",
+      "passed": true
+    },
+    {
+      "name": "summary_counts_every_record",
+      "passed": true
+    },
+    {
+      "name": "build_summary_alone_matches_run",
+      "passed": true
+    },
+    {
+      "name": "migrated_records_reach_their_canonical_schema",
+      "passed": true
+    },
+    {
+      "name": "merge_chain_resolves_to_its_end",
+      "passed": true
+    },
+    {
+      "name": "alias_cycle_code",
+      "passed": true
+    },
+    {
+      "name": "unknown_partner_code",
+      "passed": true
+    },
+    {
+      "name": "unknown_schema_code",
+      "passed": true
+    },
+    {
+      "name": "fingerprint_is_sha256_of_canonical_json",
+      "passed": true
+    },
+    {
+      "name": "public_calls_leave_their_arguments_unchanged",
+      "passed": true
+    },
+    {
+      "name": "cli_writes_records_and_summary",
+      "passed": true
+    },
+    {
+      "name": "module_help_exits_zero",
+      "passed": true
+    },
+    {
+      "name": "standard_library_only",
+      "passed": true
+    }
+  ]
+}

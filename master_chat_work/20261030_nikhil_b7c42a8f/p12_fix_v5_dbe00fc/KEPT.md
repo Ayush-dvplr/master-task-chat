@@ -1,0 +1,13 @@
+# KEPT b7c42a8f-6d19-4e35-9f82-5a3c1d7e8042 (after P12 fix v5 dbe00fc)
+
+Rows 1-6 carried over unchanged from fix 841c07e (QC v5 acknowledged KEPT 1-6). Both v5 findings (AL-27 fail, JD-5 minor) were fixed. Row 7 is new: the JD-5 split the master directed took the judge file from 35 to 37 criteria, which the kit counts as a warn (JD-S12). Nothing merged or dropped to get under the count.
+
+| finding id | file:line | reason | kit line it rests on |
+|---|---|---|---|
+| G05-3 CL-4 (v2 G05-5, v3 KEPT-1) | tests/test_output.py ledger_backbone_exact, ledger_spine_exact, lob_cycle_capacity_and_fill_exact (whole-ledger digests) | instruction.md:5 "Every figure is a whole number of dollars and exact equality is the bar, so a figure that is merely close is wrong." The exact whole-ledger bar is stated out loud. REBUT. | Final_checklist.md:491 "An instruction that states out loud that only an exact match counts has set that bar deliberately" |
+| G04-5 JD-15 weights (v2 G04-6, v3 KEPT-2) | tests/judge.toml:207 R16, :220 R17 (weight 3) | Weights kept by author decision; R19 is the CLM-00056 row whose columns 4, 5, 7 all differ. | 04_Judge_QC.md:92 (minor) |
+| G04-6 cap (v2 KEPT-3, v3 KEPT-3) | tests/judge.toml:428 R33 | Cap is 200 lines, not 80: the oracle main() is 192 lines and an 80-line cap fails the oracle (JD-7). | 04_Judge_QC.md:76 JD-7 |
+| Oracle x3 (kit x5) (v2 KEPT-4, v3 KEPT-4) | Final_checklist Step 10 | Oracle run 3 times, 1.0 each (author rule). | Final_checklist.md Step 10 |
+| TS-23/A3 count (v2 KEPT-5, v3 KEPT-5) | tests/test_output.py (24 positive + 7 negative = 31 checks) | No count cap; nothing merged or dropped to get under a count. | 03_Tests_QC.md:62 TS-23 (warn) |
+| G04-1 JD-16 (v3 warn) | tests/judge.toml:415 R32 (weight -3) | QC's own Fix line offers "or leave it". The rule is stated at environment/data/attachment_rules.md:11 "The authority is that file alone, not any value typed into the delivered module." No test grades the literal, so R32 grades the act once, in one layer. KEEP. | 04_Judge_QC.md:97 JD-16 item 4 "It is graded once, and by the layer that should own it." |
+| JD-S12 / judge_qc G3 count (new in dbe00fc) | tests/judge.toml (37 criteria: 30 positive total 68, 7 negative total 25) | Caused by the v5 JD-5 fix: R25 and R34 split into one criterion per settled reading (R25/R36 strings, R34/R37 logs). No two of R1-R37 grade the same act, so no true duplicate to merge; merging back would re-open JD-5. judge_qc prints "WARN [G3] 37 criteria; cap is 35 (warn)". KEEP with the count. | 04_Judge_QC.md:116 JD-S12 "(more than 35 is a warn)"; QC_FIX_PLAYBOOK_v3.md:41 row TS-23 (no cap, merge only true duplicates) |

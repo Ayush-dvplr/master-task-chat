@@ -1,0 +1,501 @@
+diff --git a/Input_Bundle_QC/03_Tests_QC.md b/Input_Bundle_QC/03_Tests_QC.md
+index abbe1870..b9b11aa5 100644
+--- a/Input_Bundle_QC/03_Tests_QC.md
++++ b/Input_Bundle_QC/03_Tests_QC.md
+@@ -23,7 +23,7 @@ The tests ARE the task. An agent that satisfies the contract but fails the tests
+ Grading runs in a fresh container built FROM `tests/Dockerfile` with `tests/` as the build context. No agent input path (`/app/data`, or wherever environment/Dockerfile COPYs an input directory) EXISTS there. Declared artifacts are uploaded to their exact declared absolute paths (e.g. `/app/decode.py`); the harness copies the declared path string verbatim, which is why task.toml artifacts must be absolute. Therefore:
+ 
+ - TS-1 Nothing under tests/ may unconditionally read an agent input path (`/app/data` or any other input COPY destination) at grade time. Guaranteed crash. Fail. Comments and docstrings that merely mention the path are fine (the script skips them), and a read behind an existence check or env override is safe (the guard falls through to a fallback when the path is absent) - not flagged.
+-- TS-2 `tests/Dockerfile` must `COPY . /tests/` (the image must own the test files: in separate mode Harbor 0.24.0 does not upload tests/ when tests/Dockerfile exists) and install exactly `harbor-rewardkit==0.2.1`, the version Harbor 0.24.0 pins. An unpinned, ranged or different version is a fail.
++- TS-2 `tests/Dockerfile` must `COPY . /tests/` (the image must own the test files: in separate mode Harbor 0.24.0 does not upload tests/ when tests/Dockerfile exists) and install exactly `harbor-rewardkit==0.2.1`, the version Harbor 0.24.0 pins. An unpinned, ranged or different version is a fail. The same line must pin litellm with `==` (the reference pin is `litellm==1.105.0`, what the agent image pins): rewardkit accepts `litellm>=1.83` with no upper bound, so an unpinned verifier takes whatever PyPI serves at build time, and a withdrawn litellm 1.107.0 stable shipped site-packages hooks that fetched and ran remote code in the container holding the judge key. Unpinned or a quarantined version is a fail; another exact version is a warn needing tasker approval.
+ - TS-3 `tests/Dockerfile` should `RUN mkdir -p /app` (reference-task convention). The harness auto-creates artifact parent dirs at upload time, so absence is a warn, not a crash.
+ - TS-4 `tests/Dockerfile` must install every third-party package test_output.py imports other than rewardkit (mind pip aliases: yaml/pyyaml, PIL/pillow, sklearn/scikit-learn) and every tool the scripts invoke (`util-linux` for `setpriv` or `runuser`), on Python 3.12 or newer, which rewardkit requires. pytest is not required. The agent image's packages are NOT available here.
+ - TS-5 Any ground truth the tests need (expected values, fixtures, generators) must live inside tests/ itself, never be read from agent-writable paths.
+@@ -56,6 +56,7 @@ Grading runs in a fresh container built FROM `tests/Dockerfile` with `tests/` as
+ 
+ ## Weight registration rules (script-owned, here for context)
+ 
++- TS-30 Agent file modes are survivable. The oracle installs its program with `cp`, which leaves mode 0644; a real agent writes it through an editor that renames a temp file into place, so the same program arrives at 0600, owned by uid 1000. Harbor hands `/app` to the verifier with those modes intact, and the verifier runs as root, so reading the file is only a problem once a check drops privileges to run it (`setpriv --reuid=nobody`, `runuser`, or Popen `user=`). Then the unprivileged child cannot open the program, every check that executes it returns False on a perfectly correct submission, and the plain oracle run still reads 1.000, so nothing in QC notices until a real trajectory is graded and loses that whole tier. Any verifier that executes agent-written code under a dropped uid must make it readable first: chmod the program and the directories above it (root may), or run a copy the verifier staged itself. Relaxing or removing the privilege drop is not the fix; that trades this bug for TS-24. tests_qc H6 checks the three shapes statically and fails when it finds none; the proof is the `--owner-only` oracle run in Step 10, which reproduces the agent's 0600 modes and must still read exactly 1.000. A bundle that scores lower there is a fail. The owner's own execute bit survives that run (a file already executable becomes 0700, not 0600), so a check may require an executable artifact, but only when the instruction or an agent-visible spec says to make it executable; requiring a mode or a shebang nothing tells the agent about is a CL-5 hidden convention.
+ - TS-21 Exact bijection between check functions and registrations. Every check is registered exactly once, at module level, with `criteria.<name>(weight=W)`. An unregistered check is scored by rewardkit at the default weight 1 without anyone choosing that; a registration naming no check of this file pulls in a rewardkit built-in or crashes the run; a check registered twice is scored twice. The weight lives on the registration and nowhere else: `tests/test_weights.json` is forbidden (structure_qc S3).
+ - TS-22 W is an integer literal from {5, 3, 1, -1, -3, -5}. Zero, 2, floats (`5.0`), strings, a missing weight (rewardkit would default it to 1) and any other argument are all fails.
+ - TS-23 Counts and balance: at least 10 checks (fail), at most 35 (warn); at least one positive and at least one negative check (fail); weights not all identical (fail); the sum of absolute negative weights is at most the sum of positive weights (fail), so the test channel's share of the reward never drops below -0.5.
+@@ -85,11 +86,12 @@ tests_qc.py decides these mechanically and owns the verdict on them. They are wr
+ - TS-S8 test.sh ends with `exec rewardkit /tests --workspace /app --output /logs/verifier/reward.json` and writes no reward bytes itself. The script matches the rewardkit call and reward writes by pattern; read the whole script for any other path that writes or skips (TS-6).
+ - TS-S9 test.sh contains no skip switches, never sources or executes anything from an agent-writable location, never lets an agent-writable directory shadow PATH, and never consults a pre-existing reward file. Each of these is a direct route for the agent into the grading shell or the score.
+ - TS-S10 `tests/reward.toml` has the exact shape TS-10 states, and its two weights equal 0.5 divided by the registered positive total of test_output.py and 0.5 divided by the positive criterion total of judge.toml. The script recomputes the weights from the registrations; whether each registration is the weight the check deserves is yours (TS-20).
+-- TS-S11 tests/Dockerfile exists, has a FROM line, copies the whole tests/ tree to `/tests/`, and installs exactly `harbor-rewardkit==0.2.1`. The harness builds this image with tests/ as the build context and does not upload tests/ at runtime, so an image that never copies the tree greets the verifier with an empty /tests. It also sets `ENV LITELLM_LOCAL_MODEL_COST_MAP=True` (K7): otherwise litellm's GitHub cost-map fetch fails behind the verifier allowlist and rewardkit can deadlock at shutdown before writing reward.json.
++- TS-S11 tests/Dockerfile exists, has a FROM line, copies the whole tests/ tree to `/tests/`, and installs exactly `harbor-rewardkit==0.2.1`. The harness builds this image with tests/ as the build context and does not upload tests/ at runtime, so an image that never copies the tree greets the verifier with an empty /tests. It also sets `ENV LITELLM_LOCAL_MODEL_COST_MAP=True` (K7): otherwise litellm's GitHub cost-map fetch fails behind the verifier allowlist and rewardkit can deadlock at shutdown before writing reward.json. It also pins litellm with `==` (K8); an unpinned litellm lets the build pick up any release of a package that has already shipped a malicious one. A rebuilt image is the only cure, and Docker's layer cache will reuse a poisoned `pip install` layer forever, so rebuild with `--no-cache` once the line changes.
+ - TS-S12 Every third-party import in test_output.py other than rewardkit is installed by tests/Dockerfile (mind pip-name aliases such as yaml coming from pyyaml), on Python 3.12 or newer. A missing dependency crashes the verifier at import time. The mkdir for /app is reference convention only; its absence is a warn, the harness creates artifact parent directories itself.
+ - TS-S13 The oracle is not the verifier's own code wearing a different name. The script measures how much of solve.py reappears in test_output.py and fails at 35%, warning from 20%. Judge the shared block yourself: a small one can still be the entire graded mechanism, and a large one can be an encoder both sides legitimately need. Gate 02 DS-24 carries the full reasoning.
+ - TS-S14 The verifier image installs every tool the grading scripts invoke, and carries the hardening the threat model requires. Missing tools are always a fail because grading cannot run. The protection warns (restricting /tests, clearing stale reward files, locking the log directory) are warns only because the script cannot tell whether grading executes agent code; you can, so convert them under TS-28.
+ - TS-S15 The script inspects test_output.py by parsing it, without running it, so it cannot prove a check never raises. A check that can raise on bad agent output is yours (TS-29).
++- TS-S16 H6 reads the source for one of three readable-program shapes (the privilege dropper grants read, a grant call names the program, or the verifier executes a file it staged). It cannot follow every indirection, so a pass is evidence and not proof; the owner-only oracle run in Step 10 is what settles TS-30.
+ 
+ Everything else in this gate (semantic determinism, one property per test, negative-check polarity actually verified, instruction/test contradictions, weight distribution judgment, exactness and tolerances, absence-grading positive checks, double payment across any check pair, verifier execution isolation, whether bad agent output can make a check raise) has no script coverage at all: you are the only line of defence there.
+ 
+@@ -98,7 +100,7 @@ Everything else in this gate (semantic determinism, one property per test, negat
+ - [ ] TS-0 tests_qc.py run, exit code and findings reported
+ - [ ] TS-S1..TS-S15 tests_qc.py output read, and every failure it reports confirmed in the file and carried into the report
+ - [ ] TS-1 no unconditional reads of agent input paths under tests/ (guarded reads are fine)
+-- [ ] TS-2 tests/Dockerfile has COPY . /tests/, pins harbor-rewardkit==0.2.1 and sets LITELLM_LOCAL_MODEL_COST_MAP=True
++- [ ] TS-2 tests/Dockerfile has COPY . /tests/, pins harbor-rewardkit==0.2.1 and litellm==1.105.0, and sets LITELLM_LOCAL_MODEL_COST_MAP=True
+ - [ ] TS-3 tests/Dockerfile has RUN mkdir -p /app (warn if absent)
+ - [ ] TS-4 all check dependencies and invoked tools installed in the verifier image, Python >= 3.12
+ - [ ] TS-5 ground truth self-contained in tests/
+@@ -126,9 +128,10 @@ Everything else in this gate (semantic determinism, one property per test, negat
+ - [ ] TS-27 no positive test paying for source tokens instead of behaviour
+ - [ ] TS-28 verifier hardening present where grading executes agent code, or explicitly reasoned as not needed
+ - [ ] TS-29 no check can raise on bad, missing or hostile agent output; every check returns a bool
++- [ ] TS-30 agent-written programs stay readable under the privilege drop (H6 passes; Step 10 owner-only oracle run reads 1.000)
+ 
+ ## Severity guide
+ 
+-fail: TS-1, TS-2, TS-4..TS-12 violations, TS-14 prefix/sign mismatch (script-checked), TS-15 wrong polarity, TS-16 negatives that an honest solution could trip, TS-17/19 honest-agent-loses cases, TS-19 contradictions, TS-20 core-vs-minor weight inversions and ordering contradictions, TS-21/TS-22 violations, TS-23 minimums and balance (fewer than 10 checks, no positive, no negative, all weights identical, negatives outweighing positives), TS-24 any isolation miss, TS-25 absence-grading positive tests, TS-26 double payment across any test pair, TS-27 positive tests paying for source tokens rather than behaviour, TS-28 a missing hardening step where grading executes agent code or any tool the scripts invoke that the image never installs, TS-29 a check that can raise on agent output, a `tests/test_weights.json` present. minor: TS-13 doubled asserts with same observable, mild TS-20 imbalance within the correct ordering. warn: TS-3 missing mkdir, TS-23 cap above 35, judgment calls.
++fail: TS-1, TS-2, TS-4..TS-12 violations, TS-14 prefix/sign mismatch (script-checked), TS-15 wrong polarity, TS-16 negatives that an honest solution could trip, TS-17/19 honest-agent-loses cases, TS-19 contradictions, TS-20 core-vs-minor weight inversions and ordering contradictions, TS-21/TS-22 violations, TS-23 minimums and balance (fewer than 10 checks, no positive, no negative, all weights identical, negatives outweighing positives), TS-24 any isolation miss, TS-25 absence-grading positive tests, TS-26 double payment across any test pair, TS-27 positive tests paying for source tokens rather than behaviour, TS-28 a missing hardening step where grading executes agent code or any tool the scripts invoke that the image never installs, TS-29 a check that can raise on agent output, TS-30 an agent-written program executed under a dropped uid without being made readable (H6, or an owner-only oracle run below 1.000), a `tests/test_weights.json` present. minor: TS-13 doubled asserts with same observable, mild TS-20 imbalance within the correct ordering. warn: TS-3 missing mkdir, TS-23 cap above 35, judgment calls.
+ 
+ Report in the fixed output format defined in the "Output format (all gates)" section of Final_checklist.md, then stop.
+diff --git a/Input_Bundle_QC/Final_checklist.md b/Input_Bundle_QC/Final_checklist.md
+index 44c16f67..62545a03 100644
+--- a/Input_Bundle_QC/Final_checklist.md
++++ b/Input_Bundle_QC/Final_checklist.md
+@@ -34,7 +34,7 @@ Three names are forbidden outright (structure_qc S3). A `cheat/` directory at th
+ 
+ 1. Harbor builds TWO containers. The agent works in a container built from `environment/Dockerfile` (each input directory lands where its COPY puts it, e.g. `/app/data` because of `COPY data /app/data`, `/app/repo` because of `COPY repo /app/repo`). Grading happens in a SEPARATE fresh container built from `tests/Dockerfile` with `tests/` as the build context. No input directory exists in the grading container. Any grade-time read of an input path (`/app/data` or any other COPY destination) is a guaranteed crash. `[verifier] environment_mode = "separate"` is REQUIRED in task.toml. In Harbor 0.24.0 a `[verifier.environment]` table is what makes the verifier run in its own container, and combining it with `environment_mode = "shared"` is an error; `"separate"` is still pinned so the intent is explicit in every bundle. A verifier that shares the agent's container never builds tests/Dockerfile, the agent-visible `/app/data` becomes the grading corpus, and agent-visible or agent-edited files grade the agent. Absent or any value other than `"separate"` is a fail (structure_qc T2).
+ 2. Artifacts MUST be declared as absolute container paths (e.g. `/app/decode.py`). Harbor copies each declared artifact out of the agent container and back into the verifier container using the declared path string verbatim (`artifact_handler.py: _upload_target_source` returns `artifact.source` verbatim; the copy is a `docker compose cp` on that raw string) and auto-creates parent directories (`ensure_dirs`). A relative or bare filename resolves against the image WORKDIR, which differs across images and providers (the template verifier image sets no WORKDIR, so a bare `decode.py` would land at `/decode.py` while the tests read `/app/decode.py`). Absolute paths are the only deterministic form; a non-absolute artifact entry is a fail (structure_qc T4). Tests must read each artifact at its exact declared absolute path.
+-3. In separate mode `tests/` is NOT uploaded into the verifier at runtime when `tests/Dockerfile` exists (`verifier.py: skip_tests_upload`); the image must own it, so `tests/Dockerfile` must `COPY . /tests/`, install the pinned `harbor-rewardkit==0.2.1` (the version Harbor 0.24.0's own `rewardkit/pyproject.toml` names) and every dependency the checks import.
++3. In separate mode `tests/` is NOT uploaded into the verifier at runtime when `tests/Dockerfile` exists (`verifier.py: skip_tests_upload`); the image must own it, so `tests/Dockerfile` must `COPY . /tests/`, install the pinned `harbor-rewardkit==0.2.1` (the version Harbor 0.24.0's own `rewardkit/pyproject.toml` names), pin `litellm==1.105.0`, and install every dependency the checks import. rewardkit declares `litellm>=1.83` with no upper bound, so an unpinned verifier image installs whatever PyPI serves at build time; a withdrawn litellm 1.107.0 stable shipped a `.pth` and a `sitecustomize.py` that fetched and executed remote code and reached the cloud metadata endpoint, inside the one container that holds the judge key and the hidden tests. Both pins are required (tests_qc.py K5, K8).
+ 4. Reward. Harbor 0.24.0 reads `/logs/verifier/reward.json` first and falls back to `/logs/verifier/reward.txt` only when no reward.json exists. reward.json must be a flat object of name -> number pairs; Harbor rejects NaN, infinity and text values. `tests/test.sh` hardens the verifier and then runs rewardkit over `/tests`; rewardkit writes reward.json (plus `reward-details.json` beside it with every criterion's result), and test.sh writes no reward bytes. Each criterion-bearing file at the top of `tests/` is one scoring input named by its file stem: `test_output` (the deterministic checks in `test_output.py`) and `judge` (the LLM-judged criteria in `judge.toml`). `tests/reward.toml` combines the two into the single `reward` value, each channel counting for half. rewardkit rounds the final value to 4 decimals. Wherever a check speaks of grading, a judged criterion is a graded check exactly as a test is.
+ 5. Network policy is per role (`[environment]`, `[verifier]`, `[verifier.environment]`, `[agent]`). Harbor's default is `"public"`, so an omitted key ships an online task. Every role uses `network_mode`; `allow_internet` must not appear.
+ 6. `[agent] user = "1000:1000"` runs the agent, and the oracle's `solve.sh`, as uid 1000, not root. Every directory a declared artifact is written into must be writable by that uid in the image `environment/Dockerfile` builds (for example `RUN mkdir -p /app && chown 1000:1000 /app` before `COPY data /app/data`), or the oracle dies with `PermissionError` before writing anything and Step 10 reads 0.000. A root-owned output directory is a fail (FC-S22, DS-28).
+@@ -108,12 +108,12 @@ Rules the template encodes:
+ 
+ ## Authoritative judge.toml template
+ 
+-This is the exact shape every bundle's `tests/judge.toml` must match. The `[judge]` and `[scoring]` tables are pinned and identical in every task; `[judge]` carries no `reasoning_effort` key. rewardkit reads them at run time: `judge` is the model it calls (unless the runner sets `REWARDKIT_JUDGE`), and `[scoring]` is how it adds up this file's criteria. Table order and key order are mandatory, and extra keys are a fail (judge_qc.py G2 in the header, J1 and J6 in a criterion).
++This is the exact shape every bundle's `tests/judge.toml` must match. The `[judge]` and `[scoring]` tables are pinned and identical in every task; `[judge]` carries no `reasoning_effort` key. rewardkit reads them at run time: `judge` is the model it calls (unless the runner sets `REWARDKIT_JUDGE`), and `[scoring]` is how it adds up this file's criteria. `mode = "batched"` is rewardkit's own default and sends every criterion in one judged call. The alternative, `"individual"`, opens one concurrent call per criterion and re-sends the whole trajectory in each of them, so a 30-criterion file pays 30 times the input tokens for the same verdicts; its only real advantage is a per-criterion `files` key, which JD-S3 forbids anyway. The price of batching is blast radius: on a judge timeout rewardkit scores every criterion in the call 0.0, so one slow response zeroes the whole judged half rather than a single criterion. That is what `timeout = 300` is sized for, and a judged run that comes back with every criterion at 0.0 and a timeout warning is an infrastructure failure to re-run, not a task the agent failed. Table order and key order are mandatory, and extra keys are a fail (judge_qc.py G2 in the header, J1 and J6 in a criterion).
+ 
+ ```toml
+ [judge]
+ judge = "openai/gpt-5.6-sol"
+-mode = "individual"
++mode = "batched"
+ timeout = 300
+ atif-trajectory = "/logs/agent/trajectory.json"
+ weight = 1.0
+@@ -244,7 +244,7 @@ FROM python:3.12-slim
+ RUN apt-get update \
+  && apt-get install -y --no-install-recommends util-linux \
+  && rm -rf /var/lib/apt/lists/*
+-RUN pip install --no-cache-dir harbor-rewardkit==0.2.1
++RUN pip install --no-cache-dir harbor-rewardkit==0.2.1 litellm==1.105.0
+ ENV LITELLM_LOCAL_MODEL_COST_MAP=True
+ COPY . /tests/
+ RUN mkdir -p /app
+@@ -253,6 +253,8 @@ WORKDIR /app
+ 
+ The `ENV` line is required (tests_qc.py K7). rewardkit imports litellm, which fetches its model cost map from GitHub at import time. The verifier's allowlist only reaches the OpenAI hosts, so that fetch fails, and the warning it logs races interpreter shutdown into an import deadlock: rewardkit dies before writing reward.json in about half of runs, and Harbor records a verifier error on a correct submission. Step 10 never sees this because its copy runs with a public network.
+ 
++The `litellm==1.105.0` pin is required (tests_qc.py K8) and is the version the agent image pins (FC-S23). Without it pip resolves rewardkit's open `litellm>=1.83` range to whatever PyPI serves during the build, which already once meant a withdrawn 1.107.0 that executed remote code from site-packages in the verifier container. Docker layer caching also means a poisoned `pip install` layer survives every later build on that machine: rebuild verifier images with `docker build --no-cache` (or `docker builder prune`) after changing this line.
++
+ Python 3.12 or newer is required by rewardkit. Add every third-party package the checks import to the `pip install` line. pytest is not needed.
+ 
+ ## How to run the QC
+@@ -270,7 +272,7 @@ Run the four scripts first, then the five model gates, then the execution gate,
+ | 7 | `03_Tests_QC.md` | same |
+ | 8 | `04_Judge_QC.md` | same |
+ | 9 | `05_Alignment_Integrity_QC.md` | same (this one reads the whole bundle) |
+-| 10 | Execution gate | build the tests-only copies with `exe_copy.py`, then run the harbor commands below, verbatim: five oracle runs, one nop run, one stub run |
++| 10 | Execution gate | build the tests-only copies with `exe_copy.py`, then run the harbor commands below, verbatim: five oracle runs, one nop run, one stub run, one owner-only oracle run |
+ | 11 | Final coverage and overlap re-check | Model derives coverage and overlap again from the material, not from its earlier verdicts |
+ 
+ ## Reference: what the scripts enforce (context, not a re-check)
+@@ -337,6 +339,7 @@ Why tests-only. Harbor 0.24.0 runs the same verifier for every agent, and the or
+ ```
+ python3 <QC_FOLDER>/exe_copy.py "/path/to/bundle" /tmp/step10run
+ python3 <QC_FOLDER>/exe_copy.py "/path/to/bundle" /tmp/stubrun --stub
++python3 <QC_FOLDER>/exe_copy.py "/path/to/bundle" /tmp/ownerrun --owner-only
+ ```
+ 
+ The script refuses (exit 1) when `tests/judge.toml` does not load or when tests_qc.py A1-A4 or W1-W7 fails, because a tests-only score built on broken weights proves nothing. Otherwise it copies the bundle and changes exactly these things in the copy, printing each one; paste that output into the sign-off:
+@@ -345,7 +348,8 @@ The script refuses (exit 1) when `tests/judge.toml` does not load or when tests_
+ - rewrites `tests/reward.toml` to `weights = { test_output = 1 / positive total }` (full float), so every positive passing and no negative firing reads exactly 1.0 and doing nothing reads exactly 0.0 - the same channel the shipped bundle scores at half weight;
+ - sets `network_mode = "public"` in `[environment]`, `[verifier]`, `[verifier.environment]` and `[agent]` and drops their `allowed_hosts` lines (the host limit below);
+ - drops the pre-baked OpenHands SDK install (S9 / DS-29) from `environment/Dockerfile`, which turns a multi-minute image build into seconds. It changes no score: the oracle uploads `solution/` and execs `solve.sh`, nop does nothing, and the stub is the oracle over a stub `solution/`, so none of the three ever starts an installed agent or reads `/opt/openhands-sdk-venv`. A real `openhands-sdk` run must use the bundle itself, never this copy;
+-- with `--stub`, replaces `solution/` with the stub described below.
++- with `--stub`, replaces `solution/` with the stub described below;
++- with `--owner-only`, appends two lines to the copy's `solution/solve.sh` that strip group and other access from every file the run wrote under `/app`, which is what a real agent leaves behind: 0600, or 0700 where the owner could already execute the file, so a documented executable artifact stays executable.
+ 
+ Then the runs, from the copies. The oracle runs five times, not once, because one run cannot tell a correct verifier from a flaky one:
+ 
+@@ -357,10 +361,13 @@ harbor run --path /tmp/step10run --agent oracle --env docker --job-name oracle-4
+ harbor run --path /tmp/step10run --agent oracle --env docker --job-name oracle-5 -y
+ harbor run --path /tmp/step10run --agent nop    --env docker --job-name nop-1 -y
+ harbor run --path /tmp/stubrun   --agent oracle --env docker --job-name stub-1 -y
++harbor run --path /tmp/ownerrun  --agent oracle --env docker --job-name owner-only-1 -y
+ ```
+ 
+ Five runs is enough to prove determinism here because nothing in the tests-only channel is stochastic: a disagreement among the five is a flaky check, never noise from a model.
+ 
++The owner-only run exists because the oracle lies about file modes. `solve.sh` installs its program with `cp`, which leaves 0644; a real agent writes the same program through its editor, which creates a temp file and renames it, so the file arrives at 0600, owned by uid 1000 and readable by nobody else. Harbor hands `/app` to the verifier with those modes intact. A verifier that runs the program under `setpriv --reuid=nobody` (or Popen `user=`) then cannot open it, every check that executes the program fails, and the ordinary oracle run still reads 1.000, so the bundle ships and every real trajectory loses that whole tier. The owner-only copy reproduces the agent's mode and must read exactly 1.000 like the other five. Anything lower is a verifier defect, not an agent one: the fix is to chmod the program and its parent directories inside the verifier (it runs as root) or to execute a copy the verifier staged itself, never to relax the privilege drop. tests_qc H6 reads the same property statically; this run is the proof (TS-30).
++
+ `-y` is not optional. The `[verifier.env]` block makes Harbor stop and ask "Tasks in this run will load these from your environment. Proceed?", and without `-y` the command sits waiting for input and then aborts. Harbor also prints "The verifier.env contains an API key ... You will incur costs associated with the API calls" on every run. That line is expected and is not a finding: the copy has no judge, so nothing is spent even when the reviewer's environment exports a key.
+ 
+ On Windows run these from PowerShell or from WSL. The commands themselves are identical; only the path form changes, and forward slashes are accepted, so `"C:/Users/you/bundles/my-task"` works and avoids backslash escaping.
+@@ -506,7 +513,8 @@ Run them with `instruction.md`, `tests/` (including `tests/judge.toml`), `soluti
+ - [ ] Step 10 preflight run and pasted (harbor version 0.24.0 or newer, with the exact number recorded; docker reachable; bundle path listed), or the failing preflight command named with its exact error
+ - [ ] Step 10 oracle run executed for real FIVE times: all five exactly 1.000, every number reported individually (evidence pasted)
+ - [ ] Step 10 nop run executed for real: reward exactly 0.000 (evidence pasted)
+-- [ ] Step 10 stub run executed for real: score reported, tests that paid named, judgement given with reasons (evidence pasted) (when the preflight showed this machine cannot run the harness, mark all three run lines ⏸️ rather than ✅ or ❌, keep the preflight line ✅ because it was attempted and reported, and state plainly that the bundle is not cleared to ship until the runs happen elsewhere)
++- [ ] Step 10 owner-only oracle run executed for real: reward exactly 1.000 with the agent's 0600 modes reproduced (evidence pasted)
++- [ ] Step 10 stub run executed for real: score reported, tests that paid named, judgement given with reasons (evidence pasted) (when the preflight showed this machine cannot run the harness, mark all four run lines ⏸️ rather than ✅ or ❌, keep the preflight line ✅ because it was attempted and reported, and state plainly that the bundle is not cleared to ship until the runs happen elsewhere)
+ - [ ] Step 10 runs made from `exe_copy.py` copies only: its full output pasted (judge.toml validated against the rewardkit 0.2.1 schema, judge.toml deleted, tests-only reward.toml weight, network roles opened), scores recorded as TESTS-ONLY, both copies deleted, and the original confirmed unedited
+ - [ ] Every oracle or empty-run score claimed anywhere in the bundle (TRUTH.md included) is scoped to the test channel; no judged-channel oracle score is claimed, because none can exist
+ - [ ] Step 11: re-check done, coverage mapping complete both directions, zero overlap between tests and judged criteria
+diff --git a/Input_Bundle_QC/exe_copy.py b/Input_Bundle_QC/exe_copy.py
+index 605ce2e4..7d152aa1 100644
+--- a/Input_Bundle_QC/exe_copy.py
++++ b/Input_Bundle_QC/exe_copy.py
+@@ -31,11 +31,15 @@ What the copy changes, and nothing else:
+      A real openhands-sdk run must use the bundle itself, never this copy.
+   6. With --stub, replaces solution/ with a solve.sh that only creates each
+      declared artifact empty ({} for .json), for the stub run.
++  7. With --owner-only, appends a trailer to solution/solve.sh that strips group
++     and other access from every file the run wrote under /app (0600, or 0700
++     where the owner could already execute it), the mode an agent editor leaves
++     behind, for the owner-only oracle run.
+ 
+ Every change is printed. Exit codes: 0 copy built, 1 refused, 2 usage error.
+ 
+ Usage:
+-  python3 exe_copy.py <BUNDLE_PATH> <DEST_DIR> [--stub]
++  python3 exe_copy.py <BUNDLE_PATH> <DEST_DIR> [--stub] [--owner-only]
+ """
+ 
+ from __future__ import annotations
+@@ -223,10 +227,48 @@ def write_stub(dest: Path) -> list[str]:
+     return [f"solution/ replaced by a stub solve.sh creating {len(artifacts)} empty artifact(s)"]
+ 
+ 
++def write_owner_only(dest: Path) -> list[str]:
++    """Make the oracle leave its files at mode 0600, the mode an agent editor leaves.
++
++    The OpenHands file_editor writes through a temp file in the same directory
++    and renames it, and temp files are created owner-only, so a program the
++    agent wrote is readable by uid 1000 alone. A verifier that runs that program
++    after dropping to an unprivileged uid cannot open it and fails every check
++    that executes it. solution/solve.sh installs its program with cp, which
++    leaves 0644, so the plain oracle run scores 1.000 and the hole stays
++    invisible until a real trajectory is graded. This variant reproduces the
++    agent's mode, so the same oracle has to score 1.000 against it.
++
++    The owner's own execute bit survives: an agent told to deliver an executable
++    entry point runs chmod +x and lands at 0700, not 0600, so stripping that bit
++    would fail the task for a reason no agent could avoid. Only group and other
++    access, which an editor never grants, is taken away.
++    """
++    solve = dest / "solution" / "solve.sh"
++    trailer = (
++        "\n# Owner-only variant (QC Step 10): leave every file this run wrote readable by its\n"
++        "# owner alone, the mode an agent editor leaves behind, keeping the owner execute bit.\n"
++        "find /app -xdev -type f -user 1000 -perm -u+x -print0 2>/dev/null"
++        " | xargs -0 -r chmod 700 || true\n"
++        "find /app -xdev -type f -user 1000 ! -perm -u+x -print0 2>/dev/null"
++        " | xargs -0 -r chmod 600 || true\n"
++    )
++    solve.write_text(solve.read_text(encoding="utf-8") + trailer, encoding="utf-8")
++    return [
++        "solution/solve.sh: appended a trailer leaving every file the run wrote under /app at"
++        " mode 0600, or 0700 where the owner could already execute it (agent editor mode)"
++    ]
++
++
+ def main(argv: list[str]) -> int:
+-    args = [a for a in argv if a != "--stub"]
+-    stub = len(args) != len(argv)
+-    if len(args) != 2:
++    flags = {a for a in argv if a.startswith("-")}
++    args = [a for a in argv if not a.startswith("-")]
++    stub = "--stub" in flags
++    owner_only = "--owner-only" in flags
++    unknown = sorted(flags - {"--stub", "--owner-only"})
++    if len(args) != 2 or unknown:
++        if unknown:
++            print(f"usage error: unknown flag(s) {' '.join(unknown)}", file=sys.stderr)
+         print((__doc__ or "").split("Usage:")[-1].strip(), file=sys.stderr)
+         return 2
+     bundle, dest = Path(args[0]).resolve(), Path(args[1]).resolve()
+@@ -262,6 +304,9 @@ def main(argv: list[str]) -> int:
+     if stub:
+         for change in write_stub(dest):
+             log(change)
++    if owner_only:
++        for change in write_owner_only(dest):
++            log(change)
+     log("scores from this copy are TESTS-ONLY; the bundle under review was not edited")
+     return 0
+ 
+diff --git a/Input_Bundle_QC/judge_qc.py b/Input_Bundle_QC/judge_qc.py
+index 19e5f3d8..fe6b10e5 100644
+--- a/Input_Bundle_QC/judge_qc.py
++++ b/Input_Bundle_QC/judge_qc.py
+@@ -50,7 +50,7 @@ And whole-file:
+   G1      judge.toml parses and carries a [judge] table plus at least one
+           [[criterion]].
+   G2      [judge] is exactly judge = "openai/gpt-5.6-sol", mode =
+-          "individual", timeout = 300, atif-trajectory =
++          "batched", timeout = 300, atif-trajectory =
+           "/logs/agent/trajectory.json", weight = 1.0, in that order (no
+           reasoning_effort key);
+           [scoring] is exactly aggregation = "weighted-sum"; no other
+@@ -97,7 +97,12 @@ def fails_for(check: str) -> int:
+ # it: the key is left out and fails as an extra key.
+ JUDGE_HEADER: list[tuple[str, object]] = [
+     ("judge", "openai/gpt-5.6-sol"),
+-    ("mode", "individual"),
++    # rewardkit's own default. "individual" would judge each criterion in its
++    # own concurrent call, which re-sends the whole trajectory once per
++    # criterion; on a 30-criterion file that is 30x the input tokens for the
++    # same verdicts. Its one advantage, per-criterion "files", is already
++    # forbidden by J1, so batched costs this contract nothing.
++    ("mode", "batched"),
+     ("timeout", 300),
+     # Without this key rewardkit 0.2.1 never hands the trajectory to the judge,
+     # so every trajectory / state_change criterion would be judged blind.
+diff --git a/Input_Bundle_QC/tests_qc.py b/Input_Bundle_QC/tests_qc.py
+index 2c4c569c..715cd456 100644
+--- a/Input_Bundle_QC/tests_qc.py
++++ b/Input_Bundle_QC/tests_qc.py
+@@ -26,18 +26,20 @@ What this script enforces:
+   B1-B5  test.sh: ends with the exact rewardkit line run once, no skip
+          switches, no sourcing or PATH shadowing, writes no reward itself,
+          no exit/return/|| path that skips rewardkit.
+-  K1-K7  tests/Dockerfile: FROM, COPY . /tests/, mkdir -p /app (warn),
++  K1-K8  tests/Dockerfile: FROM, COPY . /tests/, mkdir -p /app (warn),
+          every third-party import installed, harbor-rewardkit==0.2.1 pinned,
+-         Python 3.12 or newer, LITELLM_LOCAL_MODEL_COST_MAP=True.
++         Python 3.12 or newer, LITELLM_LOCAL_MODEL_COST_MAP=True, litellm
++         pinned to an exact version.
+   R1-R5  tests/reward.toml: parses with only reward and scoring tables,
+          one [[reward]] of the pinned shape, channel weights equal to
+          0.5 / positive total, [scoring.test_output] pinned, no other
+          criteria-bearing input under tests/.
+   O1     solve.py is an independent implementation, not a copy of the
+          verifier.
+-  H1,H3-H5 verifier hardening: util-linux installed when setpriv/runuser is
++  H1,H3-H6 verifier hardening: util-linux installed when setpriv/runuser is
+          used, /tests restricted, stale reward files cleared, log directory
+-         locked to root.
++         locked to root, agent-written programs made readable before the
++         uid drop.
+ 
+ Every ID:
+ 
+@@ -78,6 +80,9 @@ Every ID:
+       allowlist blocks that, and the failure warning races interpreter
+       shutdown into an import deadlock that kills rewardkit before it writes
+       reward.json (about half of runs with no route to GitHub).
++  K8  litellm installed with an exact == pin. rewardkit accepts litellm>=1.83
++      with no upper bound, so an unpinned verifier image takes whatever PyPI
++      serves while holding the judge key and the hidden tests.
+   R1  reward.toml parses; top level is exactly reward and scoring.
+   R2  exactly one [[reward]] with keys name, aggregation, weights;
+       name = "reward", aggregation = "weighted-sum", weights naming exactly
+@@ -93,6 +98,9 @@ Every ID:
+   H3  /tests restricted (chmod -R go-rwx /tests) (warn).
+   H4  test.sh removes stale reward files (warn).
+   H5  test.sh locks the log directory: chown root + chmod 755 (warn; 700 also warns).
++  H6  when checks drop the uid, the agent-written program they execute is made
++      readable first (chmod, or run a copy the verifier wrote). An agent editor
++      leaves it at mode 0600; solve.sh uses cp, so only a real trajectory feels it.
+ 
+ Usage: python3 tests_qc.py /path/to/bundle
+ Exit codes: 0 = pass (warns allowed), 1 = fail, 2 = usage error.
+@@ -145,6 +153,15 @@ def load_toml(p: Path) -> dict | None:
+ 
+ ALLOWED_WEIGHTS = {5, 3, 1, -1, -3, -5}
+ REWARDKIT_PIN = "harbor-rewardkit==0.2.1"
++# rewardkit requires litellm>=1.83 with no upper bound, so an unpinned verifier
++# install takes whatever PyPI serves at build time. On 2026-10-21 that was a
++# litellm 1.107.0 stable (since withdrawn) carrying a .pth plus sitecustomize
++# that fetched and executed remote code and reached the cloud metadata endpoint,
++# inside the one image that holds the judge key and the hidden tests. The pin is
++# the same version the agent image pins (structure_qc S9, DS-29).
++LITELLM_PIN = "litellm==1.105.0"
++# Versions known to carry the payload; never accept them even when pinned.
++LITELLM_QUARANTINE = {"1.107.0"}
+ # Authoritative stdlib list from the interpreter itself; a hand-maintained
+ # set drifts across Python versions and produces false positives.
+ STDLIB = frozenset(sys.stdlib_module_names)
+@@ -584,6 +601,8 @@ def check_dockerfile(bundle: Path, imports: set[str]) -> None:
+     K5  rewardkit is installed as exactly harbor-rewardkit==0.2.1 (the version
+         Harbor 0.24.0 names); missing, unpinned, ranged or other versions fail.
+     K6  a python:X.Y base image is 3.12 or newer (rewardkit requires it).
++    K8  litellm carries an exact == pin on a pip install line, is not a
++        withdrawn version, and matches the version the agent image pins.
+     """
+     p = bundle / "tests" / "Dockerfile"
+     if not p.is_file():
+@@ -623,6 +642,30 @@ def check_dockerfile(bundle: Path, imports: set[str]) -> None:
+     if not fails_for("K5"):
+         ok("K5", f"{REWARDKIT_PIN} pinned")
+ 
++    joined = re.sub(r"\\\s*\n", " ", text)
++    install_text = "\n".join(l for l in joined.splitlines() if "pip install" in l and not l.lstrip().startswith("#"))
++    litellm_specs = re.findall(r"(?<![\w-])litellm(?![\w-])\s*([=<>!~]=?[^\s'\"\\]*)?", install_text)
++    if not litellm_specs:
++        fail("K8", f"tests/Dockerfile installs rewardkit without pinning litellm; add {LITELLM_PIN} "
++             "to the pip line (rewardkit accepts litellm>=1.83 with no upper bound, so the build "
++             "takes whatever PyPI serves)")
++    flagged = not litellm_specs
++    for spec in litellm_specs:
++        version = spec[2:] if spec.startswith("==") else ""
++        if not version:
++            fail("K8", f"litellm installed as 'litellm{spec}'; pin exactly {LITELLM_PIN}")
++        elif version in LITELLM_QUARANTINE:
++            fail("K8", f"litellm=={version} is withdrawn and shipped remote-code-execution "
++                 f"hooks in site-packages; pin {LITELLM_PIN}")
++        elif f"litellm=={version}" != LITELLM_PIN:
++            warn("K8", f"litellm pinned to {version}, not the {LITELLM_PIN} the agent image pins "
++                 "(S9/DS-29); a deliberate bump needs tasker approval")
++        else:
++            continue
++        flagged = True
++    if not flagged:
++        ok("K8", f"{LITELLM_PIN} pinned in the verifier image")
++
+     if re.search(r"^ENV\s+LITELLM_LOCAL_MODEL_COST_MAP=(?:True|true|1)\s*$", text, re.M):
+         ok("K7", "LITELLM_LOCAL_MODEL_COST_MAP=True set")
+     else:
+@@ -850,6 +893,124 @@ def check_hardening(bundle: Path) -> None:
+             warn("H5", "verifier log directory not locked (chown root:root + chmod 755)")
+ 
+ 
++DROPS_PRIVILEGES = re.compile(r"setpriv|runuser|setuid|setresuid|preexec_fn|extra_groups")
++GRANTS_READ = re.compile(r"chmod|grant|readable|share")
++STAGES_FILE = re.compile(r"copyfile|copy2|copytree|shutil\.copy|write_text|write_bytes")
++PY_LITERAL = re.compile(r"""['"][^'"\s]*\.py['"]""")
++
++
++def _names(node: ast.AST) -> set[str]:
++    return {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
++
++
++# Interpreter switches that sit between sys.executable and the program path.
++# -c and -m take code or a module name, so the list holds no program file at
++# all and there is nothing for H6 to look for; -X and -W take a value of their
++# own, so the token after them is not the program either.
++NO_PROGRAM_FLAGS = {"-c", "-m"}
++FLAGS_WITH_VALUE = {"-X", "-W", "-Q", "--check-hash-based-pycs"}
++STRING_LITERAL = re.compile(r"""^['"](.*)['"]$""", re.S)
++
++
++def _executed_programs(tree: ast.AST) -> list[ast.expr]:
++    """The program each `[sys.executable, ...]` list runs, skipping switches.
++
++    `python -I program.py` is the usual hardening form, so the token after
++    sys.executable is frequently `-I` and not the program. Reporting that
++    asks the author to chmod a command-line switch.
++    """
++    programs = []
++    for node in ast.walk(tree):
++        if not isinstance(node, ast.List):
++            continue
++        parts = [ast.unparse(e) for e in node.elts]
++        if "sys.executable" not in parts:
++            continue
++        index = parts.index("sys.executable") + 1
++        while index < len(parts):
++            literal = STRING_LITERAL.match(parts[index])
++            if literal is None or not literal.group(1).startswith("-"):
++                break
++            switch = literal.group(1)
++            if switch in NO_PROGRAM_FLAGS:
++                index = len(parts)
++                break
++            index += 2 if switch in FLAGS_WITH_VALUE else 1
++        if index < len(parts):
++            programs.append(node.elts[index])
++    return programs
++
++
++def _drop_builders(tree: ast.AST) -> list[ast.FunctionDef]:
++    return [n for n in ast.walk(tree)
++            if isinstance(n, ast.FunctionDef)
++            and re.search(r"setpriv|runuser|_SETPRIV", ast.unparse(n))]
++
++
++def check_agent_program_readable(bundle: Path) -> None:
++    """H6: a verifier that drops privileges must make the agent's program readable.
++
++    Agent editors write through a temp file and rename it, so a program the agent
++    wrote lands at mode 0600 (owner-only). Checks that run it as an unprivileged
++    user then cannot open it and fail even on a correct submission. The oracle's
++    solve.sh installs its program with cp, which leaves 0644, so Step 10 reads
++    1.000 and the hole stays invisible until a real trajectory is graded. Passing
++    shapes: the privilege dropper grants read to its arguments, a grant call names
++    the executed program, or the verifier executes a python file it staged itself.
++    """
++    path = bundle / "tests" / "test_output.py"
++    if not path.is_file():
++        return
++    src = read(path)
++    if not DROPS_PRIVILEGES.search(src):
++        return
++    try:
++        tree = ast.parse(src)
++    except SyntaxError:
++        return
++    programs = _executed_programs(tree)
++    if not programs:
++        return
++
++    if any(GRANTS_READ.search(ast.unparse(f)) for f in _drop_builders(tree)):
++        ok("H6", "the privilege dropper grants read on the program it is about to run")
++        return
++
++    staged_py = {t.id for node in ast.walk(tree)
++                 if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None
++                 and PY_LITERAL.search(ast.unparse(node.value))
++                 for t in ([node.target] if isinstance(node, ast.AnnAssign) else node.targets)
++                 if isinstance(t, ast.Name)}
++    calls = [c for c in ast.walk(tree) if isinstance(c, ast.Call)]
++    granted: set[str] = set()
++    staged: set[str] = set()
++    for call in calls:
++        text = ast.unparse(call)
++        if GRANTS_READ.search(text):
++            granted |= _names(call)
++        if STAGES_FILE.search(text) and _names(call) & staged_py:
++            staged |= _names(call) | staged_py
++
++    aliases: dict[str, set[str]] = {}
++    for node in ast.walk(tree):
++        if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None:
++            targets = [node.target] if isinstance(node, ast.AnnAssign) else node.targets
++            bound = {t.id for t in targets if isinstance(t, ast.Name)}
++            aliases.setdefault(ast.unparse(node.value), set()).update(bound)
++
++    unguarded = sorted({ast.unparse(p) for p in programs
++                        if not ((_names(p) | aliases.get(ast.unparse(p), set()))
++                                & (granted | staged))})
++    if unguarded:
++        fail("H6", "grading runs an agent-written program under a dropped uid without making it "
++             f"readable first: {', '.join(unguarded)}. An agent editor leaves that file at mode "
++             "0600, so every check that executes it fails on a correct submission. chmod the "
++             "program and its parents (the verifier is root) or run a copy the verifier staged, "
++             "then prove it with the --owner-only oracle run in Step 10")
++    else:
++        ok("H6", "the agent-written program is made readable before the uid drop")
++
++
+ def main() -> int:
+     if len(sys.argv) != 2:
+         print(__doc__)
+@@ -870,6 +1031,7 @@ def main() -> int:
+     check_reward_toml(bundle, weights)
+     check_oracle_independence(bundle)
+     check_hardening(bundle)
++    check_agent_program_readable(bundle)
+ 
+     print(f"tests_qc: {bundle.name}")
+     print("=" * 60)

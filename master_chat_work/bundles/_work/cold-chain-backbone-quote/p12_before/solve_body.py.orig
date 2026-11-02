@@ -1,0 +1,365 @@
+#!/usr/bin/env python3
+"""Repair /app/repo in place, archive it and write the documents under /app/out."""
+from __future__ import annotations
+
+import configparser
+import csv
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import tomllib
+import zipfile
+from pathlib import Path
+
+APP = Path(os.environ.get("APP_ROOT", "/app"))
+REPO = APP / "repo"
+CI = APP / "ci"
+OUT = APP / "out"
+
+REPAIRED = {
+REPAIRED_FILES_HERE
+}
+
+DEFECTS = [
+    ("pyproject.toml", "Asked for Python 3.13, pulled in requests and pointed the package at lib/; now 3.12, no dependencies, src/ layout and the manifest version."),
+    ("src/task/__init__.py", "VERSION was missing; it now carries the manifest version."),
+    ("src/task/parser.py", "Missing book files raised a traceback, closed links were kept, override keys were lowercased and slots were ordered as text."),
+    ("src/task/core.py", "The network joined cold rooms by shortest paths, which is not the minimum quote, and a site was charged once per booked link instead of once."),
+    ("src/task/report.py", "share_bp was rounded to nearest instead of rounded down."),
+]
+
+
+def repair() -> None:
+    for rel, text in REPAIRED.items():
+        target = REPO / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
+    for cache in list(REPO.rglob("__pycache__")):
+        shutil.rmtree(cache)
+
+
+def archive(config: dict) -> Path:
+    spec = config["archive"]
+    target = Path(spec["path"])
+    target.parent.mkdir(parents=True, exist_ok=True)
+    method = zipfile.ZIP_DEFLATED if spec["compression"] == "deflated" else zipfile.ZIP_STORED
+    members = sorted(
+        p for p in REPO.rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc"
+    )
+    with zipfile.ZipFile(target, "w") as bundle:
+        for path in members:
+            info = zipfile.ZipInfo(path.relative_to(REPO).as_posix(), date_time=tuple(spec["timestamp"]))
+            info.compress_type = method
+            info.external_attr = (0o100000 | int(spec["mode"], 8)) << 16
+            bundle.writestr(info, path.read_bytes())
+    return target
+
+
+def run_book(src: Path, book: Path, out: Path, check: bool = True, cwd: str | None = None):
+    env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "PYTHONPATH": str(src), "PYTHONDONTWRITEBYTECODE": "1"}
+    return subprocess.run([sys.executable, "-B", "-m", "task", "--book", str(book), "--out", str(out)],
+                          env=env, check=check, capture_output=not check, text=True, cwd=cwd)
+
+
+def shipped_run() -> None:
+    """Run the package as shipped on the current book, before any file is changed."""
+    with tempfile.TemporaryDirectory() as scratch:
+        result = run_book(REPO / "src", CI, Path(scratch) / "out", check=False, cwd=scratch)
+        tail = (result.stderr.strip().splitlines() or ["(no output)"])[-1]
+        written = sorted(p.name for p in (Path(scratch) / "out").glob("*.json"))
+    print(f"check shipped package run before the first edit ok: exit {result.returncode}, last line: {tail}, "
+          f"documents written: {', '.join(written) or 'none'}")
+
+
+def built_book(target: Path, seed: int) -> int:
+    """Write a book of two large projects whose links reach across many corridor positions."""
+    import random
+
+    rng = random.Random(seed)
+    order = tomllib.loads((CI / "access_rules.toml").read_text(encoding="utf-8"))["corridors"]["order"]
+    bands = sorted(tomllib.loads((CI / "access_rules.toml").read_text(encoding="utf-8"))["tariff"])
+    target.mkdir(parents=True)
+    shutil.copy(CI / "access_rules.toml", target / "access_rules.toml")
+    shutil.copy(CI / "activation.ini", target / "activation.ini")
+    sites, layout, links = [], [], []
+    for k, pid in enumerate(("Q1001", "Q1002")):
+        names = ["D%03d" % k]
+        edges = set()
+        for group in range(6):
+            top = 0 if group == 0 else rng.randrange(1, len(names))
+            new = list(range(len(names), len(names) + 14))
+            names += ["X%03d" % v for v in new]
+            ring = [top] + new
+            for a, b in zip(ring, ring[1:] + ring[:1]):
+                edges.add((min(a, b), max(a, b)))
+            while len([e for e in edges if e[0] in ring and e[1] in ring]) < 34:
+                a, b = sorted(rng.sample(new, 2))
+                edges.add((a, b))
+        cold = set(rng.sample(range(1, len(names)), 30))
+        slots = rng.sample(range(1, 10 * len(names)), len(names) - 1)
+        sites.append(f"{pid},{names[0]},depot,yard")
+        for v in range(1, len(names)):
+            sites.append(f"{pid},{names[v]},{'cold_room' if v in cold else 'relay'},{rng.choice(['blast', 'freezer', 'chiller', 'shed', 'hut'])}")
+            layout.append(f"{pid}\t{names[v]}\t{rng.choice(order)}\t{slots[v - 1]}")
+        for j, (a, b) in enumerate(sorted(edges)):
+            links.append(json.dumps({"project": pid, "link": "Z%d%04d" % (k, j), "a": names[a], "b": names[b],
+                                     "band": rng.choice(bands), "km": rng.randint(1, 12)}))
+    (target / "sites.csv").write_text("project,site,role,class\n" + "\n".join(sites) + "\n", encoding="utf-8")
+    (target / "layout.tsv").write_text("project\tsite\tcorridor\tslot\n" + "\n".join(layout) + "\n", encoding="utf-8")
+    (target / "links.jsonl").write_text("\n".join(links) + "\n", encoding="utf-8")
+    return 2
+
+
+def regression_quotes(src: Path) -> dict:
+    sys.path.insert(0, str(src))
+    from task.core import best_network
+    from task.parser import Rejected, load_inline
+
+    found = {}
+    for line in (CI / "regression_cases.jsonl").read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        case = json.loads(line)
+        try:
+            found[case["case"]] = best_network(load_inline(case)).quote
+        except Rejected as exc:
+            found[case["case"]] = exc.code
+    return dict(sorted(found.items()))
+
+
+def previously_failing() -> list[str]:
+    log = (CI / "failing_tests.log").read_text(encoding="utf-8")
+    pattern = re.compile(r"^(\w+) \([\w.]+\) \.\.\. (?:FAIL|ERROR)$", re.M)
+    return sorted(set(pattern.findall(log)))
+
+
+def raw_prices(book: Path) -> tuple[dict, dict, dict]:
+    """Link costs, site charges and site corridors read straight from the book files."""
+    rules = tomllib.loads((book / "access_rules.toml").read_text(encoding="utf-8"))
+    ini = configparser.ConfigParser(interpolation=None)
+    ini.optionxform = str
+    ini.read(book / "activation.ini", encoding="utf-8")
+    costs = {}
+    for line in (book / "links.jsonl").read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            row = json.loads(line)
+            band = rules["tariff"][row["band"]]
+            costs[row["link"]] = (row["a"], row["b"], band["base"] + band["per_km"] * row["km"])
+    charges = {}
+    with open(book / "sites.csv", newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            key = f"{row['project']}/{row['site']}"
+            charges[(row["project"], row["site"])] = int(ini["overrides"].get(key, ini["classes"][row["class"]]))
+    corridors = {}
+    with open(book / "layout.tsv", newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle, delimiter="\t"):
+            corridors[(row["project"], row["site"])] = row["corridor"]
+    return costs, charges, corridors
+
+
+def self_check(src: Path) -> None:
+    costs, charges, corridors = raw_prices(CI)
+    core = json.loads((OUT / "module_core.json").read_text(encoding="utf-8"))["projects"]
+    report = json.loads((OUT / "module_report.json").read_text(encoding="utf-8"))["projects"]
+    for pid, net in core.items():
+        ends = {site for link in net["links"] for site in costs[link][:2]}
+        assert ends <= set(net["sites"]), pid
+        quote = sum(costs[link][2] for link in net["links"]) + sum(charges[(pid, s)] for s in net["sites"])
+        assert quote == net["quote"], (pid, quote, net["quote"])
+    print("check quotes ok")
+    for pid, entry in report.items():
+        per_corridor: dict[str, int] = {}
+        for site, line in entry["sites"].items():
+            assert line["corridor"] == corridors[(pid, site)], (pid, site)
+            per_corridor[line["corridor"]] = per_corridor.get(line["corridor"], 0) + line["total"]
+        assert per_corridor == {k: v["total"] for k, v in entry["corridors"].items()}, pid
+        assert entry["depot"]["total"] + sum(per_corridor.values()) == core[pid]["quote"], pid
+    print("check corridors ok")
+    fixes = json.loads((OUT / "test_fixes.json").read_text(encoding="utf-8"))
+    log = (CI / "failing_tests.log").read_text(encoding="utf-8")
+    named = set(re.findall(r"^(?:FAIL|ERROR): (\w+) ", log, re.M))
+    assert set(fixes["previously_failing"]) == named
+    print(f"check previously_failing ok: {len(named)} names in test_fixes.json, recounted from the "
+          f"FAIL and ERROR lines of failing_tests.log: {len(named)}")
+    with tempfile.TemporaryDirectory() as again:
+        run_book(src, CI, Path(again))
+        for name in ("module_core.json", "module_parser.json", "module_report.json", "summary.json"):
+            assert (Path(again) / name).read_bytes() == (OUT / name).read_bytes(), name
+    print("check rerun ok: second run into another directory, all four documents byte-identical")
+    with tempfile.TemporaryDirectory() as scratch:
+        altered = Path(scratch) / "book"
+        shutil.copytree(CI, altered)
+        rules = altered / "access_rules.toml"
+        rules.write_text(re.sub(r"^base = (\d+)$", lambda m: f"base = {int(m.group(1)) + 1}",
+                                rules.read_text(encoding="utf-8"), flags=re.M), encoding="utf-8")
+        run_book(src, altered, Path(scratch) / "out")
+        moved = json.loads((Path(scratch) / "out" / "module_core.json").read_text(encoding="utf-8"))["projects"]
+        assert moved.keys() == core.keys()
+        assert all(moved[pid]["quote"] > net["quote"] for pid, net in core.items())
+    print("check altered copy ok")
+    first = sorted(core)[0]
+    link = sorted(core[first]["links"])[0]
+    with tempfile.TemporaryDirectory() as scratch:
+        altered = Path(scratch) / "book"
+        shutil.copytree(CI, altered)
+        rows = []
+        for line in (altered / "links.jsonl").read_text(encoding="utf-8").splitlines():
+            row = json.loads(line)
+            if row["project"] == first and row["link"] == link:
+                old_km, row["km"] = row["km"], row["km"] + 7
+            rows.append(json.dumps(row))
+        (altered / "links.jsonl").write_text("\n".join(rows) + "\n", encoding="utf-8")
+        run_book(src, altered, Path(scratch) / "out")
+        moved = json.loads((Path(scratch) / "out" / "module_core.json").read_text(encoding="utf-8"))["projects"]
+        assert moved[first]["quote"] >= core[first]["quote"]
+        assert all(moved[pid] == net for pid, net in core.items() if pid != first)
+    print(f"check one link changed ok: {first} link {link} km {old_km} -> {old_km + 7}, "
+          f"quote {core[first]['quote']} -> {moved[first]['quote']}, other projects unchanged")
+    with tempfile.TemporaryDirectory() as scratch:
+        partial = Path(scratch) / "book"
+        shutil.copytree(CI, partial)
+        (partial / "activation.ini").unlink()
+        (partial / "layout.tsv").unlink()
+        result = run_book(src, partial, Path(scratch) / "out", check=False)
+        written = sorted(p.name for p in (Path(scratch) / "out").glob("*.json"))
+        assert result.returncode != 0 and result.stderr.strip().splitlines()[-1] == "E_MISSING_FILE layout.tsv"
+        assert not written
+    print(f"check missing book files ok: activation.ini and layout.tsv removed, exit {result.returncode}, "
+          f"stderr {result.stderr.strip().splitlines()[-1]}, no documents written")
+    with tempfile.TemporaryDirectory() as scratch:
+        book = Path(scratch) / "far book"
+        projects = built_book(book, 20261027)
+        started = time.monotonic()
+        run_book(src, book, Path(scratch) / "out")
+        elapsed = time.monotonic() - started
+        far_costs, far_charges, _ = raw_prices(book)
+        far = json.loads((Path(scratch) / "out" / "module_core.json").read_text(encoding="utf-8"))["projects"]
+        roles: dict[str, dict[str, str]] = {}
+        with open(book / "sites.csv", newline="", encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                roles.setdefault(row["project"], {})[row["site"]] = row["role"]
+        positions = {}
+        with open(book / "layout.tsv", newline="", encoding="utf-8") as handle:
+            for row in csv.DictReader(handle, delimiter="\t"):
+                positions[(row["project"], row["site"])] = row
+        for pid, net in far.items():
+            reached = {s for s, r in roles[pid].items() if r == "depot"}
+            grow = True
+            while grow:
+                grow = False
+                for name in net["links"]:
+                    a, b, _ = far_costs[name]
+                    if (a in reached) != (b in reached):
+                        reached |= {a, b}
+                        grow = True
+            assert {s for s, r in roles[pid].items() if r != "relay"} <= reached, pid
+            quote = sum(far_costs[n][2] for n in net["links"]) + sum(far_charges[(pid, s)] for s in net["sites"])
+            assert quote == net["quote"], pid
+        assert elapsed < 4 * projects + 10
+        cold = sum(1 for p in roles.values() for r in p.values() if r == "cold_room")
+        order = tomllib.loads((book / "access_rules.toml").read_text(encoding="utf-8"))["corridors"]["order"]
+        rank = {}
+        for pid in roles:
+            mine = sorted((order.index(r["corridor"]), int(r["slot"]), key) for key, r in positions.items()
+                          if key[0] == pid)
+            rank.update({key: k + 1 for k, (_c, _s, key) in enumerate(mine)})
+        gap = 0
+        for line in (book / "links.jsonl").read_text(encoding="utf-8").splitlines():
+            row = json.loads(line)
+            a, b = (row["project"], row["a"]), (row["project"], row["b"])
+            if a in rank and b in rank:
+                gap = max(gap, abs(rank[a] - rank[b]))
+    print(f"check built far-reaching book ok: {projects} projects, {cold} cold rooms, largest corridor position "
+          f"gap of an open link {gap}, finished in {elapsed:.2f} s of the {4 * projects + 10} s limit, quotes "
+          f"recomputed from the raw files and every cold room joined to the depot")
+    with tempfile.TemporaryDirectory() as scratch:
+        spaced = Path(scratch) / "extracted copy"
+        with zipfile.ZipFile(OUT / "patched-repo.zip") as bundle:
+            bundle.extractall(spaced)
+        elsewhere = Path(scratch) / "elsewhere"
+        elsewhere.mkdir()
+        run_book(spaced / "src", CI, Path(scratch) / "out", cwd=str(elsewhere))
+        for name in ("module_core.json", "module_parser.json", "module_report.json", "summary.json"):
+            assert (Path(scratch) / "out" / name).read_bytes() == (OUT / name).read_bytes(), name
+    print("check archive from a path with a space ok: patched-repo.zip extracted to 'extracted copy', run from "
+          "another directory, all four documents byte-identical")
+    env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "PYTHONPATH": str(src), "PYTHONDONTWRITEBYTECODE": "1"}
+    subprocess.run(
+        [sys.executable, "-B", "-m", "unittest", "discover", "-s", str(src.parent / "tests"), "-p", "test_*.py"],
+        env=env, check=True, capture_output=True,
+    )
+    print("check visible tests ok")
+    with tempfile.TemporaryDirectory() as scratch:
+        book = Path(scratch) / "tie book"
+        book.mkdir()
+        shutil.copy(CI / "access_rules.toml", book / "access_rules.toml")
+        shutil.copy(CI / "activation.ini", book / "activation.ini")
+        (book / "sites.csv").write_text("project,site,role,class\nQ2001,D1,depot,yard\nQ2001,C1,cold_room,chiller\n"
+                                        "Q2001,R1,relay,kiosk\n", encoding="utf-8")
+        (book / "layout.tsv").write_text("project\tsite\tcorridor\tslot\nQ2001\tC1\tharbour\t2\n"
+                                         "Q2001\tR1\tharbour\t1\n", encoding="utf-8")
+        rows = [("T001", "D1", "C1", 10), ("T002", "D1", "R1", 4), ("T003", "R1", "C1", 4)]
+        (book / "links.jsonl").write_text("".join(json.dumps({"project": "Q2001", "link": lid, "a": a, "b": b,
+                                                              "band": "B1", "km": km}) + "\n"
+                                                  for lid, a, b, km in rows), encoding="utf-8")
+        run_book(src, book, Path(scratch) / "out")
+        tie = json.loads((Path(scratch) / "out" / "module_core.json").read_text(encoding="utf-8"))["projects"]["Q2001"]
+        assert tie["quote"] == 17 and tie["links"] == ["T002", "T003"], tie
+    print("check tie book ok: networks {T001} and {T002, T003} both quote 17, vectors 100 and 011, the package "
+          f"picks {tie['links']} with quote {tie['quote']}")
+
+
+FOUND = [
+    ("src/task/parser.py", "a missing book file ends in a traceback", "a missing file prints E_MISSING_FILE <name>"
+     " and writes no document"),
+    ("src/task/core.py", "cold rooms are joined by shortest paths", "the quote of a project is the smallest quote"
+     " of any of its networks"),
+    ("src/task/core.py", "a site is charged once per link touching it", "each site charged once however many of"
+     " the network's links touch it"),
+    ("src/task/report.py", "share_bp is rounded to nearest", "share_bp is rounded down"),
+]
+
+
+def main() -> int:
+    config = json.loads((CI / "build_config.json").read_text(encoding="utf-8"))
+    shipped_run()
+    for rel, defect, rule in FOUND:
+        print(f"defect found before editing: {rel}: {defect}; api_contract.md says {rule}")
+    repair()
+    target = archive(config)
+    unpacked = Path(tempfile.mkdtemp(prefix="patched-"))
+    with zipfile.ZipFile(target) as bundle:
+        bundle.extractall(unpacked)
+    src = unpacked / "src"
+    OUT.mkdir(parents=True, exist_ok=True)
+    run_book(src, CI, OUT)
+    fixes = {"previously_failing": previously_failing(), "regression_quotes": regression_quotes(src)}
+    (OUT / "test_fixes.json").write_text(json.dumps(fixes, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report = {
+        "defects": [{"file": rel, "summary": text} for rel, text in DEFECTS],
+        "checks": [
+            "python3 -m unittest discover -s tests on the archived repository: all visible tests pass",
+            "every quote in module_core.json recomputed from the raw book files",
+            "corridor and depot lines add up to each project's quote",
+            "a second run of the command gives byte-identical documents",
+        ],
+    }
+    (OUT / "repair-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"ran the package extracted from {target}")
+    self_check(src)
+    parsed = json.loads((OUT / "module_parser.json").read_text(encoding="utf-8"))
+    print("rejected projects:", ", ".join(f"{pid} {code}" for pid, code in sorted(parsed["rejected"].items())))
+    print("method: core.py splits each project where its parts meet at a single site, finds the cheapest")
+    print("connection of every part exactly (over subsets of the sites it must join, or along corridor order")
+    print("when that is cheaper), adds a rank bit per link so ties fall to the earliest link vector")
+    shutil.rmtree(unpacked)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

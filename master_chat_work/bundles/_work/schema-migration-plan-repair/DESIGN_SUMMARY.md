@@ -1,0 +1,24 @@
+# DESIGN_SUMMARY schema-migration-plan-repair (Phase 0, 21 Oct 2026 IST, nothing measured)
+
+Full design: `_work/schema-migration-plan-repair/DESIGN.md`. Fingerprints GEN/QC match 9b8229f6 (no upstream change).
+
+1. Task: repair `migrakit` (src layout, about 1,300 original lines, 14 modules in parser/, core/, report/) so its public API and CLI migrate fresh partner feeds; ship the 7 fixed repo-patch outputs.
+2. Name change forced by VB §1.12: the archive is `environment/data/repo.zip`, not `source_repo.zip`.
+3. Data: 12 flat files, 9 formats (zip, md, json, csv, tsv, ini, xml, jsonl, txt), about 31,000 counted lines; every csv/tsv/jsonl/txt at least 2,000 lines; no answers, no plans, no sample_*.json.
+4. Spine (B): contracts, token-null replacement, canonical partner, replay identity, state signature, plan over (schema, state), execute with pinned corrections and live re-checks, classify and summarise. One public entry point per stage is written in the contract; tests grade each stage on supplied correct inputs.
+5. Planted defects (13 contract faults F1..F13, behaviour only): schema-keyed planner checking prereqs on the received record, simple paths only, (cost, steps, DFS order) tie, exhaustive DFS, shared FieldView drops explicit nulls (planner and executor), ini-only policy, corrections applied up front with no re-check, planned counted as migrated, fingerprint after migration, file order, one-hop identity without loop check, one bad line aborts, taxonomy/order ignored, CLI path and `__main__` faults.
+6. LV-MR-6: F5 lists only the fill symptom; the planner half is governed by stated rule R-presence, never by a fault line.
+7. D: ladder small (6,561 paths) / medium (4.8 M) / large x3 (about 10^21); limit 10 s per plan call written in the contract. Every ladder case is state-decisive AND tie-decisive, so enumeration loses 4 of 5 and schema-id Dijkstra or last-edge-tie Dijkstra lose all 5.
+8. LV-MR-2: min cost, then smallest edge-id list (first edge first); costs positive so no tied plan is a prefix. Cases: last-edge tie-break picks wrong; lexicographically smaller plan is longer.
+9. LV-MR-7: planner never sees corrections; corrections apply on first arrival at their pinned schema; a live prerequisite failure gives `failed`, E_PREREQ_FAILED, failed_edge, completed_steps; summary `attempted` vs `migrated`.
+10. LV-MR-4 / LV-MR-5 light (3s, one 5): fill and null_counts_as precedence (field_policy over ini), partner token list replaces default; fingerprint on the record as received, canonical-partner key, received_seq order, REISSUE supersedes.
+11. F: 8 exact codes (E_PARSE, E_UNKNOWN_PARTNER, E_ALIAS_CYCLE, E_UNKNOWN_SCHEMA, E_UNREACHABLE, E_PREREQ_FAILED, E_REPLAY_CONFLICT, E_INVALID_CORRECTION), each produced by a constructed case.
+12. Tests: 59 checks (54 positive = 156, 5 negatives = 15). Hidden inputs built from EVAL_SEED in tests/, run from the extracted archive in a child process, uid nobody, foreign cwd, with timeouts. Every 5-weight case needs its primary lever plus at least two others. Reports on visible data plus structure = 15 of 156.
+13. Weight by primary lever: LV-MR-7 26, F 20, D 19, LV-MR-5 17, LV-MR-1 15, LV-MR-4 15, LV-MR-2 8, LV-MR-6 8, B 7, REPORT 7, A 5, C 5, STRUCT 4 (LV-MR-1 is needed by checks worth 79 in total).
+14. Wrong solvers to write (each must lose its lever): W1, W1b, W2, W2b, W3 enumeration, W3b schema Dijkstra, W4, W4b, W5, W5b, W6 call-site-only null fix, W7a/b/c, WF; plus S0 nop, S1 stub, S2 shipped repo.
+15. Negatives (-15): hardcoded answers (-5), filename-dependent output (-3), deleted visible tests (-3), verifier paths in source (-3), nondeterministic output (-1).
+16. Judge: 16 criteria. R1..R5 are visible-run counts the final message must state (values filled from the oracle); R6..R10 name shipped root causes (FieldView.from_payload, prereqs on received record, simple-path enumeration, corrections up front, fingerprint after migration); R11..R13 conduct (runs extracted archive from a foreign folder, times the planner on 100+ schemas, code quality JD-18); R14..R16 negatives. None reads a test-read file.
+17. Baselines (targets only): nop 0, stub at most 0.01, shipped repo at most 0.10, W3 about 0.85, single-lever wrong 0.50 to 0.70, careful agent aim 0.10 to 0.20.
+18. Risks for the master: (a) a (cost, path) heap solves LV-MR-2 for free, so its bite depends on D and composition; (b) the 13-line fault list turns defects into a checklist; difficulty rests on composition only; (c) TRUTH provenance may hit Q18 (VB §15.5 vs DS-27).
+19. Open question: the judge's R1..R5 put visible-run counts in criterion text (concrete facts); tests also read summary.json. Different observables (message vs file), but the master may rule it double payment under JD-8.
+- v2 (13:35 IST) applies the master's 8 changes: see DESIGN.md sections 9 and 10; as built 50 checks (+142/-12), judge 17 (+46/-11).

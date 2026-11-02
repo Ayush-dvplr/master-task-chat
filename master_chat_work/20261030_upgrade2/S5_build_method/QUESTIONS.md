@@ -1,0 +1,7 @@
+# Decisions only Ayush can make
+
+1. **When should a new build have a strict final <35 delivery gate?** Options: (A, recommended) declare it on the idea card for pilots intended to prove a new lever; keep the current <40 rule for other tasks until evidence changes; (B) use <35 for every new build; (C) decide after a paid trajectory. Reason: a declared target prevents post-run gate changes, while `decisions.jsonl:504,514,562` records task-specific acceptance above <40 and `LEVER_RULES_v3.md:1` still sets the general gate at <40.
+
+2. **What policy should apply when fresh blinds separate only by timeout or crash?** Options: (A, recommended) stop as NO CORE for new builds and allow an explicit per-task exception only with a wrong-answer solver and one paid-run cap; (B) promote a general 60–100% allowance; (C) reject all such tasks. Reason: four recent build exceptions were needed (`decisions.jsonl:455,458,464,525,542,544`), while schema and outage paid runs later lost points through WRONG (`:520,552`).
+
+3. **Should beta's create/harden prompts be changed in this upgrade, or should the master pilot the recipe outside beta first?** Options: (A, recommended) pilot two tasks in the master pipeline, then propose exact beta prompt edits with score evidence; (B) edit beta prompts in the first implementation batch. Reason: beta is a controller with no automatic model run (`beta-task-generator/README.md:1-3,65-80`) and its defaults do not yet prove the cause of easy scores (`config/defaults.json:10`).

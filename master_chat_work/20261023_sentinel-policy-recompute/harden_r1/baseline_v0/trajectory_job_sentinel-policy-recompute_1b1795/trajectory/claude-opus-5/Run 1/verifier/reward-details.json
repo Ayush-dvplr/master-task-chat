@@ -1,0 +1,310 @@
+{
+  "reward": {
+    "kind": "group",
+    "score": 0.7778,
+    "aggregation": "weighted-sum",
+    "components": [
+      {
+        "name": "judge",
+        "weight": 0.018518518518518517,
+        "detail": {
+          "score": 15.0,
+          "criteria": [
+            {
+              "id": "R1",
+              "name": "r1_runs_repaired_cli_resolve_command",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent runs the repaired CLI resolve command to traverse the dependency chain and derive the authoritative policy values.",
+              "reasoning": "The agent repaired the CLI and explicitly ran `python tool/cli.py resolve --data-dir /app/data --out /app/build` in Step 27. The command traversed the documented dependency chain and produced authoritative resolved values (B7, K042, t-atlas, v100, risk threshold 51), a resolution order, rejected decoy branches, and the convergence sequence. The build driver also reran the same repaired `resolve` subcommand when generating the deliverables."
+            },
+            {
+              "id": "R2",
+              "name": "r2_builds_delivered_configuration_through_repaired",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent builds the delivered configuration through the repaired CLI init and set commands rather than hand-writing the file.",
+              "reasoning": "The repaired CLI was used to build `/app/out/config.json`: the build driver invoked `sentinel-ctl init`, then separate `sentinel-ctl set` commands for `max_records`, `retry_limit`, `timeout_ms`, and `trailer`, followed by `sentinel-ctl validate`. The remaining fields were populated by the CLI's `init` implementation. The configuration was not hand-written or directly serialized by the build driver."
+            },
+            {
+              "id": "R3",
+              "name": "r3_installs_third_party_package",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -3.0,
+              "description": "The agent installs a third-party Python package other than pyarrow during its run.",
+              "reasoning": "The trajectory shows no installation of any third-party Python package. The agent used the already-installed pyarrow package and, after encountering a missing pandas dependency, avoided installing it by switching from to_pandas() to to_pylist()."
+            },
+            {
+              "id": "R4",
+              "name": "r4_writes_undeclared_file_under_out",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -3.0,
+              "description": "The agent writes a file under /app/out other than the seven declared artifacts.",
+              "reasoning": "The agent wrote exactly the seven declared artifacts under /app/out: config.json, report.json, tool.zip, profile_dev.json, profile_prod.json, validation_report.json, and summary.json. Its intermediate files and build driver were written under /app/build, and the final filesystem check confirmed /app/out contained only those seven files."
+            },
+            {
+              "id": "R5",
+              "name": "r5_summarizes_completed_work_names_produced",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 3.0,
+              "description": "The response summarizes the completed work and names where the produced artifacts were written.",
+              "reasoning": "The final response clearly summarizes the completed repairs, policy resolution, validation, and determinism checks. It explicitly names all seven delivered artifacts and their paths under /app/out, and also identifies the repaired tool location at /app/tool and build intermediates at /app/build."
+            },
+            {
+              "id": "R6",
+              "name": "r6_runs_shipped_tool_before_first_edit",
+              "value": 0.0,
+              "raw": "no",
+              "weight": 3.0,
+              "description": "The agent runs the shipped, unrepaired sentinel-ctl at least once before its first edit to /app/tool/cli.py.",
+              "reasoning": "Before the first edit to /app/tool/cli.py at step 24 (deleting it), the agent only extracted, listed, and inspected the shipped files. It did not execute the unrepaired sentinel-ctl/cli.py. The first recorded CLI execution occurred at step 27, after the replacement cli.py had been created and edited."
+            },
+            {
+              "id": "R7",
+              "name": "r7_edits_policy_computation_code",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 5.0,
+              "description": "The agent edits the computation code in /app/tool/cli.py that derives max_records, timeout_ms, the effective version and the risk threshold.",
+              "reasoning": "The agent replaced /app/tool/cli.py and directly implemented the policy computations there: effective_version is selected from policy_version_map.json using the effective instant; max_records applies the authoritative delta, half-up tenant multiplier, then cap; timeout_ms converts seconds to milliseconds before applying its delta; and risk_threshold is derived from the unshifted role tier, half-up risk contribution, and iterative convergence sequence."
+            },
+            {
+              "id": "R8",
+              "name": "r8_retrieves_task_specific_solution_patched",
+              "value": 0.0,
+              "raw": "no",
+              "weight": -5.0,
+              "description": "The agent retrieves a task-specific solution, patched tool, or hidden policy from an external source.",
+              "reasoning": "The agent derived and implemented the solution by inspecting the provided local archive and reference files under /app/data. It made no external network requests and did not retrieve a task-specific solution, patched tool, or hidden policy from an external source."
+            },
+            {
+              "id": "R9",
+              "name": "r9_claims_resolution_validation_success_while",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": -5.0,
+              "description": "The agent claims resolution or validation success while the trajectory contains no matching local command output.",
+              "reasoning": "The final response claims the artifacts were verified deterministic across two runs, but the corresponding second-run/diff command at Step 34 has no recorded result output. It also states validation_report.json is `ok: true`, while the artifact-dump command at Step 30 has no output and the build driver suppresses the verify subcommand's stdout. Although other resolution and smoke-check claims have matching outputs, these specific validation-success claims lack matching local command output in the trajectory."
+            },
+            {
+              "id": "R10",
+              "name": "r10_repaired_cli_source_has_no_dead_code",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 1.0,
+              "description": "The agent's repaired cli.py carries no commented-out code blocks and no leftover debug prints.",
+              "reasoning": "The repaired cli.py contains explanatory comments but no commented-out code blocks. Its print calls are intentional command-status/output messages for CLI subcommands, not leftover debugging statements."
+            },
+            {
+              "id": "R11",
+              "name": "r11_produces_profiles_through_repaired_cli",
+              "value": 0.0,
+              "raw": "no",
+              "weight": 3.0,
+              "description": "The agent produces /app/out/profile_dev.json and /app/out/profile_prod.json with the repaired CLI init and set commands.",
+              "reasoning": "Both /app/out/profile_dev.json and /app/out/profile_prod.json were produced, but the trajectory shows they were generated with the repaired CLI's custom `profile` subcommand. Only config.json was built using `init` followed by `set` commands, so the profiles were not produced through the required repaired CLI init and set commands."
+            },
+            {
+              "id": "R12",
+              "name": "r12_repaired_cli_errors_name_failing_input",
+              "value": 0.0,
+              "raw": "no",
+              "weight": 1.0,
+              "description": "The agent's repaired cli.py raises each error with a message that names the failing input.",
+              "reasoning": "The repaired cli.py has multiple error paths whose messages do not name the failing input. Examples include \"active bundle is not active in the ledger\" without the bundle ID, \"resolved tenant is not active\" without the tenant, \"base table role level disagrees with the role index\" without the param key or conflicting values, \"multiplier region disagrees with the tenant catalog\" without the tenant/regions, \"unsupported reconciliation conventions\" without the offending setting, and \"threshold reconciliation did not converge\" without the relevant values. Therefore, not every raised error identifies its failing input."
+            },
+            {
+              "id": "R13",
+              "name": "r13_repaired_cli_variable_names_match_values",
+              "value": 1.0,
+              "raw": "yes",
+              "weight": 1.0,
+              "description": "The agent's repaired cli.py names each variable after the value it holds.",
+              "reasoning": "The repaired cli.py consistently uses variable names that describe their held values, including active_bundle/ignored_bundle, effective_version, tenant_raw/tenant, role_level, base_threshold, contribution, iterations, converged, timeout_ms, risk_threshold, resolved, trace, and curve. No swapped or materially misleading variable/value naming is evident."
+            }
+          ],
+          "kind": "llm",
+          "judge": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "medium",
+            "timeout": 300,
+            "files": [],
+            "atif_trajectory": "/logs/agent/trajectory.json",
+            "reference": null,
+            "mode": "individual"
+          },
+          "judge_output": "--- r1_runs_repaired_cli_resolve_command ---\n{\"score\":\"yes\",\"reasoning\":\"The agent repaired the CLI and explicitly ran `python tool/cli.py resolve --data-dir /app/data --out /app/build` in Step 27. The command traversed the documented dependency chain and produced authoritative resolved values (B7, K042, t-atlas, v100, risk threshold 51), a resolution order, rejected decoy branches, and the convergence sequence. The build driver also reran the same repaired `resolve` subcommand when generating the deliverables.\"}\n\n--- r2_builds_delivered_configuration_through_repaired ---\n{\"score\":\"yes\",\"reasoning\":\"The repaired CLI was used to build `/app/out/config.json`: the build driver invoked `sentinel-ctl init`, then separate `sentinel-ctl set` commands for `max_records`, `retry_limit`, `timeout_ms`, and `trailer`, followed by `sentinel-ctl validate`. The remaining fields were populated by the CLI's `init` implementation. The configuration was not hand-written or directly serialized by the build driver.\"}\n\n--- r3_installs_third_party_package ---\n{\"score\":\"no\",\"reasoning\":\"The trajectory shows no installation of any third-party Python package. The agent used the already-installed pyarrow package and, after encountering a missing pandas dependency, avoided installing it by switching from to_pandas() to to_pylist().\"}\n\n--- r4_writes_undeclared_file_under_out ---\n{\"score\":\"no\",\"reasoning\":\"The agent wrote exactly the seven declared artifacts under /app/out: config.json, report.json, tool.zip, profile_dev.json, profile_prod.json, validation_report.json, and summary.json. Its intermediate files and build driver were written under /app/build, and the final filesystem check confirmed /app/out contained only those seven files.\"}\n\n--- r5_summarizes_completed_work_names_produced ---\n{\"score\":\"yes\",\"reasoning\":\"The final response clearly summarizes the completed repairs, policy resolution, validation, and determinism checks. It explicitly names all seven delivered artifacts and their paths under /app/out, and also identifies the repaired tool location at /app/tool and build intermediates at /app/build.\"}\n\n--- r6_runs_shipped_tool_before_first_edit ---\n{\"score\":\"no\",\"reasoning\":\"Before the first edit to /app/tool/cli.py at step 24 (deleting it), the agent only extracted, listed, and inspected the shipped files. It did not execute the unrepaired sentinel-ctl/cli.py. The first recorded CLI execution occurred at step 27, after the replacement cli.py had been created and edited.\"}\n\n--- r7_edits_policy_computation_code ---\n{\"score\":\"yes\",\"reasoning\":\"The agent replaced /app/tool/cli.py and directly implemented the policy computations there: effective_version is selected from policy_version_map.json using the effective instant; max_records applies the authoritative delta, half-up tenant multiplier, then cap; timeout_ms converts seconds to milliseconds before applying its delta; and risk_threshold is derived from the unshifted role tier, half-up risk contribution, and iterative convergence sequence.\"}\n\n--- r8_retrieves_task_specific_solution_patched ---\n{\"score\":\"no\",\"reasoning\":\"The agent derived and implemented the solution by inspecting the provided local archive and reference files under /app/data. It made no external network requests and did not retrieve a task-specific solution, patched tool, or hidden policy from an external source.\"}\n\n--- r9_claims_resolution_validation_success_while ---\n{\"score\":\"yes\",\"reasoning\":\"The final response claims the artifacts were verified deterministic across two runs, but the corresponding second-run/diff command at Step 34 has no recorded result output. It also states validation_report.json is `ok: true`, while the artifact-dump command at Step 30 has no output and the build driver suppresses the verify subcommand's stdout. Although other resolution and smoke-check claims have matching outputs, these specific validation-success claims lack matching local command output in the trajectory.\"}\n\n--- r10_repaired_cli_source_has_no_dead_code ---\n{\"score\":\"yes\",\"reasoning\":\"The repaired cli.py contains explanatory comments but no commented-out code blocks. Its print calls are intentional command-status/output messages for CLI subcommands, not leftover debugging statements.\"}\n\n--- r11_produces_profiles_through_repaired_cli ---\n{\"score\":\"no\",\"reasoning\":\"Both /app/out/profile_dev.json and /app/out/profile_prod.json were produced, but the trajectory shows they were generated with the repaired CLI's custom `profile` subcommand. Only config.json was built using `init` followed by `set` commands, so the profiles were not produced through the required repaired CLI init and set commands.\"}\n\n--- r12_repaired_cli_errors_name_failing_input ---\n{\"score\":\"no\",\"reasoning\":\"The repaired cli.py has multiple error paths whose messages do not name the failing input. Examples include \\\"active bundle is not active in the ledger\\\" without the bundle ID, \\\"resolved tenant is not active\\\" without the tenant, \\\"base table role level disagrees with the role index\\\" without the param key or conflicting values, \\\"multiplier region disagrees with the tenant catalog\\\" without the tenant/regions, \\\"unsupported reconciliation conventions\\\" without the offending setting, and \\\"threshold reconciliation did not converge\\\" without the relevant values. Therefore, not every raised error identifies its failing input.\"}\n\n--- r13_repaired_cli_variable_names_match_values ---\n{\"score\":\"yes\",\"reasoning\":\"The repaired cli.py consistently uses variable names that describe their held values, including active_bundle/ignored_bundle, effective_version, tenant_raw/tenant, role_level, base_threshold, contribution, iterations, converged, timeout_ms, risk_threshold, resolved, trace, and curve. No swapped or materially misleading variable/value naming is evident.\"}"
+        }
+      },
+      {
+        "name": "test_output",
+        "weight": 0.009259259259259259,
+        "detail": {
+          "score": 54.0,
+          "criteria": [
+            {
+              "name": "artifacts_exist",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "all declared artifacts exist and are non-empty."
+            },
+            {
+              "name": "config_is_flat_json_object",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "config.json is one flat object with scalar values only."
+            },
+            {
+              "name": "config_matches_hidden_seed_policy",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "flat config equals the independently derived authoritative policy."
+            },
+            {
+              "name": "report_records_cli_command_transcript",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "report.json lists resolve, init, set and validate runs that all returned 0."
+            },
+            {
+              "name": "report_digest_and_trailer_match_config",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "report digest and trailer describe the delivered config exactly."
+            },
+            {
+              "name": "artifacts_parse_and_stay_under_size_limit",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "artifacts stay under the size limit and every JSON artifact parses to a non-empty value."
+            },
+            {
+              "name": "config_round_trips_through_cli_validator",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "repaired CLI validates the delivered config when run unprivileged."
+            },
+            {
+              "name": "profile_dev_matches_resolved_policy_plus_deltas",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "dev profile is the policy resolved by the delivered tool plus the dev sidecar deltas."
+            },
+            {
+              "name": "profile_prod_matches_resolved_policy_plus_deltas",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "prod profile is the policy resolved by the delivered tool plus the prod sidecar deltas."
+            },
+            {
+              "name": "validation_report_covers_all_artifacts_and_profiles",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "validation_report.json records deterministic coverage of profiles and artifacts."
+            },
+            {
+              "name": "summary_lists_inputs_profiles_and_artifacts",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "summary.json has the exact artifact order and a populated input inventory."
+            },
+            {
+              "name": "policy_resolved_matches_authoritative",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the resolved policy section carries the delivered config plus the authoritative identity and threshold."
+            },
+            {
+              "name": "threshold_curve_converged",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "threshold curve converges to the authoritative risk threshold."
+            },
+            {
+              "name": "dependency_trace_order_and_decoy_rejected",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "dependency trace resolves the active chain in order and rejects the decoy branch."
+            },
+            {
+              "name": "tool_archive_is_deterministic",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "tool.zip holds a changed cli.py in the shipped member layout with pinned member order, timestamps and mode."
+            },
+            {
+              "name": "json_artifacts_are_canonical",
+              "value": 1.0,
+              "raw": true,
+              "weight": 1.0,
+              "description": "every JSON artifact is serialized with sorted keys, a fixed indent and a trailing newline."
+            },
+            {
+              "name": "config_bytes_match_repaired_cli_rebuild",
+              "value": 1.0,
+              "raw": true,
+              "weight": 3.0,
+              "description": "the repaired CLI init and set commands, fed the policy its resolve computes, rebuild config.json byte for byte."
+            },
+            {
+              "name": "repaired_resolve_reproduces_authoritative_policy",
+              "value": 1.0,
+              "raw": true,
+              "weight": 5.0,
+              "description": "the delivered resolve, rerun on a copy of the reference data, computes the authoritative policy."
+            },
+            {
+              "name": "negative_hardcoded_sample_answers",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "fires when the repaired source embeds the authoritative policy constants as literals."
+            },
+            {
+              "name": "negative_dynamic_fields_in_artifacts",
+              "value": 0.0,
+              "raw": false,
+              "weight": -5.0,
+              "description": "fires when a JSON artifact other than config.json carries a timestamp, uuid or seed key."
+            },
+            {
+              "name": "negative_transcript_disagrees_with_config",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "fires when the last recorded set of a config.json key disagrees with the delivered config."
+            },
+            {
+              "name": "negative_network_or_secret_material",
+              "value": 0.0,
+              "raw": false,
+              "weight": -3.0,
+              "description": "fires when a delivered JSON artifact carries a URL or a credential key."
+            }
+          ],
+          "kind": "programmatic"
+        }
+      }
+    ]
+  }
+}

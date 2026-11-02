@@ -1,0 +1,13 @@
+# TODO 841c07e (P12 fix v4 b7c42a8f)
+- [x] name_session (opencode ses_e6f592113ffe51Ki2XyYEVeDQK listed), rule files read, kit HEAD 5574d77eb9f22c207ba05fd8f9ac31d42ba45271
+- [x] backup BUNDLE -> WORK/qc4_b5dd7c985e44
+- [x] Phase 0: noise diff vs QC copy faeab3c (identical); xref 44/0 before edits; trap baseline = runs/trap_v3_after (tests unchanged since): L1 39 L2 21 L3 41 L4 45 L5 19 L6 22 L7 0
+- [x] Phase 1: recheck G03-1/G05-1, G04-1, G04-2 -> OUT/RECHECK_FIX.md
+- [x] tests: delete negative_output_directory_holds_extra_files + registration; add settlement to remaining_sections_exact (shipped, A, B)
+- [x] judge: new negative (extra files, -1, instruction following, trajectory); R25 cut to recap; R34 log names; renumber/check ids; reward.toml judge 0.5/P
+- [x] vacuity 0/64, trap survival PASS (= before), hygiene settlement 61/64; (touched rules table + side effects written in RECHECK_FIX)
+- [x] QC_DEFENCE/XREF/LEVERS/RULE_COVERAGE update, xref 0, stacking (stack_v4_after, OUT/STACKING_CHECK.md)
+- [x] Docker block (ALL_DONE: oracle 1.0x3, owner 1.0, nop 0.0) fixgate-20261031T121029-8810 (launched 12:11; check logs/chain.log ALL_DONE) ; [x] replay BEFORE/AFTER 7/64 both (runs/replay_v4); judge 16/65 -> 17/66; pred 17.78 -> 18.35
+- [x] TRUTH.md by script last; precheck CLEAN (tree 7e457f09086a)
+- [x] OUT: RECHECK_FIX, PL_NOTE, KEPT, result json, STACKING_CHECK
+- [x] Tasks_INPUT sync + tree shas (7e457f09086a both)

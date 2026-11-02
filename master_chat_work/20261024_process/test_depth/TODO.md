@@ -1,0 +1,15 @@
+# TODO (board 840adf9)  W=/tmp/test_depth-20261024T2141
+- [x] name_session (start) — ran, exit 0, matched opencode ses_e91520fc2ffehZstE4GFMRfHUY
+- [x] copy 6 tasks + 6 agent outs to W, hashes in INPUTS.md
+- [x] read existing diagnoses (3) + match-replay probe loss list
+- [x] P0 sanity: control match-replay (agent 75/160, oracle 1.0) — MATCH; P0 for other 5 also MATCH (100%/100%)
+- [x] P1 fuzz: control match-replay — 306 valid; found both known slips (runtime -9 in trap-only corpora, CTRL-J settlement)
+- [x] P0+P1: metered (303 valid, 0 agent diffs)
+- [x] P0+P1: sentinel (310 corpora, 0 agent diffs)
+- [x] P0+P1: tariff (334 valid, 0 agent diffs)
+- [x] P0+P1: config (322 valid, 0 agent diffs)
+- [x] P0+P1: caldermoor (314 valid, 9 agent diffs P2: 7 crash malformed budget row, 2 second-pass allocation)
+- [x] P2 classify: CM-B GENUINE, CM-A AMBIGUOUS; all 17 levers REVEALING
+- [x] P3 new families + rescore: caldermoor fam 95.29% (overall 49.9), whole 74.12% (39.3); oracle 100%
+- [x] P4 TEST_DEPTH.md + result.json
+- [x] cleanup: 6 td840 images removed, 0 td840 containers; name_session (end) exit 0

@@ -1,0 +1,31 @@
+{
+  "module": "core",
+  "changed_functions": [
+    "core.executor.execute_plan",
+    "core.planner._Transitions.__init__",
+    "core.planner._Transitions._compute",
+    "core.planner._Transitions.step",
+    "core.planner._descend",
+    "core.planner._explore",
+    "core.planner._remaining",
+    "core.planner._transitions",
+    "core.planner.plan_migration",
+    "core.records.FieldView.from_payload",
+    "core.records.fill_mode",
+    "core.records.null_counts_as",
+    "pipeline._Run._admit",
+    "pipeline._Run._migrate",
+    "pipeline._ordered",
+    "pipeline._read_manifest"
+  ],
+  "notes": [
+    "core.records.FieldView.from_payload dropped every key holding JSON null, so an explicit null was indistinguishable from an absent field in signatures, prerequisites, renames and fills (N1); it now reports null as its own state.",
+    "core.records.null_counts_as and core.records.fill_mode ignored field_policy.tsv and always returned the null_semantics.ini defaults; they now prefer the per-domain, per-field null_counts_as and fill columns when those are not empty (N2, N3).",
+    "core.planner checked every edge's prerequisites against the record as first received and refused to revisit a schema, against M6 and M7; planning now runs over (schema, field state) nodes so prerequisites see the state each edge actually meets.",
+    "core.planner._better broke ties on plan length instead of the smallest list of edge ids (M8); the new _descend picks the smallest edge id among the steps that keep the record on a cheapest plan.",
+    "core.planner._enumerate_paths listed every path, which cannot meet the K14 ten-second limit; the removed _advance, _better, _enumerate_paths and _stand_in are replaced by _explore, _remaining, _descend and _Transitions, whose work depends on the state space rather than the path count.",
+    "core.executor.execute_plan applied every correction before the first edge and never re-checked prerequisites, so it always reported migrated; corrections now land on first arrival at their pinned schema in log order (C3, C4) and a failed prerequisite stops the run with E_PREREQ_FAILED (M11).",
+    "pipeline._ordered returned the feed order, ignoring replay_manifest.csv; it now sorts by the batch received_seq and then the feed line number (K13).",
+    "pipeline._Run._admit keyed replay identity on the raw partner string and fingerprinted the migrated payload after migration; identity is now the canonical partner id and the fingerprint is taken on the line as received, before token replacement and before migration (K16, P4)."
+  ]
+}

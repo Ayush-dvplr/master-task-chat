@@ -1,0 +1,35 @@
+cd /app/out && python3 - <<'EOF'
+import json, collections
+lines=[json.loads(l) for l in open('normalized.jsonl')]
+# find an account with a segment change and many SUP lines crossing tiers
+by=collections.defaultdict(list)
+for L in lines: by[(L['account_id'],L['product'])].append(L)
+cand=[k for k,v in by.items() if len(v)>=6 and len({x['segment'] for x in v})>1 and max(x['tier'] for x in v)>=2]
+print(len(cand), cand[:5])
+k=cand[0]
+for L in by[k]:
+    print(L['timestamp'], L['region'], L['record_id'], L['units'], L['segment'], L['plan'], 'tier',L['tier'], L['unit_rate'], L['charge'], L['credit'], L['true_up'], L['net'])
+import subprocess
+print(subprocess.run(['grep',k[0],'/app/data/plan_changes.log'],capture_output=True,text=True).stdout)
+print(subprocess.run(['grep','-m1',k[0],'/app/data/accounts.csv'],capture_output=True,text=True).stdout)
+EOF
+
+=== OBSERVATION ===
+624 [('AC42126', 'SUP'), ('AC63736', 'STO'), ('AC24831', 'CMP'), ('AC53553', 'SUP'), ('AC22016', 'STO')]
+2026-09-01T00:01:39Z south SOU-000012 46 enterprise committed tier 1 0.4565 21.00 7.32 0.00 13.68
+2026-09-01T23:31:54Z north NOR-000125 874 enterprise committed tier 1 0.4565 398.98 160.83 0.00 238.15
+2026-09-03T05:21:58Z south SOU-000240 644 enterprise committed tier 2 0.4095 263.72 91.94 0.00 171.78
+2026-09-08T23:34:28Z west WES-000921 467 smb committed tier 2 0.5245 244.94 84.00 0.00 160.94
+2026-09-09T09:39:04Z west WES-000963 38 smb committed tier 3 0.4607 17.51 6.00 0.00 11.51
+2026-09-12T02:13:26Z north NOR-001216 58 consumer committed tier 3 0.7178 41.63 16.78 0.00 24.85
+2026-09-23T06:49:09Z east EAS-002352 77 corporate committed tier 3 0.3095 23.83 10.33 0.00 13.50
+2026-09-24T10:59:18Z east EAS-002500 66 corporate committed tier 3 0.3095 20.43 8.86 0.00 11.57
+2026-09-05T06:54:24Z change account=AC42126 plan=committed segment=corporate
+2026-09-05T06:54:24Z change account=AC42126 plan=committed segment=smb
+2026-09-06T12:39:45Z change account=AC42126 plan=committed
+2026-09-09T13:35:26Z change account=AC42126 plan=committed segment=consumer
+2026-09-12T10:08:24Z change account=AC42126 plan=committed
+2026-09-19T07:00:46Z change account=AC42126 segment=corporate
+2026-09-22T13:20:24Z change account=AC42126 plan=committed
+
+AC42126,enterprise,committed,

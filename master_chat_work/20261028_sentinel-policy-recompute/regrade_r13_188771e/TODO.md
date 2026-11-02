@@ -1,0 +1,24 @@
+# TODO 188771e (sentinel-policy-recompute, regrade R13)
+- [x] 0 rename session (opencode ses_e7eb94610ffe9K0n4gQ6EHRUuH)
+- [x] 1.1 baseline diffs + tree sha
+- [x] 1.2 read R13 + instruction line 7
+- [x] 1.3 read a8 final reply + judge R13 reasoning
+- [x] 2.1 edit R13 line
+- [x] 2.2 TRUTH.md check
+- [x] 2.3 diff vs QC v9 copy -> LOG
+- [x] 2.4 kit rule lines
+- [x] 3.1 precheck
+- [x] 3.2 kit QC scripts
+- [x] 3.4 sync Tasks_INPUT
+- [x] 4.1 learn harness judge path
+- [x] 4.2 staged task
+- [x] 4.3 bridge + regrade (once) - done 12:34, reward 0.4048
+- [x] 5 readout + scores + tables + gate - STOP: rubric 0 (R13 +3, R16 -3)
+- [x] 6 Output_RFP update (if gate) - SKIPPED, gate not met
+- [x] D report + result json
+## Regrade 2 (option b, Ayush 13:23)
+- [x] R2.0 pre-checks: diff -rq B vs T empty; diff B vs QC = only judge.toml:170; tree 583e77e1ae94
+- [x] R2.1 (done 13:34, reward 0.4453) wait docker slot (<2 heavy jobs), stage task, regrade once -> /tmp/regrade-sentinel-<TS>-2/
+- [x] R2.2 (gate MET: tests 80.95, rubric 8.11, overall 44.53; R13 0->1, R16 a8 0/r1 1/r2 0) Step 5 readout vs a8 and vs regrade 1, gate
+- [x] R2.3 Step 6 done 13:39 (backup, judge.toml, run_1 + pass_summary replaced, no 40.48 hits)
+- [x] R2.4 report section + result_188771e_r2.json

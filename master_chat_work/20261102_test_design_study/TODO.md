@@ -1,0 +1,5 @@
+- [x] Build reproducible 110-task inventory and selection script
+- [x] Deep-read selected tasks; write evidence cards and Easy contrasts
+- [x] Map QC rules and synthesize test-design patterns
+- [x] Inspect four local bundles and write ranked fix plan
+- [x] Verify counts, line limits, JSON, and final report

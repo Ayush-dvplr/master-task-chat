@@ -1,0 +1,36 @@
+cd /app/out && python3 - <<'EOF'
+import json
+from decimal import Decimal
+from fractions import Fraction
+lines=[json.loads(l) for l in open('normalized.jsonl')]
+acc={}
+for l in open('/app/data/accounts.csv').read().splitlines()[1:]:
+    f=l.split(','); acc[f[0].strip()]=f[2].strip()
+reg=json.load(open('region_south.json'))
+south=[L for L in lines if L['region']=='south']
+counted=[L for L in south if acc[L['account_id']]=='committed']
+base=sum(Decimal(L['charge']) for L in counted)
+print('base recomputed', base, 'reported', reg['credit_base'])
+pool=Decimal(reg['credit_pool'])
+# pencil check on one line: first pass then reshare
+first={L['record_id']: (pool*Decimal(L['charge'])/base) for L in counted}
+kept=[L for L in counted if round(first[L['record_id']],2)>=Decimal('0.50')]
+S=sum(Decimal(L['charge']) for L in kept)
+print('kept lines', len(kept), 'of', len(counted), 'kept charge sum', S)
+L=[x for x in counted if x['record_id']=='SOU-000012'][0]
+exact=Fraction(int(pool*100)*int(Decimal(L['charge'])*100), int(S*100))
+print('SOU-000012 exact cents', float(exact), 'reported credit', L['credit'])
+print('sum of credits', sum(Decimal(x['credit']) for x in south), 'reported applied', reg['credit_applied'])
+# tie-rounding evidence: charges whose exact product ends in 5 at the 3rd decimal
+ties=[L for L in lines if (Decimal(L['units'])*Decimal(L['unit_rate']))*1000 % 10 == 5]
+print('tie cases:', len(ties))
+for L in ties[:6]:
+    print(' ', L['units'], L['unit_rate'], Decimal(L['units'])*Decimal(L['unit_rate']), '->', L['charge'])
+EOF
+
+=== OBSERVATION ===
+base recomputed 70191.54 reported 70191.54
+kept lines 1346 of 1816 kept charge sum 69986.35
+SOU-000012 exact cents 732.1418676641945 reported credit 7.32
+sum of credits 24399.83 reported applied 24399.83
+tie cases: 0

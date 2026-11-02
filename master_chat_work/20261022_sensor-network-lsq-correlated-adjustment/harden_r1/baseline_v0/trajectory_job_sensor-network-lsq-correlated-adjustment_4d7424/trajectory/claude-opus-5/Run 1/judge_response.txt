@@ -1,0 +1,62 @@
+--- r1_produces_reports_running_python3_app ---
+{"score":"yes","reasoning":"In Step 23, the agent ran `python3 /app/out/derive_report.py /app/data /app/out`, using the shipped extract directory `/app/data` and `/app/out` as the two arguments. The command completed successfully and produced the reports."}
+
+--- r2_assembles_normal_equations_observations_ascending ---
+{"score":"no","reasoning":"Although load_observations sorts observations by obs_id and the diagonal subset preserves that order, assemble() processes all uncorrelated observations first and then correlated session blocks. Those blocks retain session_correlation.csv order, and each block uses member_a/member_b order without sorting. Therefore normal-equation contributions are not assembled in one globally ascending obs_id order."}
+
+--- r3_takes_figure_from_documented_decoy ---
+{"score":"no","reasoning":"derive_report.py does not source any reported numerical figure from inputs documented as deprecated, superseded, cached, or decoy. It reads control values from the authoritative XLSX workbook, filters unit factors and correlation sessions to authoritative rows, computes weights from normalized shard data, and explicitly ignores the decoy tuning constant, naive-weight column, stale cached solution, deprecated coordinates, and rounded decoy unit factors. References to decoy inputs in provenance_summary.json are labels documenting what was ignored, not sources of reported figures."}
+
+--- r4_opens_path_outside_data_out_dirs ---
+{"score":"no","reasoning":"derive_report.py restricts filesystem access to paths derived from its two command-line arguments: it reads files via os.path.join(data_dir, ...) or names returned by os.listdir(data_dir), and writes artifacts via os.path.join(out_dir, ...). It contains no hardcoded external filesystem path, current-directory access, home-directory expansion, or other open outside DATA_DIR/OUT_DIR. XLSX members are read internally from the workbook located in DATA_DIR, not as external paths."}
+
+--- r5_keeps_load_bearing_arithmetic_exact ---
+{"score":"yes","reasoning":"derive_report.py uses fractions.Fraction for decimal parsing, unit conversions, variances, base and robust weights, correlated-session inverse weights, normal-matrix assembly, exact Gaussian elimination, residuals, and the vTPv quadratic form. Weight quantization and ROUND_HALF_EVEN are implemented with integer/Fraction arithmetic, and no floating-point arithmetic is used in the delivered program's load-bearing calculations."}
+
+--- r6_reads_header_block_four_source ---
+{"score":"yes","reasoning":"Before writing the shard parser in step 20, the agent inspected the headers of all four source shards in step 11. The North, South, and West outputs exposed their comment-header convention declarations, while the East JSONL metadata header was further parsed and inspected in full in step 12. These reads occurred before implementation and covered each shard's declared unit, sigma, sign, azimuth, and identifier conventions."}
+
+--- r7_reproduces_naive_weight_from_shard_sigma ---
+{"score":"yes","reasoning":"The trajectory explicitly recomputes OB00261's naive weight from its ft_i shard-unit standard deviation using var_raw = sigma^2 and 1/var_raw, obtaining 549.722130. It then converts the variance to base units and obtains the different correct weight 5917.159763. The final response also reports this named observation and comparison."}
+
+--- r8_cross_checks_least_one_converted ---
+{"score":"yes","reasoning":"Step 32 independently checks converted weighting for multiple observations against observation_weight_manifest.csv. For OB00261 (ft_i, stddev) and OB00521 (ft_us, variance), it reads the manifest’s base-unit a-priori sigma (0.013 and 0.012), applies the authoritative unit factors and shard sigma conventions, and derives corresponding base-unit weights of 5917.159763 and 6944.444444. This confirms the converted sigma/variance interpretation while showing that the manifest’s decoy naive_weight instead matches unconverted shard-unit weighting."}
+
+--- r9_cross_checks_restored_epoch_2 ---
+{"score":"no","reasoning":"The agent restored transposed epoch-2 IDs and checked uniqueness, format, and whether session members existed in the restored overall ID set, but it never cross-checked the restored epoch-2 IDs against an independent authoritative listing such as observation_provenance.psv before joining sessions. The delivered program does not load provenance for validation and even reports observation_provenance.psv as ignored."}
+
+--- r10_prints_applied_unit_factors_with_status ---
+{"score":"no","reasoning":"Before the first full adjustment run at step 23, the agent never printed the applied factor for every unit declared by the shards alongside the status of the corresponding reference_unit_registry.csv row. Step 19 hardcoded factors for m, ft_i, ft_us, chain, gon, deg, and arcsec internally but did not print those factors or registry statuses. The later discussion in steps 32–33 occurred after the full run and still did not list every declared unit next to its source-row status."}
+
+--- r11_recomputes_vtpv_final_residuals_weights ---
+{"score":"no","reasoning":"The program computes vTPv once from the stage-2 residuals and in-memory weights via quadratic_form() and uses that same value for all reports. The trajectory does not independently recompute vTPv from the final residual and weight artifacts and compare it against the reported quadratic form before concluding."}
+
+--- r12_checks_session_members_keep_block_weight ---
+{"score":"no","reasoning":"The implementation structurally excludes surviving session members from the stage-2 diagonal IRLS loop and reuses fixed block inverse weights, but it never explicitly checks the required invariant before writing reports. In particular, `members2` is computed and then unused; there is no assertion that every surviving authoritative-session member retained its original block weight or that none appeared in the stage-2 downweight test/results."}
+
+--- r13_confirms_exact_solution_checking_reproduces ---
+{"score":"no","reasoning":"The agent solved the exact normal equations using rational Gaussian elimination, but it never explicitly verified that the resulting solution satisfies N x = b or checked that the assembled normal matrix N is symmetric before relying on the solution. Determinism and the global model-test result do not satisfy this criterion."}
+
+--- r14_runs_program_modified_copy_extract ---
+{"score":"no","reasoning":"The agent ran the program on the shipped extract and on an unchanged copied extract, but never changed a workbook value or shard declaration before running it. Therefore it did not demonstrate that the program reads modified values from the files."}
+
+--- r15_prints_flagged_standardized_residuals ---
+{"score":"no","reasoning":"The program flags stage-1 blunders using `v * v * base_weights[oid] > crit2`, but it does not print each flagged observation's standardized residual squared alongside `blunder_crit` squared before the stage-2 re-solve. It only later reports the blunder IDs and the unsquared critical value."}
+
+--- r16_checks_stage_2_observation_count ---
+{"score":"no","reasoning":"The counts are numerically consistent (1040 stage-1 observations minus 18 blunders equals 1022 stage-2 observations), but the agent never explicitly checks or asserts this invariant before computing and reporting dof. It simply constructs `kept`, sets `n_obs = len(kept)`, and computes `dof = n_obs - u_constrained`."}
+
+--- r17_inspects_station_frame_map_csv ---
+{"score":"yes","reasoning":"In Step 15, the agent explicitly inspected both station_frame_map.csv and epoch_campaign_map.csv. It later used those files in the implementation to derive frame membership from the mapped primary station and campaign membership from the mapped observation epoch, so the inspection occurred before deciding and coding the rollup grouping keys."}
+
+--- r18_writes_derive_report_py_maintainable ---
+{"score":"no","reasoning":"The code is generally well structured with descriptive function names and no bare except clauses or obvious debug prints, but it does not consistently fail explicitly on malformed input. For example, unknown boolean convention values silently become false, any sigma_kind other than \"variance\" is treated as \"stddev\", unknown observation kinds fall through as length observations, and malformed or conflicting authoritative session rows are silently skipped. It also retains unused values such as members2, session_id, and the observation shard field, contrary to the no-dead-code requirement."}
+
+--- r19_states_model_test_verdict_adjustment ---
+{"score":"no","reasoning":"The final response’s model-test verdict and adjustment figures agree with the artifacts shown under /app/out: PASS, n=1022, dof=1019, 18 removed blunders, vTPv=1097.7210980823, acceptance interval [1097.220807, 1098.220807], variance factor 1.0772532857, three downweighted observations, and the listed free and datum-shifted corrections all match."}
+
+--- r20_claims_check_test_passed_trajectory ---
+{"score":"no","reasoning":"The response's explicit verification claims are supported by trajectory actions: the program was run and timed, required/missing/extra artifacts were checked, JSON newline/key ordering was checked, repeated runs were diffed for determinism, execution against a copied DATA_DIR was performed, source imports and path references were inspected, and temporary directories were removed. Some substantive conclusions may be debatable, but there is no clear claim that a test or check passed when no corresponding check was run."}
+
+--- r21_repeats_same_failing_derivation_approach ---
+{"score":"no","reasoning":"The agent did not repeat a failing derivation approach three or more times after contradictory checks. The only explicit failure was the initial file creation because `/app/out` did not exist; it immediately created the directory and retried successfully. Subsequent execution and validation checks passed, with no repeated unchanged derivation attempts following a disagreement."}

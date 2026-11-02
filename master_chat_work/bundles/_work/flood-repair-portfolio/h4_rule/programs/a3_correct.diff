@@ -1,0 +1,27 @@
+8a9
+> import itertools
+149a151,152
+> SHARED_CAP = 4
+> 
+306c309,327
+<         total, chosen = max_weight_independent_set(self.ids, adj, self.benefit)
+---
+>         # A shared crew can work on at most four proposals of a portfolio: try
+>         # every allowed choice of four members for each over-full shared crew.
+>         crews = defaultdict(list)
+>         for pid in self.ids:
+>             if self.book.crews[self.crew[pid]] == "shared":
+>                 crews[self.crew[pid]].append(pid)
+>         over = [sorted(ps) for _, ps in sorted(crews.items()) if len(ps) > SHARED_CAP]
+>         best = None
+>         for pick in itertools.product(*[itertools.combinations(ps, SHARED_CAP) for ps in over]):
+>             out = set()
+>             for ps, kept in zip(over, pick):
+>                 out |= set(ps) - set(kept)
+>             keep = [p for p in self.ids if p not in out]
+>             sub = dict((p, adj[p] - out) for p in keep)
+>             total, chosen = max_weight_independent_set(keep, sub, self.benefit)
+>             cand = (-total, sorted(chosen))
+>             if best is None or cand < best:
+>                 best = cand
+>         total, chosen = -best[0], best[1]

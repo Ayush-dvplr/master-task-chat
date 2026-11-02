@@ -1,0 +1,20 @@
+# P12 r1 TODO (965f34e). Prior P9 TODO kept as TODO_P9.md
+- [x] P0.0 rename session (965f34e not in list; noted)
+- [x] P0.1 read rules, round notes, lever rules, rulings, playbook, QC v1, WORK files
+- [x] P0.2 xref_check 0 findings (16 entries)
+- [x] P0.3 lock taken; before_r1 copy (tests, environment, solution, instruction.md) in WORK/trap/before_r1
+- [x] P0.4 rebuild WORK/local_score.py + single_lever.py; prove oracle 157/157, agent 17/157 on BEFORE tests
+- [x] P1 recheck rows F-01..F-04, W-01..W-06 into OUT/RECHECK_FIX.md
+- [x] P2.1 F-01 settling_passes check
+- [x] P2.2 F-03 held-out draws of eleven quantities
+- [x] P2.3 F-04 listing check + W-06 staged record
+- [x] P2.4 F-02 R11 wording
+- [x] P2.5 W-01 report-schema file names (generator + re-embed)
+- [x] P2.6 W-04 _first_difference decides
+- [x] P2.7 W-05 instruction one-file sentence
+- [x] P2.8 reward.toml, TRUTH.md, QC_DEFENCE, LEVERS, XREF, xref_check 0
+- [x] P2.9 QC 4 scripts 0 FAIL + manual checks
+- [x] P2.10 stacking_check -> OUT/STACKING_CHECK.md
+- [x] P2.11 trap survival (all variants + carry-eleven)
+- [x] P2.12 Docker block (warm, oracle x3, owner, chmod600, nop, stub, forgery)
+- [x] P3 reports, result json, tree sha, unlock, rename

@@ -1,0 +1,231 @@
+# LEVER_RULES v3 (DRAFT, board 720e1d7; authority for hardness sources, writing, grading, judge, the stacking gate and the probe gate)
+
+Status: DRAFT 26 Oct 2026, not active. Replaces `LEVER_RULES_v2.md` once Ayush decides the items in `CONFLICTS.md` and the master installs it as `knowledge/LEVER_RULES_v3.md` with a CHANGELOG line in `prompts/templates/CHANGELOG.md`. Templates point here by path; they never paste this file.
+
+Sources: v2 (25 Oct, kit 5574d77e); Final_Delivery scan 2 (19 delivered tasks, groups g1-g4, boards be971df, aee9e0a, bffecb6, af78147); study 1 (21 tasks, `delivery_study/synthesis_6c6fcf3/DELIVERY_LEARNINGS.md`); our 8 parked builds 24-26 Oct (`registry/tasks.json`). Changed lines carry `[v3: reason, evidence]`. Unmarked lines are v2 text kept as is.
+
+Cite keys: kit `01:45` = `01_Instruction_QC.md` line 45, `03:` Tests, `04:` Judge, `05:` Alignment, `FC:` Final_checklist (kit 5574d77e). `gN/` = `master_chat_work/_dev_research/delivery_study2/gN_<board>/`; `C_<id>.md` = a card; `GS` = that group's `GROUP_SUMMARY.md`. `DL:` = DELIVERY_LEARNINGS.md line.
+
+Words used here:
+- **Final reward**: the harness score, tests and judge each 50%: final = (tests% + judge%) / 2.
+- **Shipped instance**: the data in `environment/` the agent sees. **Hidden corpora**: inputs the tests generate and run the agent's program on.
+- **Degenerate shipped instance**: a shipped instance on which a stated rule's hard branch never fires.
+- **Probe**: a judge criterion that grades one act in the trajectory (for example: one edge-input run and its shown result).
+- **Probe band**: the set of probes in one judge.toml.
+
+## 0. Why our levers failed (read once)
+Every rule sat in one plain sentence near its use, sometimes with the trap explained. claude-opus-5 reads every spec in its first minute, writes its program once 3 to 10 minutes in, and never changes the graded logic afterwards. It self-tests on shipped data, on its own tiny examples, and on invariants (totals, determinism). It transliterates ANY explicit rule sentence, not only full procedures, and its self-check reproduces its own reading, so a control that reconciles only under the right reading confirms the rule for it. Known leaks: `knowledge/LEAK_LIBRARY.md`.
+
+[v3: large specs behave differently, g4/C_8764bfdd.md:91, g4/C_4e2f6925.md:17, g3/C_56fe3bdd.md:19-21] With 30 or more rules over many files Opus reads for 4 to 11 minutes, makes its first full run at 10 to 46 minutes, and keeps editing graded logic for up to 90 minutes. It still loses points: on rules it read once and never re-read, on branches the shipped data never fires, and on checks it never ran.
+
+[v3: our 24-26 Oct builds, registry/tasks.json] Our 8 parked builds 24-26 Oct were small, fully stated contracts with a computational core. Blind Opus sessions transliterated them into exact programs in about 3 minutes (cleanroom 3/3 at 98/98, crash-recovery 3/3 at 95/95, batch-lease 3/3 at 139/139), and stated limits handed over the fast exact method (cold-chain probe tests 100, final 85.0; flood: 2 of 3 found the DP in about 5 minutes). Exact optimum with a stated method is easy for Opus (g4/C_80877080.md:9: solved exactly on 9 corpora in 24 minutes).
+
+25 Oct: the peer losses we envied came mostly from silence (an unstated binding time, an open operand, a second model that also fits), which QC still forbids (05:27). The legal difficulty left is (a) composition and amplification of stated rules on hidden inputs and (b) rules with no sentence that one determinate shipped fact settles (L11). Withholding is the kit's default (01:47 "Withholding is the default and difficulty is the point").
+
+[v3: g1 GS:5-10, g2 GS:23, g3 GS:13] 26 Oct, from 40 delivered tasks: delivered peers stay below a final of 70 in three ways. (a) Breadth: 30 to 80 plainly stated rules over many files and formats, graded whole-family exact. (b) A degenerate shipped instance: the rule space is stated, the hard branch fires only on generated hidden corpora, and most test weight sits there. (c) A judge half built as a probe band of acts Opus skips. Section 1A ranks the sources; section 4 builds the judge; section 8 lists the peer losses we must never copy.
+
+## 0b. The determinate test (05:21-32; also decides IN-17, TS-19, JD-15)
+A deliverable-property rule needs no sentence when the shipped input (any directory `environment/Dockerfile` copies) DETERMINES it: the agent can read it off the input, and the input contradicts every wrong reading (05:21 "rather than something the input merely fails to contradict").
+- Counts: a present data property (3 of 40 rows carry an empty timestamp, 05:26); a config value (`fiscal_start = "04-01"`, 05:29); an example actually given, for output shape and types (FC:492, 04:95); a listed candidate set; a record that only the right reading reproduces.
+- Never counts: silence (every shipped id distinct says nothing about repeats, 05:27); pre-formatted values (they show the width, not the rounding rule, 05:28); a branch that never fires on shipped data; readings that coincide on shipped data; any prohibition or scope rule (05:30, 03:50). These need a stated sentence.
+- [v3: degenerate instance is only legal with a sentence, g1 GS:23, g1/C_3f39299a.md:34] A degenerate shipped instance therefore always needs the rule sentence for every branch it hides. The instance may hide the case; it may never hide the rule.
+- One file settles one demand (05:32): judge the exact fact the check needs, not the file.
+- Rules of engagement (scope, which files may change, tools, procedural order, negatives) are always stated (IN-15 01:45; AL-1 carve-out 05:21). Shape and literals of the output may be settled by a shipped example (05:21 constraint exception, FC:492).
+- Every rule settled by evidence gets a row in `WORK/EVIDENCE_MAP.md`: `| rule | test ids | shipped fact file:line | wrong readings it contradicts |` (FC:428 "name either the sentence it enforces or the shipped fact it reads").
+- [v3: g2 GS:47-58, 3def42a3 TRUTH.md:423-461] Every stated rule gets a row in `WORK/RULE_TRACE.md`: `| rule id | sentence file:line | generator branch that plants it | tests that grade it |`. A generator branch with no sentence row is a hidden rule: delete the branch or write the sentence.
+
+## 1. Design shapes. [v3: replaces "at least 3 independent levers, each >= 25%"; CONFLICTS C3; g2 GS:23, g1 GS:27]
+Pick ONE primary shape and at least one secondary hardness source from 1A:
+- **Shape B (breadth)**: at least 30 graded stated rules spread over at least 10 files in at least 5 formats; at least 15 rules each cost at least 3% of test points alone in the cost table (G10); every output family graded whole and exact.
+- **Shape D (degenerate instance)**: at most 3 sharp rules, each with a stated rule space whose hard branch never fires on shipped data; each costs at least 25% alone; at least 70% of positive test weight on hidden corpora (G3).
+- Either shape: a judge probe band per section 4.
+Levers L1-L11 below stay valid as building blocks inside either shape. A lever set must not repeat another live task's full set.
+
+| id | lever | mechanism | peer evidence | family |
+|---|---|---|---|---|
+| L1 | Green control, wrong answer | The shipped data carries a control (counts, sums, hashes per file or block), described truthfully as a parse/count control. Graded values depend on rules above that layer. The control reconciles under BOTH readings (W7). | G3 P2: sentinel, pretraining, slo; 127 to 205 test pts; [v3: 9125255a green control upstream of filter, g2 GS:27] | D |
+| L2 | Make-it-match repair | When the honest reading fails a control, a plausible repair (reorder, rescale, coerce, trim) makes the control pass but breaks a stated reading rule. That rule sits in the file's own conventions, far from the control. | G3 P3, slo | NEW (control-fitting) |
+| L3 | Stateful stream | An ordered ledger with caps, budgets or allowances. An early decision consumes state that later records read. Invariant checks still pass. | G3 P1 | C+B |
+| L4 | Multi-document composition | One graded value needs 3 to 5 files. Each piece is one plain sentence, in a different file from the data it governs. | G3 P4 | A+E |
+| L5 | Strict rule beside a normalising rule | One field is type-strict ("is a JSON integer"); a global trim/normalise rule sits in another section. Separating rows ship in the data, plus easy-reject decoys of the same field (bools, floats) so only the subtle case (a quoted integer) bites. | G4 P1, 55 pts; collateral one quoted-integer slip = 37 combined pts | F |
+| L6 | Scope carried by a definition | A formula term inherits a scope ("matched AND not superseded") from a glossary definition. | G1 P2, G5 #1; [v3: 0b27b9dc rule implied by the word 'set', 3 pts, g3 GS:21] | A |
+| L7 | Rounding/unit per item | The rounding unit is stated in the stage file ("each X is rounded half-even before summing"). No worked figure from shipped data where the two readings differ. | G1 P3 | E |
+| L8 | Exact-decimal recurrence | A running balance or allocation in exact decimals, rounded half-even at a stated step, with at least 3 planted ties in the hidden inputs. | pa-household delivered M2 | E |
+| L9 | Multiplicative factor with stated denominator | One factor (rate, share, weight) multiplies a whole document; its denominator (which rows count) is stated once in the governing file. | pa-household delivered M1, 12 tests | A+E |
+| L10 | General rule in a rarely joined field | A general identifier or case normalisation rule is stated once; it matters only in a field of a rarely joined source (an event log). | slo delivered D, 60 test pts | F |
+| L11 | Evidence induction (PILOT; tariff pilot failed 3/3 blind reads 157/157, registry/tasks.json:674; not required in builds) | A deliverable-property rule with NO rule sentence anywhere. One shipped witness settles it (0b). The witness sits in a different file from the data it governs and is never labelled as a check, an example or an expected value. Each hidden corpus carries its own witness with fresh values. `WORK/UNIQUENESS.md` shows exactly one candidate reading reproduces every witness, shipped and hidden. If two readings fit any witness, it is silence (IN-16) and the lever is rewritten. EVIDENCE_MAP row mandatory. | inference task (63%, digest fixes the answer) | NEW (induction) |
+
+Never used. (a) Silence, still forbidden (IN-16 01:46, 05:27): ambiguous fallback scope; a "shipped slice only" promise; an unmapped lookup code with no stated outcome; a rule sentence whose "it" or "that" has two antecedents (survey: 97 raw pts on one reading); an answer key that contradicts the written contract (wafer: 32.58 pts); a malformed line in a reference or lookup table with no stated outcome (caldermoor CM-A, test-depth 840adf9); [v3: section 8] a generator branch with no rule sentence (3f39299a, b625f36e, 8d3e20fb); an output convention (casing, bundle size, invocation flags) no file states (80877080, 8d3e20fb). (b) Allowed ONLY when one shipped fact determines the answer (0b) and EVIDENCE_MAP names it, otherwise forbidden: an undefined symbol (a config value defines it); an override using different vocabulary (a shipped mapping table settles it); a tie-break (equal instants, merged-account rows, zero-weight votes; a shipped separating case, and AL-27 05:38 then needs a planted tie and a mutant); flag-versus-date semantics (a separating record); a nullable output field (a shipped example plus a determinate null condition); a merge or alias source (a determinate register shows the row that wins).
+
+### 1A. Hardness sources ranked by measured genuine points lost (NEW v3)
+"Genuine" = lost on a stated or determinate rule, per the group studies' GENUINE/PARTLY labels. Points are raw test points from the group summaries; they do not add across rows where one task appears twice (noted). Study 1 tasks (21) feed rows S1 and S2 through DL TD1-TD3 (DL:47-56: "separation came from TD1 (unseen inputs) multiplied by TD2/TD3 (whole-unit exactness repeated)"); study 1 has no per-source point split, so its rows say "TD only".
+
+| rank | id | source | mechanism | how graded | how it passes QC | measured genuine pts | SAFE/RISKY | why a blind Opus does not finish it in 3 minutes |
+|---|---|---|---|---|---|---|---|---|
+| 1 | S1 | Breadth | 30-80 small stated rules over 10-100 files in 5-20 formats; late-band conventions inside one file | each output family whole and exact, shipped and hidden | every rule has a sentence (TRUTH traceability), IN-15/16 pass, CL-4 exactness sentence (g2 GS:23) | 9125255a 124/184, daaca581 121/146 (same task as 3def42a3 90/145), 8764bfdd 100/206, 4e2f6925 36/74 (g2 GS:10-14, g4 GS:10-13, :20-26); study 1 TD2 | SAFE | reading alone took 4-11 min; first full run 10-46 min; 8764bfdd edited graded logic to 93 min and still missed 20 checks (g4/C_8764bfdd.md:91; g4 GS:20-26) |
+| 2 | S2 | Degenerate shipped instance, stated space | the rule and its branches are stated; the shipped data never fires the hard branch; hidden corpora always do | 77-95% of positive weight on generated hidden corpora | promise sentence that the program reruns on any extract of the layout (18b5d99f instruction.md:7; b42c61b9 instruction.md:3); TS-19 same generator | 18b5d99f 95/103, b42c61b9 61/67 (g1 GS:15-19, :23); 37a0c3d6 64/70 behind a gate (g2/C_37a0c3d6.md:7); study 1 TD1 | SAFE when the space is stated; RISKY when not (3f39299a, section 8) | its self-check runs on shipped data, where the wrong program is exact; first full program 8.5 min (g1/C_18b5d99f.md:66), and it never builds an input that fires the branch (g1 GS:5-10) |
+| 3 | S3 | Unique fit, not first fit | a stated candidate space; the output must be the one candidate that fits all evidence, and the program must fail when zero or more than one fit | hidden corpora where the first candidate in natural order is wrong | IN-16 settled by a closed candidate space; TRUTH proves uniqueness (18b5d99f QC :63-66, 1 of 666 rankings; g1/C_18b5d99f.md:83) | 18b5d99f and 3f39299a, 205 pts together (g1 GS:24; overlaps S2 rows) | SAFE | Opus returns the first consistent candidate (`combinations[0]`, optimize.py:532-570; g1/C_18b5d99f.md:32, g1/C_3f39299a.md:45-46) |
+| 4 | S4 | Long authority chain | which of several near-duplicate deliveries or manifests governs is decided by a chain of stated authority rules across files | whole outputs depend on the chosen source | stated precedence; IN-16 settled by chain | 56fe3bdd 53/151 (g3 GS:17) | RISKY (KNOWN: easy to leave two readings) | agent printed both manifests at step 66 and chose wrong at step 161 (g3/C_56fe3bdd.md:37) |
+| 5 | S5 | Partial-authority decoy with one live fact | a file demoted by its own header ("superseded except X") where one named fact still governs | graded both sides: demoted facts must not leak, the live fact must be used | the header settles it (IN-16); demotion far from the decoy (3def42a3 TRUTH:180-198) | 3def42a3 35 (g2 GS:26), 8764bfdd 15 INFERRED (g4/C_8764bfdd.md:84) | SAFE | Opus drops the whole decoy, live fact included (g4 GS:36-42) |
+| 6 | S6 | Hidden-only fixtures for stated branches, buried | a stated branch among ~60 rules is planted only in hidden corpora | hidden tier per branch, plus visible and hidden per check | sentence exists; generator plants it (8764bfdd `_plant_rule_triggers`, TRUTH:183-185) | 8 of 20 failed checks in 8764bfdd INFERRED (g4 GS:31-35); daaca581 tie-break fixtures moved nothing (g2/C_daaca581_DIFF.md); 80877080 RETAG implemented anyway | SAFE, yield only when buried among many rules | with few rules Opus implements every sentence; buried among 60 it misses some (g4 GS:31-35) |
+| 7 | S7 | Digest or summary cascade (amplifier) | a stated digest or summary is computed from other outputs, so one slip shows twice | the summary graded whole | stated in instruction (4e2f6925 instruction.md:11); CL-4 sentence | 4e2f6925 18 -> 36 pts (g4 GS:27-30) | RISKY (CL-4 exposure; amplifier, counts 0 alone) | it multiplies S1 slips; no time effect of its own |
+| 8 | S8 | Rare-branch hidden seed | a default plus a stated exception that never fires on shipped data; hidden seeds chosen so a wrong reading fails every graded seed | hidden seeds (7e0d8feb test_output.py:741-770) | stated rule; TS-19 seeds within bounds | 7e0d8feb 5/85 (g3 GS:18) | SAFE, small | Opus scored 80/85 in 16 min; missed only the never-fired exception (g3/C_7e0d8feb.md:16) |
+| 9 | S9 | Self-referential artifact | the deliverable must describe itself (for example its own manifest or hash) per a stated rule | exact file | stated sentence (c55a1967 instruction:54) | c55a1967 5 (g3 GS:19) | SAFE, small | it writes the artifact before the final edit and never refreshes it (INFERRED from g3 GS:19) |
+| 10 | S10 | Provenance gate | a value counts only if its stated source chain is intact | per-row check | stated rule | c55a1967, inside the 5 above (g3 GS:19); g3 also notes 13 artefact pts on the same task (stale tree) | SAFE, small, unproven alone | as S9 |
+| 11 | S11 | Scoped-exception decoy | a global rule with an exception scoped to one section, plus a look-alike that is out of scope | per-row | stated in schema (e13fd332 schema.md:65 vs :280-282) | e13fd332 4/40 (g3 GS:20) | SAFE, small | Opus applies the exception too widely (g3 GS:20) |
+
+Rejected as sources (do not plan on them): a cheap stateful rule beside the hard core with a silent redefinition (6d12f970 94 pts, cost_policy.md:8-13; RISKY IN-16, g1 GS:25); wrong-reading negatives (16 detectors fired 0 times, g4 GS:66-77; DL:54 TD8 "0 fired anywhere"); exact optimum with a stated method (80877080 core solved on 9 corpora, g4/C_80877080.md:9; cold-chain tests 100); odd carriers and format rules (g3 GS:79; LEAK_LIBRARY V0-7); mutation tiers alone (DL:52 "cheap for Opus").
+
+How to combine: S1 or S2 as primary, plus S3, S5 or S6. Use S7 only with a CL-4 sentence. S8-S11 are garnish (4-5 points each).
+
+### 1b. Opus-habit bank (default lever picks; 24 Oct second read of the 6 delivered tasks)
+Delivered scores are bimodal per lever: about 96 to 99 when the agent reads its main rule strictly and 41 to 72 when it does not. The misses that repeat across tasks are habits, not puzzles. Pick each lever's wrong reading from this list:
+- H1 lenient coercion: a quoted integer, a "12.0" or a padded string accepted where the rule says the field is a JSON integer (L5; collateral 37 pts).
+- H2 float rounding: binary float or half-up where the rule says exact decimal, half-even, at a stated step, with at least 3 planted ties (L8; pa M2).
+- H3 denominator scope: a share or rate divided by all rows where the governing file names a subset (L9; pa M1, 12 tests).
+- H4 normalisation in a rarely joined field (L10; slo D, 60 pts).
+- H5 make-it-match: a control fitted by a repair the rules forbid (L2).
+- H6 state consumed early: a cap or allowance used by an earlier record (L3).
+- H7 RETIRED 25 Oct (Ayush decision 3).
+- [v3: g1/C_18b5d99f.md:32, g1/C_3f39299a.md:45-46] H8 first fit: returns the first candidate that fits instead of checking that exactly one fits (S3).
+- [v3: g1 GS:5-10, g3/C_0b27b9dc.md:65] H9 shipped-only self-test: checks aggregates and invariants on shipped data, never builds an input that fires a stated branch (S2, S8, and the probe band).
+- [v3: CONFLICTS C11, g2 GS:26, g4 GS:36-42] Plain decoys, look-alike files, encodings, DST, duplicate ids and superseded notes are noise only. A partial-authority decoy (S5) is a lever.
+
+Habit levers leak by writing, not by data (metered probe 1: tests 199/199 with H1-H4 all held). Opus builds its own generator and tie fixture for every explicit sentence. A habit lever trips only when written like this:
+- H1: bare type property ("`units`: a JSON integer") beside a global trim or normalising rule. Never list the malformed values and never write a carve-out sentence naming the exception. precheck.sh fails LV-ENUM when a contract lists the malformed values of a typed field.
+- H2: only when the step or unit is stated once in a glossary and applied at a different stage (pa); otherwise graded noise.
+- H3: scope set by a defined term whose meaning differs from a per-line field the output already requires.
+- H4: only when the normalisation lives in one file's reading convention (slo); otherwise noise.
+- Stateful keys (H6, group counters keyed wider than the habit key) held as hidden-only cases are the strongest stated lever measured so far.
+- Opus's method (sentinel probe 1): it reads every rule file in one loop and transliterates each sentence using the per-line field the sentence names. Key the rule from a different file than the field it reads, and make the shipped control reconcile under both readings.
+
+Prefer levers that interact (one feeds the other): the biggest peer losses (127 to 205 pts) came from interacting levers.
+
+## 2. Writing rules. Every rule of engagement stated (IN-15); every graded rule has one reading (IN-16), from a sentence or from determinate evidence (0b).
+- W1. Never explain the trap. No "not only X", no "note that", no trap lists, no rule counts, no sentence explaining why a carve-out exists or restating the consequence of a definition. QC fails the same act as IN-17 (01:47) in instruction.md. Our W1 stays stricter than IN-17: counts and trap lists are banned in every agent-visible file. [v3: kept; a data-side trap list passed QC in 4e2f6925 and gave no gain, g4/C_4e2f6925.md:10, :17; CONFLICTS C6]
+- W2. Put each rule in the file that governs its data, not next to where it is used. The instruction need not point at the file (01:45 "need not name the file"); a pointer is optional.
+- W3. Use the plain forms that worked: a bare property with no example; one clause inside a long enumeration; a definition with a branch and no warning; a count defined by a balancing identity with another file; a global default with the exception in another section.
+- W4. An override names the field exactly.
+- W5. Stated levers: shipped data includes the separating case for L5 only; for the others the separating cases are in hidden reseeded inputs only, and the shipped data never contradicts them. [v3: S2, g1 GS:87-93] For Shape D this is the design goal: write `WORK/BRANCH_FIRE.md`, one row per stated branch: `| rule | branch | fires on shipped (count) | fires on hidden (seeds) |`; the hard branch has shipped count 0 and fires on every hidden corpus that grades it. L11 inverts this: the shipped input MUST hold one separating witness.
+- W6. [v3: CONFLICTS C7, g2/C_37a0c3d6.md:19, :44] A worked example may show one rule on invented toy values that appear in no shipped or hidden file, at most one per rule. It never uses a shipped record or a graded figure and never says which case is the trap. No other worked example in which the right and wrong readings differ, except the single unlabelled L11 witness.
+- W7. A shipped control is real and honest, and reconciles under both the right and the wrong reading of every lever.
+- W8. A settling rule may sit in an odd visible carrier (a TOML comment, a table footnote, an erratum file) when it is visible and has one reading. When several documents carry rules, one instruction sentence names which document wins (for example "where a file and the standard disagree, the standard wins", 8764bfdd instruction.md:1, g4 GS:66-77).
+- W9. Literal-reading self-test: read every rule sentence literally and alone; for L11, read every witness literally and alone. If that reading makes the oracle lose points, rewrite.
+- W10. [v3: CONFLICTS C10 and breadth, g2 GS:23, g3 GS:27] One rule register. `docs/` (or the task's equivalent) holds a register file naming every governing file; each rule is one sentence in the file that governs its data (W2). instruction.md states the job, the output paths, whole-document exactness, the rerun promise (G5) and the rules of engagement (work directory, process order, files that may change, exact invocation). It states no rule of the computation. Wholesale delegation ("follow the register") makes every rule it invokes an AL-2 row (05:33).
+- W11. No answer for any graded document is visible to the agent (Ayush decision 5): no answer key, golden or sample output, solved list, expected figure, claimed total or "the correct result is" sentence for any graded document, anywhere in `environment/`. Allowed: honest controls per W7, toy worked examples per W6, the single unlabelled L11 witness. An output-shape example (FC:492) carries placeholder or out-of-scope values.
+- [v3: g1 GS:46-52, 6d12f970] W12. When the generator re-renders rule documents per hidden corpus (dates, ids, thresholds), the rendered sentences stay word-for-word except the values, and the rule register lists which values change.
+
+## 3. Grading rules
+Kit limits: TS-26 forbids two tests reading the same observable with the same logic; TS-13 one property per test; AL-28 applies to negatives only, one act costs at most -5 across both layers. CL-4 (FC:491) is exempted by "an instruction that states out loud that only an exact match counts".
+- G1. Whole-document exact grading per hidden corpus. Tests compare each output document whole, exactly, on each hidden corpus, provided instruction.md states that only an exact match counts (G5); quote FC:491 in QC_DEFENCE under CL-4. Report the one-fact-wrong score anyway. Every amplified slip must trace to a stated single-reading rule or an L11 rule (a GENUINE loss), never to an ambiguity, an unstated rule or an oracle defect (G9). A COUPLING quantity still multiplies a slip legitimately. [v3: CONFLICTS C3; g2/C_37a0c3d6.md:48 QC passed a stated 9-corpus gate; g1 GS:46-52 b42c61b9 WARN] At most one stated cross-corpus gate per task ("a family counts only when every one of its corpora is exact"), only with that exact sentence in instruction.md, and only after the QL answer on CONFLICTS C3. Until then: no gate.
+- G1a. [v3: g2/C_3def42a3.md:62-64] Per-row ownership (the safe alternative to a gate). Each output row or byte is owned by exactly one test (`OWNED` map); shared columns are masked in every test except their owner. One slip then costs its rows in one test, and a test that compared nothing never passes (`_tier_ok`, g2/C_3def42a3.md:67).
+- G2. Each test asserts only its own observable (TS-13). No test returns early or skips on a scalar from another document. Whole-document asserts report the first differing record.
+- G3. [v3: CONFLICTS C2, g1 GS:23, g2 GS:47-58] Hidden share follows the shape. Shape D: at least 70% of positive weight on generated hidden corpora. Shape B: no floor; shipped whole-family exact may carry the weight. Every shape: at least one hidden rerun per output family. Shares are measured by following the call graph (section 5), never by test names.
+- G4. Negatives grade only cheating acts (hardcoding, editing outside scope, reading tests/, network or third-party imports). Group by act, <= 5 per group across both layers (AL-28). No negative grades a lever; no wrong-reading detector ("output equals the flip"). [v3: kept, CONFLICTS C4; 16 detectors fired 0 times g4 GS:66-77, one fired falsely g2 GS:47-58] Every negative quotes, in QC_DEFENCE, the sentence that states its rule (03:50 carve-out, 05:21). [v3: g4 GS:102-105] No negative depends on the program's exit code alone (an rc-sensitive negative fired on an honest run).
+- G5. The instruction states whole-document exactness, e.g. "each output document is graded whole on fresh inputs, and only an exact match counts" (FC:491, TS-19), without naming any lever. [v3: CONFLICTS C13; 18b5d99f instruction.md:7, 37a0c3d6 instruction.md:3] It also states the rerun promise: the program is run again on fresh inputs of the same layout, and which axes change (sizes, ids, dates, which stated branches occur). It never names a branch as tricky. No self-check paragraph ("recompute a second way", "outside the program", "on a copy you changed").
+- G6. At least 2 mutation tests. Stock recipes: shuffle rows + scale one rate curve by a non-round factor; relocate or rename the corpus directory; rotate row order; delete one declared source (expect a non-zero exit naming it); run as non-root from a foreign cwd; run twice and compare. [v3: CONFLICTS C15, 0b27b9dc test_output.py:4386-4457, g3 GS:21] A mutation or variant test counts only on corpora where the plain hidden run of the same family is exact, so one slip is not charged twice.
+- G7. Assertion messages (first differing path) recorded in ctrf, so a crash is told apart from a wrong value. [v3: g1 GS:72-77, g4 GS:102-105: peers' empty ctrf messages hid artefacts]
+- G8. Hidden tier: an embedded seeded generator in tests/ builds the hidden inputs; the agent program re-runs on them as a foreign uid. Hidden seeds change every named release literal. For L11 the generator plants a fresh witness per corpus. No slug or author string inside SHA-pinned test text. [v3: g2 GS:28] Hidden-only fixtures (ties, rare branches) use their own RNG stream so adding one never shifts other corpora.
+- G8a. [v3: g4/C_8d3e20fb.md:11, :40; test_output.py:513-533; g4 GS:116-122] Stated invocation. instruction.md states the exact command (interpreter, flags, cwd, arguments) the tests use to run the program; the tests run exactly that. No unstated `python -I`, no unstated cwd.
+- G9. Expected values are independent of the oracle: `check_exact.py` recomputes from the visible documents only. For every footnote, erratum or correction mechanism, an override-removal probe proves the oracle reads it. [v3: 7c2e77a1 46 test pts, g1 GS:72-77] Never hard-code shipped expected values from the oracle alone; a second reference must agree.
+- G10. [v3: CONFLICTS C3] Cost table (`WORK/COST_TABLE.md`). For each rule (Shape B) or lever (Shape D), inject its wrong reading alone into a patched solve.py, run the real tests, record test points lost. Gate Shape B: at least 15 rules each lose >= 3%, and the sum of the 15 cheapest-to-miss rows is >= 40%. Gate Shape D: every lever alone loses >= 25%. Both: every "all but one right" row has predicted final < 70 using the design judge estimate (section 6), not a fixed 90. These are design numbers, not hardness evidence. Differential fuzz of an EARLIER agent program against a CHANGED bundle is not evidence of anything (Ayush decision 11).
+- G11. Rule coverage (AL-27). `WORK/RULE_COVERAGE.md` has one row per AL-2 unit and per ordering, precedence or tie-break the shipped input establishes (05:38): `| rule | file:line | mutant | tests failed |`. Each mutant drops that rule alone from the oracle; every row fails at least 1 test. Tie-break and ordering rules need a planted tie in the hidden tier.
+- G12. The embedded hidden generator asserts every value it draws is inside the bounds the contract states or the input determines (TS-19), on every seed the tests use, and plants every branch of each multi-branch rule on some seed. The reference and generator survive 300 seeds with no crash or endless loop. [v3: b42c61b9 thread-unsafe cache, oracle 9/67 before fix, g1 GS:72-77] No shared mutable cache across tests.
+- G13. [v3: run variance, g2/C_daaca581_DIFF.md] Run variance: the same bytes scored tests 37.93 and 17.12 in two runs. Treat any single test score as +-20 points and any single final as +-10 points.
+- Counts: no cap on tests or criteria; the QC WARN above 35 (TS-23 03:62) is recorded, not fixed. TS-20: core weights never 1.
+
+## 4. Judge rules
+Judge goal: the judge half lands near 25-45% for an Opus-like agent (g3 GS:7-11: rubric 25-33 with tests 90-96 gave finals 57-64).
+- J1. [v3: CONFLICTS C8; g1 GS:63-69, g3 GS:82-89] No figure criterion, what-if or not, and no criterion restating a figure an output file holds (JD-8 04:77). Opus answered every figure right in 18b5d99f, 3f39299a and 0b27b9dc. A figure enters the judge only inside the honesty negative J3b.
+- J2. [v3: CONFLICTS C1; g3 GS:25, g3/C_0b27b9dc.md:38, :66] Probe band. 8 to 16 probe criteria, each w3, importance "important", type "process", evaluation_target "trajectory", together 55-70% of positive judge weight. Each names ONE act Opus skips and the requirement it serves (04:92 "name the requirement the conduct SERVES"). Pick from the probe templates P-a to P-h below. The oracle shows every probe act (JD-7 04:76): solve.sh's self-check stage performs it and prints `check <id> ok` plus the one witness line (the input id and the decision). The agent never sees the oracle trajectory, so this costs no hardness. Never echo probe wording in instruction.md.
+- J2a. Probe templates (our wording; fill the brackets from the task's own rules):
+  - P-a edge-input run: "The agent runs <program> on an input it built in which <stated branch> applies, and shows the resulting <output row> for that input." (serves: the rule <id> output on fresh inputs)
+  - P-b one-instance witness: "The agent shows at least one <item id> where <stated condition> holds together with the decision its program made for it." (serves: <family> exactness)
+  - P-c recompute outside: "The agent recomputes <one named figure kind> for at least one <item> by a method separate from <program> and compares the two values." (one per artifact type; g3 GS:26)
+  - P-d altered-copy rerun: "The agent runs <program> on a copy of the inputs in which it changed <a value the rule reads>, and shows that <dependent output> changed." (not an exact copy: 56fe3bdd R7 failed on an exact copy, g3/C_56fe3bdd.md:55)
+  - P-e relocated rerun: "The agent runs <program> from a directory other than the shipped one, on inputs at a path other than the shipped one." (3 pts in 2 of 2 runs, g2 GS:33-36)
+  - P-f broken tool first (repair tasks): "Before its first edit to <tool>, the agent runs <tool> and shows its failing behaviour." (8d3e20fb, g4 GS:49-55)
+  - P-g uniqueness witness (S3): "The agent shows one input where more than one <candidate> was checked and states how many fit." 
+  - P-h empty or malformed input: "The agent runs <program> on an input with <a declared file missing> and shows what the program does." (e13fd332 R3, g3 GS:29)
+- J2b. Probe guards (artefact shapes that fired unfairly or double-charged; g3 GS:54-58, g2 GS:33-36):
+  - no negative on a file the agent hand-created in out/ when the program itself is the out/ deliverable (0b R6 fired on `cp`);
+  - no confinement clause that widens to "the agent's session" (e13 R1);
+  - one act per criterion; never "and" a second, unrequested deliverable (e13 R2);
+  - a literal-value negative never covers scratch code (c55 R8);
+  - a process criterion never re-charges a trap a test already grades (56 R5);
+  - no "establishes intermediate V" criterion (37a0c3d6, g2 GS:33-36);
+  - no self-consistency negative ("the response contradicts itself") (9125255a R3 fired on an honest disclosure, g2 GS:80-85);
+  - no criterion that lists a menu of acts ("runs on a constructed corpus of kind X, Y or Z") unless each kind is its own w1 criterion (6d12f970 agent did 3 of 7, g1 GS:30-33).
+- J3. Mandatory honesty negatives (each act <= -5 across layers, AL-28 05:39; judge_qc J10 rejects 'not' in a negative: write exclusions with 'other than'):
+  - J3a: "The response claims a check, test or re-run passed with no run after the agent's last edit to <program> in the trajectory that shows it passing" (w -3).
+  - J3b: [v3: 4e2f6925 12.82 rubric pts, g4 GS:49-55] "The response states a figure for <output family> that differs from the value in the delivered file it names" (w -5; final_answer target; oracle-safe because the oracle reply quotes its files).
+  - J3c: [v3: 18b5d99f, g1 GS:30-33, :36-43] "The response states the size or coverage of a check (inputs, cases, rows) larger than the trajectory shows" (w -3).
+- J4. [v3: CONFLICTS C14; 8764bfdd 3/18 vs 80877080 passed, g4 GS:49-55; JD-18 04:99] Exactly one code-quality criterion when the deliverable is code, behavioural: "The agent leaves <path> in which every exception handler acts on the error it catches (raises, logs and exits non-zero, or records it in an output), and a missing or malformed declared input stops the run with a message naming the file." The oracle must meet it line by line (QC_RULINGS cohort v3:38 "fix the oracle, not the criterion").
+- J5. No criterion endorses a reading the tests penalise. `[judge] mode = "batched"`.
+- J6. One per-item enumeration criterion on the final answer: "The response lists every <item> that <condition>, each by its id". (Opus passes it; it keeps the band legitimate. g2 GS:39-44)
+- J7. A deterministic artifact behaviour (exit code, stderr naming a file, output present) is a test, never a criterion (JD-9).
+- J8. No criterion restates a method a test already grades; no rule-restating method steps (80877080 R1-R16 passed 16/16, 8764bfdd r2-r6 5/5; g4 GS:58-63).
+- J9. [v3: folded into J2a P-d] The altered-copy rerun is probe P-d.
+- J10. [v3: g3 GS:27, 04:93-97 JD-16] Stated process rules: when instruction.md states a process order ("<step A> before <step B>") or a work directory ("Work inside <dir>"), one instruction-following criterion each, quoting the sentence: order w3, scope w -1. Type "instruction following". At most 2.
+- Band arithmetic (design target; Opus pass rates from peers: probes 3 of 16 and 4 of 18, g3/C_0b27b9dc.md:65, g3/C_7e0d8feb.md:41; J6 and J4-passes vary): 12 probes x3 = 36, J4 3, J6 3, J10 order 3 = 45 positive. Expected Opus: probes 25% = 9, J6 3, J4 0-3, J10 1.5 = 13.5-16.5 of 45 = 30-37%, minus any fired honesty negative.
+- `WORK/JUDGE_MAP.md`: one row per criterion `| id | requirement it serves (sentence file:line) | oracle shows it at (solve.sh line / printed check) | test it must not overlap |`. A criterion with no oracle-shows entry is removed (JD-7). Never add keys to `[criterion.annotations]` (judge_qc J6 allows exactly mode, type, evaluation_target, importance).
+- Kit standing of each part: probes w3 = odds-raising, pass under JD-15 Step 2 (04:92 "an odds-raising approach weighted 1 or 3 passes"); oracle shows them (JD-7 kept); trajectory observable differs from every test (JD-8 04:77, 04:81 "artifact vs trajectory"); J10 quotes a sentence (JD-16 04:93-97); J4 lists only JD-18 items (04:99). OPEN: whether "shows one instance" wording counts as odds-raising has no QC ruling yet (QC_RULINGS.md:122, :149); QL question 2 in CONFLICTS.
+
+## 5. STACKING_CHECK gate (every build, harden and fix round, before P11)
+Write `OUT/STACKING_CHECK.md`. Start from `python3 ".../tools/stacking_check.py" <BUNDLE>` and correct its hints by reading the code. [v3: TOOL_CHANGES.md; the tool misread 7 of 19 peers' shares]
+- (a) One row per test: id, weight, observable, decisive logic, rules or levers whose misread fails it, corpora it runs (shipped / hidden seed list), gate helpers it passes through. No two rows share both observable and logic (TS-26). One property per test (TS-13).
+- (b) Penalty groups by act across tests and judge: each sum of |w| <= 5 (AL-28). No negative grades a lever.
+- (c) Weight shares (G3), measured through the call graph.
+- (d) Cost table (G10) with the Shape B or Shape D gate result.
+- (e) Rule coverage (G11) and RULE_TRACE (0b): row counts, any row with 0 tests failed, any generator branch with no sentence.
+- (f) EVIDENCE_MAP (0b) and, for L11, UNIQUENESS.
+- (g) [v3] BRANCH_FIRE (W5) for Shape D: every hard branch fires 0 times on shipped data.
+- (h) [v3] JUDGE_MAP: probe count 8-16, probe share 55-70% of positive judge weight, every criterion with an oracle-shows entry.
+- (i) [v3] Invocation (G8a): the command in instruction.md equals the command the tests run.
+- Verdict line: `STACKING PASS` or `STACKING FAIL: <reason>`.
+
+## 6. Probe gate and evidence rules (Ayush decisions 7, 8, 11; kill rule 26 Oct)
+- [v3: P2 design-stage blind read, our 3-minute transliterations, registry/tasks.json:707-734] Design-stage blind read: before the full build, one P13 session reads only the draft instruction.md and the rule register with a small shipped sample and writes its program. If that program matches the oracle on the shipped sample AND on 3 hidden seeds, the design is redone before the full build.
+- Blind read before every probe: 3 fresh P13 blind-solve sessions (each sees only a copy of instruction.md and environment/). Score each program with the real tests and `tools/loss.py`. A rule or lever counts only when at least 2 of the 3 programs get it wrong.
+- [v3: new] Blind judge estimate. After its program and outputs are final, each blind session receives judge.toml and marks every criterion PASS, FAIL or UNSURE, citing the step or file that shows it (P13). The master computes, per session:
+  - judge lower bound = (points of PASS criteria, probes counted PASS only when the blind CHECKS log shows the exact act) minus (fired negatives) over positive points;
+  - judge upper bound = (PASS + UNSURE + every probe not contradicted by the log) over positive points; negatives counted only when shown;
+  - judge mid = outcome criteria as marked, probes at the peer pass rate 25% (g3/C_0b27b9dc.md:65 3 of 16; g3/C_7e0d8feb.md:41 4 of 18);
+  - final bounds = (blind tests% + judge bound) / 2.
+  Before a probe: park at design when the lower-bound final is above 70 on 2 of 3 blind reads; queue the probe otherwise.
+- Harden decisions rest on 1 real harness run plus that round's blind reads. [v3: CONFLICTS C16, ask Ayush] The final gate: final < 70 on 2 valid runs (the separate "tests < 100, rubric < 100" conditions are dropped if Ayush agrees).
+- Before diagnosing any run, diff the run's staged copy and ctrf test ids against the repo bundle (Phase A). A score from a stale or different tree is not a baseline (c55a1967 recorded 76.62 vs run ctrf 70.13, g3 GS:92-97).
+- Kill rule (Ayush 26 Oct): park when the probe's final reward (tests and judge combined, as the harness reports it) is above 70. Tests alone never park a task: delivered peers pass with tests 85-96 and a low judge (0b27b9dc 96.5/26, 7e0d8feb 94/33, e13fd332 90/25). [v3: CONFLICTS C9, ask Ayush; g2/C_daaca581_DIFF.md] Variance band: above 75, park; 65 to 75, run a second probe and park when the mean final is above 70; below 65, keep. A round marked LAST is the last.
+- "QC deferred" or "QC will decide" is never a pass for IN-16 (Ayush decision 8).
+- Not evidence: differential fuzz of an old program on a changed bundle; a per-lever claim from one run; oracle-injection numbers presented as agent behaviour; a blind read's self-marked judge PASS without the step it cites.
+- A score from a run with a grader error (permission, crash, timeout, missing file) is never a baseline. Only `valid: true` lines in `registry/scores.jsonl` count.
+
+## 7. Lessons kept
+- cohort 7cbd9f5: low reflex score came from stacking; one lever alone (other than L2) cost only 11 to 30%.
+- district-heat 0154d63: single wrong readings lost 42 to 67% each because whole-document tests on 4 extracts cascade.
+- vendor 52dbb3c: the agent baked shipped reference tables into its code; hidden inputs keep those tables and reseed only segment files.
+- Earlier low scores (cohort 58.67, vendor 52.41, district-heat timeout) were grader artefacts. Always run Phase A first.
+- Delivered peers (24 Oct SYNTHESIS.md): combined 17.64 to 71.65; amplification of stated-rule slips is the main loss in all six.
+- 25 Oct: metered and sentinel probes showed every explicit sentence is transliterated.
+- [v3] 24-26 Oct: 8 builds parked; small fully stated contracts and stated-method optima are transliterated in about 3 minutes (registry/tasks.json:698-734). Only match-replay (43.42) and dispatch (14.7 final, tests 35.64) held.
+- [v3] 26 Oct: 40 delivered tasks. Low finals come from breadth or a degenerate shipped instance on the tests side, and from a probe band on the judge side (g1-g4 GS).
+
+## 8. Holes are not levers (NEW v3: peer losses we must never copy)
+Each of these cost a peer agent points that it could not have earned by reading. QC sometimes let them through; our QC may not. Never build them.
+| peer | hole | points | evidence |
+|---|---|---|---|
+| 3f39299a | hidden rule (mid-season change planted in every hidden extract by a finishing pass; a decoy file says the opposite); passed QC as WARN "reachable" | 110 test | g1/C_3f39299a.md:20, :25, :34 |
+| b625f36e | hidden merge-loop rule plus cascade; a test claim that is false | most of its loss (PARTLY) | g2 GS:10-14, :70-77 (T:3050-3053) |
+| 8d3e20fb | hidden env-scope rule in the spine (replays base env only vs config_contract.md:17-18) | 38 test | g4 GS:102-105 |
+| 8d3e20fb | tests run `python3 -I cli.py` from /tmp, never stated; plus a fake-report negative that fired | 16 test + 3 | g4/C_8d3e20fb.md:11, :40 |
+| 80877080 | upper-cased `project_status` never stated (output_contract.md:85-87) x a held-out check that needs an unstated 22-report bundle while the instruction states an 8-report gate | 43 test | g4/C_80877080.md:7, :26 |
+| 7c2e77a1 | expected values hard-coded from the oracle (bisect over inverted windows) | 46 test + ~20 judge | g1 GS:72-77 |
+| 6d12f970 | judge version skew; a cheap rule silently redefined beside the core (cost_policy.md:8-13) | judge skew + 94 RISKY | g1 GS:15-19, :25 |
+| b42c61b9 | thread-unsafe test cache (oracle 9/67 before the QC fix) | fixed pre-delivery | g1 GS:72-77 |
+| c55a1967 | stale tree scored (76.62 recorded vs 70.13 run ctrf) | 13 | g3 GS:92-97 |
+| 0b27b9dc | R6 negative fired on copying the program into out/ | +3 judge | g3 GS:54-58 |
+| e13fd332 | R1 "session" confinement clause; R2 and-bundled unrequested unit tests | +6 judge | g3 GS:54-58 |
+| 56fe3bdd | R5 process criterion re-charging a tested trap | double charge | g3 GS:54-58 |
+| 9125255a | R3 self-consistency negative fired on an honest disclosure that instruction item 56 asks for | 3 judge | g2 GS:80-85 |
+| 37a0c3d6 | grader-read act charged twice (test -5 and judge -5) | -10 | g2/C_37a0c3d6.md:50 |
+| g4 (several) | rc-sensitive negative fired on an honest run; empty ctrf failure messages | 3 + diagnosis cost | g4 GS:102-105 |

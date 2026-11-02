@@ -1,0 +1,210 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "cli.py",
+        "resolve-config",
+        "--data",
+        "/app/data",
+        "--out",
+        "/app/out/config.json"
+      ],
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "cli.py",
+        "compile",
+        "--data",
+        "/app/data",
+        "--config",
+        "/app/out/config.json",
+        "--profile",
+        "dev",
+        "--out",
+        "/app/out/profile_dev.json"
+      ],
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "cli.py",
+        "compile",
+        "--data",
+        "/app/data",
+        "--config",
+        "/app/out/config.json",
+        "--profile",
+        "prod",
+        "--out",
+        "/app/out/profile_prod.json"
+      ],
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "cli.py",
+        "audit",
+        "--data",
+        "/app/data",
+        "--config",
+        "/app/out/config.json",
+        "--out",
+        "/app/out/validation_report.json"
+      ],
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "cli.py",
+        "summarize",
+        "--data",
+        "/app/data",
+        "--config",
+        "/app/out/config.json",
+        "--out",
+        "/app/out/summary.json"
+      ],
+      "returncode": 0
+    }
+  ],
+  "config_sha256": "99e3ee77934ef406dccbccd23a78d7242abf38c9d54456e27607c9e0ab8d5435",
+  "profile_dev_sha256": "b6dbd9ced7328a9e763998c8706c264d433047d291484246a065749b0efe0cb0",
+  "profile_prod_sha256": "7f1e8ee6002a32dbaf03a15abbf3e2164de93141f9b39fe83e5bc861f3b54680",
+  "repairs": [
+    {
+      "defect": "The command line had no summarize subcommand, so the summary document could not be produced.",
+      "module": "cli.py"
+    },
+    {
+      "defect": "A corpus missing files listed in corpus_manifest.json was compiled from whatever was present instead of being refused with a non-zero exit and no output.",
+      "module": "corpus.py"
+    },
+    {
+      "defect": "MFA log lines whose instant was written with a space instead of T did not match the line pattern and were dropped from the file's rows instead of being read and rejected.",
+      "module": "corpus.py"
+    },
+    {
+      "defect": "Instants were parsed with the language's own reader, accepting a missing offset, a space for T, a lower case z, fractional seconds and offsets without a colon, instead of only the contract's grammar.",
+      "module": "wtime.py"
+    },
+    {
+      "defect": "HR effective dates and contract start and end dates were read as UTC calendar days instead of days on the site's own clock.",
+      "module": "wtime.py"
+    },
+    {
+      "defect": "Local wall times were converted with each zone's standard offset all year, ignoring the daylight transitions of tz_rules.json.",
+      "module": "wtime.py"
+    },
+    {
+      "defect": "Epoch fields accepted non-integer text and carried no unit, so a file's own precision was lost.",
+      "module": "wtime.py"
+    },
+    {
+      "defect": "Journal entries were never tested against recorded_cutoff, so entries recorded after the cutoff were still applied and never counted as invisible.",
+      "module": "policy.py"
+    },
+    {
+      "defect": "Journal entries were applied in seq order instead of effective_at order with seq breaking ties.",
+      "module": "policy.py"
+    },
+    {
+      "defect": "Ceiling keys took the newest value like ordinary keys instead of the smallest value among every layer and every applied entry still standing.",
+      "module": "policy.py"
+    },
+    {
+      "defect": "The summary read a grants key the compiler never produced, so summarize failed instead of counting active grants.",
+      "module": "audit.py"
+    },
+    {
+      "defect": "self_check covered only files the ledger had marked and took each file's record count from those marks rather than from the file's own rows.",
+      "module": "audit.py"
+    },
+    {
+      "defect": "The journal was classified against the corpus site policy anchors instead of the anchors of the configuration passed with --config.",
+      "module": "audit.py"
+    },
+    {
+      "defect": "The winning IdP record for a handle was taken in file order instead of the highest generation with idp_shard_priority settling equal generations.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "A handle was looked up in directory_aliases.tsv before the account table and alias keys were compared case-sensitively, so an alias whose alias is itself a winning handle wrongly took effect.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "MFA enrolment counted any past enrol event, ignoring a later reset, instead of the latest event at or before the instant.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "The governing HR correction of an event was the last row read instead of the visible correction recorded last with correction_id breaking ties.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Contract cover ended at the start of end_date instead of running to the start of the day after end_date.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Membership removals were applied whether or not they were visible at the cutoff and without rejecting an unreadable removed_at.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Nested group membership took the first route found by a breadth first walk instead of the largest earliest-removal bound over every chain.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Role expansion carried every permission a role named, ignoring whether the permission's catalog scope covers the profile.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Memberships, bindings, grants, shifts, freeze windows, contract cover and key values were treated as inclusive at both ends instead of ending at their bound.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Grant requests sharing a ticket were settled by taking the last shard read instead of the highest export_generation, with identical top records collapsing to the alphabetically first shard and differing ones unresolved as conflicting_duplicate.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Grant corrections for a ticket were ordered by recorded instant instead of by revision with the later recorded instant breaking ties.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "An approval counted whenever the approver was not the beneficiary, so rows from the requester, from non-employees and from approvers not employed at decided_at qualified, repeat approvals counted twice and non-qualifying rejects vetoed the request.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "An approved grant started at its requested start even when it only gathered enough qualifying approvers later, instead of starting when it had enough approvals.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Security revocations capped permissions at the instant they were recorded instead of their effective_at.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Self-service revocation recorded_at values were read as epoch seconds instead of milliseconds.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "The on-call bound stopped at the current shift instead of being carried through each following shift of the same rotation that starts no later than the bound reached and has the same holder.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "Separation of duties always suspended the second permission of a held pair instead of recording a standing_conflict when both sides stand, suspending the elevated side when exactly one stands, and otherwise suspending the later elevation start or the alphabetically greater permission.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "A review by the subject on their own access counted as the deciding attestation and a review exactly attestation_max_age_days old was treated as expired.",
+      "module": "engine.py"
+    },
+    {
+      "defect": "held_grants listed every pending or vetoed request, including those whose requested end had already passed as_of.",
+      "module": "engine.py"
+    }
+  ],
+  "tool": "warrant-ctl"
+}

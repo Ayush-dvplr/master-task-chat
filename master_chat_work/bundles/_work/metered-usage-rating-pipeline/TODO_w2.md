@@ -1,0 +1,23 @@
+# TODO 09963d3 metered-usage-rating-pipeline wave 2 harden (prompt: master_chat_tasks/prompts/issued/metered-usage-rating-pipeline/20261027T1247_harden.md)
+(r3 list kept as TODO_r3.md.) OUT = master_chat_work/20261027_metered-usage-rating-pipeline/harden_w2_09963d3
+- [x] Session rename (list showed opencode ses_e83c4775cfferX2qLPexqXfgM8, not 09963d3; noted, not retried)
+- [x] Read COMMON v4, LEVER_RULES v3, LEAK_LIBRARY, QC_RULINGS, QC_FIX_PLAYBOOK_v2, sentinel t3 report, sentinel v6 findings, DIAGNOSIS r3, DESIGN
+- [x] Read LEVERS, QC_DEFENCE, JUDGE_MAP, XREF, COST_TABLE, contract, instruction, tests layout
+- [x] P1.1 Phase A diff probe staged copy vs BUNDLE (only .kiro-staged-from marker + task.toml allowed_hosts differ)
+- [x] P1.2 Diagnosis table (trajectory + loss.py)
+- [x] P1.3 Lever design (P-2 long hidden billing replay; carried state check)
+- [x] P1.4 Kill test in Docker on WORK/proto: probe program, per-period, keyed-by-label, end-only true-ups, greedy, naive; ref timing -> WORK/KILL_TEST.md
+- [x] P1.5 OUT/DESIGN.md, STOP "DESIGN READY"
+- [x] WAIT for "go" (go 27 Oct, P-3 + P-5, items 1-6)
+- [x] go item 1: shipped has 0 parent rows -> decision A (27 Oct): small shipped groups ~5%, depth<=3, some variant spelling
+- [x] B0 digests of old hidden + mutation corpora + shipped expected docs (before)
+- [x] B1 gen_core: reseller tree (spine 9000-12000, branching, side branches), shipped small groups, id range for long, cum_weights; digests after
+- [x] B2 ref_core memo group; solve.py memo group; solve.sh self-check plain text (DS-17)
+- [x] B3 contract 60 s sentence; datagen shipped regen; visible changed values -> DESIGN.md
+- [x] B4 tests_template RUN_LIMIT 60 + long corpora + 12 checks; assemble (done); reward.toml (done 0.5/295)
+- [x] B5 judge.toml P-5 band + reward.toml judge weight 0.5/28 (JUDGE_MAP in B8)
+- [x] B6 300-seed shape check (tree + shipped groups) in Docker
+- [x] B7 kill table on final generator output (Docker) -> KILL_TEST.md
+- [x] B8 check_exact, RULE_COVERAGE, cost table (Docker), LEVERS, QC_DEFENCE, XREF, DESIGN wave 2, TRUTH last
+- [x] Phase 2 build (after go)
+- [x] Phase 3 gates

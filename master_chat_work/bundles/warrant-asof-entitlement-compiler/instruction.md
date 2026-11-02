@@ -1,0 +1,13 @@
+The Warrant estate decides who may do what in its `dev` and `prod` environments with `warrant-ctl`, a standard library Python compiler whose source ships as `/app/data/tool.zip`. The compiler has drifted from its written contract. Everything you need is under `/app/data`; `corpus_index.md` names every file there, its layout, and which documents form the governing contract. Where the compiler source and the contract disagree, the contract governs. Several conventions are left to the access gateway rather than written down anywhere, and they belong to each corpus; the reviewer observations in that corpus's `access_attestations.csv` are the only record of what its gateway did, and a single reading of each such convention reproduces every observation.
+
+Repair the compiler so that it satisfies the whole contract, and deliver it as `/app/out/tool.zip` with `cli.py` at the archive root. The delivered compiler will also be run on corpora you have not seen, built to the same contract with their own zones, instants, configuration layers, gateway conventions, people and records, so it must take everything from its `--data` directory and its `--config` file, refuse an incomplete corpus as `cli_contract.md` states, and give the same bytes whatever the row order of its inputs.
+
+Run your repaired compiler over `/app/data` to produce `/app/out/config.json` with `resolve-config`, `/app/out/profile_dev.json` and `/app/out/profile_prod.json` with `compile`, `/app/out/validation_report.json` with `audit` and `/app/out/summary.json` with `summarize`, passing the configuration it resolved to the later subcommands. Each of these files must be exactly what the delivered compiler writes for this corpus. Write `/app/out/report.json` as `output_contract.md` shows: the compiler invocations that produced those files in the order they ran with their return codes, the sha256 of the delivered `config.json`, `profile_dev.json` and `profile_prod.json`, and one repair entry per defect you fixed naming the module inside `tool.zip` that holds the fix. Key names, enums, record ids, sort orders and serialization for every artifact are in `output_contract.md` and `corpus_index.md`; use those literals exactly.
+
+A profile, a list in the validation report, the self check, the configuration and the summary each count only when every unit in them is exact: one wrong key, value, entry or count makes that part wrong.
+
+Leave every file under `/app/data` unchanged and do not write anything there. Use only the Python standard library, install nothing, and do not look anything up online.
+
+Finish with a closing message that names, for each convention left to the gateway, the reading the shipped observations show.
+
+You have 7200 seconds to complete this task.

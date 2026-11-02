@@ -1,0 +1,13 @@
+# LOG 36f01dd
+- 11:56 IST name_session.py rc=0 (opencode ses_e9368f774ffeAtmyWBEhjAu40a); docker ps: no containers running; scratch /tmp/fd-survey-raking-disclosure-audit-20261024T1156
+- 11:59 P1.2 residue: only task.toml:9 author name/email; Dockerfile /home/agent benign. No slug/host paths anywhere (incl trajectories).
+- 11:59 P1.3 env leaks: none (only Dockerfile:31 comment 'oracle', not visible in container). calib__pilot-round.json = separate pilot dataset, not answers.
+- 12:05 P2.1 precheck rc=1: kit 4 scripts 17/5/37/19 pass, 0 warn 0 fail; 1 our finding FC-S24 ENV HOME line 6 not 2-3; tests 35 criteria 18. Full output saved.
+- 12:08 P2.2 team QC AL-18 warn accepted (instruction.md:13 'None of the answers is written into any report' vs replicate NR1::NR1P2 total 331499999995). QC report:47 judge 12:34 edit R9 1->3, R15 retarget, R16 +3 => explains 32.35->41.03. Our-rule breaks: COMMON v3:56 warns; :55 2 runs; :38 ENV HOME; P2 v3:91 J1 figure criteria R1-R8; P2 G3 shipped-only<=5- 12:05 P2.1 precheck rc=1: kit 4 scripts 17/5/37/19 pass, 0 warn 0 fail; 1 our finding FC-S24 ENV HOME line 6 not 2-3; tests 35 criteria 18. Full output saved.
+- 12:08 P2.2 team QC AL-18 warn accepted (instruction.md:13 vs replicate NR1::NR1P2 total 331499999995). QC report:47 judge 12:34 edit R9 1->3, R15 retarget, R16 +3 => explains 32.35 -> 41.03. Our-rule breaks: COMMON v3:56 warns; :55 2 runs; :38 ENV HOME; P2 v3:91 J1 figure criteria R1-R8; P2 v3 G3 shipped-only <=5 pct; G1/G2 one test per doc.
+- 12:10 P3.2 loss.py: judge 16/39 lost 23 (R4 5,R5 5,R1 3,R6 3,R7 3,R8 3,R10 1), tests 53/128 lost 75 (15 x w5), no negatives fired.
+- 12:06 P3.1 combined recomputed 0.5*53/128+0.5*16/39=41.22 = pass_summary; P3.3 regrade agent 53/128 match, oracle 128/128, nop 0, band patch 128/128 -> regrade.txt
+- 12:10 P4 trajectory: 62 steps (1 system, 2 user, 3-61 tool calls, 62 final msg), 11:21:23-11:44:29 UTC. Standard read in full step 4 (incl. §11 :237-244). Band logic written step 29 (str_replace), revisited step 44 (wave indices only), never fixed. What-if code steps 47/48/56/58/59 re-run on band-patched agent script: Q1 5393301, Q3 4, Q4 5, Q5 331499999995, Q6 3, Q7 15, Q8 43 = all judge answers -> band mistake also costs R1,R4-R8 = 22 judge pts. R10: eligible_set unused (derive_survey.py:1226 only use), write_reports 427 lines -> fair fail. No /tests,/logs/verifier,solution touches.
+- 12:12 P3.2 loss_table.md written; what-if re-run appended to regrade.txt
+- 12:15 P5, P6 done; ANALYSIS.md and result.json written (JSON_OK). Next: cleanup.
+- 12:16 cleanup: 4 containers + image fdsurvey-verifier:local removed, scratch removed; name_session rerun. DONE.

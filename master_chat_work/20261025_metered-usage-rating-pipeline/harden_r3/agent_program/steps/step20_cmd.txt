@@ -1,0 +1,43 @@
+cd /app/data && awk -F, 'NR>1 {
+  id=$1; gsub(/^ +| +$/,"",id);
+  if (seen[id]++) { dup++; next }
+  ts=$2; gsub(/^ +| +$/,"",ts);
+  a=$3; gsub(/^ +| +$/,"",a);
+  pr=$4; gsub(/^ +| +$/,"",pr);
+  u=$5; gsub(/^ +| +$/,"",u);
+  if (substr(ts,1,7) != "2026-09") { q["timestamp_outside_month"]++; next }
+  if (!(a in acct)) { q["unknown_account"]++; next }
+  if (pr!="compute_hours" && pr!="storage_gb_days" && pr!="egress_gb" && pr!="support_minutes") { q["unknown_product"]++; next }
+  if (u !~ /^[0-9]+$/) { q["units_not_integer"]++; next }
+  ok++; units[pr]+=u; accts[a]=1
+} END {
+  print "dup="dup, "accepted="ok;
+  for (k in q) print k, q[k];
+  n=0; for (k in accts) n++; print "distinct accounts", n;
+  for (k in units) print k, units[k]
+}' accounts_tmp=1 <(:) 2>/dev/null; echo "--- with account table:"; awk -F, 'NR==FNR {if(FNR>1){id=$1; gsub(/^ +| +$/,"",id); acct[id]=1} next}
+FNR>1 {
+  id=$1; gsub(/^ +| +$/,"",id);
+  if (seen[id]++) { dup++; next }
+  ts=$2; gsub(/^ +| +$/,"",ts); a=$3; gsub(/^ +| +$/,"",a); pr=$4; gsub(/^ +| +$/,"",pr); u=$5; gsub(/^ +| +$/,"",u);
+  if (substr(ts,1,7) != "2026-09") { q["timestamp_outside_month"]++; next }
+  if (!(a in acct)) { q["unknown_account"]++; next }
+  if (pr!="compute_hours" && pr!="storage_gb_days" && pr!="egress_gb" && pr!="support_minutes") { q["unknown_product"]++; next }
+  if (u !~ /^[0-9]+$/) { q["units_not_integer"]++; next }
+  ok++; units[pr]+=u; accts[a]=1
+} END { print "dup="dup, "accepted="ok; for (k in q) print k, q[k]; n=0; for (k in accts) n++; print "distinct_accounts", n; for (k in units) print k, units[k] }' accounts.csv collector_central.csv
+
+=== OBSERVATION ===
+dup= accepted=
+distinct accounts 0
+--- with account table:
+dup=32 accepted=3048
+unknown_product 36
+units_not_integer 50
+timestamp_outside_month 39
+unknown_account 27
+distinct_accounts 1181
+compute_hours 166504
+egress_gb 152348
+storage_gb_days 152109
+support_minutes 165094

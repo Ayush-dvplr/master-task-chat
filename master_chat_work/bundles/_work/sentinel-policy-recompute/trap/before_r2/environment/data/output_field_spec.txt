@@ -1,0 +1,49 @@
+# output artifact field shapes (validation_report.json, summary.json, profile_dev.json, profile_prod.json)
+# report.json is documented in report_field_spec.txt; config.json in config_schema.json.
+# these list the exact keys each artifact must carry. every value is computed by you.
+# the tool's resolve subcommand writes policy_resolved.json, threshold_curve.json and dependency_trace.json with the fields of the policy_resolved, threshold_curve and dependency_trace entries below.
+
+[validation_report.json]
+ok = bool, true when every check below holds
+checks.all_artifacts_present = bool, true when all required_artifacts exist
+checks.config_matches_policy = bool, true when config equals the resolved policy
+checks.config_scalar_flat = bool, true when config carries scalar values only
+checks.command_failures = list, empty when every cli command returned zero
+checks.required_artifacts = list of the seven artifact file names, in delivery order
+checks.profiles = object keyed by profile name (dev, prod); each entry carries its trailer
+policy_resolved = the resolved authoritative policy: exactly the flat config keys plus param_key, tenant, effective_version, risk_threshold, and no other keys
+threshold_curve = object with tier, base_threshold, contribution, iterations (the reconciliation sequence: the seed value followed by every computed value, ending with the first value whose step change is within convergence_epsilon), converged
+dependency_trace = object with active_bundle, effective_version, param_key, tenant, client_version_ignored (true when the client-claimed version was not used), applied_overrides (list of the override_id of every override applied to the resolved principal, in ascending seq), ledger_controls (object keyed by every tenant in the controls block of override_deltas.json; the value is "ok" when that tenant's stored control equals the one recomputed from the stored rows and "mismatch" otherwise), resolution_order (files consumed in order), rejected_branches (list of entries; each entry names an id or filename and the reason it was rejected; the entries together must name the superseded bundle id, the legacy override table file, and the superseded windows file)
+
+[summary.json]
+artifact_count = int, the number of delivered artifacts
+artifacts = list of the seven artifact file names, in delivery order
+profiles = list of profile names produced (dev, prod)
+format_tag = string, the profile tag from config_schema.json
+trailer = string, the canonical trailer
+input_count = int, the number of input files present in the reference data
+inputs = sorted list of every input file name present in the reference data
+
+[profile_dev.json]
+# flat scalar object: the dev environment profile, derived from the resolved policy and the dev sidecar deltas
+checksum = string, the config checksum field (crc32)
+container = string, the config container field (policy-bundle)
+producer = string, the config producer field (sentinel-policyd)
+mode = string, the mode for dev read from env_overrides.json
+profile = string, the format tag from config_schema.json joined to the profile name with a hyphen, so "<format_tag>-dev"
+max_records = int, the resolved max_records plus max_records_delta from sample_config_dev.json
+retry_limit = int, the resolved retry_limit plus retry_limit_delta from env_overrides.json dev
+timeout_ms = int, the resolved timeout_ms plus timeout_ms_delta from env_overrides.json dev
+trailer = string, the canonical trailer with the profile name appended after a colon, so "<canonical trailer>:dev"
+
+[profile_prod.json]
+# flat scalar object: the prod environment profile, derived from the resolved policy and the prod sidecar deltas
+checksum = string, the config checksum field (crc32)
+container = string, the config container field (policy-bundle)
+producer = string, the config producer field (sentinel-policyd)
+mode = string, the mode for prod read from env_overrides.json
+profile = string, the format tag from config_schema.json joined to the profile name with a hyphen, so "<format_tag>-prod"
+max_records = int, the resolved max_records plus max_records_delta from sample_config_prod.json
+retry_limit = int, the resolved retry_limit plus retry_limit_delta from env_overrides.json prod
+timeout_ms = int, the resolved timeout_ms plus timeout_ms_delta from env_overrides.json prod
+trailer = string, the canonical trailer with the profile name appended after a colon, so "<canonical trailer>:prod"

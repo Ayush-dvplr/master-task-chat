@@ -1,0 +1,24 @@
+# Re-grade, board d930be0, Sat Oct 24 12:10:34 IST 2026
+# docker ps before start: empty (no foreign containers) -> Docker used.
+# Verifier image built from a COPY of tests/ with judge.toml removed and reward.toml tests-only
+# (weights = { test_output = 0.006711409395973154 } = 1/149). The LLM judge was never called.
+#   cd $S/tests_only && docker build -q -t fdsent-verifier:d930be0 .
+#   cd $S/bundle/environment && docker build -q -t fdsent-env:d930be0 .
+# All verifier runs: --network none, /app = copy, test.sh unmodified (exec rewardkit /tests --workspace /app).
+
+## 1. Agent outputs (copy of run_1/artifacts/app: /app/out with 14 outputs + transform.py)
+docker run --name fdsent-rg-agent --network none -v $S/rg_agent/app:/app -v $S/rg_agent/logs:/logs/verifier fdsent-verifier:d930be0 bash /tests/test.sh
+-> reward: 0.0268   (wall 1:15)
+passed: outputs_have_documented_shape (1), held_release_when_catalog_file_missing (3) = 4/149 = 2.68%
+negatives fired: none
+Recorded ctrf.json: same 2 passed, weighted_percentage 2.6846 -> REGRADE MATCHES.
+
+## 2. Oracle
+docker run --name fdsent-oracle --network none --user 1000:1000 -v $S/bundle/solution:/solution:ro -v $S/rg_oracle/out:/app/out fdsent-env:d930be0 bash /solution/solve.sh
+-> rc=0, "[oracle] built TR-2026.09 into /app/out", wall 1:06, 14 files in /app/out
+docker run --name fdsent-rg-oracle --network none -v $S/rg_oracle/app:/app -v $S/rg_oracle/logs:/logs/verifier fdsent-verifier:d930be0 bash /tests/test.sh
+-> reward: 1.0   all 31 positives true, no negative fired -> ORACLE 100%.
+
+## 3. Nop (empty /app/out)
+docker run --name fdsent-rg-nop --network none -v $S/rg_nop/app:/app -v $S/rg_nop/logs:/logs/verifier fdsent-verifier:d930be0 bash /tests/test.sh
+-> reward: 0.0   no positive true, no negative fired -> NOP 0%.

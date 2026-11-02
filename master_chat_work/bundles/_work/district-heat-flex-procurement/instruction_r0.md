@@ -1,0 +1,17 @@
+A district-heating company runs a winter demand-response programme. Its exports for one season are in `/app/data`, and the full rulebook for reading them is `/app/data/schema.md`. Treat schema.md as the authority on every rule, unit and output field, and work out from it how the files fit together.
+
+Write one reusable program at `/app/out/derive_report.py`, run as `python3 /app/out/derive_report.py DATA_DIR OUT_DIR`, that reads an extract in this schema from `DATA_DIR` and writes the reports into `OUT_DIR`. It will also be run on other extracts in the same schema, so it must follow the rules in general and must not depend on the shipped records. Use only the Python 3.12 standard library.
+
+Run it on the shipped data so these files exist: `/app/out/summary.json`, `/app/out/policy_audit.json`, `/app/out/data_quality.json`, `/app/out/region_North.json`, `/app/out/region_South.json`, `/app/out/region_West.json`, `/app/out/region_East.json`, `/app/out/segment_commercial.json` and `/app/out/segment_public.json`.
+
+What the reports must get right:
+
+- For every event and region, pick the offer portfolio the rulebook calls best, keeping to every interval limit and to one mode per site.
+- Report procurement cost, performance credits and grant allocations as separate figures.
+- Each grant pool's cents must equal its allocated plus unallocated cents.
+- The global summary must agree with the region and segment files.
+- Energy is in whole ticks, money in whole cents and ratios in whole basis points, all as JSON integers.
+- Write every JSON file with sorted keys and a trailing newline, and order every array as schema.md says.
+- Empty groups, missing optional fields, exact boundaries, ties and zero denominators all have defined outcomes in schema.md.
+
+You have 7200 seconds to complete this task. Do not cheat by using online solutions or hints specific to this task.
