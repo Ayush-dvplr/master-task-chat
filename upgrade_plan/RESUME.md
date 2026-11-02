@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 03:20 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 03:49 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
@@ -37,19 +37,20 @@ WHERE WE ARE
 5. P9 means (b): fixing works, designing new tasks is weak (Q38).
 6. Ayush pastes the recovery prompt in this same session after compaction (Q52).
 7. P4 hardening: there is no method yet; it must hide levers, avoid leaks, pass QC, keep oracle 1 and nop 0, and more (Q20). Proposed first step: a verified constraint list (Q61).
-8. Helpers: W1 and W2 allowed, no limit (Q58, flag Q62); report only, full findings in tmp/ with sha8 ids (Q59); W3 prompts go to opencode GPT Sol 6.1 with a no subagents line (Q60).
+8. Helpers: W1 and W2 allowed, no limit (Q58, Q62); report only, full findings in tmp/ with sha8 ids (Q59); W3 prompts go to opencode GPT Sol 6.1 with a no subagents line (Q60).
 9. Nothing outside upgrade_plan/ has been edited. PROCEED not given.
 
 KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 1. Copy is complete to about 3 Nov 00:45 IST; 3 sessions were running then (tmp/W1-003, Q1).
 2. After compaction the master loses format and process rules, not task facts (lessons.jsonl lines 89 and 100).
 3. 27 Oct hang: 3 orphan Python solvers on the host (about 185 GB, swap full), plus other apps, wrong Docker settings and VMware (feedback.jsonl line 21, Q65b).
-6. The 2 days of tests 100 after an upgrade = 31 Oct and 1 Nov: misread rule levers lost to careful Opus (Q65e).
-4. Gate: tests under 85, rubric under 85, final under 40 (confirmed Q66; a score of exactly 85 fails). Harness model is Opus 5; the master chat runs Opus 5.5. No count cap, P12 v5 active, push = 1 run on frozen bytes (records; confirm Q65d).
+4. Gate: tests under 85, rubric under 85, final under 40 (confirmed Q66; a score of exactly 85 fails). Harness model is Opus 5; the master chat runs Opus 5.5. Counts: QC minimum, soft 70, hard 100 (Ayush's own rule). P12 v5 active, push = 1 run on frozen bytes (confirmed Q65d).
 5. 182 hardening rules, 44 conflicts (tmp/W1-002).
+6. The 2 days of tests 100 after an upgrade = 31 Oct and 1 Nov: misread rule levers lost to careful Opus (Q65e).
+7. Ayush's pushed inputs (QC reports, QC kit, harness queue, _runs, dcp.jsonc, PL generator) are on origin/main, not this branch: read with git show origin/main:<path> or a read only worktree (F12.1). Kit drift since 25 Oct: 05_Alignment_Integrity_QC.md and Final_checklist.md changed (F12.2).
 
 NEXT STEPS (in this order)
-1. Answer the LIVE questions at the top of QUESTIONS.md (Q64 push list point by point, Q73, Q75).
+1. Answer the LIVE questions at the top of QUESTIONS.md (Q76 missing records, Q77 kit drift helper).
 2. Conflict review: open tmp/W1-002/CONFLICTS.md and go through its 5 most serious conflicts with Ayush one at a time (C3 timeouts, C5 careful program, C25 with C6 how much may be written, C1 parking, C2 with C22 carriers), then the rest.
 3. Q4 (how to review UNVERIFIED_RULES), then UNVERIFIED_RULES.md batch 1 with Ayush.
 4. Shape PLAN.md, P1 (compaction) first, then the order in PROBLEMS.md.

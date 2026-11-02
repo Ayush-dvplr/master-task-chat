@@ -2,10 +2,10 @@ REQUESTS FROM CLAUDE TO AYUSH
 
 Things Claude cannot see in this repo. Ayush adds them, pushes, and tells Claude. Status: OPEN, DONE, NOT NEEDED.
 
-RQ1. Harness repo (OPEN)
+RQ1. Harness repo (DONE 3 Nov: master_queue.py and state.json pushed to main under "harness queue/")
 Terminal_2.0_Harbor_Harness, at least scripts/master_queue.py and anything it imports. Either copy it into upgrade_plan/inputs/harness/ or tell Claude the GitHub owner/repo so it can be added read only.
 
-RQ2. QC kit (OPEN)
+RQ2. QC kit (DONE 3 Nov: pushed to main under Input_Bundle_QC/)
 Input_Bundle_QC (the live kit you QC against). Needed for P2. Copy into upgrade_plan/inputs/qc_kit/.
 
 RQ3. Docker settings (DONE 3 Nov, saved in inputs/mac_docker_20261103.txt)

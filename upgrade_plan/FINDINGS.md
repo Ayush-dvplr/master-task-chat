@@ -70,6 +70,11 @@ F11.1 Hardening has 182 rules spread over many files, and 44 conflicts or vague 
 F11.2 Answers from records for the parked questions: tmp/W1-003/ANSWERS_FROM_RECORDS.md. Key: what is lost after compaction is format and process rules, not task facts (Q7); the 27 Oct hang came from 3 orphan Python solvers on the host (not Docker) holding about 185 GB with swap full (feedback.jsonl line 21, verified); levers lost in fixes were mostly noticed only at the next paid run (Q11).
 F11.3 SECURITY: all 24 tracked wrapper.log files contain an OPENAI_API_KEY value on the harbor command line (verified by master, value not printed).
 
+FROM AYUSH'S PUSH TO MAIN (3 Nov)
+F12.1 Ayush's inputs are on origin/main, NOT on this branch: QC/ (350 report files, copies, notes, PATH_MAP.md), Input_Bundle_QC/ (12 files), "harness queue/" (master_queue.py, state.json), _runs/ (62004 files), opencode_dcp/dcp.jsonc, "Input Bundle Generator New/". Read them with git show origin/main:<path> or a read only worktree; do not merge them into this branch (R: only upgrade_plan/ is committed here).
+F12.2 QC kit drift: against the 25 Oct snapshot (qc.json, kit head 5574d77e), 05_Alignment_Integrity_QC.md and Final_checklist.md changed; the other 10 files are identical (sha256 compare by master).
+F12.3 dcp.jsonc pushed by Ayush is the same empty schema only file as in RQ4: DCP runs on defaults.
+
 OTHER
 
 F7.1 master_chat_tasks/auto/__pycache__/auto.cpython-314.pyc is tracked in git.

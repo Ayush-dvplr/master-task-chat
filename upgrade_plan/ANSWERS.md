@@ -144,3 +144,12 @@ ENTRY 13. 3 Nov 2026 03:20 IST, answers in chat (word for word)
 73. did not get it ask me again in laymen terms"
 
 Recorded as: Q74 solvability is a QC check (records: DS-21, F0e, CL-10 "solvable from visible files", knowledge/intake/handover_digest.json line 43); extra solvability prompt saved as SOLVABILITY_PROMPT (README), used only if the QL asks; boundary not objected to (Q74 closed as AGREED by Claude's reading, Ayush may reopen). Q65a yes. Q65b yes, plus other apps, wrong Docker settings and VMware running at the same time (once). Q65c yes. Q65d yes, but count caps: personal soft cap 70, hard cap 100, for both tests and rubric criteria, minimum per QC (FOLLOW UP Q75). Q65e episode B (31 Oct and 1 Nov). Q72 answered by the solvability prompt. Q64 and Q73 asked again in chat.
+
+ENTRY 14. 3 Nov 2026 03:49 IST, answers in chat (word for word)
+"64. 1-7 (pushed everything in main with proper commits 8. not needed 
+
+73. yes change it 
+
+75. option 1 (my own rule)"
+
+Recorded as: Q64 items 1 to 7 pushed to main (commits b9831951, 57c22748, 47d75d76, 1cadfb5b, 7b07ca80); item 8 not needed. Claude checked origin/main: QC/ (reports, copies, notes), Input_Bundle_QC/ (12 files), "harness queue/" (master_queue.py, state.json), _runs/ (62004 files, whole folders), opencode_dcp/dcp.jsonc, "Input Bundle Generator New/" are there. Item 6 (newest master_chat_tasks records and the 3 running session outputs) is NOT in main: master_chat_tasks last changed 3 Nov 00:45 (Q76). Q73: name "GOAL OF THE TASK SYSTEM" accepted. Q75: hard cap 100 is Ayush's own rule.

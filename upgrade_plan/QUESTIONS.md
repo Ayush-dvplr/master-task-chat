@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q64 (asked point by point in chat 3 Nov), Q73 (asked again), Q75.
+LIVE NOW: Q76, Q77.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -99,7 +99,7 @@ Q62. FLAG on Q58 versus P5 and Q57: you said subagents cost a lot of tokens, and
 
 AFTER HELPERS W1-002 AND W1-003 (3 Nov)
 Q63. Secrets: all 24 tracked wrapper.log files under master_chat_work (gate_run and traj folders) contain an OPENAI_API_KEY value. Is this repo private? Is that value a real OpenAI key or a local bridge token? Do you want it rotated, and masked in the repo after PROCEED? [DROPPED: Ayush said ignore]
-Q64. May I give you the push list from tmp/W1-003/MISSING.md (MUST items: QC/reports, the live QC kit Input_Bundle_QC, harness master_queue.py and .master-queue/state.json, blind program folders under _runs, opencode config without keys, the newest records and the 3 sessions running at copy time)? Never push: ~/.codex/auth.json, ~/.tb-master-key, ~/.ssh, oc-bridge secrets, ~/.local/share/opencode. [OPEN]
+Q64. May I give you the push list from tmp/W1-003/MISSING.md (MUST items: QC/reports, the live QC kit Input_Bundle_QC, harness master_queue.py and .master-queue/state.json, blind program folders under _runs, opencode config without keys, the newest records and the 3 sessions running at copy time)? Never push: ~/.codex/auth.json, ~/.tb-master-key, ~/.ssh, oc-bridge secrets, ~/.local/share/opencode. [ANSWERED: items 1 to 7 pushed to main 3 Nov; item 8 not needed; item 6 missing, Q76]
 Q65. Please confirm or correct the answers the records gave (short list in chat 3 Nov). In particular Q35: episode A (24 to 25 Oct, plan v1 plus habit levers, contract sentences stated the whole graded procedure) or episode B (31 Oct to 2 Nov, min plan v2 and route 1, misread rule levers lost to careful Opus)? [SPLIT into Q65a to Q65e]
 
 GOAL AND NEW RULES (ENTRY 11, 3 Nov)
@@ -116,11 +116,14 @@ Q65c. Q11 and Q12 (QC fixes): the records say a lost lever was usually noticed o
 Q65d. Q30 to Q33: no limit on the number of tests (over 35 only gives a warning that is accepted; QL1 asks the QL), fix template P12 v5 is the active one, and one harness run on frozen bytes is enough to push. True? [ANSWERED: yes, but count caps exist: soft 70, hard 100, tests and rubric, minimum per QC. FOLLOW UP Q75]
 Q65e. Q35 (2 days of tests 100 after an upgrade): episode A, 24 to 25 Oct, or episode B, 31 Oct to 2 Nov? [ANSWERED: B, 31 Oct and 1 Nov]
 Q72. Q67 follow up: "solvable" in your words is "with enough time and everything shipped, an agent can solve it". Does that also mean every graded value has one correct answer that the shipped instruction and data decide (no value that only the hidden tests decide)? [ANSWERED: defined by the solvability prompt in README (ENTRY 13)]
-Q73. You asked to change the README goal heading. It is now "GOAL OF THE TASK SYSTEM". Is that what you wanted, or a different wording? [FOLLOW UP: asked again in plain words in chat 3 Nov]
+Q73. You asked to change the README goal heading. It is now "GOAL OF THE TASK SYSTEM". Is that what you wanted, or a different wording? [ANSWERED: keep "GOAL OF THE TASK SYSTEM"]
 
 Q74. Please confirm or change Claude's boundary (README GOAL item 7). Your words in ENTRY 11 ("bypassing the QC", "not possible to follow the legit process") and ENTRY 12 ("if it is passing the QC, it is fine", "task must be solvable") are recorded. Claude's reading: every lever must keep the task solvable from what it ships and must pass QC as the kit is written; Claude will not design something whose purpose is to hide an unsolvable or underspecified grading from QC, the PL or the QL. Do you agree with this as the working rule? [ANSWERED: solvability is a QC check (DS-21, F0e, CL-10); extra solvability prompt only if the QL asks; Ayush did not object to the boundary, so it stands as the working rule unless he reopens it]
 Q64 note (saved explanation): the "push list" is the list of folders Ayush copies INTO THIS repo so Claude can read them (tmp/W1-003/MISSING.md, MUST items). It does not contradict R_REPOS: Claude never pushes anywhere except this repo; Ayush adds material here himself. It matches RQ1 and RQ2 in REQUESTS.md and Ayush's Q69 offer to paste the QC kit.
 
-Q75. Count caps (Q65d): you set a personal soft cap of 70 and a hard cap of 100 for the number of tests and of rubric criteria, plus the QC minimum. Earlier feedback (24 Oct 12:52) said "there is not cap". (1) Is the hard cap of 100 your own rule, or from the PL, QL or harness? (2) Is a count between 70 and 100 fine whenever it helps the score? These will be settings like the gate (DR2). [OPEN]
+Q75. Count caps (Q65d): you set a personal soft cap of 70 and a hard cap of 100 for the number of tests and of rubric criteria, plus the QC minimum. Earlier feedback (24 Oct 12:52) said "there is not cap". (1) Is the hard cap of 100 your own rule, or from the PL, QL or harness? (2) Is a count between 70 and 100 fine whenever it helps the score? These will be settings like the gate (DR2). [ANSWERED: hard cap 100 is Ayush\'s own rule]
+
+Q76. Item 6 of the push list is not in main: the newest master_chat_tasks records (the copy still stops at 3 Nov 00:45) and the outputs of the 3 sessions running then (hangar fix_qcv4, flood fix_qcv4, sensor QC v3). Did you mean to push them, or are they not needed? [OPEN]
+Q77. QC kit check: compared with your 25 Oct snapshot (knowledge/fingerprints/qc.json), 2 of the 12 kit files changed: 05_Alignment_Integrity_QC.md and Final_checklist.md. The other 10 are the same. May a helper read the change and classify it MINOR or MAJOR by your definition (README 8b)? That is also a first real test of the R_QC_UPSTREAM idea. [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
