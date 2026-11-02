@@ -1,12 +1,12 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 02:47 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 03:05 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
 
-AYUSH'S GOAL (README.md GOAL section; read it)
-Tasks that make Opus 5 score under 40% overall on the harness, tests and rubric not above 80 (flag Q66: records say 85), always QC passed, many tasks, approach may repeat but never the same task as a teammate's. Ayush says the "legit process" alone cannot do it; what is allowed is open (Q67); Claude's boundary is README GOAL item 5.
+GOAL (README.md "GOAL OF THE TASK SYSTEM"; read it every time)
+Ayush must produce many tasks. Each must pass the current QC kit, be solvable from what it ships (DR3), be new (never a copy of an old task or of one teammate task), and make Opus 5 score under the gate: today tests under 85, rubric under 85, final under 40, but the gate is a changeable setting (DR2). Focus: levers and wordings that make Opus lose points while QC passes. Claude's boundary: README GOAL item 7.
 
 RULES THAT ALWAYS APPLY
 1. Edit nothing outside upgrade_plan/ until Ayush types the exact word PROCEED. Even then, only changes both are 100% sure of.
@@ -48,7 +48,7 @@ KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 5. 182 hardening rules, 44 conflicts (tmp/W1-002).
 
 NEXT STEPS
-1. W1-002 done and verified: tmp/W1-002/CONSTRAINTS.md (182 hardening constraints), CONFLICTS.md (44). Next with it: Ayush reviews the conflicts first, then the constraints. W1-003 done and verified (one correction: 24 wrapper.log files hold an OPENAI_API_KEY, not 2). Waiting for Ayush on Q63 (secrets), Q64 (push list), Q65 (confirm answers from records), Q66 to Q71 (goal and new rules). After his answers: rerun the cold recovery test (like W1-001) as Ayush asked, then go through the W1-002 conflicts.
+1. W1-002 done and verified: tmp/W1-002/CONSTRAINTS.md (182 hardening constraints), CONFLICTS.md (44). Next with it: Ayush reviews the conflicts first, then the constraints. W1-003 done and verified (one correction: 24 wrapper.log files hold an OPENAI_API_KEY, not 2). Live questions: Q64, Q65a to Q65e, Q72, Q73. Cold recovery test W1-004 run on 3 Nov (see WORKER_LOG). Next: go through the W1-002 conflicts with Ayush.
 2. Recovery prompt: cold test W1-001 done and its gaps fixed. Use the prompt saved in prompts/RECOVERY_PROMPT.md.
 3. When Ayush allows, read the master_chat_tasks records to answer Q35 and Q39 and the questions marked IN RECORDS.
 4. Go through UNVERIFIED_RULES.md batch 1 with Ayush.

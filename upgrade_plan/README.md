@@ -4,13 +4,15 @@ Started 3 Nov 2026, 01:19 IST. Planning only.
 
 STATUS: PLANNING. NOTHING OUTSIDE THIS FOLDER IS EDITED.
 
-AYUSH'S GOAL (3 Nov 2026, ANSWERS.md ENTRY 11; flags Q66 to Q68 still open)
-1. Target: tasks that score on the harness (Opus 5) under 40% overall, with neither tests nor rubric above 80%. (FLAG Q66: the records say tests under 85, rubric under 85.)
-2. Every task must pass the QC kit.
-3. Make many tasks, the way teammates do. An approach may be reused; a whole task may not be the same as a teammate's task, or it gets flagged. (FLAG Q68: GOALS G9 only checks uniqueness against Ayush's own registry.)
-4. Ayush says it is not possible to make Opus 5 fail by the "legit process" alone, and that his goal is not a 100% genuine task, but the score. (FLAG Q67: what this allows is not yet agreed.)
-5. Claude's boundary, stated 3 Nov: Claude helps make tasks hard and QC passing in the way the QC kit intends (hidden test data, scale, carrier variation, exact bars, honest judges). Claude does not help design a task to hide a defect from the QC kit, the PL or the QL, for example an unsolvable or underspecified grading made to look valid. Where a request crosses that line, Claude says so.
-6. Every upgrade decision is checked against this goal.
+GOAL OF THE TASK SYSTEM (Ayush, 3 Nov 2026, ANSWERS.md ENTRY 11 and 12; heading wording open, Q73)
+1. Ayush's job is to produce many tasks. His count is low now, so the system must make tasks fast and reliably.
+2. Score target on the harness (Opus 5): today tests under 85, rubric under 85, final under 40 (gate v3.7). The gate is a SETTING, not a fixed rule: the PL may lower it (for example final under 30 or 35) and the system must follow a change in one place (DR2).
+3. Every task must pass the current QC kit. Ayush's PL and QL said a task that passes QC is acceptable.
+4. HARD REQUIREMENT (DR3): every task is solvable. With enough time, an agent can solve it using only what the task ships (instruction, docs, data, environment). It does not matter whether the agent actually passes every test or criterion; it must be possible.
+5. Focus: learn which levers, wordings and designs make Opus lose points while the task still passes QC, including what teammates do, and build them in.
+6. Uniqueness: measured against Ayush's own tasks. Every build is new, never a copy of an old task. A task must also never be a close copy of one teammate task (an approach may be reused).
+7. Claude's boundary: Claude helps make tasks hard while solvable and QC passing. Claude does not help hide a defect from the QC kit, the PL or the QL (for example grading that cannot be solved or is underspecified, made to look valid). Where a request crosses that line, Claude says so.
+8. Every upgrade decision is checked against this goal.
 
 The edit rule (Ayush, 3 Nov 2026)
 1. No file outside upgrade_plan/ is created, edited, moved or deleted until Ayush types the exact word PROCEED.
@@ -22,9 +24,10 @@ The edit rule (Ayush, 3 Nov 2026)
 6. R_FLAG (Ayush, 3 Nov): Claude must flag Ayush when an answer looks wrong, or contradicts the records, the settings, or an earlier answer, and cross question until it is clear.
 7. R_RECORDS (Ayush, 3 Nov): most answers already exist in the master_chat_tasks records (decisions, lessons, status, logs). Lifted 3 Nov (Q61): Claude reads them through helpers and checks them before asking Ayush.
 7a. DR1 design requirement (Q62): tokens are not limited while building this upgrade, but the finished system must be light on tokens in daily use.
+7b. DR2 (Q66): score gates are one setting, changeable in one place. DR3 (Q67): every task must be solvable from what it ships.
 8. After compaction or in a new session, Claude follows RESUME.md before anything else.
 8a. R_REPOS (Ayush, 3 Nov): Claude pushes only to this repo (Ayush-dvplr/master-task-chat, branch claude/youthful-feynman-zug0uq). Never push to any other repo, including the PL's QC repo.
-8b. R_QC_UPSTREAM (Ayush, 3 Nov): the PL updates the Input Bundle QC kit often, in another repo. Ayush keeps snapshots (knowledge/fingerprints). The upgraded system must detect a kit change, tell major from minor, and adjust levers and fixes for it.
+8b. R_QC_UPSTREAM (Ayush, 3 Nov): the PL updates the Input Bundle QC kit often, in his repo "terminal bench 2.0" (Terminal_2.0_Harbor_Harness). Ayush keeps snapshots (knowledge/fingerprints). The upgraded system must detect a kit change and classify it. MINOR = a leniency or a lenient new rule that does not affect how fixes map to QC checks, how hidden information and traps stay hidden. MAJOR = anything that does affect those. Today an agent decides which (Q69).
 8c. R_SUGGEST (Ayush, 3 Nov): Ayush's suggestions go to AYUSH_SUGGESTIONS.md. Each is discussed; none is assumed; a suggestion may be dropped if it is not possible.
 8d. R_QL (Ayush, 3 Nov): QC rules Ayush added himself (for example "the test count may exceed the QC cap and still pass") are not trusted. Each is verified with Ayush or queued in QL_QUESTIONS.md for the QL; the QL's answer is verified before it is used.
 9. WORKING MODEL (Ayush, 3 Nov): this session is the upgrade master. Heavy reading goes to worker sessions (WORKERS.md): helpers Claude starts itself, separate cloud sessions, or prompts Ayush pastes on the Mac. Every worker self checks; the master verifies before storing; contradictions go to Ayush.

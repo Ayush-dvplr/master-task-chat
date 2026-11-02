@@ -32,5 +32,10 @@ P6 TOOLS (depends on Q26 to Q29, R31, R32)
 Idea A. One runner layer with one adapter per tool (opencode with Claude, opencode with GPT, codex exec, claude CLI, others). Every session writes the same result.json, so board, intake and auto mode treat them all the same.
 Idea B. Per tool prompt notes (like the GPT no subagents rule) added automatically by the adapter, not by hand.
 
+CROSS CUTTING (from the goal)
+DR2: one settings file for gate values; every template and tool reads it.
+DR3: a solvability check on every build (oracle 1.0 is the minimum; plus a check that every graded value is decided by shipped material, pending Q72).
+R_QC_UPSTREAM: kit change detector (fingerprint compare) plus an agent classification MINOR or MAJOR by the README 8b definition; MAJOR stops issuing until the mapping is updated.
+
 ORDER
-To be set after Q3.
+P1 first, then the order Ayush wrote (Q34).
