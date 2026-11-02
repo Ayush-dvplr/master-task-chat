@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q78 to Q82. Helper W1-005 (QC kit change) running.
+LIVE NOW: Q78 to Q82, Q83.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -131,5 +131,7 @@ Q79. S7: "act on it, first let me know only": on a kit change, should the system
 Q80. S8, FLAG: your GOALS.md G8 already asks for dynamic ChatGPT idea prompts rewritten after every batch with the lever bank, and templates P1 (ChatGPT ideas, v1 to v3) and P15 (research angle) plus knowledge/ANGLES.md exist. Why did that not work in practice: were the prompts not updated, too long, lost after compaction, or something else? [OPEN]
 Q81. S8: where do the ChatGPT and Gemini results go today, and how do they get back into the knowledge base (pasted into a session, saved as files, not saved)? [OPEN]
 Q82. Still open from before: shall the conflict review (5 most serious hardening conflicts) start now, or after the W1-005 kit result? [OPEN]
+
+Q83. Kit change (W1-005): verdict MAJOR because of one change only (C6, one finding gets one check id). Do you agree with MAJOR, or do you count it MINOR because no bundle needs rework? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

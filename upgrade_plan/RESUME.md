@@ -50,7 +50,7 @@ KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 7. Ayush's pushed inputs (QC reports, QC kit, harness queue, _runs, dcp.jsonc, PL generator) are on origin/main, not this branch: read with git show origin/main:<path> or a read only worktree (F12.1). Kit drift since 25 Oct: 05_Alignment_Integrity_QC.md and Final_checklist.md changed (F12.2).
 
 NEXT STEPS (in this order)
-1. Helper W1-005 (QC kit change MINOR or MAJOR) is running: when done, spot check, commit tmp/W1-005, report to Ayush. Live questions Q78 to Q82.
+1. W1-005 done and verified: kit change MAJOR only because of C6 (one finding, one id), 8 MINOR, no bundle rework (FINDINGS F12.4, QL2). Live questions Q78 to Q82.
 2. Conflict review: open tmp/W1-002/CONFLICTS.md and go through its 5 most serious conflicts with Ayush one at a time (C3 timeouts, C5 careful program, C25 with C6 how much may be written, C1 parking, C2 with C22 carriers), then the rest.
 3. Q4 (how to review UNVERIFIED_RULES), then UNVERIFIED_RULES.md batch 1 with Ayush.
 4. Shape PLAN.md, P1 (compaction) first, then the order in PROBLEMS.md.
