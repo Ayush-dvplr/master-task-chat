@@ -69,3 +69,24 @@ Q48. Q40 and Q42 : I mean, when I use the thing, I have Codex installed, Claude 
 55. yes i guess to so that it again do not need find or read whats your recomendation"
 
 Recorded as: Q38 = option b (fixing is fine, designing new tasks is weak). Q47: the command ran the file instead of printing it; a print command was given in chat. Q48, Q49, Q50, Q52 answered. Q51, Q54 explained again in plain words in chat. Q53, Q55: Claude recommendation given in chat, waiting for OK.
+
+3 Nov 2026 02:11 IST, answers in chat (word for word)
+"47: mac@MacBookPro Terminal Bench % grep -n -A6 '"plugin"' ~/.config/opencode/opencode.jsonc
+4:  "plugin": [
+5-    "@tarquinen/opencode-dcp@3.2.0",
+6-    "oh-my-openagent@5.1.33",
+7-    "opencode-anthropic-console",
+8-    "opencode-kiro@0.4.0"
+9-  ],
+10-  "compaction": {
+mac@MacBookPro Terminal Bench % 
+
+51: some sort of dynamic computing thing instead of static values (like my suggestion some backround script managing these no using ai tokens can be seen , start or stop by ai ) 
+53: okay for your recomendation 
+54: yes 
+55: okay yes for your recomendations 
+56: So basically my name is Master Task Chat, and I just confused you with my words. So that was the name of my session, and the response that I pasted, that source Sisyphus agent, is basically that default one that's just fixed at the bottom of the chat. So when I copied everything, it get copied too. And if you still have something more to ask, you can ask. It just is the thing. 
+
+one important thing i missed : So basically, from now on, we will work like the way we are working with the chat sessions. This particular session is my master chat for upgrade. And if you need some other chat session that is doing deep study on other folders or anything, that itself take a lot of context and you need only the report. So you can write and give me the prompt, or if possible, you can open new sessions yourself and run those and ask in the end, ask it to verify too. And after that, you will verify and then store. If any contradiction occurs, you will ask me. But for this one, thus this part two, let's plan and update all the respective documents, and it must survive the compaction too. And tell me, is it correct or not, and how you are going to handle either giving me prompt for the sessions or you will be doing yourself. If you are doing yourself, then how you are doing it."
+
+Recorded as: Q47 file is valid, brackets were lost only in copying. Q51: Ayush wants a dynamic background script (no AI tokens) that manages Docker room; AI can see it and start or stop it. Q53, Q55: Claude recommendations accepted. Q54: yes, cold test approved. Q56: the master session is named "Master Task Chat"; Sisyphus is the default opencode agent shown at the bottom of every reply. New working model: WORKERS.md.

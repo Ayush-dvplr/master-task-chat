@@ -14,7 +14,7 @@ Idea B. Diff guard. A script compares tests/ before and after the fix and fails 
 Idea C. One finding, one change, one check. Each fix is applied and checked on its own before the next one.
 
 P3 DOCKER (depends on Q14 to Q19, R19 to R24, RQ1, RQ3)
-Idea A. One slot manager instead of each worker polling: lock files per slot, sized from real RAM and real container use, so a worker blocks on a lock instead of looping.
+Idea A (Ayush direction, Q51): a background script, using no AI tokens, that measures real Docker use and hands out room dynamically instead of static values; the AI can see its state and start or stop it. Draft: one slot manager instead of each worker polling: lock files per slot, sized from real RAM and real container use, so a worker blocks on a lock instead of looping.
 Idea B. One Docker rule, written in one place, replacing C1 and C6.
 Idea C. Measure the Mac once (how many kill tests, oracle runs and paid runs fit together without a hang) and set the limits from that measurement.
 

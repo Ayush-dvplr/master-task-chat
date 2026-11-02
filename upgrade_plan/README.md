@@ -13,6 +13,7 @@ The edit rule (Ayush, 3 Nov 2026)
 6. R_FLAG (Ayush, 3 Nov): Claude must flag Ayush when an answer looks wrong, or contradicts the records, the settings, or an earlier answer, and cross question until it is clear.
 7. R_RECORDS (Ayush, 3 Nov): most answers already exist in the master_chat_tasks records (decisions, lessons, status, logs). Claude reads them later, when Ayush says so (not yet), and checks them before asking.
 8. After compaction or in a new session, Claude follows RESUME.md before anything else.
+9. WORKING MODEL (Ayush, 3 Nov): this session is the upgrade master. Heavy reading goes to worker sessions (WORKERS.md): helpers Claude starts itself, separate cloud sessions, or prompts Ayush pastes on the Mac. Every worker self checks; the master verifies before storing; contradictions go to Ayush.
 
 How we work
 1. Claude writes questions in QUESTIONS.md, each with an id (Q1, Q2 ...) and a status.
@@ -37,6 +38,7 @@ Files
 5. ANSWERS.md: Ayush's answers word for word, with date and time.
 6. UNVERIFIED_RULES.md: existing rules from the records that affect the upgrade, each waiting for Ayush to verify, change or drop.
 7. CONTRADICTIONS.md: places where the current records disagree with each other.
+8a. WORKERS.md: how worker sessions are used and verified. WORKER_LOG.md: one row per worker. reports/: full worker reports. prompts/: prompts for Ayush to paste on the Mac.
 8. REQUESTS.md: material Claude needs from Ayush (repos, uploads, opencode output, Docker settings).
 9. PLAN.md: the draft fix for each problem. Not approved.
 
