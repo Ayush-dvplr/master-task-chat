@@ -24,3 +24,22 @@ Q3: the list above. Compaction is first. New problems P7 to P10 added to PROBLEM
 3 Nov 2026, RQ3 and RQ4 output pasted in chat
 Saved word for word in inputs/mac_docker_20261103.txt and inputs/opencode_settings_20261103.md.
 Recorded as: Q14 answered (32 GiB, 10 cores). Q15 answered (Docker Desktop 29.8.2, VM about 15.6 GiB, 8 CPUs). Q5 and Q6 partly answered. Follow up questions Q40 to Q47.
+
+3 Nov 2026 01:47 IST, answers in chat (word for word)
+"40. sisyphus, master always use opus 5.5 and workers sometimes codex, opencode opus 5.5 or sometimes gpt sol 6.1 
+41. I guess its the problem but the fact it is also correct that the opencode master also needs to compress wisely too.
+42. Because it works better non-stop and yes workers use same without human interactions needed (i guess so ) 
+43. chatgpt login in opencode
+44. my starting plan was this but now most of the time it gets compact when it goes around 30-40 % and came back to 7-10% losing lot of important context.
+45. that time it was litreally too much i don't know exact numbers but i guess it was around 3x of limit that is set in the files 
+46. i guess this much is sufficient as task's task.toml says it need this much memory but not all of them takes that much memory
+47. where i pasted ? 
+
+34. yes 
+35. one time i upgraded it and for whole 2 days it was making and fixing tasks and getting 100% tests for 2 days then again when i analysed found something was wrong i guess you can find in master_task_chat some where if it logged it 
+36. yes same for QC but generator is not same as the generator is just for structure a plan one but sometimes i feel its of no use and some of my frinds use direct prompts mentioning every thing in that 
+37. will answer this later 
+38. what is a or b here 
+39. i don't remeber but it will be in the master_task_somewhere Almost all of your questions, and for most of the questions or upcoming questions, you can get answer from the master task chat. There are decisions or the files, the status, lessons, the files that it write at as logs. So I guess you should read that too, but not now. Save the above answers as per you need. Add one more rule that you must flag me if somewhere I am wrong or cross question to the answers that I provide you. The answer may also contradict something else. And the most important thing you have to do right now you are at 17% context, and as this chat is going to be too long, so first find, verify, and give me one single prompt, a short prompt that I will use so that you can recover your context, at least the major ones that are needed, as many of these things in between our chats are random messages, researches, files you read, but you are storing it properly. So first let's plan and create that, so that this upgrade session, even after contest limit, if you compact yourself automatically or ask me to compact you, then I will give you the prompt, you will read the respective files and gain good context and be back on the track, because right now you are pointing everything, asking everything, and correctly. That's how I want to follow the upgrade plan. So also you can ask me for this one part 2."
+
+Recorded as: Q34 yes. Q35 to Q36, Q40 to Q46 answered (see QUESTIONS.md). Q37 later. Q38 and Q47: Ayush asked what they mean; explained in chat 3 Nov. Q39: answer is in the master_chat_tasks records; read later, not now. New rules R_FLAG and R_RECORDS added to README.md. Recovery prompt requested: RESUME.md created.

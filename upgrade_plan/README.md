@@ -10,6 +10,9 @@ The edit rule (Ayush, 3 Nov 2026)
 3. Only this folder is committed and pushed, to branch claude/youthful-feynman-zug0uq.
 4. No existing rule in master_chat_tasks or master_chat_work (the "avoid this, avoid that" rules, QC rules, caps, limits) is treated as correct until Ayush verifies it. See UNVERIFIED_RULES.md.
 5. Claude asks; Claude does not assume. Anything not verified is marked UNVERIFIED.
+6. R_FLAG (Ayush, 3 Nov): Claude must flag Ayush when an answer looks wrong, or contradicts the records, the settings, or an earlier answer, and cross question until it is clear.
+7. R_RECORDS (Ayush, 3 Nov): most answers already exist in the master_chat_tasks records (decisions, lessons, status, logs). Claude reads them later, when Ayush says so (not yet), and checks them before asking.
+8. After compaction or in a new session, Claude follows RESUME.md before anything else.
 
 How we work
 1. Claude writes questions in QUESTIONS.md, each with an id (Q1, Q2 ...) and a status.
@@ -26,6 +29,7 @@ FOLLOW UP: the answer raised a new question (the new id is noted).
 DROPPED: Ayush said it does not matter.
 
 Files
+0. RESUME.md: the recovery card. Read first after any compaction or in a new session. Kept current after every step.
 1. README.md: this file. Rules of the planning process and the index.
 2. PROBLEMS.md: the six problems in Ayush's words, plus any new problems he adds.
 3. FINDINGS.md: what Claude found in the repo for each problem, with file and line evidence.

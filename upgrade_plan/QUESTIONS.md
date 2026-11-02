@@ -31,7 +31,7 @@ Q18. The 27 Oct Mac hang: do you know the cause (memory, disk, too many containe
 Q19. How many Docker jobs at the same time do you believe the Mac can run, and of what kind (kill tests, oracle or nop, paid harness runs)? [OPEN]
 
 P4 HARDENING
-Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [OPEN]
+Q20. "Hardening as per the proven": do you mean (a) a repeatable recipe applying the R0 lever kinds to a task, (b) a library of proven levers with implementation patterns, or (c) something else? [FOLLOW UP: Ayush asked what (a) and (b) mean; explained in chat 3 Nov, waiting for answer]
 Q21. Which tasks should be hardened first? [OPEN]
 Q22. What goes wrong today when you harden: the lever does not bite, QC flags it, or too many rounds? [OPEN]
 
@@ -53,21 +53,33 @@ Q32. Is the gate tests under 85, rubric under 85, final under 40, and the older 
 Q33. Push needs 1 harness run, or 8 runs on final approval? (C5) [OPEN]
 
 NEW PROBLEMS P7 TO P10 (from the Q3 answer, 3 Nov)
-Q34. Is your Q3 list in priority order, so compaction (P1) comes first, then the others in the order you wrote them? [OPEN]
-Q35. P7: when you "upgrade the master chat session", what kind of upgrade do you mean (new template versions, new rules, new tools, a new plan like v3.7 or v3.8)? What became worse afterwards? One real example. [OPEN]
-Q36. P8: do your teammates use the same QC kit and the same generator as you? Do they build by hand, with their own chat, or with a system like yours? [OPEN]
-Q37. P8: can you share one or two teammate tasks that passed QC and scored well, with their scores? I saw master_chat_work/20261102_test_design_study (10 teammate tasks). Are those the right examples, or are there better ones? [OPEN]
+Q34. Is your Q3 list in priority order, so compaction (P1) comes first, then the others in the order you wrote them? [ANSWERED: yes]
+Q35. P7: when you "upgrade the master chat session", what kind of upgrade do you mean (new template versions, new rules, new tools, a new plan like v3.7 or v3.8)? What became worse afterwards? One real example. [ANSWERED: an upgrade led to 2 days of tasks scoring tests 100; details are in the records, read later]
+Q36. P8: do your teammates use the same QC kit and the same generator as you? Do they build by hand, with their own chat, or with a system like yours? [ANSWERED: same QC; generator differs, it only gives structure and a plan, Ayush sometimes finds it useless; some friends use direct prompts with everything in them]
+Q37. P8: can you share one or two teammate tasks that passed QC and scored well, with their scores? I saw master_chat_work/20261102_test_design_study (10 teammate tasks). Are those the right examples, or are there better ones? [LATER, Ayush will answer]
 Q38. P9: "very bad at creating new tasks with respect to the fixing tasks". Which do you mean: (a) new tasks built from scratch come out worse than tasks that get fixed, (b) the system is good at fixing but bad at designing new tasks, or (c) something else? [OPEN]
-Q39. P10: which templates were still old after an upgrade? Name one case (which upgrade, which template, which session used the old one). I already found one: state.json and README line 31 still say P12 v4 while INDEX says v5 is active (CONTRADICTIONS C3). [OPEN]
+Q39. P10: which templates were still old after an upgrade? Name one case (which upgrade, which template, which session used the old one). I already found one: state.json and README line 31 still say P12 v4 while INDEX says v5 is active (CONTRADICTIONS C3). [IN RECORDS, read later]
 
 FROM THE RQ3 AND RQ4 OUTPUT (3 Nov)
-Q40. Which opencode agent does the master chat use: the plain opencode agent, or Sisyphus from the oh-my-openagent plugin (the settings report was written by "Sisyphus, Ultraworker")? Which model does the master use, and is it the same for workers? [OPEN]
-Q41. The DCP plugin (Dynamic Context Pruning) is on with default settings. It removes or shortens older tool outputs from the context by itself, even with auto compaction off. Did you install it on purpose, and when? Did the "loses all its learning" problem start around the same time? [OPEN]
-Q42. Why is oh-my-openagent installed? Do workers run under Sisyphus too? It adds its own large system prompt and pushes subagents and background tasks, which may clash with your "no subagents" rule and raise token use. [OPEN]
-Q43. The report came from "GPT 6.1 Sol", which is not in the config file. Which provider gives you GPT in opencode (ChatGPT login, OpenAI API, something else)? [OPEN]
-Q44. How do you compact by hand: the /compact command, or starting a new session? How often per day for the master chat? [OPEN]
-Q45. When the Mac hung on 27 Oct, how many opencode sessions and Docker containers were running? Do you have any memory numbers (Activity Monitor) from a busy time? [OPEN]
-Q46. Would you allow, later and only as a measured test, raising the Docker Desktop memory above 15.6 GiB? The Mac has 32 GiB, but opencode sessions and the browser also need RAM, so the right number has to be measured, not guessed. [OPEN]
-Q47. Your pasted config lost some square brackets (the "plugin" list). Is that only from copying, and is the real file valid? [OPEN]
+Q40. Which opencode agent does the master chat use: the plain opencode agent, or Sisyphus from the oh-my-openagent plugin (the settings report was written by "Sisyphus, Ultraworker")? Which model does the master use, and is it the same for workers? [ANSWERED: Sisyphus; master always Opus 5.5; workers sometimes Codex, opencode Opus 5.5, or GPT 6.1 Sol. FLAG Q48, Q50]
+Q41. The DCP plugin (Dynamic Context Pruning) is on with default settings. It removes or shortens older tool outputs from the context by itself, even with auto compaction off. Did you install it on purpose, and when? Did the "loses all its learning" problem start around the same time? [ANSWERED: Ayush guesses DCP is the problem, and also says the master needs to compress wisely]
+Q42. Why is oh-my-openagent installed? Do workers run under Sisyphus too? It adds its own large system prompt and pushes subagents and background tasks, which may clash with your "no subagents" rule and raise token use. [ANSWERED: it works better non stop; workers use it too, without human interaction (Ayush: "i guess so"). FLAG Q48]
+Q43. The report came from "GPT 6.1 Sol", which is not in the config file. Which provider gives you GPT in opencode (ChatGPT login, OpenAI API, something else)? [ANSWERED: ChatGPT login in opencode]
+Q44. How do you compact by hand: the /compact command, or starting a new session? How often per day for the master chat? [ANSWERED: the plan was by hand, but now it mostly compacts at around 30 to 40% and drops to 7 to 10%, losing important context. FLAG Q49]
+Q45. When the Mac hung on 27 Oct, how many opencode sessions and Docker containers were running? Do you have any memory numbers (Activity Monitor) from a busy time? [ANSWERED: no exact numbers, about 3 times the limit set in the files]
+Q46. Would you allow, later and only as a measured test, raising the Docker Desktop memory above 15.6 GiB? The Mac has 32 GiB, but opencode sessions and the browser also need RAM, so the right number has to be measured, not guessed. [ANSWERED: 15.6 GiB is probably enough, since not every task uses the memory its task.toml asks for. FLAG Q51]
+Q47. Your pasted config lost some square brackets (the "plugin" list). Is that only from copying, and is the real file valid? [FOLLOW UP: Ayush asked where; explained in chat 3 Nov]
+
+FLAGS AND CROSS QUESTIONS ON THE 3 NOV ANSWERS (rule R_FLAG)
+Q48. Q40 and Q42 do not fit together fully. Codex workers do not run under Sisyphus, so "workers use the same" is true only for opencode workers. Also Sisyphus pushes subagents, while your 31 Oct rule says GPT prompts must "strictly do not run subagents". Which wins for workers: Sisyphus non stop with subagents, or no subagents? [OPEN]
+Q49. Q44 versus the config: native auto compaction is OFF, yet you see compaction at 30 to 40%. So something else is shrinking the context: most likely DCP, or a feature of the Sisyphus plugin. Next time it happens, can you copy the exact message or screen text you see? [OPEN]
+Q50. The config default model is claude-opus-5, but you say the master always uses Opus 5.5. Do you pick Opus 5.5 by hand in each session (or with a flag)? [OPEN]
+Q51. Q46 fits what I found: if 15.6 GiB is enough in practice, the waiting comes mostly from dockfree counting task.toml LIMITS (and 4 GiB for any container without a limit), not real use. But Q45 says you once ran about 3 times the limit and the Mac hung. So "enough" holds for real use, but not if everything starts at once. Do you agree with this reading? [OPEN]
+
+RECOVERY PROMPT (part 2)
+Q52. When will you use the recovery prompt: after I compact in this same session, in a brand new session, or both? [OPEN]
+Q53. Should I update RESUME.md and push after every exchange (always current, one small commit each time), or only at milestones? [OPEN]
+Q54. May I verify the recovery prompt with a cold test: start one fresh helper agent that gets only the prompt, then check that it reports the state correctly? It costs some tokens. [OPEN]
+Q55. Should the recovery also reload part of the master_chat_tasks records, or only this upgrade_plan folder for now? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
