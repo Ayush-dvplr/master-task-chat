@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: none. Layer F running (W1-025); next P1 draft: STATE_CARD generator.
+LIVE NOW: Q110. Layer F running (W1-025).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -179,5 +179,7 @@ Q107. Next step for the study: (a) Layer F, one helper reads only the 68 cards a
 
 Q108. P1: may the master chat be started from master_chat_tasks/ instead of the root (so its own DCP file is the nearest one)? Its prompts use paths from the root; Claude would check that nothing breaks. If not, which other way do you prefer? [ANSWERED: yes; paths checked, one README line to change]
 Q109. P1: which files should be protected from compression in the master (draft list in drafts/P1/master.dcp.jsonc: README.md, GOALS.md, STATE_CARD.md, state.json, knowledge/INDEX.md)? Add or remove? [ANSWERED: list accepted]
+
+Q110. The state card needs one current list of rules (RULES_IN_FORCE.md), built from the rule review (UNVERIFIED_RULES.md, R1 to R35). Shall we do that review now, in batches of about 10 rules, while Layer F runs? This is also Q4. [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

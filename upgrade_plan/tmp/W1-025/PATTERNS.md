@@ -81,7 +81,7 @@ D9 (NOT IN SUMMARY). ONE CLAUSE HARDENING CONTRACTS
 5. State scope symmetry against over application (d4e8c327).
 6. State that recency or labels do not decide authority (9125255a "a value is never right just because it is newer, more complete or labelled final"), then give the real precedence in the docs.
 7. State runtime as one sentence; a stated size did not save fd7a2544.
-8. Avoid: grading situations the instruction calls unsettled (4ef4340d), leaving a branch boundary unwritten (7e0d8feb weak point), tally names that differ from the reference (d4e8c327), internal function names as an unstated API (6defadfe).
+8. Avoid: leaving a branch boundary unwritten (7e0d8feb, where only a test docstring settles the walk start) and grading internal function names that no document names (6defadfe).
 
 4. RUBRIC PATTERNS
 1. Self tests on mutated inputs, one item per named axis (6285fcad R1 R4 R5 R17; 9d1784a5 R3 R12 to R14).

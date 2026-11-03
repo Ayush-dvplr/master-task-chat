@@ -30,7 +30,12 @@ CHECK OF PATHS (Claude, 3 Nov, for Q108: master started from master_chat_tasks/)
 4. auto.py starts worker sessions with cwd = the project root (auto.py line 765), so workers get the root file (DCP off), as decided.
 5. Issued prompts use absolute Mac paths, so they are not affected.
 
-STILL TO DRAFT (P1 steps 2 to 5 in PLAN.md)
-1. STATE_CARD.md generator for the master (spec next).
+STATE CARD GENERATOR (P1 step 2, drafted 3 Nov 10:26)
+1. drafts/P1/state_card.py builds master_chat_tasks/STATE_CARD.md from RULES_IN_FORCE.md, GOALS.md "Today's goal", board.json, registry/tasks.json and pending.db (read only). No AI tokens.
+2. Tested on this repo's records (copy of 3 Nov 00:45): 3.0 KB, with 3 running sessions, 5 active tasks and the open items; output in drafts/P1/sample_STATE_CARD.md.
+3. Missing piece: RULES_IN_FORCE.md, one current layer of rules. It is built from the UNVERIFIED_RULES review with Ayush (R1 to R35 and later batches), so that review is the next dependency.
+4. After PROCEED: copy to master_chat_tasks/tools/, call it at the end of issue.py, intake.py, status.py and pending.py, and make the master README read order start with STATE_CARD.md.
+
+STILL TO DRAFT (P1 steps 3 to 5 in PLAN.md)
 2. Recovery prompt for the master.
 3. Folding the layered rule files into one current version each.
