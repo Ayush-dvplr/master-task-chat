@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: none open. Card run in progress (tmp/S2-CARDS/CARD_RUN.md).
+LIVE NOW: G1, G2, G3 (goal discussion). Card run in progress (tmp/S2-CARDS/CARD_RUN.md).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -159,5 +159,10 @@ Q98. P1 Step 1: which DCP option for the master chat: A tune, B manual (compress
 Q99. Task sessions: DCP off (C), or a light A (compress only near the end of the 1 million window, your messages protected)? Claude suggests C, since one session does one job; we can switch to A if a task session ever runs out of room. [ANSWERED: C, DCP off for task sessions]
 
 Q100. Scaling the cards: light cards (about 40k tokens, no reproduction, first field DEFECT or DESIGN) for all tasks, deep cards only where the loss looks like DESIGN? Or a different depth? [ANSWERED: yes]
+
+GOAL DISCUSSION (ENTRY 29)
+G1. Draft goal in one line: "Make more and more accepted tasks the way teammates make them: each passes QC, scores under the gate, is solvable from what it ships, and is new (not a copy). Traps and levers are one tool for that, next to volume, speed, design shapes and test structure." Agree, or change the words? [OPEN]
+G2. The cards so far mark some teammate tasks DEFECT, for example a rule that only the hidden data carries and that TRUTH.md itself calls undocumented, or a reference that contradicts the docs. These were accepted, and you want to make tasks like teammates. Your own hard requirement DR3 says a task must be solvable from what it ships. When "like teammates" and DR3 conflict, which wins, or do we decide each case together? [OPEN]
+G3. Besides traps, what else from teammates should the system learn and copy in approach: design shapes (for example the seeded generator plus full core gate), test structure, rubric style, task size, pace? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

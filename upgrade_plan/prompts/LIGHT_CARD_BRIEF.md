@@ -4,7 +4,7 @@ You are helper <HELPER>. Repo /home/user/master-task-chat. Read task files from 
 
 Your tasks: the lines starting with <BATCH> in upgrade_plan/tmp/S2-CARDS/QUEUE.txt (4 teammate tasks under anubis-stage-2/, with their Opus 5 scores).
 
-PURPOSE: learn task design from these accepted teammate tasks: what the tests check, why Opus lost points, and whether each loss comes from a DESIGN choice (real difficulty in a solvable task) or a DEFECT (the reference contradicts the docs, the environment or grader breaks the agent's program, or the contract leaves a graded value undecided). Defects are recorded but never treated as levers.
+PURPOSE: learn task design from these accepted teammate tasks: what the tests check, why Opus lost points, and whether each loss comes from a DESIGN choice (real difficulty in a solvable task) or a DEFECT (the reference contradicts the docs, the environment or grader breaks the agent's program, or the contract leaves a graded value undecided). Defects are recorded and flagged; they are not counted as design levers until Ayush and the master review them (nothing is voided automatically).
 
 BUDGET: about 40k tokens per task. Do NOT rerun code, decode digests, or regenerate data. Do NOT read trajectory.json or the PDFs. Read, in this order, only as much as needed: instruction.md; tests/judge.toml (criteria names and targets); trajectories/claude-opus-5/run_1/verifier/reward-details.json (lost checks and the judge reasoning); headers and check functions of tests/test_output.py (skip embedded data); solution/TRUTH.md (head); the environment docs that the lost checks depend on; the matching part of the agent's program under trajectories/claude-opus-5/run_1/artifacts/ only to locate a divergence.
 

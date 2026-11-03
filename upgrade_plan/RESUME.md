@@ -1,12 +1,12 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 09:40 IST. Claude updates this card after every step that changes the plan state. Times are IST.
+Last updated: 3 Nov 2026 09:48 IST. Claude updates this card after every step that changes the plan state. Times are IST.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session plans that upgrade. Repo Ayush-dvplr/master-task-chat, branch claude/youthful-feynman-zug0uq, planning folder upgrade_plan/. Ayush's inputs (QC kit, QC reports, harness queue, _runs, PL generator, teammate tasks anubis-stage-2/) are on origin/main: read them with git show origin/main:<path>, never merge.
 
 GOAL (README.md "GOAL OF THE TASK SYSTEM"; read it)
-TOP PRIORITY: fix, rebuild and harden tasks, and create new hard tasks under the gate. Problems P1 to P12 matter because they block this. Each task must pass the current QC kit, be solvable from what it ships (DR3), be new (never a copy of an old task or of one teammate task), and make Opus 5 score under the gate: today tests under 85, rubric under 85, final under 40, a changeable setting (DR2). Count caps: QC minimum, soft 70, hard 100 (Ayush's own rule). Agreed line (README GOAL item 7): hide traps from the solving agent; never make a real defect look valid to QC.
+GOAL IN ONE LINE (being agreed, G1): make more and more accepted tasks the way teammates make them; traps are one part. Conflicts are decided case by case, never voided automatically (ENTRY 29). TOP PRIORITY: fix, rebuild and harden tasks, and create new hard tasks under the gate. Problems P1 to P12 matter because they block this. Each task must pass the current QC kit, be solvable from what it ships (DR3), be new (never a copy of an old task or of one teammate task), and make Opus 5 score under the gate: today tests under 85, rubric under 85, final under 40, a changeable setting (DR2). Count caps: QC minimum, soft 70, hard 100 (Ayush's own rule). Agreed line (README GOAL item 7): hide traps from the solving agent; never make a real defect look valid to QC.
 
 RULES THAT ALWAYS APPLY
 1. Edit nothing outside upgrade_plan/ until Ayush types the exact word PROCEED; even then only changes both are 100% sure of.
@@ -49,4 +49,4 @@ NEXT STEPS (in order)
 1. Keep the card run going (CARD_RUN.md) and update Ayush after every 3 batches.
 2. In parallel: conflict review CR2 (tmp/W1-002/CONFLICTS.md C5, the careful program), then CR3 to CR5.
 3. Then the UNVERIFIED_RULES review (Q4 first), then Layer F patterns, then shape PLAN.md.
-4. Recovery prompt: prompts/RECOVERY_PROMPT.md (version 3), cold tested four times (W1-001, W1-004, W1-012, W1-013).
+4. Before a compaction: prompts/COMPACT_PROMPT.md. Recovery prompt: prompts/RECOVERY_PROMPT.md (version 3), cold tested four times (W1-001, W1-004, W1-012, W1-013).
