@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: rule review batch 4 (R31 to R35). Q116 kept open for later (Ayush).
+LIVE NOW: Q117. Q116 kept for later.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -191,5 +191,7 @@ Q114. R15 caps as settings: what values today for fix rounds per QC (now 2), QC 
 Q115. R2 CHECK: accept the 2 fixes (a, b) and the 6 added points (8 to 13)? [ANSWERED: accepted]
 
 Q116. R28 "Difficulty comes from computation on hidden data, never from withheld rules": keep, change or drop? Ayush will come back to it (ENTRY 42). [OPEN, LATER]
+
+Q117. The state card with the full rules in force is 5.9 KB (sample in drafts/P1/sample_STATE_CARD.md). Raise the budget to 6 KB (about 1,500 tokens), or shorten the rules? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

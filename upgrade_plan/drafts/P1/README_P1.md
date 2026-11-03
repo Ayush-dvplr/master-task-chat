@@ -36,6 +36,11 @@ STATE CARD GENERATOR (P1 step 2, drafted 3 Nov 10:26)
 3. Missing piece: RULES_IN_FORCE.md, one current layer of rules. It is built from the UNVERIFIED_RULES review with Ayush (R1 to R35 and later batches), so that review is the next dependency.
 4. After PROCEED: copy to master_chat_tasks/tools/, call it at the end of issue.py, intake.py, status.py and pending.py, and make the master README read order start with STATE_CARD.md.
 
+RULES IN FORCE (drafted 3 Nov 11:45 from RULE_REVIEW.md batch one)
+1. drafts/P1/RULES_IN_FORCE.md: one layer, 3.0 KB, every line names the rule ids it comes from. R28 left open (Q116).
+2. Card test with the rules: 5.9 KB (sample_STATE_CARD.md), over the 4 KB budget. Proposal (Q117): budget 6 KB, about 1,500 tokens, still about one sixteenth of the old 100 KB read order.
+3. Still to add to state_card.py: the accepted points 2 and 8 to 13 (news since last card, long running sessions, QC kit line, settings line, progress line, old questions first, uniqueness reminder) and fixes a and b (priority fill order, waiting items of any age).
+
 STILL TO DRAFT (P1 steps 3 to 5 in PLAN.md)
 2. Recovery prompt for the master.
 3. Folding the layered rule files into one current version each.

@@ -1,7 +1,21 @@
-STATE CARD (generated 03 Nov 2026 10:26 IST by tools/state_card.py; do not edit by hand)
+STATE CARD (generated 03 Nov 2026 11:45 IST by tools/state_card.py; do not edit by hand)
 
 RULES IN FORCE (one layer; the only rule text the master follows)
-MISSING: RULES_IN_FORCE.md not found. Stop and tell Ayush.
+GOAL: many accepted tasks, made the way teammates make them: QC passed, under the gate, solvable from what ships, new (not a copy). Conflicts decided case by case with Ayush.
+ROLE (R1): the master is the brain: plans, writes and tunes prompts, sends heavy work to other sessions, verifies every result on disk before recording, flags anything wrong or contradictory, reports updates.
+AFTER COMPACTION (R2): read this card first; load only live work; read more only when the next step needs it.
+RECORDS (R3 to R5): only the master writes master_chat_tasks, only through the tools. Ayush's corrections word for word to feedback.jsonl; process failures to lessons.jsonl; a lesson that repeats becomes a tool check. Store rules, decisions, state, failures, lessons, scores, levers, ideas; never chat summaries.
+HANDOFF (R6, R7): a table with board sha, step, status, clickable file link; never "read and follow". A session stays issued until Ayush says running.
+QC FIXES (R8 to R14, R17): never paste QC "Fix:" text as the direction; never move an assert into an existing check or weight onto a conduct criterion; never delete a clause or grader without naming what grades the rest; recheck every touched check; rerun the vacuity probe; regenerate docs and TRUTH.md last, by script; byte diff tests/ before and after; a finding on unchanged lines that passed before is noise, kept with diff evidence.
+QC PASS (R16, R18): no fail in 2 QC runs in a row, any CL fail blocks, a minor that does not repeat is accepted, false positive review after every QC result. Stop at the first pass; no hardening after it.
+CAPS (R15): none; Ayush decides each time. Counts: QC minimum, soft 70, hard 100 (Ayush's rule).
+GATE (R26, R27, setting): tests under 85, rubric under 85, final under 40, on 1 run of frozen QC passed bytes. Never rerun the same bytes after a miss.
+LEVERS (R25, R30, CR1, CR6, CR7): primary lever from the PATTERNS.md DESIGN families, at least 40 percent of positive test weight, firing in most hidden inputs. A misread rule lever needs one clear deciding sentence. Timeout lever only as an extra unless Ayush says so. An amended field needs one deciding doc sentence. No "note that", no trap list, no method word; a size bound may be stated for a runtime lever.
+RUBRIC (Q106, R29): every criterion traces to an instruction sentence; ask for a worked example in the instruction when one is graded; honesty negative minus 3 in every judge.
+DOCKER (R19 to R23): kill tests in Docker only; Docker room from the S1 script (dockfree.py as fallback); worker and harness limits are settings; never harbor delete; prune images only when idle.
+COST (R24, R31, R32): paid runs per day and model per step are settings; GPT prompts in opencode say "strictly do not run subagents".
+REPOS (R33 to R35): prompts read live QC and generator files; never commit or push in any repo, read only commands only; never edit the generator, QC kit, "QC assigned/" or "my tasks/" without Ayush's "proceed".
+OPEN: R28 (Q116).
 
 TODAY
 At least 4 push-ready tasks today, counting slipway (pushed 2 Nov 11:42). Sources allowed: flood and depot rebuilt with a new primary lever (R0 1a-c), parked bundles on disk; doc changes allowed; hangar go after the v3.8 upgrade, on Ayush's word. b7c42a8f is Nikhil's task: never counted, never issued without Ayush.

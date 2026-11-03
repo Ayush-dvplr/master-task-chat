@@ -324,3 +324,8 @@ ENTRY 42. 3 Nov 2026 11:42 IST (word for word)
 "Q114 no cap, Q115 accept, R21 to R30 all as suggested and for R28. we will come back to this as of now make it an open question"
 
 Recorded as: Q114 no caps (Ayush decides each time). Q115 accepted. Batch 3: all as suggested, except R28, which stays an open question (Q116).
+
+ENTRY 43. 3 Nov 2026 11:44 IST (word for word)
+"R31 to R35 all as suggested but for R34: never commit or push anything int but can have read only checks or read only commands"
+
+Recorded as: R31, R32, R33, R35 as suggested. R34: the task system never commits or pushes anything in any repo (including this one); only read only checks and read only commands; Ayush runs every pull, commit and push. (This planning session keeps its own permission to push upgrade_plan/ to its branch, ENTRY 2.) Batch one of the rule review (R1 to R35) is complete except R28 (Q116).

@@ -119,4 +119,11 @@ R34. Allowed repos only Terminal_2.0_Harbor_Harness, Anubis_Tasks_Samples, beta-
   Note: matches R_REPOS. The teammate tasks now come from anubis-stage-2 (this repo on main). Suggest CHANGE: add this repo (Ayush-dvplr/master-task-chat) as the place the upgraded system lives.
 R35. Never edit the generator, the QC kit, "QC assigned/" or "my tasks/" without Ayush's explicit "proceed".
   Suggest KEEP.
-Decisions: (open)
+Decisions (Ayush, ENTRY 43, 3 Nov):
+R31 CHANGE to a setting per step and tool (model and variant per step; P6 adapter).
+R32 KEEP (review when subagents can follow the session's provider).
+R33 KEEP. R35 KEEP.
+R34 CHANGE to: "The task system never commits or pushes anything in any repo, including master-task-chat. Only read only checks and read only commands (status, log, diff, show, ls-remote, fetch for reading). Ayush runs every pull, commit and push." Repos it may read: Terminal_2.0_Harbor_Harness, Anubis_Tasks_Samples, beta-task-generator, Finalized_Tasks_RFP, master-task-chat.
+
+BATCH ONE COMPLETE (R1 to R35), 3 Nov. Open: R28 (Q116, later). Next: RULES_IN_FORCE.md draft built from these decisions (drafts/P1/RULES_IN_FORCE.md).
+
