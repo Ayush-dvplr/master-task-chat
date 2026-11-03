@@ -425,3 +425,8 @@ T35-T38: your suggestions
 T41-T46: you sugeestion (but verify all too)"
 
 Recorded as: QC pass (refines ENTRY 57): 1 complete QC pass is enough when every fail left is a false positive (shown by the false positive review with diff evidence, U13, FP_DOSSIER) and the rest are minors or warnings. Real fails block. Open point Q129: does a false positive CL fail also pass? T35 KEEP, T36 to T38 DROP, as suggested. T41 to T46 as suggested, with Claude's verification: T42 to T46 confirmed (T43: route 1 notes lines 8 and 44, reference at most 1/4 of the limit, so 4x; T46: kit 03_Tests_QC.md:41, Step 10 runs the oracle five times). T41 corrected: the wording "a Python reviewer would accept as maintainable" is the playbook's (QC_FIX_PLAYBOOK_v3.md:50), not the kit's literal text; it fits the kit standard (04_Judge_QC.md:99), so the decision stands. New conflict found: Q130 (JD-18 conduct criteria need no instruction sentence, against Q106 and T16).
+
+ENTRY 59. 3 Nov 2026 15:33 IST (word for word)
+"Q129 as recommended, Q130 - code quality criterion needs to be there only if it is relarted to an instrcution better if not fine as a conduct cirterion as well"
+
+Recorded as: Q129: a CL fail that the false positive review proves is a false positive (diff evidence on file) passes like any other false positive fail. Q130: the code quality criterion is always present when the agent authors code (kit JD-18 requires it); best when it relates to an instruction sentence, otherwise it is fine as a conduct criterion with no instruction sentence. Q106 and T16 get this exception. The honesty negative (minus 3, every judge) stays a conduct criterion with no instruction sentence, as before (RIF RUBRIC).

@@ -66,3 +66,5 @@ T43 CHANGE: time limit at least 4x the reference time (route 1 lines 8 and 44), 
 T44 CHANGE: "0 differences over 2,000 variants: report to Ayush, never park on its own"; the 60 percent NO CORE number waits for CR2.
 T45 CHANGE: "Blinds before QC are not required; a blind is a diagnostic only"; 70 and 100 thresholds dropped; AUTO_POLICY A3 blind read becomes optional.
 T46 CHANGE: oracle count in settings.json: 3 by Ayush's rule, 2 in auto mode with the rest owed before push (T30), 5 once in the final QC before ship (kit 03_Tests_QC.md:41).
+
+Q129, Q130 (ENTRY 59): a CL fail proven a false positive passes like other false positives. T16 and Q106 exempt conduct criteria: code quality (always present when code is authored, best tied to an instruction sentence, else conduct) and the honesty negative.
