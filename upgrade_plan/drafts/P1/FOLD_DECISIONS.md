@@ -21,3 +21,9 @@ T18 KEEP: "Rules of engagement are always stated in a file the agent reads."
 T19 KEEP: "Every instruction keeps the finish time sentence; no effort cap."
 T20 CHANGE: "DESIGN READY needs a predicted final under the gate minus design_margin (settings.json, 5 points: under 35 today)."
 T21 DROP.
+
+BATCHES 3 AND 6, QC FIXES, REPOS AND SAFETY (ENTRY 54)
+T22 CHANGE: "No fix softens a lever just to pass QC unless Ayush says so for that finding. A real defect is always fixed: the shipped docs decide the value in one sentence and the hardness is rebuilt in a valid form (Q126)."
+T23 CHANGE: issue.py refusals after a QC pass become logged warnings; RIF:7 "stop at the first pass" stays.
+T39 KEEP: "Never run generate_bundle.py --force, playground.py --model, or anything that uploads files or keys."
+T40 CHANGE: "Mine passing teammate tasks only from anubis-stage-2 (the current source Ayush named)."

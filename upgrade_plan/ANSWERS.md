@@ -398,3 +398,8 @@ ENTRY 53. 3 Nov 2026 14:42 IST (word for word)
 "T12 to T21 as suggested, margin 5"
 
 Recorded as: fold review batch 2: T12, T13, T14, T15, T18, T19 KEEP; T16, T17, T20 CHANGE; T21 DROP; all as suggested. Design margin 5 points: DESIGN READY needs a predicted final under 35 (gate 40 minus 5), set in settings.json as design_margin.
+
+ENTRY 54. 3 Nov 2026 14:45 IST (word for word)
+"T22 to T40 as suggested, T40 option 1"
+
+Recorded as: T22 CHANGE, T23 CHANGE, T39 KEEP, T40 CHANGE, all as suggested; T40 current peer source = anubis-stage-2 only. Read as covering only the four items shown (T22, T23, T39, T40); T24 to T38 were not shown yet and are NOT counted as decided (flagged to Ayush).
