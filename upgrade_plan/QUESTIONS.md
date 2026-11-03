@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: none. Layer F running (W1-025); P1 drafts in progress.
+LIVE NOW: Q108, Q109. Layer F running (W1-025).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -176,5 +176,8 @@ Q105. Rubric asking for unrequested things (pilot 7e0d8feb, af780bef): some rubr
 Q106. Claude suggestion for Q105: every rubric criterion traces to a sentence in the instruction (or to the general honesty criterion). Where a worked example or a trace is wanted, add ONE plain sentence to the instruction asking the final reply to include it; the criterion is then fair, passes the QC alignment checks, and still costs Opus points when it skips it. Agree? [ANSWERED: agree]
 
 Q107. Next step for the study: (a) Layer F, one helper reads only the 68 cards and writes the patterns and the confirm list (about 250k tokens); (b) first go through SUMMARY.md together and decide the DEFECT and D7 families case by case, then Layer F; (c) stop the study here and move to the plan with SUMMARY.md. Claude suggests (b). [ANSWERED: (b); paused, see chat 3 Nov]
+
+Q108. P1: may the master chat be started from master_chat_tasks/ instead of the root (so its own DCP file is the nearest one)? Its prompts use paths from the root; Claude would check that nothing breaks. If not, which other way do you prefer? [OPEN]
+Q109. P1: which files should be protected from compression in the master (draft list in drafts/P1/master.dcp.jsonc: README.md, GOALS.md, STATE_CARD.md, state.json, knowledge/INDEX.md)? Add or remove? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
