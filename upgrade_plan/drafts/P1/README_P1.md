@@ -41,6 +41,7 @@ RULES IN FORCE (drafted 3 Nov 11:45 from RULE_REVIEW.md batch one)
 2. Card test with the rules: 5.9 KB (sample_STATE_CARD.md), over the 4 KB budget. Proposal (Q117): budget 6 KB, about 1,500 tokens, still about one sixteenth of the old 100 KB read order. Ayush chose 6 KB (ENTRY 44); the time check says it is not enough after the accepted points (about 6.3 to 7.9 KB a day, up to 9.5 KB at the script maximum). Decision pending in Q118.
 3. Still to add to state_card.py: the accepted points 2 and 8 to 13 (news since last card, long running sessions, QC kit line, settings line, progress line, old questions first, uniqueness reminder) and fixes a and b (priority fill order, waiting items of any age).
 
-STILL TO DRAFT (P1 steps 3 to 5 in PLAN.md)
+DRAFTED 3 Nov 12:45: P1 steps 3 and 4 in MASTER_RECOVERY.md (new read order, paste prompt, protect block, cold test); step 5 in FOLD_PLAN.md (history move, content fold by helper W1-027, 5 contradictions). Waiting for Q8, Q120, Q121.
+OLD LIST (P1 steps 3 to 5 in PLAN.md)
 2. Recovery prompt for the master.
 3. Folding the layered rule files into one current version each.
