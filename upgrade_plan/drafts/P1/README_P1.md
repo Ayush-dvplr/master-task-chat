@@ -23,6 +23,13 @@ CHECK AFTER APPLYING (one day)
 2. Count compressions in the master per day (target: only the ones Ayush starts).
 3. Run one cold recovery test of the master (like W1-001 here).
 
+CHECK OF PATHS (Claude, 3 Nov, for Q108: master started from master_chat_tasks/)
+1. Tools: 11 of 16 tools and auto.py find their files from their own location (__file__), so the start folder does not matter for them. The other 5 (dockfree.py, name_session.py, stacking_check.py, trajectory_readout.py, xref_check.py) open no fixed relative paths.
+2. README read order already uses paths relative to master_chat_tasks/ (tools/status.py, tools/pending.py), so those get simpler.
+3. One line breaks: README line 14 "git -C Terminal_2.0_Harbor_Harness rev-parse HEAD" is relative to the root. Change after PROCEED: "git -C ../Terminal_2.0_Harbor_Harness rev-parse HEAD".
+4. auto.py starts worker sessions with cwd = the project root (auto.py line 765), so workers get the root file (DCP off), as decided.
+5. Issued prompts use absolute Mac paths, so they are not affected.
+
 STILL TO DRAFT (P1 steps 2 to 5 in PLAN.md)
 1. STATE_CARD.md generator for the master (spec next).
 2. Recovery prompt for the master.
