@@ -57,3 +57,11 @@ Layer F. Synthesis: PATTERNS.md (lever families, frequency, points cost, wording
 Layer G. QC risk view: for CL checks especially (Ayush: CL findings count as major), how passing teammate tasks meet each CL check, including the exemptions the kit itself allows.
 Optional: scan Ayush's own 5 tasks the same way if a comparison is needed.
 Cost: A and B almost none; C about 100k; D about 2 to 3 million; E about 2 million; F and G about 500k.
+
+LAYER A AND B RESULT (3 Nov 09:19, scripts tmp/S2-FEATURES/layer_a.py and layer_b.py, LAYER_B.txt sha 362c535c, no AI tokens)
+1. 108 teammate tasks with test details. Real counts: median 35 test checks (28.5 positive, 5 negative), median 22 rubric criteria (about 12 judged on the trajectory). The earlier estimate of 186 was wrong.
+2. Opus lost 64.9 percent of all positive test weight across these tasks.
+3. No surface feature predicts a low tests score: every correlation is weak (between minus 0.13 and plus 0.23), apart from "weight lost", which is the score itself. Instruction length, data size, number of files, number of checks: none of them decides it. The difficulty is in WHAT the tests check, not in how big the task looks. So Layer C cards are needed.
+4. Where the lost weight sits, by words in check names: "exact" (624 checks, 1743 lost), "corpus" (295 checks, 1260 lost), "reports" (334 checks, 1215 lost), "held" or "heldout" (197 checks, about 790 lost), "unseen" (91 checks, 374 lost), "hidden" (78 checks, 251 lost), and region names (north, south, east, west, basin). Reading: most loss is on exact comparisons of reports that the agent's program produces over several held out data sets. To be confirmed by cards.
+5. Checks against our own rules (regex based, UNVERIFIED): an explicit exact match sentence appears in only 3 of 108 tasks (route 1 R0 item 3 says every task carries it); the "Leave enough of that time" sentence appears in none (R0 item 7 requires it). Tasks whose instruction mentions unseen or hidden data scored HIGHER (median 55) than the rest (31.5). The runtime sentence pattern matched every task, so that regex is too broad to use.
+NEXT: Layer C pilot, 3 cards (low, middle, high scorer), waiting for Ayush's go (Q96).

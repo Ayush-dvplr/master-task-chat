@@ -228,3 +228,5 @@ ENTRY 23. 3 Nov 2026 09:18 IST, clarification (word for word)
 "the QC is made by my PL not client and we don't have any client we are working on our own and as you can check my teamates are doing the same and i am not doing off the way here sorry for saying the word bypassing QC , its like passing QC using the rewordings or approaches that can hide our traps and all so the QC is passed and tasks also get a good score"
 
 Recorded as: the QC kit is written by Ayush's PL; the team works on its own. "Bypassing QC" was the wrong word: Ayush means passing QC with wordings and approaches that keep the traps hidden from the solving agent, so QC passes and the task still scores low. README GOAL item 7 updated with the agreed line.
+
+ENTRY 24. 3 Nov 2026 09:19 IST, "yes" to resume Layer B. Recorded as: Layer B run; result in STAGE2_STUDY_PLAN.md.

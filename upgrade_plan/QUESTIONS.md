@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: see chat 3 Nov (pause on the stage 2 study).
+LIVE NOW: Q96.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -150,5 +150,7 @@ Q92. P12 (QC is noisy): shall we set a working definition now, for example "QC p
 Q93. Approve STAGE2_STUDY_PLAN.md plan v2 (layers A to G, starting with the free script layers A and B and a 3 card pilot)? [ANSWERED: Layer A and B approved]
 Q94. Gate categories: tasks fill quotas in easy, medium and hard, and the gate falls over time (70, 50, then 35). Does each category have its own gate today, and which category are your new tasks meant for? The system needs this to know which gate a task must meet. [ANSWERED: no separate gate per category]
 Q95. Working QC definition (draft): "QC passed = no fail finding in 2 QC runs in a row; any CL fail blocks; a minor is accepted if it does not come back with the same evidence in the second run". Agree, or change? [ANSWERED: agreed, plus a false positive review step after each QC result]
+
+Q96. Layer C pilot: 3 light cards (one low, one middle, one high Opus tests score, chosen by Claude from FEATURES.csv), about 100k tokens, run as background helpers; Ayush reviews the cards before scaling. Go? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
