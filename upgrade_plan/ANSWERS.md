@@ -552,3 +552,8 @@ Q151: "No need"
 Recorded as: Q148 a skeleton folder of our own, copied from a QC passed task (task.toml with the kit's key order, tests/Dockerfile, test.sh, reward.toml), blanks only for task values, checked by the kit scripts and precheck.sh. Q149 stage 1 writes a WORK/ design pack that never ships (design card, every deciding sentence as it will appear, file and folder plan with nesting, shipped and hidden data plan with its generator spec, levers and traps, leak check) and ends at DESIGN READY; stage 2, a fresh session, reads only the pack and builds. Q150 (and Q147) BR-SL1 to BR-SL4 added to BUILD_RULES and to the stage 1 leak check; the coupling sentence demand is dropped from the build prompt. Q151 no PL question about the generator.
 
 NOTE 4 Nov 2026 00:19 IST (Claude, after Ayush asked whether PL_QUESTIONS.md should change now that the generator is dropped): removed two generator bug questions (blank words in the build repair template; CATEGORIES.md lists 2 of 8 archetypes); rewrote the validator question as "what must a bundle pass before push: the full kit alone, or also validate_bundle.py or playground.py" (still needed, worded neutrally, no mention of dropping the generator, per Q151); kept the archetype question (does a task shape outside the 8 archetypes pass); opening line no longer says Ayush builds with the generator. 31 questions now, renumbered PL1 to PL31.
+
+ENTRY 80. 4 Nov 2026 00:37 IST (word for word)
+"remove this What Ayush does today:  from Pl_questions.md" then "from all questions"
+
+Recorded as: the "What Ayush does today" line removed from all 31 questions in PL_QUESTIONS.md (31 lines and their blank lines). Nothing else in the file changed.
