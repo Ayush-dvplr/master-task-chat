@@ -30,7 +30,7 @@ T40 CHANGE: "Mine passing teammate tasks only from anubis-stage-2 (the current s
 
 BATCH 4, RUNS AND PUSH (ENTRY 55)
 T24 CHANGE: "Order: design, build, full QC until it passes, 1 paid run on the frozen bytes. No hardening between the QC pass and the paid run. After a gate miss: harden from what the run got wrong with the fix map, QC again, 1 new run."
-T25 PENDING (Q128): auto mode self go.
+T25 CHANGE (Q128, ENTRY 56): "By day the master stops at DESIGN READY and waits for Ayush's go. In auto mode (AUTO_POLICY.md) it checks DESIGN READY against the rules in force and the kit and sends the go itself or a correction, writes it to prompts/issued/<slug>/<ts>_go.md and lists it in REPORT.md." R7 gets the same auto mode exception (auto.py starts sessions itself).
 T26 KEEP: "Before diagnosing a run, diff its staged copy against the bundle; a score from another tree is no baseline."
 T27 KEEP: "A regrade is diagnostic only, except a judge only edit on a valid run with Ayush's written OK, repackaged by repackage_one.py."
 T28 KEEP: "Only valid runs (no grader error) count as baselines."
@@ -40,3 +40,19 @@ T31 KEEP: "Every freeze records the tree sha; a gate run counts only on that sha
 T32 KEEP: "Only real runs measure hardness; a reviewer rating never gates."
 T33 CHANGE: runs per task while building (1) and on final approval (8) move into settings.json.
 T34 KEEP: "No task is parked except on Ayush's word."
+
+AUTO_POLICY BATCH (auto/AUTO_POLICY.md against RULES_IN_FORCE.md, checked by Claude 3 Nov; asked, waiting)
+A1 line 3 "README still applies: same read order, caps": CHANGE to the state card read order and RULES_IN_FORCE.md; caps are warnings.
+A2 line 22 DESIGN READY go: DECIDED by T25 (Q128): check against the rules in force and current LEVER_RULES.
+A3 line 23 blind read after DESIGN BLIND READY: depends on T45 (blinds before QC or none on route 1).
+A4 line 24 no third redesign, stop and write under Needs Ayush: KEEP (asks Ayush, does not park).
+A5 line 25 auto Step 10 = 2 oracle and 1 nop; the rest owed before push: KEEP, oracle count follows T46, push condition T30.
+A6 line 26 QC PASS or minors only, then freeze: CHANGE to RIF:7 (no fail in 2 QC runs in a row, any CL fail blocks, a minor that does not repeat is accepted, false positive review after every QC result).
+A7 line 27 QC FAIL, one fix session with G1 to G7: CHANGE to "one fix session with the fix map (T22, Q125, Q126), then QC recheck".
+A8 line 28 gate 85, 85, 40 written out: CHANGE to "gate from settings.json".
+A9 line 29 gate miss, fix prompt in QC-safe form: CHANGE to T24 order with the fix map.
+A10 line 30 round limit override by the master: DROP (caps are warnings, Q120).
+A11 Limits (5 workers, 2 harness, 2 new builds per run, last spawn 20 min before Until): CHANGE, values into settings.json (Q122, R21).
+A12 Budget (6 paid runs a day; start a paid run only with at most 2 busy workers, at most 3 while it runs): CHANGE, values into settings.json (R24).
+A13 Workers model "claude-opus-5-5, variant high": CHANGE, model per step from settings.json (R32).
+Kept as they are (match the rules in force): hard rules 1 to 6, interruptions table, restart and scheduled start, REPORT.md layout. No line stops a working session (ENTRY 47).
