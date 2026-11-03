@@ -280,3 +280,8 @@ ENTRY 34. 3 Nov 2026 10:09 IST (word for word)
 "Q104 only with one doc sentence, Q105 what you suggest ?"
 
 Recorded as: Q104 decided: an amended or retyped field is allowed only when one sentence in the shipped docs decides how it is read. Q105: Claude suggestion given in chat (Q106).
+
+ENTRY 35. 3 Nov 2026 10:11 IST (word for word)
+"keep this question open later when all beatches comes out we will decide what to do with this"
+
+Recorded as: Q106 stays open until all sample batches are done; decided then.
