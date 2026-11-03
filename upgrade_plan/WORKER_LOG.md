@@ -43,3 +43,6 @@ W1-019 | W1 helper | 3 Nov 2026 09:52 | Layer D light cards, batch B09 | Q100 | 
   Result: fb91cc7f MIXED leaning DEFECT (candidate conventions only in tests); fd7a2544 DESIGN (c, stated runtime on a hidden large input); 072aced5 MIXED leaning DESIGN (one unstated priority rule); 6defadfe MIXED (hardening probes, mostly DESIGN). About 181k tokens.
 W1-020 | W1 helper | 3 Nov 2026 09:55 | Layer D light cards, batch B10 | Q100 | verified (master checked d7898e6d TRUTH.md line 89: "six choices that no document states and seven mode bits whose meaning no document states", as cited) | tmp/S2-CARDS/ (88ee425d, af780bef, e08c051f, d7898e6d)
   Result: 88ee425d and af780bef DEFECT (same open type question as 058cbab3: amended JSON field type); e08c051f DESIGN (a, schema says integer, quoted strings must be rejected); d7898e6d MIXED leaning DEFECT (behaviour only searchable against digests inside later inputs). Rubric note: several criteria ask for examples the instruction never asks for. About 163k tokens.
+W1-021 | W1 helper | 3 Nov 2026 10:07 | Layer D light cards, batch S01 (sample) | Q103 | running | tmp/S2-CARDS/
+W1-022 | W1 helper | 3 Nov 2026 10:07 | Layer D light cards, batch S02 (sample) | Q103 | running | tmp/S2-CARDS/
+W1-023 | W1 helper | 3 Nov 2026 10:07 | Layer D light cards, batch S03 (sample) | Q103 | running | tmp/S2-CARDS/

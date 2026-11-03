@@ -1,4 +1,5 @@
-STATUS: PAUSED by Ayush 3 Nov 09:55 (ENTRY 31): credits used up. Start NO new batch until Ayush agrees a tighter plan (Q102).
+STATUS (3 Nov 10:07): QUEUE batches B11 to B24 stay PAUSED. Sample batches S01 to S04 (15 tasks, ENTRY 33) are approved and running; same procedure, batch ids S01 to S04.
+EARLIER: PAUSED by Ayush 3 Nov 09:55 (ENTRY 31): credits used up. Start NO new batch until Ayush agrees a tighter plan (Q102).
 
 CARD RUN PROCEDURE (Layer D light cards; read this to continue the run after a compaction)
 

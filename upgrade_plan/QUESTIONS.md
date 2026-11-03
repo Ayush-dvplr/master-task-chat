@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q103. Card run PAUSED (B01 to B10 done).
+LIVE NOW: Q104, Q105. Sample S01 to S03 running, S04 next.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -168,6 +168,9 @@ G3. Besides traps, what else from teammates should the system learn and copy in 
 Q101. B08, B09 and B10 were already running when you paused. Stop them now (cards written so far are kept), or let them finish? [ANSWERED: keep them running]
 Q102. Tighter plan for the rest (B10 to B24, about 56 tasks): which option? (a) stop the cards here and go to patterns with the 34 to 46 cards we have plus the 10 from 2 Nov; (b) a free script pass first that flags likely DEFECT tasks (graded key names or ids not found in the docs), then cards only for the rest; (c) a much smaller card (about 15k tokens, verdict and kind only) for the rest; (d) a sample, for example 10 more tasks chosen to cover categories not yet seen. [ANSWERED: b then d; b result in tmp/S2-TRIAGE/RESULT.md]
 
-Q103. Start sample S1 (10 tasks in STAGE2_STUDY_PLAN.md, about 450k tokens), now or when your credits are back? [OPEN]
+Q103. Start sample S1 (10 tasks in STAGE2_STUDY_PLAN.md, about 450k tokens), now or when your credits are back? [ANSWERED: run now, plus a few more chosen by Claude; S01 to S04]
+
+Q104. Amended field type (cards 058cbab3, 88ee425d, af780bef): the data says a field is a whole number, then an amendment rewrites it as text, for example "1200" in quotes. The docs never say whether that amended value still counts as a number or is now invalid. The teammate reference treats it as invalid; Opus treated it as a number, and lost many points. For your own tasks: allowed only if one sentence in the docs decides it, or never use it? [OPEN]
+Q105. Rubric asking for unrequested things (pilot 7e0d8feb, af780bef): some rubric criteria give points only if the agent shows one named example or prints a trace, but the instruction never asks for that. Opus lost many rubric points this way. For your own tasks: copy this style, or keep every rubric criterion tied to something the instruction asks for? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
