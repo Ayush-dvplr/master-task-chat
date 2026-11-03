@@ -243,3 +243,8 @@ ENTRY 27. 3 Nov 2026 09:29 IST, answers in chat (word for word, RQ9 output conde
 response from opencode: (RQ9 output, about 40 KB, condensed in inputs/dcp/RQ9_dcp_3.2.0_summary.md)"
 
 Recorded as: Q98 master = B (manual); task sessions = A or C, since one session is used for one job and the model has a 1 million token window. Claude checked the board: 445 sessions and 599 issued prompts, of which 56 are follow ups (go, answer, continue), so most sessions get one prompt; this supports C (DCP off) or a light A for task sessions. RQ9 done: DCP 3.2.0 supports every option needed, and reads a per folder .opencode/dcp.jsonc, so master and task sessions can have different settings. Q97 asked again.
+
+ENTRY 28. 3 Nov 2026 09:34 IST, answers in chat (word for word)
+"100 yes, 97 yes, 99 C"
+
+Recorded as: Q100 light cards approved (about 40k tokens, no reruns, DEFECT or DESIGN first). Q97 the context meter is a percent of the 1 million token window, so DCP starts pushing compression at about 10 percent. Q99 DCP off (option C) for task sessions.

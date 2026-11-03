@@ -75,3 +75,5 @@ LESSONS FOR SCALING
 2. The real design levers seen so far are all of one kind: a documented case that the visible data never triggers and the test data does (R0 kind b).
 3. Cost: 113k, 144k and 179k tokens per card (about 145k average), far above the 20k to 30k planned, mostly from reproducing and decoding. All 108 at this depth would be about 15 million tokens.
 PROPOSED CHANGE (Q100): light cards with a hard budget of about 40k tokens and no reproduction runs; first field DEFECT or DESIGN; deep cards (with reproduction) only for tasks whose loss looks like DESIGN.
+
+LAYER D (approved Q100, started 3 Nov 09:34): 95 tasks (108 minus 10 carded on 2 Nov and 3 pilot) in 24 batches of 4, lowest Opus tests first: tmp/S2-CARDS/QUEUE.txt. Brief: prompts/LIGHT_CARD_BRIEF.md. Cards: tmp/S2-CARDS/<id>.md. 3 helpers at a time; the master spot checks one card per batch.
