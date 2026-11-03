@@ -3,7 +3,7 @@ PLAN (DRAFT, NOT APPROVED)
 Every section here is a first direction only. None of it is built until: (1) the questions it depends on are ANSWERED and VERIFIED, (2) the rules it relies on are VERIFIED in UNVERIFIED_RULES.md, (3) Ayush approves the section, and (4) Ayush types PROCEED.
 
 P1 COMPACTION (draft v2, 3 Nov; depends on Q97, Q98, RQ9; nothing applied before PROCEED)
-Cause found: DCP runs on defaults (F1.8, F1.9): it starts pushing compression at 100k tokens, the model compresses its own history into about 5%% summaries, and nothing is protected, not even Ayush's messages.
+Cause found: DCP runs on defaults (F1.8, F1.9): it starts pushing compression at 100k tokens, the model compresses its own history into about 5% summaries, and nothing is protected, not even Ayush's messages.
 Step 1. DCP settings (one small dcp.jsonc, applied by Ayush on the Mac). Choose one of:
   Option A, tune: protectUserMessages true; protectTags true; protectedFilePatterns for the rule and state files; turnProtection on; higher per model limits for the master model; nudgeForce soft.
   Option B, manual: manualMode on (the master compresses only when Ayush says so), automatic dedup and error purge kept.
