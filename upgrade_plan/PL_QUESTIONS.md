@@ -348,17 +348,6 @@ Example: In a task where the agent cleans a supplier catalogue, QC asks to rewor
 Follow up questions: Must the regraded result be marked as a regrade anywhere?
 
 
-PL31 (for PL). Old Anubis 07 to 10 runs
-
-Question: The verifiers for Anubis tasks 07 to 10 were fixed in Anubis commit 5d565653, but the stored trajectories and rewards (25.49, 27.39, 29.17, 29.35) come from the old runs that were blocked by file permissions. Who reruns them, and do those four tasks still matter?
-
-What this means: The stored scores are wrong because the old verifier could not read the files. Nothing has been rerun since the fix.
-
-Example: Task 08 shows 27.39 in the records. One reading: someone reruns it on the fixed verifier and the record is updated. The other reading: the tasks no longer matter and the records are marked as old.
-
-Follow up questions: If they matter, should Ayush rerun them?
-
-
 ANSWER TABLE
 
 PL1 |
@@ -391,4 +380,3 @@ PL27 |
 PL28 |
 PL29 |
 PL30 |
-PL31 |

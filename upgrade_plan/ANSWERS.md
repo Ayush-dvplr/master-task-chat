@@ -557,3 +557,8 @@ ENTRY 80. 4 Nov 2026 00:37 IST (word for word)
 "remove this What Ayush does today:  from Pl_questions.md" then "from all questions"
 
 Recorded as: the "What Ayush does today" line removed from all 31 questions in PL_QUESTIONS.md (31 lines and their blank lines). Nothing else in the file changed.
+
+ENTRY 81. 4 Nov 2026 00:41 IST (word for word)
+"yes remove PL31"
+
+Recorded as: PL31 (old Anubis 07 to 10 runs) removed from PL_QUESTIONS.md: the four tasks are teammate sample tasks from the 22 Oct low score study (authors are three teammates, not Ayush), the study is finished and anubis-stage-2 is the only teammate source now. 30 questions remain. Old pending item Q47 is settled the same way.
