@@ -334,3 +334,8 @@ ENTRY 44. 3 Nov 2026 12:05 IST (word for word)
 "Q117 raise to 6 KB and verify with time is it will be sufficient"
 
 Recorded as: Q117 budget 6 KB, with a check that it stays enough over time. Check done 12:08 (measured from sample_STATE_CARD.md): fixed part 4.8 KB today, about 5.8 KB after the accepted card points; each running session adds about 173 bytes, each active task about 130. Quiet day (1 session, 2 tasks) about 6.3 KB, today (3, 5) about 7.0 KB, busy day with 4 lanes (6, 8) about 7.9 KB, the script maximum (12, 12) about 9.5 KB, before any new rule. Result: 6 KB is NOT enough, even on a quiet day. Flagged to Ayush under R_FLAG; follow up Q118.
+
+ENTRY 45. 3 Nov 2026 12:10 IST (word for word)
+"Q118 option 3"
+
+Recorded as: card budget is a hard limit of 8 KB with a 6 KB target, plus the trims (open items top 5, shorter task and step lines, sessions over 6 shown as a count). Sizes live in settings.json (DR2). Built into drafts/P1/state_card.py v2 and tested 12:20 (drafts/P1/CARD_TEST.md).

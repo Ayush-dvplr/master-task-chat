@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q118. Q116 kept for later.
+LIVE NOW: Q119. Q116 kept for later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q8, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -193,6 +193,7 @@ Q115. R2 CHECK: accept the 2 fixes (a, b) and the 6 added points (8 to 13)? [ANS
 Q116. R28 "Difficulty comes from computation on hidden data, never from withheld rules": keep, change or drop? Ayush will come back to it (ENTRY 42). [OPEN, LATER]
 
 Q117. The state card with the full rules in force is 5.9 KB (sample in drafts/P1/sample_STATE_CARD.md). Raise the budget to 6 KB (about 1,500 tokens), or shorten the rules? [ANSWERED: 6 KB, verify it stays enough (ENTRY 44); check says it does not; FOLLOW UP Q118]
-Q118. Measured: 6 KB is not enough (quiet day about 6.3 KB, today about 7.0 KB, busy day about 7.9 KB, after the accepted card points). Choose: (a) 8 KB, about 2,000 tokens, with the fill order cutting from the bottom and a line naming what was left out; (b) keep 6 KB and trim: open items top 5 instead of 10, shorter task lines, sessions over 6 shown as a count; (c) both: 8 KB hard limit, 6 KB target with the trims. [OPEN]
+Q118. Measured: 6 KB is not enough (quiet day about 6.3 KB, today about 7.0 KB, busy day about 7.9 KB, after the accepted card points). Choose: (a) 8 KB, about 2,000 tokens, with the fill order cutting from the bottom and a line naming what was left out; (b) keep 6 KB and trim: open items top 5 instead of 10, shorter task lines, sessions over 6 shown as a count; (c) both: 8 KB hard limit, 6 KB target with the trims. [ANSWERED: (c) (ENTRY 45); built and tested, drafts/P1/CARD_TEST.md]
+Q119. Card v2 gaps (drafts/P1/CARD_TEST.md): (a) a normal day is 6.3 KB, a little over the 6 KB target: accept, or shorten RULES_IN_FORCE.md? (b) add a registry field for the design family and primary lever kind, so the uniqueness line can show them (after PROCEED)? (c) progress target: 4 push ready a day, 20 a week, right? (d) long running flag after 3 hours, right? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
