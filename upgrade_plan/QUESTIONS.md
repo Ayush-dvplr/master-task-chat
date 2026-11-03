@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: none. Layer C pilot running (W1-006 to W1-008).
+LIVE NOW: Q97, Q98, RQ9. Layer C pilot running (W1-006 to W1-008).none. Layer C pilot running (W1-006 to W1-008).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -152,5 +152,8 @@ Q94. Gate categories: tasks fill quotas in easy, medium and hard, and the gate f
 Q95. Working QC definition (draft): "QC passed = no fail finding in 2 QC runs in a row; any CL fail blocks; a minor is accepted if it does not come back with the same evidence in the second run". Agree, or change? [ANSWERED: agreed, plus a false positive review step after each QC result]
 
 Q96. Layer C pilot: 3 light cards (one low, one middle, one high Opus tests score, chosen by Claude from FEATURES.csv), about 100k tokens, run as background helpers; Ayush reviews the cards before scaling. Go? [OPEN]
+
+Q97. P1: in opencode, what context size does the master's model show (the percent meter: percent of what total)? This tells how early 100k is. [OPEN]
+Q98. P1 Step 1: which DCP option for the master chat: A tune, B manual (compress only when you say), or C off? Claude recommends B for the master and A for task sessions. [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

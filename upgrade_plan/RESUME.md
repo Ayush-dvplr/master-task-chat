@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 09:19 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 09:23 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
@@ -32,7 +32,7 @@ READ ORDER AFTER COMPACTION
 
 WHERE WE ARE
 1. Problems: P1 to P12 recorded (P11 static research prompts, P12 noisy AI QC). Suggestions S1 to S8 in AYUSH_SUGGESTIONS.md. Priority order = the order Ayush wrote them, compaction (P1) first (Q34).
-2. P1 cause, strong evidence: the DCP plugin (Dynamic Context Pruning) has run 258 compressions in the master session, keeping only about 4 to 5% as summary (FINDINGS F1.8). Native auto compaction is off. compaction-rules.js does not cover DCP.
+2. P1 work started in parallel (Ayush 3 Nov): DCP defaults found (F1.9): compression pushed from 100k tokens, Ayush's messages not protected. Draft P1 v2 in PLAN.md; live Q97, Q98, RQ9. P1 cause, strong evidence: the DCP plugin (Dynamic Context Pruning) has run 258 compressions in the master session, keeping only about 4 to 5% as summary (FINDINGS F1.8). Native auto compaction is off. compaction-rules.js does not cover DCP.
 3. Mac: 32 GiB, 10 cores. Docker Desktop VM 15.6 GiB, 8 CPUs. Claude's reading (UNVERIFIED, Q16 and Q17 parked): waiting comes from dockfree counting task.toml limits, not real use. Ayush wants a background script (no AI tokens) that manages Docker room dynamically; AI can see it and start or stop it (Q51).
 4. Root folder today "Terminal Bench" for all sessions; Ayush plans a new root (Q84). Teammate tasks are the main knowledge source (Q80, Q85). Master: one saved opencode session named "Master Task Chat" on Opus 5.5 (model stays per session). Sisyphus (oh my openagent) is the default agent of every opencode session. Task sessions (build, QC, fix): Ayush pastes prompts by hand into opencode GPT Sol 6.1, opencode Opus 5.5, or Codex. Subagents (Q57): fine in principle; avoided for cost and because they default to Claude and fail in GPT sessions when the Claude limit is used up (F6.7).
 5. P9 means (b): fixing works, designing new tasks is weak (Q38).

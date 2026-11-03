@@ -2,11 +2,18 @@ PLAN (DRAFT, NOT APPROVED)
 
 Every section here is a first direction only. None of it is built until: (1) the questions it depends on are ANSWERED and VERIFIED, (2) the rules it relies on are VERIFIED in UNVERIFIED_RULES.md, (3) Ayush approves the section, and (4) Ayush types PROCEED.
 
-P1 COMPACTION (depends on Q5 to Q9, R2 to R5)
-Idea A. One generated state card. A script builds STATE_CARD.md (target under 4 KB) from the records: rules in force now (one layer only, no "overrides line X"), today's goal, running sessions, open questions, the handoff format Ayush wants. After compaction the master reads only this card, then reads more on demand.
-Idea B. Fold the patches. Rewrite the layered rule files into one current version each; move superseded files to a history folder that is never in the read order.
-Idea C. Compaction hook. If opencode allows a custom compaction prompt, make it always keep the state card and the last decisions word for word.
-Idea D. Lessons become checks. A lesson that repeats (like F1.3) turns into a tool check (for example issue.py refuses a handoff without a link) instead of another note.
+P1 COMPACTION (draft v2, 3 Nov; depends on Q97, Q98, RQ9; nothing applied before PROCEED)
+Cause found: DCP runs on defaults (F1.8, F1.9): it starts pushing compression at 100k tokens, the model compresses its own history into about 5%% summaries, and nothing is protected, not even Ayush's messages.
+Step 1. DCP settings (one small dcp.jsonc, applied by Ayush on the Mac). Choose one of:
+  Option A, tune: protectUserMessages true; protectTags true; protectedFilePatterns for the rule and state files; turnProtection on; higher per model limits for the master model; nudgeForce soft.
+  Option B, manual: manualMode on (the master compresses only when Ayush says so), automatic dedup and error purge kept.
+  Option C, off for the master: DCP disabled in the master session, native compaction with compaction-rules.js used when needed.
+  Recommendation: A for task sessions, B for the master chat.
+Step 2. A generated STATE card for the master (like RESUME.md here, which passed two cold tests): goal, rules in force (one layer), running sessions, open items, handoff format. A script rebuilds it after every records write.
+Step 3. Protected rules: Ayush's standing rules wrapped in <protect> in the card, so even a compression keeps them word for word (needs protectTags true).
+Step 4. One recovery prompt for the master after any compaction, cold tested like ours.
+Step 5. Fold the layered rule files into one current version each (old Ideas B and D): superseded text moves to history; a repeating lesson becomes a tool check.
+Check after the change: count DCP compressions per day and run one cold recovery test of the master.
 
 P2 QC FIXES (depends on Q10 to Q13, R8 to R18)
 Idea A. Lever regression gate. Each task keeps its kill programs (careful program, blind programs, paid run program) and its lever inputs under WORK. After every fix, a script reruns them on the new tests and fails the fix if lever points lost drop below the bar.

@@ -232,3 +232,5 @@ Recorded as: the QC kit is written by Ayush's PL; the team works on its own. "By
 ENTRY 24. 3 Nov 2026 09:19 IST, "yes" to resume Layer B. Recorded as: Layer B run; result in STAGE2_STUDY_PLAN.md.
 
 ENTRY 25. 3 Nov 2026 09:20 IST, "yes start the pilot". Recorded as: Q96 approved; helpers W1-006 to W1-008 started.
+
+ENTRY 26. 3 Nov 2026 09:23 IST, "okay let me know when the pilot cards are done and till the time its running lets parallely work on system compactatibility part". Recorded as: P1 work started in parallel with the pilot.
