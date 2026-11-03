@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q110, Q111.
+LIVE NOW: rule review batch 1 (RULE_REVIEW.md, R1 to R10).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -12,7 +12,7 @@ Q0. You wrote "Do not edit when you are 100% sure". I read it as "do not edit UN
 Q1. Is this repo a full copy of your Mac folders master_chat_tasks and master_chat_work, or a snapshot that may be older than the Mac? [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
 Q2. After PROCEED, where do changes go: committed in this repo on the branch for you to copy to the Mac, or written as files for you to place by hand? [PARKED until its problem is planned]
 Q3. Which of the six problems hurts most right now, so the plan starts there? [ANSWERED: compaction first, plus new problems P7 to P10; order confirmed in Q34]
-Q4. Should the UNVERIFIED_RULES.md batches come one batch at a time in chat, or will you read the file and answer by rule id? [PARKED until its problem is planned]
+Q4. Should the UNVERIFIED_RULES.md batches come one batch at a time in chat, or will you read the file and answer by rule id? [ANSWERED: batches of about 10 in chat, RULE_REVIEW.md]
 
 P1 COMPACTION
 Q5. Does the master chat run in the opencode TUI (auto.py mentions "oc master")? Which model and provider? [ANSWERED: opencode TUI session "Master Task Chat", Opus 5.5 (Q40, Q50, Q56)]
@@ -180,8 +180,8 @@ Q107. Next step for the study: (a) Layer F, one helper reads only the 68 cards a
 Q108. P1: may the master chat be started from master_chat_tasks/ instead of the root (so its own DCP file is the nearest one)? Its prompts use paths from the root; Claude would check that nothing breaks. If not, which other way do you prefer? [ANSWERED: yes; paths checked, one README line to change]
 Q109. P1: which files should be protected from compression in the master (draft list in drafts/P1/master.dcp.jsonc: README.md, GOALS.md, STATE_CARD.md, state.json, knowledge/INDEX.md)? Add or remove? [ANSWERED: list accepted]
 
-Q110. The state card needs one current list of rules (RULES_IN_FORCE.md), built from the rule review (UNVERIFIED_RULES.md, R1 to R35). Shall we do that review now, in batches of about 10 rules, while Layer F runs? This is also Q4. [OPEN]
+Q110. The state card needs one current list of rules (RULES_IN_FORCE.md), built from the rule review (UNVERIFIED_RULES.md, R1 to R35). Shall we do that review now, in batches of about 10 rules, while Layer F runs? This is also Q4. [ANSWERED: yes, RULE_REVIEW.md]
 
-Q111. FLAG against your own rule (CONFIRM.md): route 1 R0 point 2 (2 Nov) says a misread rule lever may only be an extra, never the primary lever. In teammate tasks, one misread documented rule carried most of the lost weight in 5 tasks (df8f123b, 4a5f9738, b6237098, d4e8c327, 43249294). Keep R0 point 2, or allow a misread rule lever as a primary lever again when the rule has one clear deciding sentence and many tempting records? [OPEN]
+Q111. FLAG against your own rule (CONFIRM.md): route 1 R0 point 2 (2 Nov) says a misread rule lever may only be an extra, never the primary lever. In teammate tasks, one misread documented rule carried most of the lost weight in 5 tasks (df8f123b, 4a5f9738, b6237098, d4e8c327, 43249294). Keep R0 point 2, or allow a misread rule lever as a primary lever again when the rule has one clear deciding sentence and many tempting records? [ANSWERED: allow it (CR7)]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

@@ -300,3 +300,8 @@ ENTRY 38. 3 Nov 2026 10:25 IST (word for word)
 "Q108 yes, Q109 looks fine"
 
 Recorded as: Q108 the master starts from master_chat_tasks/. Q109 protected file list accepted. Claude checked paths (README_P1.md CHECK OF PATHS).
+
+ENTRY 39. 3 Nov 2026 10:31 IST (word for word)
+"Q110 yes start rule review, Q111 allow it"
+
+Recorded as: Q110 rule review started (RULE_REVIEW.md, batch 1 = R1 to R10). Q111 decided as CR7: a misread rule lever may be a primary lever when the rule has one clear deciding sentence and many records tempt the wrong reading (changes route 1 R0 point 2 after PROCEED).
