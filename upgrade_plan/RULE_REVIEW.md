@@ -75,7 +75,7 @@ R20. dockfree.py: 3 GiB headroom, a container without a limit counts as 4 GiB, C
   Note: to be replaced by the background Docker slot script (S1, P3), which measures real use. Suggest CHANGE: keep as a fallback until S1 exists.
 Decisions (Ayush, ENTRY 41, 3 Nov): R11 KEEP, R12 KEEP, R13 KEEP, R14 KEEP, R16 KEEP, R17 KEEP, R19 KEEP.
 R15 CHANGE: no caps on fix rounds, QC rounds, edit rounds or session count; Ayush decides each time (Q114, ENTRY 42).
-R18 CHANGE to: "A task is QC passed by the working definition (Q95): no fail finding in 2 QC runs in a row, any CL fail blocks, a minor is accepted if it does not come back with the same evidence, and a false positive review follows every QC result."
+R18 CHANGE to: "A task is QC passed by the working definition (Q95): no fail finding in 2 QC runs in a row, any CL fail blocks, a minor is accepted if it does not come back with the same evidence, and a false positive review follows every QC result." [SUPERSEDED by ENTRY 57: 1 complete QC pass]
 R20 CHANGE to: "dockfree.py stays only as a fallback until the background Docker slot script (S1) exists; then S1 decides, from real use."
 
 BATCH 3 (R21 to R30), asked 3 Nov
@@ -127,3 +127,5 @@ R34 CHANGE to: "The task system never commits or pushes anything in any repo, in
 
 BATCH ONE COMPLETE (R1 to R35), 3 Nov. Open: R28 (Q116, later). Next: RULES_IN_FORCE.md draft built from these decisions (drafts/P1/RULES_IN_FORCE.md).
 
+
+CHANGE 3 Nov (ENTRY 57): R18 and Q95 QC pass is now 1 complete QC pass with no fail; the 2 runs in a row condition is removed.

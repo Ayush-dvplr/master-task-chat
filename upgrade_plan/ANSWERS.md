@@ -413,3 +413,8 @@ ENTRY 56. 3 Nov 2026 14:53 IST (word for word)
 "Q128 yes to both"
 
 Recorded as: T25 CHANGE with the auto mode exception (by day wait for Ayush's go; in auto mode the master checks DESIGN READY and sends the go or a correction, writes the go file, lists it in REPORT.md); R7 gets the same auto mode exception. Claude checks auto/AUTO_POLICY.md against RULES_IN_FORCE.md itself and brings its conflicts as one batch.
+
+ENTRY 57. 3 Nov 2026 15:05 IST (word for word)
+"A1 to A13 as suggested and , also no need for 2 QC complete pass 1 is enough you are again and again mentioning it so it explicitly mentioned here"
+
+Recorded as: AUTO_POLICY batch A1 to A13 as suggested. CHANGE to Q95 and R18 (QC pass): 1 complete QC pass with no fail is enough; the "2 QC runs in a row" condition is removed everywhere. Kept: any CL fail blocks; false positive review after every QC result. Minors: accepted as PL notes (the "does not repeat" test needs 2 runs, so it goes; Ayush to say if a minor should still block).

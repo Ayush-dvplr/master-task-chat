@@ -41,13 +41,13 @@ T32 KEEP: "Only real runs measure hardness; a reviewer rating never gates."
 T33 CHANGE: runs per task while building (1) and on final approval (8) move into settings.json.
 T34 KEEP: "No task is parked except on Ayush's word."
 
-AUTO_POLICY BATCH (auto/AUTO_POLICY.md against RULES_IN_FORCE.md, checked by Claude 3 Nov; asked, waiting)
+AUTO_POLICY BATCH (auto/AUTO_POLICY.md against RULES_IN_FORCE.md, checked by Claude 3 Nov; A1 to A13 as suggested, ENTRY 57)
 A1 line 3 "README still applies: same read order, caps": CHANGE to the state card read order and RULES_IN_FORCE.md; caps are warnings.
 A2 line 22 DESIGN READY go: DECIDED by T25 (Q128): check against the rules in force and current LEVER_RULES.
 A3 line 23 blind read after DESIGN BLIND READY: depends on T45 (blinds before QC or none on route 1).
 A4 line 24 no third redesign, stop and write under Needs Ayush: KEEP (asks Ayush, does not park).
 A5 line 25 auto Step 10 = 2 oracle and 1 nop; the rest owed before push: KEEP, oracle count follows T46, push condition T30.
-A6 line 26 QC PASS or minors only, then freeze: CHANGE to RIF:7 (no fail in 2 QC runs in a row, any CL fail blocks, a minor that does not repeat is accepted, false positive review after every QC result).
+A6 line 26 QC PASS or minors only, then freeze: CHANGE to RIF:7 (1 complete QC pass with no fail, ENTRY 57; any CL fail blocks; minors as PL notes; false positive review after every QC result).
 A7 line 27 QC FAIL, one fix session with G1 to G7: CHANGE to "one fix session with the fix map (T22, Q125, Q126), then QC recheck".
 A8 line 28 gate 85, 85, 40 written out: CHANGE to "gate from settings.json".
 A9 line 29 gate miss, fix prompt in QC-safe form: CHANGE to T24 order with the fix map.

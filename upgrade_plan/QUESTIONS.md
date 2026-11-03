@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: AUTO_POLICY batch (A1 ...), then fold batches 5 and 7. Q116 kept for later.
+LIVE NOW: fold batches 5 and 7 (T35 to T38, T41 to T46). Q116 kept for later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -145,11 +145,11 @@ Q89. Do you know which one or two teammate tasks failed QC, so they are kept out
 
 Q90. FLAG on the count cap (Q75, your own hard cap 100): teammate tasks have a median of about 186 test checks (54 to 1798), estimated from the test weights in reward.toml. If that estimate is right, your cap of 100 is far below what passing teammate tasks use. Keep 100, or treat it as a setting to revisit after the cards? [ANSWERED: Ayush asked for the author table (tmp/S2-INDEX/AUTHORS.md); decision on the cap later]
 Q91. Phase 1 pick: 26 under gate tasks not yet carded plus 5 high scoring contrast tasks (31 cards, about 2 to 3 million tokens). Approve, or change the list (for example only the lowest 15)? [ANSWERED: study all tasks smartly, skip Ayush's own; plan v2 (Q93)]
-Q92. P12 (QC is noisy): shall we set a working definition now, for example "QC passed = no fail findings in 2 runs in a row, minors allowed if they repeat no evidence", or discuss it after the cards show what teammate tasks still carry? [ANSWERED: both; working definition now, refined after cards; CL findings are major (Q95)]
+Q92. P12 (QC is noisy): shall we set a working definition now, for example "QC passed = no fail findings in 2 runs in a row, minors allowed if they repeat no evidence", or discuss it after the cards show what teammate tasks still carry? [ANSWERED: both; working definition now, refined after cards; CL findings are major (Q95)] [CHANGED 3 Nov, ENTRY 57: 1 complete QC pass is enough]
 
 Q93. Approve STAGE2_STUDY_PLAN.md plan v2 (layers A to G, starting with the free script layers A and B and a 3 card pilot)? [ANSWERED: Layer A and B approved]
 Q94. Gate categories: tasks fill quotas in easy, medium and hard, and the gate falls over time (70, 50, then 35). Does each category have its own gate today, and which category are your new tasks meant for? The system needs this to know which gate a task must meet. [ANSWERED: no separate gate per category]
-Q95. Working QC definition (draft): "QC passed = no fail finding in 2 QC runs in a row; any CL fail blocks; a minor is accepted if it does not come back with the same evidence in the second run". Agree, or change? [ANSWERED: agreed, plus a false positive review step after each QC result]
+Q95. Working QC definition (draft): "QC passed = no fail finding in 2 QC runs in a row; any CL fail blocks; a minor is accepted if it does not come back with the same evidence in the second run". Agree, or change? [ANSWERED: agreed, plus a false positive review step after each QC result] [CHANGED 3 Nov, ENTRY 57: 1 complete QC pass is enough]
 
 Q96. Layer C pilot: 3 light cards (one low, one middle, one high Opus tests score, chosen by Claude from FEATURES.csv), about 100k tokens, run as background helpers; Ayush reviews the cards before scaling. Go? [ANSWERED: yes (ENTRY 25); pilot done]
 
