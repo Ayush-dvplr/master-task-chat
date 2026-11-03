@@ -339,3 +339,8 @@ ENTRY 45. 3 Nov 2026 12:10 IST (word for word)
 "Q118 option 3"
 
 Recorded as: card budget is a hard limit of 8 KB with a 6 KB target, plus the trims (open items top 5, shorter task and step lines, sessions over 6 shown as a count). Sizes live in settings.json (DR2). Built into drafts/P1/state_card.py v2 and tested 12:20 (drafts/P1/CARD_TEST.md).
+
+ENTRY 46. 3 Nov 2026 12:25 IST (word for word)
+"Q119 accept 6.3 KB, yes add field, targets right, 3 hours ok"
+
+Recorded as: (a) a normal day card of 6.3 KB is accepted; RULES_IN_FORCE.md stays as is. (b) registry/tasks.json gets a "design" field (design family from PATTERNS.md and primary lever kind), applied only after PROCEED. (c) progress target 4 push ready a day, 20 a week. (d) long running flag after 3 hours. Values written to drafts/P1/settings.json.

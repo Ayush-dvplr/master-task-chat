@@ -26,3 +26,8 @@ Gaps found
 2. The uniqueness line can only show archetype and category: registry/tasks.json has no field for the design family (PATTERNS.md D1 to D9) or the primary lever kind. Needs a new field after PROCEED.
 3. The progress target per day and per week is a draft value.
 4. The three sessions issued last night show "LONG 12 h": correct for the copy of the records, which is from 2 Nov.
+
+Decisions (ENTRY 46, Q119)
+1. 6.3 KB on a normal day accepted.
+2. New registry field, after PROCEED: "design": {"family": "D1 to D9 from PATTERNS.md", "primary_lever_kind": "short name"}, filled by intake for every new build. The card shows it when present and falls back to archetype and category.
+3. Targets 4 a day, 20 a week; long running after 3 hours. Both in drafts/P1/settings.json.

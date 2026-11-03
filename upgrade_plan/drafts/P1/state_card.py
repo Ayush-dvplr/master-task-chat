@@ -170,7 +170,9 @@ def build(R, now, S):
 
     recent = sorted(tasks, key=lambda t: t.get("created_ist", ""), reverse=True)[: C["unique_last"]]
     secs.append(("uniqueness", [f"UNIQUENESS (last {len(recent)} builds; a new build must not repeat these): "
-                                + "; ".join(f"{t['slug']}: {t.get('archetype','?')}, {t.get('category','?')}" for t in recent)]))
+                                + "; ".join(f"{t['slug']}: " + (f"{t['design'].get('family','?')}, lever {t['design'].get('primary_lever_kind','?')}"
+                                           if isinstance(t.get("design"), dict) else f"{t.get('archetype','?')}, {t.get('category','?')} (no design field)")
+                                  for t in recent)]))
     secs.append(("handoff", ["HANDOFF FORMAT: a table with board sha, step, status and a clickable file link; never 'read and follow'."]))
     return secs, snap, prev_path
 
