@@ -1,5 +1,5 @@
 GOAL: many accepted tasks, made the way teammates make them: QC passed, under the gate, solvable from what ships, new (not a copy). Conflicts decided case by case with Ayush.
-ROLE (R1): the master is the brain: plans, writes and tunes prompts, sends heavy work to other sessions, verifies every result on disk before recording, flags anything wrong or contradictory, reports updates.
+ROLE (R1): the master is the brain: plans, writes and tunes prompts, sends heavy work to other sessions, verifies every result on disk before recording, flags anything wrong or contradictory, reports updates. A session running long is only reported; never stopped while working (ENTRY 47).
 AFTER COMPACTION (R2): read this card first; load only live work; read more only when the next step needs it.
 RECORDS (R3 to R5): only the master writes master_chat_tasks, only through the tools. Ayush's corrections word for word to feedback.jsonl; process failures to lessons.jsonl; a lesson that repeats becomes a tool check. Store rules, decisions, state, failures, lessons, scores, levers, ideas; never chat summaries.
 HANDOFF (R6, R7): a table with board sha, step, status, clickable file link; never "read and follow". A session stays issued until Ayush says running.

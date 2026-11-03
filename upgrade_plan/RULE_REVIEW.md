@@ -44,7 +44,7 @@ The goal is many accepted tasks, fast, with a master that is a brain (R1) and li
   a. "Changed in the last 48 hours" could hide an old item that is blocked and waiting for Ayush. Fix: blocked items and questions waiting for Ayush are always shown, whatever their age.
   b. The 4 KB limit can push useful lines out. Fix: the card fills in a fixed priority order (rules, news, waiting for Ayush, running, active tasks, the rest) and says what it left out.
 MISSING, added (Q115; ACCEPTED with fixes a and b, ENTRY 42):
-8. Sessions running longer than expected are flagged (so the master can chase them, per R1).
+8. Sessions running longer than expected are flagged (so the master can chase them, per R1). CHANGED (ENTRY 47): the flag only reports to Ayush; a working session is never stopped.
 9. QC kit status line: the kit fingerprint compared with the stored snapshot, and LENIENT, MINOR or MAJOR if it changed (S7, R_QC_UPSTREAM).
 10. Settings line: the current gate and caps, read from the one settings file (DR2), so every session uses the same values.
 11. Progress line: tasks pushed today and this week against the target, since the goal is volume.
