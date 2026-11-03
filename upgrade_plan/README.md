@@ -5,6 +5,7 @@ Started 3 Nov 2026, 01:19 IST. Planning only.
 STATUS: PLANNING. NOTHING OUTSIDE THIS FOLDER IS EDITED.
 
 GOAL OF THE TASK SYSTEM (Ayush, 3 Nov 2026, ANSWERS.md ENTRY 11 and 12; heading wording open, Q73)
+0. TOP PRIORITY (ENTRY 19): the system exists to fix, rebuild and harden existing tasks, and to create new hard tasks that score under the gate. Problems P1 to P11 matter because they block this.
 1. Ayush's job is to produce many tasks. His count is low now, so the system must make tasks fast and reliably.
 2. Score target on the harness (Opus 5): today tests under 85, rubric under 85, final under 40 (gate v3.7). The gate is a SETTING, not a fixed rule: the PL may lower it (for example final under 30 or 35) and the system must follow a change in one place (DR2).
 3. Every task must pass the current QC kit. Ayush's PL and QL said a task that passes QC is acceptable.
@@ -63,6 +64,7 @@ Files
 7. CONTRADICTIONS.md: places where the current records disagree with each other.
 8. REQUESTS.md: material Claude needs from Ayush (repos, uploads, opencode output, Docker settings).
 9. WORKERS.md: how helper sessions of this upgrade are used and verified. WORKER_LOG.md: one row per helper. reports/: full helper reports. prompts/: prompts for Ayush to paste on the Mac.
+9c. STAGE2_STUDY_PLAN.md: plan for studying the teammate tasks (anubis-stage-2 on main).
 9b. CONFLICT_REVIEW.md: decisions on the hardening rule conflicts, one by one.
 9a. AYUSH_SUGGESTIONS.md: Ayush's suggestions and their status. QL_QUESTIONS.md: questions queued for the QL.
 10. inputs/: material Ayush gave (RQ3 and RQ4 output pasted in chat on 3 Nov, saved by Claude).

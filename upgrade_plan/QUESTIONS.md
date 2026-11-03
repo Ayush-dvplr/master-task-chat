@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: CR1a, Q84, Q85, Q86.
+LIVE NOW: Q87, Q88, Q89, CR1a, Q84, Q86.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -138,5 +138,9 @@ Q84. New root folder: what should it hold (master_chat_tasks, master_chat_work, 
 Q85. Teammate tasks: where are they (Anubis_Tasks_Samples, Finalized_Tasks_RFP, a shared drive, the PL repo)? Can a helper read them (they are your teammates' work; are you allowed to study them)? This decides how S8 research prompts are built. [OPEN; Ayush offers to push them, ENTRY 18. Answer given in chat: yes, needed]
 
 Q86. Kit change classes: proposal LENIENT (a change that only makes QC easier for us; act on it freely), MINOR (a stricter or reworded rule that does not touch fix mapping or hiding), MAJOR (touches fix mapping, hiding or traps). Under this, W1-005's 8 changes are LENIENT and C6 is MAJOR or MINOR as you decide (you said MINOR). Is that what you meant by "better name it"? [OPEN]
+
+Q87. Priority (ENTRY 19): the core goal is fixing, rebuilding and hardening tasks and making new hard ones. Earlier (Q34) the order was compaction first. Should the plan now put first what directly improves task making (teammate study, hardening method P4, new task design P9, QC fixes P2), with the system fixes (P1 compaction, P3 Docker, P5 tokens, P6 tools) after or in parallel? [OPEN]
+Q88. STAGE2_STUDY_PLAN.md: approve the phases? Phase 0 is a script only (no AI tokens) and can run first; Phase 2 is the expensive part. [OPEN]
+Q89. Do you know which one or two teammate tasks failed QC, so they are kept out of the patterns? If not, the study marks QC risk per task instead. [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

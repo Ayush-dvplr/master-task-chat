@@ -1,11 +1,12 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 04:13 IST. Claude updates this card after every step that changes the plan state.
+Last updated: 3 Nov 2026 08:31 IST. Claude updates this card after every step that changes the plan state.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session is the planning session for that upgrade. Repo: Ayush-dvplr/master-task-chat. Branch: claude/youthful-feynman-zug0uq. Planning folder: upgrade_plan/.
 
 GOAL (README.md "GOAL OF THE TASK SYSTEM"; read it every time)
+TOP PRIORITY (ENTRY 19): fix, rebuild and harden tasks, and create new hard tasks under the gate; P1 to P11 are obstacles to this.
 Ayush must produce many tasks. Each must pass the current QC kit, be solvable from what it ships (DR3), be new (never a copy of an old task or of one teammate task), and make Opus 5 score under the gate: today tests under 85, rubric under 85, final under 40, but the gate is a changeable setting (DR2). Focus: levers and wordings that make Opus lose points while QC passes. Solvability is a QC check (DS-21, F0e, CL-10). Count caps: QC minimum, soft 70, hard 100 (Q75). Claude's boundary: README GOAL item 7, not objected to.
 
 RULES THAT ALWAYS APPLY
@@ -50,7 +51,7 @@ KNOWN FROM RECORDS (max about 1 KB; each fact with its source file)
 7. Ayush's pushed inputs (QC reports, QC kit, harness queue, _runs, dcp.jsonc, PL generator) are on origin/main, not this branch: read with git show origin/main:<path> or a read only worktree (F12.1). Kit drift since 25 Oct: 05_Alignment_Integrity_QC.md and Final_checklist.md changed (F12.2).
 
 NEXT STEPS (in this order)
-1. W1-005 done and verified: kit change MAJOR only because of C6 (one finding, one id), 8 MINOR, no bundle rework (FINDINGS F12.4, QL2). Conflict review started: CONFLICT_REVIEW.md (CR1 asked). CR1 partly decided (timeout lever: use less, emergency allowed; form open CR1a). Live: CR1a, Q84, Q85, Q86. Teammate tasks requested (RQ8).
+1. W1-005 done and verified: kit change MAJOR only because of C6 (one finding, one id), 8 MINOR, no bundle rework (FINDINGS F12.4, QL2). Conflict review started: CONFLICT_REVIEW.md (CR1 asked). CR1 partly decided (timeout lever: use less, emergency allowed; form open CR1a). Live: CR1a, Q84, Q85, Q86. Teammate tasks pushed: anubis-stage-2/ on main, 115 tasks; study plan STAGE2_STUDY_PLAN.md waits for approval (Q88). Live: Q87, Q88, Q89, CR1a, Q84, Q86.
 2. Conflict review (CONFLICT_REVIEW.md, decisions recorded there): continue with tmp/W1-002/CONFLICTS.md, going through its 5 most serious conflicts with Ayush one at a time (C3 timeouts, C5 careful program, C25 with C6 how much may be written, C1 parking, C2 with C22 carriers), then the rest.
 3. Q4 (how to review UNVERIFIED_RULES), then UNVERIFIED_RULES.md batch 1 with Ayush.
 4. Shape PLAN.md, P1 (compaction) first, then the order in PROBLEMS.md.
