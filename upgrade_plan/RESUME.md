@@ -38,7 +38,7 @@ STATE OF THE WORK (3 Nov)
 DECISIONS SO FAR (short; details in the named files)
 1. Compaction (P1): master DCP manual (Q98), task sessions DCP off (Q99); master starts from master_chat_tasks/ (Q108); protected files list accepted (Q109).
 2. Order: task making first, system fixes in parallel (Q87).
-3. QC pass = 1 complete QC pass with no fail (ENTRY 57 replaces the 2 runs rule of Q95, R18); any CL fail blocks; minors as PL notes; false positive review after every QC result.
+3. QC pass = 1 complete QC pass (ENTRY 57, 58 replace the 2 runs rule of Q95, R18): fails left must be false positives proven by review; minors and warnings are fine; real fails block. CL false positive: Q129.
 4. Levers: CR1 timeout extra by default; CR6 amended field needs one deciding doc sentence; CR7 misread rule lever allowed as primary with one clear deciding sentence; R25 primary lever from PATTERNS.md families, 40 percent, fires in most hidden inputs; R30 a size bound may be stated for a runtime lever.
 5. Rubric: every criterion traces to an instruction sentence (Q106).
 6. No caps on rounds (Q114). Gate 85, 85, 40 as a setting (R26). Never commit or push in any repo from the task system (R34).

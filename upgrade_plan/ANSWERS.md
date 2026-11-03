@@ -418,3 +418,10 @@ ENTRY 57. 3 Nov 2026 15:05 IST (word for word)
 "A1 to A13 as suggested and , also no need for 2 QC complete pass 1 is enough you are again and again mentioning it so it explicitly mentioned here"
 
 Recorded as: AUTO_POLICY batch A1 to A13 as suggested. CHANGE to Q95 and R18 (QC pass): 1 complete QC pass with no fail is enough; the "2 QC runs in a row" condition is removed everywhere. Kept: any CL fail blocks; false positive review after every QC result. Minors: accepted as PL notes (the "does not repeat" test needs 2 runs, so it goes; Ayush to say if a minor should still block).
+
+ENTRY 58. 3 Nov 2026 15:23 IST (word for word)
+"One complete QC pass with no fail is now enough. : see exactly not no fails , we can accept with false positive fails , minors or warnings (okay)
+T35-T38: your suggestions
+T41-T46: you sugeestion (but verify all too)"
+
+Recorded as: QC pass (refines ENTRY 57): 1 complete QC pass is enough when every fail left is a false positive (shown by the false positive review with diff evidence, U13, FP_DOSSIER) and the rest are minors or warnings. Real fails block. Open point Q129: does a false positive CL fail also pass? T35 KEEP, T36 to T38 DROP, as suggested. T41 to T46 as suggested, with Claude's verification: T42 to T46 confirmed (T43: route 1 notes lines 8 and 44, reference at most 1/4 of the limit, so 4x; T46: kit 03_Tests_QC.md:41, Step 10 runs the oracle five times). T41 corrected: the wording "a Python reviewer would accept as maintainable" is the playbook's (QC_FIX_PLAYBOOK_v3.md:50), not the kit's literal text; it fits the kit standard (04_Judge_QC.md:99), so the decision stands. New conflict found: Q130 (JD-18 conduct criteria need no instruction sentence, against Q106 and T16).

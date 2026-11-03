@@ -47,7 +47,7 @@ A2 line 22 DESIGN READY go: DECIDED by T25 (Q128): check against the rules in fo
 A3 line 23 blind read after DESIGN BLIND READY: depends on T45 (blinds before QC or none on route 1).
 A4 line 24 no third redesign, stop and write under Needs Ayush: KEEP (asks Ayush, does not park).
 A5 line 25 auto Step 10 = 2 oracle and 1 nop; the rest owed before push: KEEP, oracle count follows T46, push condition T30.
-A6 line 26 QC PASS or minors only, then freeze: CHANGE to RIF:7 (1 complete QC pass with no fail, ENTRY 57; any CL fail blocks; minors as PL notes; false positive review after every QC result).
+A6 line 26 QC PASS or minors only, then freeze: CHANGE to RIF:7 (1 complete QC pass; fails left only false positives proven by review; minors and warnings fine; ENTRY 57, 58).
 A7 line 27 QC FAIL, one fix session with G1 to G7: CHANGE to "one fix session with the fix map (T22, Q125, Q126), then QC recheck".
 A8 line 28 gate 85, 85, 40 written out: CHANGE to "gate from settings.json".
 A9 line 29 gate miss, fix prompt in QC-safe form: CHANGE to T24 order with the fix map.
@@ -56,3 +56,13 @@ A11 Limits (5 workers, 2 harness, 2 new builds per run, last spawn 20 min before
 A12 Budget (6 paid runs a day; start a paid run only with at most 2 busy workers, at most 3 while it runs): CHANGE, values into settings.json (R24).
 A13 Workers model "claude-opus-5-5, variant high": CHANGE, model per step from settings.json (R32).
 Kept as they are (match the rules in force): hard rules 1 to 6, interruptions table, restart and scheduled start, REPORT.md layout. No line stops a working session (ENTRY 47).
+
+BATCHES 5 AND 7, RECORDS AND PROCESS, CONFLICTS INSIDE OLD FILES (ENTRY 58)
+T35 KEEP: "Never claim a number you did not measure; mark guesses and unconfirmed values UNVERIFIED; no secrets in records."
+T36 DROP (the state card is the checkpoint). T37 DROP (trial over, lines to history). T38 DROP ("ask before delete" stays as how to text).
+T41 CHANGE: one code quality criterion in the one judgement wording "a Python reviewer would accept as maintainable, judged on its names, function structure and error handling" (QC_FIX_PLAYBOOK_v3.md:50, fits kit JD-18 04_Judge_QC.md:99), conduct label, w1 to 3, the oracle meets it.
+T42 CHANGE: a what if figure criterion only when the instruction asks for that figure, at most 6, weight at most 3 each (playbook row AL-2b); J1 ban dropped.
+T43 CHANGE: time limit at least 4x the reference time (route 1 lines 8 and 44), value in settings.json.
+T44 CHANGE: "0 differences over 2,000 variants: report to Ayush, never park on its own"; the 60 percent NO CORE number waits for CR2.
+T45 CHANGE: "Blinds before QC are not required; a blind is a diagnostic only"; 70 and 100 thresholds dropped; AUTO_POLICY A3 blind read becomes optional.
+T46 CHANGE: oracle count in settings.json: 3 by Ayush's rule, 2 in auto mode with the rest owed before push (T30), 5 once in the final QC before ship (kit 03_Tests_QC.md:41).
