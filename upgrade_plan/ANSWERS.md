@@ -371,3 +371,20 @@ ENTRY 50. 3 Nov 2026 14:19 IST (word for word, options dialog)
 Q126: "Decide it, rebuild hardness (Recommended)"
 
 Recorded as: when a QC finding shows a trap is a real defect, the fix adds one deciding sentence to the docs or data so the shipped files decide the value, and rebuilds the hardness in a valid form (for example a branch only the hidden data fires, or a carrier variant). This is part of the fix map (P2).
+
+ENTRY 51. 3 Nov 2026 14:31 IST (word for word)
+"T ones:
+
+1. drop
+2. drop
+3. change
+4. change
+5. change
+6. drop
+7. keep
+8. drop
+9. keep
+10. keep
+11. changes we have to keep and use those holes too becasue only levers are never alone suffient."
+
+Recorded as: fold review batch 1: T1 DROP, T2 DROP, T3 CHANGE, T4 CHANGE, T5 CHANGE, T6 DROP, T7 KEEP, T8 DROP, T9 KEEP, T10 KEEP, all as suggested. T11: Ayush wants to keep and use the holes (hidden data against a doc line, an underspecified graded field, unbounded unstated forms, source shape tests) because levers alone are never enough. FLAGGED under R_FLAG: this contradicts DR3 (solvable from what ships), the agreed line (README GOAL item 7: every graded value decided by the shipped instruction and data, no underspecified grading), Q126 (ENTRY 50, one entry earlier) and T7 (kept in this same answer). Under G2 it is decided case by case; Claude said plainly what it can help build. Follow up Q127.
