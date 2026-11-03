@@ -30,6 +30,7 @@ The edit rule (Ayush, 3 Nov 2026)
 7b. DR2 (Q66): score gates are one setting, changeable in one place. DR3 (Q67): every task must be solvable from what it ships.
 8. After compaction or in a new session, Claude follows RESUME.md before anything else.
 8a. R_REPOS (Ayush, 3 Nov): Claude pushes only to this repo (Ayush-dvplr/master-task-chat, branch claude/youthful-feynman-zug0uq). Never push to any other repo, including the PL's QC repo.
+8b0. Kit change classes (Q86, agreed): LENIENT (QC only gets easier; act freely), MINOR (stricter or reworded, no effect on fix mapping or hiding), MAJOR (affects fix mapping, hiding or traps).
 8b. R_QC_UPSTREAM (Ayush, 3 Nov): the PL updates the Input Bundle QC kit often, in his repo "terminal bench 2.0" (Terminal_2.0_Harbor_Harness). Ayush keeps snapshots (knowledge/fingerprints). The upgraded system must detect a kit change and classify it. MINOR = a leniency or a lenient new rule that does not affect how fixes map to QC checks, how hidden information and traps stay hidden. MAJOR = anything that does affect those. Today an agent decides which (Q69).
 8c. R_SUGGEST (Ayush, 3 Nov): Ayush's suggestions go to AYUSH_SUGGESTIONS.md. Each is discussed; none is assumed; a suggestion may be dropped if it is not possible.
 8d. R_QL (Ayush, 3 Nov): QC rules Ayush added himself (for example "the test count may exceed the QC cap and still pass") are not trusted. Each is verified with Ayush or queued in QL_QUESTIONS.md for the QL; the QL's answer is verified before it is used.

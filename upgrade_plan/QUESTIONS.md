@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q87, Q88, Q89, CR1a, Q84, Q86.
+LIVE NOW: Q90, Q91, Q92, CR1a, Q84.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -137,10 +137,14 @@ Q83. Kit change (W1-005): verdict MAJOR because of one change only (C6, one find
 Q84. New root folder: what should it hold (master_chat_tasks, master_chat_work, bundles, QC, _runs, the harness clone, the generator)? Should THIS git repo become that root? Where would the large folders (_runs has about 62 thousand files) live? [OPEN]
 Q85. Teammate tasks: where are they (Anubis_Tasks_Samples, Finalized_Tasks_RFP, a shared drive, the PL repo)? Can a helper read them (they are your teammates' work; are you allowed to study them)? This decides how S8 research prompts are built. [OPEN; Ayush offers to push them, ENTRY 18. Answer given in chat: yes, needed]
 
-Q86. Kit change classes: proposal LENIENT (a change that only makes QC easier for us; act on it freely), MINOR (a stricter or reworded rule that does not touch fix mapping or hiding), MAJOR (touches fix mapping, hiding or traps). Under this, W1-005's 8 changes are LENIENT and C6 is MAJOR or MINOR as you decide (you said MINOR). Is that what you meant by "better name it"? [OPEN]
+Q86. Kit change classes: proposal LENIENT (a change that only makes QC easier for us; act on it freely), MINOR (a stricter or reworded rule that does not touch fix mapping or hiding), MAJOR (touches fix mapping, hiding or traps). Under this, W1-005's 8 changes are LENIENT and C6 is MAJOR or MINOR as you decide (you said MINOR). Is that what you meant by "better name it"? [ANSWERED: LENIENT, MINOR, MAJOR agreed]
 
-Q87. Priority (ENTRY 19): the core goal is fixing, rebuilding and hardening tasks and making new hard ones. Earlier (Q34) the order was compaction first. Should the plan now put first what directly improves task making (teammate study, hardening method P4, new task design P9, QC fixes P2), with the system fixes (P1 compaction, P3 Docker, P5 tokens, P6 tools) after or in parallel? [OPEN]
-Q88. STAGE2_STUDY_PLAN.md: approve the phases? Phase 0 is a script only (no AI tokens) and can run first; Phase 2 is the expensive part. [OPEN]
-Q89. Do you know which one or two teammate tasks failed QC, so they are kept out of the patterns? If not, the study marks QC risk per task instead. [OPEN]
+Q87. Priority (ENTRY 19): the core goal is fixing, rebuilding and hardening tasks and making new hard ones. Earlier (Q34) the order was compaction first. Should the plan now put first what directly improves task making (teammate study, hardening method P4, new task design P9, QC fixes P2), with the system fixes (P1 compaction, P3 Docker, P5 tokens, P6 tools) after or in parallel? [ANSWERED: task making first, system fixes in parallel]
+Q88. STAGE2_STUDY_PLAN.md: approve the phases? Phase 0 is a script only (no AI tokens) and can run first; Phase 2 is the expensive part. [ANSWERED: approved; Phase 0 done]
+Q89. Do you know which one or two teammate tasks failed QC, so they are kept out of the patterns? If not, the study marks QC risk per task instead. [ANSWERED: QC is an AI reviewer, every run finds something; these tasks have the fewest findings; open to discuss (P12, Q92)]
+
+Q90. FLAG on the count cap (Q75, your own hard cap 100): teammate tasks have a median of about 186 test checks (54 to 1798), estimated from the test weights in reward.toml. If that estimate is right, your cap of 100 is far below what passing teammate tasks use. Keep 100, or treat it as a setting to revisit after the cards? [OPEN]
+Q91. Phase 1 pick: 26 under gate tasks not yet carded plus 5 high scoring contrast tasks (31 cards, about 2 to 3 million tokens). Approve, or change the list (for example only the lowest 15)? [OPEN]
+Q92. P12 (QC is noisy): shall we set a working definition now, for example "QC passed = no fail findings in 2 runs in a row, minors allowed if they repeat no evidence", or discuss it after the cards show what teammate tasks still carry? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

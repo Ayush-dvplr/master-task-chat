@@ -1,6 +1,6 @@
 STUDY PLAN FOR THE TEAMMATE TASKS (anubis-stage-2)
 
-Status: DRAFT, waiting for Ayush (Q88). No helper runs until he approves.
+Status: APPROVED by Ayush 3 Nov (Q88). Phase 0 DONE 08:43. Phase 1 pick list waiting for Ayush (Q91).
 
 WHAT IS THERE (checked by the master 3 Nov, git ls-tree of origin/main)
 1. anubis-stage-2/ on main: 115 task folders (114 with instruction.md and task.toml), 12904 files, about 2.6 GB.
@@ -27,3 +27,14 @@ Phase 0: almost none. Phase 2: about 60k to 100k tokens per card, so about 2 to 
 
 HOW IT SURVIVES COMPACTION
 Every phase writes files in tmp/ and a row in WORKER_LOG.md; RESUME.md says which phase is running. A new session continues from the files.
+
+PHASE 0 RESULT (3 Nov 08:43, script tmp/S2-INDEX/make_index.py, INDEX.csv sha b811acf1, no AI tokens)
+1. 114 tasks with an Opus 5 score (1 run each). 34 are under today's gate (tests under 85, rubric under 85, final under 40).
+2. Opus final: min 4.91, median 45.74, max 78.52. Buckets: 0s 3, 10s 6, 20s 10, 30s 16, 40s 44, 50s 8, 60s 22, 70s 5. 44 tasks sit at final 40 to 50, just over today's gate.
+3. Opus tests median 35.64; rubric median 54.1. So in teammate tasks the TESTS are where Opus loses most; the rubric is usually higher.
+4. Test checks per task (estimated as 1 / test weight in reward.toml): min 54, median 186, max 1798. Rubric criteria: min 8, median 21, max 51. UNVERIFIED estimate (FLAG Q90).
+5. Categories: Data Processing 40, Software Engineering 13, Debugging 10, Optimization 8, Scientific Computing 7, others small.
+6. Of the 10 tasks carded on 2 Nov, 8 are under the gate (05550e00, 18b5d99f, 1d61e794, 5048c412, 59417607, 80202e15, a710b00e, aa314fee); 37a0c3d6 and fabbe645 are not.
+
+PHASE 1 PROPOSED PICK (Q91)
+26 new cards: the 34 under gate minus the 8 already carded. Plus 5 contrast tasks with the highest Opus final: 65ba10c2 (78.52), 1950015d (73.82), c9d7b490 (71.83), f357cd96 (70.65), 92dd0b24 (70.34). Total 31 new cards, about 2 to 3 million tokens, 4 batches of about 8.
