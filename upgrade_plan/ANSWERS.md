@@ -506,3 +506,11 @@ Failed card: "Reuse, switch, report (Recommended)"
 Research: "Idea queue, you approve (Recommended)"
 
 Recorded as Q137 (a) to (e), (g): family order D2, D1, D8, D5, D6, D9, D3, D4 only an extra, D7 never, skip the families and domains of the last 3 builds; the prototype kill table is a design signal only, never a park and never NO CORE by itself (CR2 stands); a failed card keeps its parts and switches family, after 2 switches the master reports (warning, not a cap); research answers saved one file each, ideas to master_chat_tasks/registry/ideas.jsonl with source and status, nothing becomes a rule without Ayush, the generator's gen_memory is never written, teammate study runs in a session with the repo; design_cards.jsonl, research/INTAKE.jsonl and an intake parser are part of the plan. Still open (f): Ayush confirms the family labels of his 14 builds and checks 42e79476, b5c7b14c, 85ba8b43 (Q138, later, not blocking).
+
+ENTRY 73. 3 Nov 2026 22:29 IST (options dialogs, word for word)
+Outside run: "Counts only if exact (Recommended)"
+Assigned: "No, unless you say (Recommended)"
+No runner: "Always Opus 5.5", then after Claude's check: "Blinds Opus 5, rest 5.5 (Recommended)"
+Author: "did not get it ask again in laymen terms", then: "Keep the name (Recommended)"
+
+Recorded as Q139: an outside trajectory counts as the gate run only when it ran on the harness model (Opus 5) on exactly the frozen QC passed bytes; otherwise diagnosis only. Assigned tasks do not count for Ayush unless he says so per task. With no runner named: blinds are recorded as oc-opus-5, every other step as oc-opus-5.5; the master does not ask. The registry keeps the original author's name as given, written once, never edited, in private records only. Claude's defaults for the minor points (not asked): T40 is about mining teammate tasks for study, so a teammate_agreed bundle handed over directly is allowed by P13; the plus or minus 5 score band only when Ayush names it; one model id for Sol 6.1 in settings; paid runs stay a model field in scores, not a fifth runner; the intake is named INTAKE, not P13, to avoid the P13 blind template clash. Still open, later: classify the 6 old intake tasks (Q140).
