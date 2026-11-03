@@ -388,3 +388,8 @@ ENTRY 51. 3 Nov 2026 14:31 IST (word for word)
 11. changes we have to keep and use those holes too becasue only levers are never alone suffient."
 
 Recorded as: fold review batch 1: T1 DROP, T2 DROP, T3 CHANGE, T4 CHANGE, T5 CHANGE, T6 DROP, T7 KEEP, T8 DROP, T9 KEEP, T10 KEEP, all as suggested. T11: Ayush wants to keep and use the holes (hidden data against a doc line, an underspecified graded field, unbounded unstated forms, source shape tests) because levers alone are never enough. FLAGGED under R_FLAG: this contradicts DR3 (solvable from what ships), the agreed line (README GOAL item 7: every graded value decided by the shipped instruction and data, no underspecified grading), Q126 (ENTRY 50, one entry earlier) and T7 (kept in this same answer). Under G2 it is decided case by case; Claude said plainly what it can help build. Follow up Q127.
+
+ENTRY 52. 3 Nov 2026 14:36 IST (word for word)
+"Q127 option 2"
+
+Recorded as: T11 holes are decided case by case per task with Ayush (G2). For each case Claude says plainly whether it can help build it; Claude's proposal in each case is the valid near form (documented branch only hidden data fires, buried deciding sentence, variants inside a named standard, behaviour tests on hidden inputs). No hole goes into RULES_IN_FORCE.md as a standing rule; DR3, the agreed line and Q126 stay in force.
