@@ -71,6 +71,7 @@ Files
 9c. STAGE2_STUDY_PLAN.md: plan for studying the teammate tasks (anubis-stage-2 on main).
 9e. RULE_REVIEW.md: KEEP, CHANGE or DROP per rule, batch by batch; builds RULES_IN_FORCE.md.
 9b. CONFLICT_REVIEW.md: decisions on the hardening rule conflicts, one by one.
+9f. PL_QUESTIONS.md: 33 questions for the PL and QL in plain words (P15), ready to send.
 9a. AYUSH_SUGGESTIONS.md: Ayush's suggestions and their status. QL_QUESTIONS.md: questions queued for the QL.
 9d. drafts/: draft files for each fix (P1 first). Nothing in drafts/ is applied before PROCEED.
 10. inputs/: material Ayush gave (RQ3 and RQ4 output pasted in chat on 3 Nov, saved by Claude).
