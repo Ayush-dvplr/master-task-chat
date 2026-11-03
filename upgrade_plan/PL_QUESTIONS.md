@@ -1,4 +1,4 @@
-These questions come from Ayush, who builds input bundles with the generator and checks them with your QC kit.
+These questions come from Ayush, who builds input bundles and checks them with your QC kit.
 He wants to follow the kit exactly, and he wants to stop the loops where one QC round leads to another over the same doubt.
 Please answer by number: yes or no, or a short note, per question. The table at the end has a line for each one.
 Items marked "for QL" are for the QL who reviews Ayush's tasks with QC; all other items are for the PL who owns the kit and the generator.
@@ -327,7 +327,7 @@ What Ayush does today: He keeps only the current measured scores with the run na
 Follow up questions: If it stays, what exact wording do you want?
 
 
-THEME F. KIT CHANGES AND THE GENERATOR
+THEME F. KIT CHANGES AND WHAT A BUNDLE MUST PASS
 
 PL25 (for PL). What changed in the kit since 25 Oct
 
@@ -342,44 +342,19 @@ What Ayush does today: He treats every check in those two files as possibly chan
 Follow up questions: Which of your past rulings, if any, no longer hold?
 
 
-PL26 (for PL). Blank words in generated build repair instructions
+PL26 (for PL). What a bundle must pass before push
 
-Question: generate_bundle.py:1851 to 1852 set container_noun and producer_system to "", and templates/build-repair/instruction.md:1 uses {{CONTAINER_NOUN}} and {{PRODUCER_SYSTEM}}, giving "summarize  manifests from a ." This is still present at origin/main. Should those archetypes get real values, or should the template stop using the two fields?
+Question: Is passing the full QC kit (every gate, its four scripts and Step 10) enough for a bundle to be push ready, or must it also pass validate_bundle.py with zero warnings (generator README.md:22 "Zero-warning pass is required before a bundle ships.") or a playground.py run? The same README at lines 113 to 115 says "the checklist wins" and a bundle is ready "when validate_bundle.py reports no FAIL".
 
-What this means: Every generated build repair task starts with a broken sentence that has two empty slots.
+What this means: Two lines of one README disagree, and neither says whether the kit alone is the final word. Ayush wants one clear answer on what decides "ready to push".
 
-Example: Ayush generates a build repair task. The first sentence reads "meant to summarize  manifests from a ." One reading: the generator should fill the words. The other reading: the template should drop them.
+Example: A task where the agent reconciles delivery invoices passes every kit gate and Step 10. One reading: it is push ready. The other reading: it must also go through the validator, and any validator warning blocks it.
 
-What Ayush does today: He never edits the generator; he fills the words in his own bundle.
+What Ayush does today: He treats the full kit as the final word and never runs playground.py with a model.
 
-Follow up questions: Will a fix land in the generator soon?
+Follow up questions: If a validator or playground run is required, which version, and should its output be pasted with the Step 10 output?
 
-
-PL27 (for PL). CATEGORIES.md lists 2 of the 8 archetypes
-
-Question: CATEGORIES.md:34 to 35 says "The current archetypes are format-recovery and build-repair", but the generator's templates folder has 8 archetype folders. Can CATEGORIES.md list all eight, or point to ARCHETYPE_SELECTION.md?
-
-What this means: The other six are cli-config, data-pipeline, domain-calculation, performance, repo-patch and service-interaction. A new author reading CATEGORIES.md would not know they exist.
-
-Example: A new author wants a task where the agent fixes a broken data pipeline and reads CATEGORIES.md. One reading: only two archetypes exist. The other reading: the list is out of date.
-
-What Ayush does today: He reads ARCHETYPE_SELECTION.md.
-
-
-PL28 (for PL). Validator warnings before push
-
-Question: The generator README.md:22 says "Zero-warning pass is required before a bundle ships.", while README.md:113 to 115 says "the checklist wins" and a bundle is ready "when validate_bundle.py reports no FAIL". Must validate_bundle.py show zero warnings before push, or only no FAIL with the kit deciding the rest? Is playground.py needed at all?
-
-What this means: Two lines of the same README disagree on whether validator warnings block push.
-
-Example: In a task where the agent fixes a config loader, the validator reports no FAIL and two warnings that the kit treats as fine. One reading: the bundle is ready. The other reading: both warnings must be cleared first.
-
-What Ayush does today: Only no FAIL; the kit decides the rest. He never runs playground.py with a model.
-
-Follow up questions: Which README line will be corrected?
-
-
-PL29 (for PL). Tasks that fit none of the 8 archetypes
+PL27 (for PL). Tasks that fit none of the 8 archetypes
 
 Question: Is a bundle in the standard format whose task shape fits none of the 8 generator archetypes acceptable once it passes the full kit, or should an archetype be added first?
 
@@ -394,7 +369,7 @@ Follow up questions: Should TRUTH.md or task.toml say anything about the shape?
 
 THEME G. OUTSIDE, TEAMMATE AND ASSIGNED BUNDLES, AND WHICH RUN COUNTS
 
-PL30 (for PL). The authors field on a teammate or assigned bundle Ayush fixes
+PL28 (for PL). The authors field on a teammate or assigned bundle Ayush fixes
 
 Question: Final_checklist.md:105 says authors carries "the author's NAME", and Final_checklist.md:301 FC-S18 says more entries "are allowed and simply mean more than one person worked on the bundle". When Ayush fixes a task assigned to him (the QC assigned folder) or a teammate's task with agreement, should authors stay the original author only, or add Ayush as a second entry?
 
@@ -407,7 +382,7 @@ What Ayush does today: The original name stays and his tools never edit authors;
 Follow up questions: Is there a size of fix above which you want the fixer named?
 
 
-PL31 (for PL). Which paid run counts after a fix to an outside task
+PL29 (for PL). Which paid run counts after a fix to an outside task
 
 Question: If a teammate's paid run was on bytes Ayush then changed (even only TRUTH.md or task.toml), must there be a new paid run on the fixed bytes before push?
 
@@ -420,7 +395,7 @@ What Ayush does today: Yes, a new run on the exact fixed bytes.
 Follow up questions: Would you accept the old run if the change is only in files the agent never sees?
 
 
-PL32 (for PL). Regrading after a judge only edit
+PL30 (for PL). Regrading after a judge only edit
 
 Question: After an edit to judge.toml only (tests, data and solution unchanged), may Ayush submit the old valid trajectory regraded with the new judge, or must there be a fresh paid run?
 
@@ -433,7 +408,7 @@ What Ayush does today: Regrade allowed only for judge only edits, and only with 
 Follow up questions: Must the regraded result be marked as a regrade anywhere?
 
 
-PL33 (for PL). Old Anubis 07 to 10 runs
+PL31 (for PL). Old Anubis 07 to 10 runs
 
 Question: The verifiers for Anubis tasks 07 to 10 were fixed in Anubis commit 5d565653, but the stored trajectories and rewards (25.49, 27.39, 29.17, 29.35) come from the old runs that were blocked by file permissions. Who reruns them, and do those four tasks still matter?
 
@@ -479,5 +454,3 @@ PL28 |
 PL29 |
 PL30 |
 PL31 |
-PL32 |
-PL33 |
