@@ -498,3 +498,11 @@ ENTRY 71. 3 Nov 2026 21:26 IST (options dialog, word for word)
 7: "Measure 1 week first (Recommended)"
 
 Recorded as Q136: (1) the pain is usage limits, not money; (2) blinds always on opencode Opus 5, fixed in settings; (3) no cheaper models: mechanical steps stay on Opus; (4) auto starts Codex itself only for read only research and static work, plus any step Ayush names for Codex in the auto run's PLAN.md; (5) Codex research may use subagents, opencode GPT never (R32); (6) intake.py accepts DONE in any case; (7) DCP off for task sessions is measured for one week before it counts as a token saving.
+
+ENTRY 72. 3 Nov 2026 21:44 IST (options dialog, word for word)
+Family order: "Teammate evidence order (Recommended)"
+Prototype: "Signal only (Recommended)"
+Failed card: "Reuse, switch, report (Recommended)"
+Research: "Idea queue, you approve (Recommended)"
+
+Recorded as Q137 (a) to (e), (g): family order D2, D1, D8, D5, D6, D9, D3, D4 only an extra, D7 never, skip the families and domains of the last 3 builds; the prototype kill table is a design signal only, never a park and never NO CORE by itself (CR2 stands); a failed card keeps its parts and switches family, after 2 switches the master reports (warning, not a cap); research answers saved one file each, ideas to master_chat_tasks/registry/ideas.jsonl with source and status, nothing becomes a rule without Ayush, the generator's gen_memory is never written, teammate study runs in a session with the repo; design_cards.jsonl, research/INTAKE.jsonl and an intake parser are part of the plan. Still open (f): Ayush confirms the family labels of his 14 builds and checks 42e79476, b5c7b14c, 85ba8b43 (Q138, later, not blocking).
