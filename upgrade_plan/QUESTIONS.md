@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q19 (Mac measurement, tmp/W1-031/MEASURE.md, when convenient). Q147 (step leak rules). PL_QUESTIONS.md ready to send. Q138, Q140 later. Q138 later.
+LIVE NOW: Q19 (Mac measurement, tmp/W1-031/MEASURE.md, when convenient). none. PL_QUESTIONS.md ready to send. Next: final plan. Q138, Q140 later. Q138 later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, (Q19 now live: tmp/W1-031/MEASURE.md), Q19, Q21, Q23 to Q29.
 LATER (Ayush): none.
@@ -221,4 +221,5 @@ Q140. Later, not blocking: classify the 6 old intake tasks (assay-plate-triage, 
 Q141 to Q144 asked in the dialog 3 Nov and answered (ENTRY 75).
 Q145. The built in upgrade tool needs to switch git branches and tags on the Mac (checkout, no commit, no push). R34 says the task system runs read only git commands only and Ayush runs every pull, commit and push. Allow the upgrade tool checkout and tag only, or does it print the commands for Ayush? [ANSWERED: print commands only (ENTRY 76)]
 Q146. Tick which of PL1 to PL33 (tmp/W1-036/PL_CHECKLIST.md) go to the PL or QL; Ayush answers the unticked ones himself. [ANSWERED: all 33 go to the PL and QL, rewritten in plain words with scenarios (ENTRY 77)]
-Q147. P16 step leak (tmp/W1-037/STEP_LEAK.md): add BR-SL1 to BR-SL4 to BUILD_RULES and remove the coupling sentence demand from the build prompt? [OPEN]
+Q147. P16 step leak (tmp/W1-037/STEP_LEAK.md): add BR-SL1 to BR-SL4 to BUILD_RULES and remove the coupling sentence demand from the build prompt? [ANSWERED: yes, in stage 1 (ENTRY 78, 79)]
+Q148 to Q151 asked in the dialog 3 Nov and answered (ENTRY 79).
