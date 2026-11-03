@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q97, Q99. Layer C pilot: W1-007 and W1-008 done, W1-006 running.
+LIVE NOW: Q97, Q99, Q100.
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -157,5 +157,7 @@ Q97. P1: in opencode, what context size does the master's model show (the percen
 Q98. P1 Step 1: which DCP option for the master chat: A tune, B manual (compress only when you say), or C off? Claude recommends B for the master and A for task sessions. [ANSWERED: B for the master; A or C for task sessions]
 
 Q99. Task sessions: DCP off (C), or a light A (compress only near the end of the 1 million window, your messages protected)? Claude suggests C, since one session does one job; we can switch to A if a task session ever runs out of room. [OPEN]
+
+Q100. Scaling the cards: light cards (about 40k tokens, no reproduction, first field DEFECT or DESIGN) for all tasks, deep cards only where the loss looks like DESIGN? Or a different depth? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
