@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q19 (Mac measurement, tmp/W1-031/MEASURE.md, when convenient). Next: final plan. Q138, Q140 later. Q138 later.
+LIVE NOW: Q19 (Mac measurement, tmp/W1-031/MEASURE.md, when convenient). Q145 (upgrade tool and git). W1-036 (PL checklist) and W1-037 (generator leak) running. Q138, Q140 later. Q138 later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, (Q19 now live: tmp/W1-031/MEASURE.md), Q19, Q21, Q23 to Q29.
 LATER (Ayush): none.
@@ -218,3 +218,5 @@ Q137. P9 and P11 (tmp/W1-034): (a) family order by teammate evidence: D2, D1, D8
 Q138. Later, not blocking: confirm the lever family labels of your 14 builds (tmp/W1-034/WHY_NEW_FAILS.md) and check whether 42e79476, b5c7b14c and 85ba8b43 are your own tasks rather than teammates'. [OPEN, LATER]
 Q139. P13 and S9 open points (tmp/W1-035), asked in short. [ANSWERED (ENTRY 73)]
 Q140. Later, not blocking: classify the 6 old intake tasks (assay-plate-triage, stall-graph-postmortem, slipway-overhaul-replan-repair, warrant-asof-entitlement-compiler, multicorner-eco-timing-closure, b7c42a8f): origin (own, assigned, teammate) and whether each counts for you. [OPEN, LATER]
+Q141 to Q144 asked in the dialog 3 Nov and answered (ENTRY 75).
+Q145. The built in upgrade tool needs to switch git branches and tags on the Mac (checkout, no commit, no push). R34 says the task system runs read only git commands only and Ayush runs every pull, commit and push. Allow the upgrade tool checkout and tag only, or does it print the commands for Ayush? [OPEN]
