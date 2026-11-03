@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 11:45 IST. Claude updates this card after every step that changes the plan state. Times are IST.
+Last updated: 3 Nov 2026 11:56 IST. Claude updates this card after every step that changes the plan state. Times are IST.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session plans that upgrade. Repo Ayush-dvplr/master-task-chat, branch claude/youthful-feynman-zug0uq, planning folder upgrade_plan/. Ayush's inputs (QC kit, QC reports, harness queue, _runs, PL generator, teammate tasks anubis-stage-2/) are on origin/main: read them with git show origin/main:<path>, never merge.
@@ -27,27 +27,32 @@ READ ORDER AFTER COMPACTION
 7. Only when the next step needs them: STAGE2_STUDY_PLAN.md, PLAN.md, FINDINGS.md, tmp/W1-002/CONFLICTS.md, CONTRADICTIONS.md, UNVERIFIED_RULES.md, REQUESTS.md, inputs/.
 
 RUNNING NOW
-0. Layer F DONE and verified: tmp/W1-025/PATTERNS.md and CONFIRM.md. Q111 decided as CR7. Rule review batch one (R1 to R35) DONE (ENTRY 40 to 43), R28 open (Q116, later). RULES_IN_FORCE.md drafted (drafts/P1/); card 5.9 KB, Q117. P1 drafts in drafts/P1/ (README_P1.md); Q108 (master starts in master_chat_tasks/) and Q109 answered; STATE_CARD generator drafted and tested (drafts/P1/state_card.py, sample 3.0 KB); needs RULES_IN_FORCE.md from the rule review (Q110). Next free helper id: W1-026.
-1. Layer D light cards: 95 tasks in tmp/S2-CARDS/QUEUE.txt; batches B01 to B03 started 09:34 (helpers W1-009 to W1-011). Continue with tmp/S2-CARDS/CARD_RUN.md. B01 to B10 verified (40 cards; 53 teammate tasks studied with the 2 Nov and pilot cards). Run PAUSED (ENTRY 31): no new QUEUE batches. Tighter plan (ENTRY 32): triage done (tmp/S2-TRIAGE/RESULT.md), sample S01 to S04 (15 tasks, ENTRY 33) approved: S01 to S04 verified; sample DONE: 68 of 108 teammate tasks studied, families in tmp/S2-CARDS/SUMMARY.md. Q106 agreed, Q107 (b) chosen (ENTRY 36); the review step is paused, see the last chat message. Next free helper id: W1-025.
+Nothing is running. No helper is active. Next free helper id: W1-026.
 
-DECISIONS SO FAR (short)
-1. P1 compaction cause: the DCP plugin on defaults (pushes compression from 100k tokens, about 10 percent of the 1 million window; nothing protected, not even Ayush's messages). Decided: master DCP B (manual), task sessions DCP C (off). DCP 3.2.0 reads a per folder .opencode/dcp.jsonc and OPENCODE_CONFIG_DIR (FINDINGS F1.8 to F1.10, PLAN.md P1).
+STATE OF THE WORK (3 Nov)
+1. Teammate study (anubis-stage-2 on main): 68 of 108 tasks studied (55 light cards, 3 pilot, 10 from 2 Nov). Families: tmp/S2-CARDS/SUMMARY.md. Design guide: tmp/W1-025/PATTERNS.md; check against R0: tmp/W1-025/CONFIRM.md. QUEUE batches B11 to B24 stay PAUSED (Ayush, credits); do not start them. The case by case review of the DEFECT families is paused (see chat 3 Nov); do not restart it without Ayush.
+2. Rule review batch one (R1 to R35) DONE: decisions in RULE_REVIEW.md (ENTRY 40 to 43). R28 open (Q116, Ayush comes back later).
+3. P1 compaction drafts in drafts/P1/: master.dcp.jsonc (manual), tasks.dcp.jsonc (off), README_P1.md (how files reach each session, path check), state_card.py (tested), RULES_IN_FORCE.md (one layer from the rule review), sample_STATE_CARD.md (5.9 KB).
+4. Nothing outside upgrade_plan/ has been edited. PROCEED has not been given.
+
+DECISIONS SO FAR (short; details in the named files)
+1. Compaction (P1): master DCP manual (Q98), task sessions DCP off (Q99); master starts from master_chat_tasks/ (Q108); protected files list accepted (Q109).
 2. Order: task making first, system fixes in parallel (Q87).
-3. CR1 timeouts: extra lever by default, main lever only with Ayush's word (CONFLICT_REVIEW.md).
-4. QC working definition: no fail in 2 runs in a row, any CL fail blocks, minor accepted if it does not repeat; plus a false positive review after each QC result (Q95).
-5. Pilot cards: in 2 of the 3 pilot cards the main loss was a DEFECT (oracle bug, unreadable program file), not levers; light cards mark DEFECT or DESIGN first (Q100).
-6. New root later: one git folder with master_chat_tasks, master_chat_work, QC and anything needed (Q84).
-7. Gate per category: none (Q94). Work mostly on tests (rubric already low).
+3. QC pass = no fail in 2 runs in a row, any CL fail blocks, a minor that does not repeat is fine, false positive review after every QC result (Q95, R18).
+4. Levers: CR1 timeout extra by default; CR6 amended field needs one deciding doc sentence; CR7 misread rule lever allowed as primary with one clear deciding sentence; R25 primary lever from PATTERNS.md families, 40 percent, fires in most hidden inputs; R30 a size bound may be stated for a runtime lever.
+5. Rubric: every criterion traces to an instruction sentence (Q106).
+6. No caps on rounds (Q114). Gate 85, 85, 40 as a setting (R26). Never commit or push in any repo from the task system (R34).
+7. Root later: one git folder with master_chat_tasks, master_chat_work, QC and anything needed (Q84).
 
 KNOWN FROM RECORDS (short)
 1. After compaction the master loses format and process rules, not task facts (lessons.jsonl lines 89 and 100).
 2. 27 Oct Mac hang: 3 orphan Python solvers on the host (about 185 GB) plus other apps and VMware.
 3. 2 days of tests 100 (31 Oct and 1 Nov): misread rule levers lost to careful Opus.
-4. Fix template in use: P12_recheck_fix v5. Push needs 1 harness run on frozen bytes.
-5. 182 hardening rules, 44 conflicts (tmp/W1-002).
+4. 182 hardening rules, 44 conflicts in the records (tmp/W1-002).
 
 NEXT STEPS (in order)
-1. Keep the card run going (CARD_RUN.md) and update Ayush after every 3 batches.
-2. In parallel: conflict review CR2 (tmp/W1-002/CONFLICTS.md C5, the careful program), then CR3 to CR5.
-3. Then the UNVERIFIED_RULES review (Q4 first), then Layer F patterns, then shape PLAN.md.
-4. Before a compaction: prompts/COMPACT_PROMPT.md. Recovery prompt: prompts/RECOVERY_PROMPT.md (version 3), cold tested four times (W1-001, W1-004, W1-012, W1-013).
+1. Q117: card budget 6 KB or shorter rules.
+2. Add the accepted card points to state_card.py (news since last card, long running sessions, QC kit line, settings line, progress line, old questions first, uniqueness reminder, fill order).
+3. Remaining P1 steps (master recovery prompt, folding layered rule files), then the next system fixes: P2 QC fix regression gate, P3 Docker slot script (S1), P10 old templates, S7 QC kit watch, P6 tools.
+4. Then shape PLAN.md into the final plan for Ayush to approve before PROCEED.
+5. Before a compaction: prompts/COMPACT_PROMPT.md. Recovery: prompts/RECOVERY_PROMPT.md.
