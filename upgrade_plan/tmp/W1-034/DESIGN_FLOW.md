@@ -5,7 +5,7 @@ Why: WHY_NEW_FAILS.md finds five causes. 1 NO CORE at design (8 designs, 13 roun
 A. IDEA INTAKE (answers causes 3 and 1)
 1. Start from a domain and a data shape, not from a lever. The data shape is what the shipped files look like (a container format, a ledger with carried quantities, an event log with clocks, a long procedural document, a repository). Write both in one line each.
 2. Pick the primary lever family by rotation:
-   a. Take the families and domains of Ayush's last card.unique_last (3) design cards plus every build in the last 7 days (registry plus the card log).
+   a. Take the families and domains of Ayush's last card.unique_last (3) design cards plus every build in the last 7 days (registry plus the card log master_chat_tasks/registry/design_cards.jsonl, one line per card: slug, family, domain, date).
    b. Drop any family used as primary in those cards; drop any domain used in those cards.
    c. Of the remaining families, rank by teammate evidence in PATTERNS.md and CONFIRM.md: confirmed families first (D2 carrier variation, D1 branch only hidden data fires, D8 carried state), then D5 and D6, then D3 under CR7, then D4 only as an extra (CR1). D7 is never a family.
    d. Take the first family whose recipe fits the data shape; if none fits, change the data shape, not the family order.
