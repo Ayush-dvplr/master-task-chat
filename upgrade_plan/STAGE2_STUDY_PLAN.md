@@ -1,6 +1,6 @@
 STUDY PLAN FOR THE TEAMMATE TASKS (anubis-stage-2)
 
-Status: APPROVED by Ayush 3 Nov (Q88). Phase 0 DONE 08:43. Phase 1 pick list waiting for Ayush (Q91).
+Status: v1 APPROVED 3 Nov (Q88); v2 below REPLACES Phases 1 to 4 (Ayush Q91, ENTRY 21), waiting for approval (Q93). Phase 0 DONE 08:43. Phase 1 pick list waiting for Ayush (Q91).
 
 WHAT IS THERE (checked by the master 3 Nov, git ls-tree of origin/main)
 1. anubis-stage-2/ on main: 115 task folders (114 with instruction.md and task.toml), 12904 files, about 2.6 GB.
@@ -38,3 +38,22 @@ PHASE 0 RESULT (3 Nov 08:43, script tmp/S2-INDEX/make_index.py, INDEX.csv sha b8
 
 PHASE 1 PROPOSED PICK (Q91)
 26 new cards: the 34 under gate minus the 8 already carded. Plus 5 contrast tasks with the highest Opus final: 65ba10c2 (78.52), 1950015d (73.82), c9d7b490 (71.83), f357cd96 (70.65), 92dd0b24 (70.34). Total 31 new cards, about 2 to 3 million tokens, 4 batches of about 8.
+
+PLAN v2 (3 Nov 09:02, after ENTRY 21; replaces Phases 1 to 4 above)
+Scope: all 109 teammate tasks (114 minus Ayush's own 5). Goal: find levers and methods common across tasks (including easy ones), find new things, and confirm or refute our own findings (lever bank, the 182 rules in tmp/W1-002, R0 lever kinds).
+Rule for every step: one fixed card template so cards can be compared; every claim cites file and line or a reward-details check name; self check; master spot check.
+
+Layer A. Feature matrix by script, all 109 tasks, no AI tokens.
+  From reward-details.json: lost points per check, grouped by check name, and how many checks lost per hidden corpus.
+  From instruction.md: presence and wording of key sentences (exact match bar, runtime sentence, "unseen" or "hidden" data, standards named), word count, number of output files.
+  From environment/: file formats and counts, number of docs, data size; from tests/: hidden data size and number of hidden corpora.
+  From judge.toml: criteria by evaluation target (trajectory or output), negatives, honesty criterion.
+  Output: tmp/S2-FEATURES/FEATURES.csv.
+Layer B. Correlation by script: which features go with low Opus tests scores; which are common to almost all tasks (the "keys").
+Layer C. Pilot: 3 light cards (one low, one middle, one high scorer) to fix the card template and measure tokens. Ayush reviews the pilot cards before scaling.
+Layer D. Light cards for all 109 tasks (instruction, reward-details, test file headers, judge criteria; no trajectory.json), about 20k to 30k tokens each, 3 helpers at a time in batches of 8.
+Layer E. Deep cards for about 20 to 30 tasks chosen from Layers B and D (lowest, contrasts, and any with a new lever kind): adds the agent program and the trajectory steps where it lost points.
+Layer F. Synthesis: PATTERNS.md (lever families, frequency, points cost, wordings that pass QC, what not to copy), and CONFIRM.md (each of our own rules and lever kinds: confirmed, refuted, or not seen in teammate tasks).
+Layer G. QC risk view: for CL checks especially (Ayush: CL findings count as major), how passing teammate tasks meet each CL check, including the exemptions the kit itself allows.
+Optional: scan Ayush's own 5 tasks the same way if a comparison is needed.
+Cost: A and B almost none; C about 100k; D about 2 to 3 million; E about 2 million; F and G about 500k.

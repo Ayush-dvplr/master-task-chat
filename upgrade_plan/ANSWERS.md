@@ -193,3 +193,20 @@ ENTRY 20. 3 Nov 2026 08:43 IST, answers in chat (word for word)
 "87. yes with the system fixes in parallel 88. yes 89. So actually the main thing is now that you checked out the QC. So basically it's an AI, and every time it runs, it tries to find some flaws. Okay, and it tried to find the flaws, and every time I run it, every time it will find some minor, some fails. So these are the tasks with the least amounts of failure. Okay, and I have to find the pattern or something, because right now we don't know which task is completely QC pass, and we cannot make a directly a rigid rule. Okay, just if you want, we can take some time and discuss on this specific point too, because it's very ambiguous and there is no direct way we can handle this, that the tasks are 100% QC perfect. But these have the least issues with proper scores and everything we have. Okay.  86. yes i am good with the three changes with the kit (LENIENT, MINOR, MAJOR)."
 
 Recorded as: Q87 task making first, system fixes in parallel. Q88 study plan approved; Phase 0 run. Q89 the QC is an AI reviewer: every run finds some minors or fails, so no task is known to be 100% QC clean; the stage 2 tasks are those with the fewest findings and good scores; no rigid rule possible; open for discussion (new problem P12). Q86 kit classes LENIENT, MINOR, MAJOR agreed.
+
+ENTRY 21. 3 Nov 2026 09:02 IST, answers in chat (word for word)
+"What the 114 scored teammate tasks show (Opus 5, 1 run each):
+
+1. So basically, how the gate works, we have specific number of tasks and it goes into easy, medium and hard category, and we have specific number of each task reserved to that category. So first the gate was around 70% for easy ones, then it dropped to 50, then it will drop from 50 to 35. It will goes like this. So all the task that is pushed is already accepted. Okay.
+2. same reason as above
+3. okay with my current i already got very low rubrics so we mostly have to work on tests
+4. yes 
+5. okay
+
+90. okay can you show me a simple list of temmates names and their number of tests and rubrics and in each tasks in simple table (for name you can get it frim authors in task.toml
+91. See, basically we have to work on all the tasks smartly, because some of the easier tasks got a few good levers that caused that falling. Right now what I was doing, I was trying to mostly analyze the task with very low pass rate scores, but most of them are doing like bypassing the QC. So what I think, like, there will be some genuine levers or methods or any key that are used by all the tasks, but we have to do and plan it very wisely. As for this specific part, you already scanned the folder, so this is very huge code base, the task input bundles of me and my teammates. So we have to plan it very carefully so that we doesn't miss anything. We find new things, we improve through that findings, and we confirm our own findings from that. Everything we have to plan it. So we must plan it, and we can skip my task because these are already made using those that is already present in the master task chat. And if needed, we can go for the that scan too.
+92.  1. yes also things CL ones issues are also major ones so we have find ways to bypass those. 2. yup 
+
+ask me me again in short and laymen terms : Still open: CR1a (the form of the timeout rule) and Q84 (the new root folder)."
+
+Recorded as: gate: tasks fill quotas in easy, medium and hard categories; the gate fell 70 to 50 and will fall to 35; every pushed teammate task was accepted under the gate of its time (Q94). Work mostly on tests (rubric already low in Ayush's tasks). Q90: author table made (tmp/S2-INDEX/AUTHORS.md). Q91: study ALL tasks smartly, not only the lowest; easy tasks also hold good levers; find levers common to all tasks; plan carefully so nothing is missed; find new things and confirm our own findings; skip Ayush's own 5 tasks (337a1262, 42e79476, 8fbe0e42, b47fd5f7, b5c7b14c) unless needed. Revised plan v2 in STAGE2_STUDY_PLAN.md (Q93). Q92: both: a working definition now, refined after the cards; CL findings count as major (Q95). CR1a and Q84 asked again in plain words.
