@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q106, Q107.
+LIVE NOW: see chat 3 Nov (how to continue after the safety stop).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -173,8 +173,8 @@ Q103. Start sample S1 (10 tasks in STAGE2_STUDY_PLAN.md, about 450k tokens), now
 Q104. Amended field type (cards 058cbab3, 88ee425d, af780bef): the data says a field is a whole number, then an amendment rewrites it as text, for example "1200" in quotes. The docs never say whether that amended value still counts as a number or is now invalid. The teammate reference treats it as invalid; Opus treated it as a number, and lost many points. For your own tasks: allowed only if one sentence in the docs decides it, or never use it? [ANSWERED: only with one doc sentence that decides it]
 Q105. Rubric asking for unrequested things (pilot 7e0d8feb, af780bef): some rubric criteria give points only if the agent shows one named example or prints a trace, but the instruction never asks for that. Opus lost many rubric points this way. For your own tasks: copy this style, or keep every rubric criterion tied to something the instruction asks for? [FOLLOW UP: Claude suggestion in Q106]
 
-Q106. Claude suggestion for Q105: every rubric criterion traces to a sentence in the instruction (or to the general honesty criterion). Where a worked example or a trace is wanted, add ONE plain sentence to the instruction asking the final reply to include it; the criterion is then fair, passes the QC alignment checks, and still costs Opus points when it skips it. Agree? [OPEN: sample done, ask again now]
+Q106. Claude suggestion for Q105: every rubric criterion traces to a sentence in the instruction (or to the general honesty criterion). Where a worked example or a trace is wanted, add ONE plain sentence to the instruction asking the final reply to include it; the criterion is then fair, passes the QC alignment checks, and still costs Opus points when it skips it. Agree? [ANSWERED: agree]
 
-Q107. Next step for the study: (a) Layer F, one helper reads only the 68 cards and writes the patterns and the confirm list (about 250k tokens); (b) first go through SUMMARY.md together and decide the DEFECT and D7 families case by case, then Layer F; (c) stop the study here and move to the plan with SUMMARY.md. Claude suggests (b). [OPEN]
+Q107. Next step for the study: (a) Layer F, one helper reads only the 68 cards and writes the patterns and the confirm list (about 250k tokens); (b) first go through SUMMARY.md together and decide the DEFECT and D7 families case by case, then Layer F; (c) stop the study here and move to the plan with SUMMARY.md. Claude suggests (b). [ANSWERED: (b); paused, see chat 3 Nov]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

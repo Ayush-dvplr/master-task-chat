@@ -285,3 +285,8 @@ ENTRY 35. 3 Nov 2026 10:11 IST (word for word)
 "keep this question open later when all beatches comes out we will decide what to do with this"
 
 Recorded as: Q106 stays open until all sample batches are done; decided then.
+
+ENTRY 36. 3 Nov 2026 10:20 IST (word for word)
+"Q106 agree, Q107 b"
+
+Recorded as: Q106 agreed. Q107 option (b) chosen. The review step was paused by Claude after an automatic safety stop; see chat 3 Nov.
