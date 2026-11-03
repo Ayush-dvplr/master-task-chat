@@ -462,3 +462,8 @@ ENTRY 65. 3 Nov 2026 16:17 IST (word for word)
 "Q132 options 1 and 2 and 3 (I kind of mutual agreement between us that sometimes i help him and sometimes he helped its not like stealing his task everything is done under PL survelence and agreeemnet)"
 
 Recorded as: P13 intake takes (1) Ayush's own outside bundles, (2) tasks assigned to him to fix (QC assigned/), (3) teammate tasks fixed with the teammate's agreement, under the PL's oversight. The registry records the source and original author of every outside bundle (provenance), and outside tasks never count toward Ayush's own pushes unless he says so (like the b7c42a8f rule). Who is named as author at push is settled between Ayush, the teammate and the PL; the system never edits author fields (R34, Ayush runs every push).
+
+ENTRY 66. 3 Nov 2026 16:38 IST (options dialog, word for word)
+Q133: "see i do QC one time if it passes then i give to my QL he does QC again if something or large number of major fails are there then give back report then i check false positives ones or the vague ones and fix only the real ones , then qc then harness"
+
+Recorded as: Q133: false positives are judged by Ayush, on the QL's report. Flow: Ayush's QC once; on a pass the bundle goes to the QL, who runs QC again; if the QL finds fails (or many majors) he returns the report; Ayush marks the false positive and vague findings; only the real ones are fixed (fix map, regression check); QC again; then the harness. The system prepares a triage table for each QL report (P16 ql_report_triage template): per finding, the diff since the passed copy and the kit line read in full, with a suggestion real, false positive or vague; Ayush decides. ORDER rule (T24) gets the QL step before the paid run.
