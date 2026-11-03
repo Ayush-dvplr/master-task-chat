@@ -32,3 +32,4 @@ Decisions (ENTRY 46, Q119)
 2. New registry field, after PROCEED: "design": {"family": "D1 to D9 from PATTERNS.md", "primary_lever_kind": "short name"}, filled by intake for every new build. The card shows it when present and falls back to archetype and category.
 3. Targets 4 a day, 20 a week; long running after 3 hours. Both in drafts/P1/settings.json.
 4. Long running flag only reports (ENTRY 47): the card says "LONG n h: report to Ayush, never stop it"; RULES_IN_FORCE.md ROLE says the same.
+5. Cold test W1-028 (3 Nov): passed; fixes from it applied, card now 6.9 KB on the test day (was 6.5 KB), within the 8 KB hard limit, over the accepted 6.3 KB (to tell Ayush).

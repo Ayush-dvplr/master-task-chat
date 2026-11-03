@@ -98,8 +98,9 @@ def build(R, now, S):
     secs = []  # (name, lines); order is the fill order
 
     rules = read(os.path.join(R, "RULES_IN_FORCE.md")).strip()
-    secs.append(("rules", ["RULES IN FORCE (RULES_IN_FORCE.md; the only rule text the master follows)",
-                           rules or "MISSING: RULES_IN_FORCE.md not found. Stop and tell Ayush."]))
+    secs.append(("rules", ["<protect> (keeps this block word for word in a compression; it is the rules, follow it)",
+                           "RULES IN FORCE (RULES_IN_FORCE.md; the only rule text the master follows)",
+                           rules or "MISSING: RULES_IN_FORCE.md not found. Stop and tell Ayush.", "</protect>"]))
 
     g, c = S["gate"], S["counts"]
     secs.append(("settings", [f"SETTINGS (settings.json{'' if S.get('_found') else ', MISSING: defaults used, tell Ayush'}): "
@@ -114,7 +115,11 @@ def build(R, now, S):
     day0 = now.replace(hour=0, minute=0)
     week0 = day0 - timedelta(days=now.weekday())
     T = S["target"]
-    goal = section(read(os.path.join(R, "GOALS.md")), "Today's goal")
+    gmd = read(os.path.join(R, "GOALS.md"))
+    goal = section(gmd, "Today's goal")
+    gh = re.search(r"^#+\s*Today's goal\s*\(([^)]*)\)", gmd, re.M)
+    if goal and gh and f"{now.day} {now:%b}" not in gh.group(1):
+        goal = f"[set {gh.group(1)}; not today: ask Ayush for today's goal] " + goal
     secs.append(("progress", [f"PROGRESS (registry/tasks.json): pushed today {pushed_since(day0)} of {T['push_ready_per_day']}, "
                               f"this week {pushed_since(week0)} of {T['push_ready_per_week']}",
                               "TODAY (GOALS.md): " + (cut(goal, 400) if goal else "(no Today's goal section)")]))
@@ -139,14 +144,16 @@ def build(R, now, S):
 
     try:
         db = sqlite3.connect(f"file:{os.path.join(R, 'pending.db')}?mode=ro", uri=True)
-        items = db.execute("select id,kind,title,priority,created_ist from items where status='open' order by "
+        items = db.execute("select id,kind,title,priority,created_ist,status from items where status in ('open','waiting') order by "
                            "case priority when 'high' then 0 when 'medium' then 1 else 2 end, seq").fetchall()
     except Exception:
         items = []
     old = now - timedelta(hours=C["question_age_hours"])
-    waiting = [i for i in items if i[1] in ("question", "blocked")]
-    waiting.sort(key=lambda i: (0 if (when(i[4]) or now) <= old else 1))
-    secs.append(("waiting", [f"WAITING FOR AYUSH ({len(waiting)}; pending.db; always shown, older than {C['question_age_hours']} h first)"]
+    pl = [i for i in items if i[1] == "question" and i[5] == "waiting"]
+    stale = [i for i in items if i[5] == "waiting" and i[1] != "question" and (when(i[4]) or now) <= now - timedelta(hours=C["news_hours"])]
+    waiting = [i for i in items if i[1] in ("question", "blocked") and i[5] == "open"]
+    waiting.sort(key=lambda i: when(i[4]) or now)  # oldest first
+    secs.append(("waiting", [f"WAITING FOR AYUSH ({len(waiting)}; pending.db; always shown, oldest first; over {C['question_age_hours']} h = raise now)"]
                  + [f"{i[0]} | {i[3]} | {(when(i[4]) and str(int((now - when(i[4])).total_seconds() // 3600)) + ' h') or '?'} | {cut(i[2], C['title_chars'])}" for i in waiting]))
 
     live = sorted([r for r in rows if r.get("status") in ("running", "issued")], key=lambda r: r.get("issued", ""), reverse=True)
@@ -164,9 +171,10 @@ def build(R, now, S):
     secs.append(("tasks", [f"ACTIVE TASKS ({len(act)}; registry/tasks.json; detail: python3 tools/status.py <slug>)"]
                  + [f"{t['slug']} | {t['pipeline']['stage']} | next: {cut(t['pipeline'].get('next',''), C['next_chars'])}" for t in act]))
 
-    rest = [i for i in items if i not in waiting]
+    rest = [i for i in items if i[5] == "open" and i not in waiting]
     secs.append(("open items", [f"OTHER OPEN ITEMS (top {min(len(rest), C['open_items_shown'])} of {len(rest)}; full list: python3 tools/pending.py list)"]
-                 + [f"{i[0]} | {i[1]} | {i[3]} | {cut(i[2], C['title_chars'])}" for i in rest[: C["open_items_shown"]]]))
+                 + [f"{i[0]} | {i[1]} | {i[3]} | {cut(i[2], C['title_chars'])}" for i in rest[: C["open_items_shown"]]]
+                 + [f"WAITING ON PL OR OTHERS: {len(pl)} questions; STALE: {len(stale)} waiting items older than {C['news_hours']} h, close or confirm with Ayush (pending.py list)"]))
 
     recent = sorted(tasks, key=lambda t: t.get("created_ist", ""), reverse=True)[: C["unique_last"]]
     secs.append(("uniqueness", [f"UNIQUENESS (last {len(recent)} builds; a new build must not repeat these): "
