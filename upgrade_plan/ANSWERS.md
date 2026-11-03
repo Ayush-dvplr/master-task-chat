@@ -487,3 +487,14 @@ ENTRY 70. 3 Nov 2026 21:21 IST (word for word)
 "I didn't get your recommendations, like recommendations for what, is it a question or anything else? So ask me again all 7 of your recommendations, in short, including why or what's other option, just in short. And also I want to add one more thing, like I'm using multiple models and multiple things, so just maintain a record, like which like Codex or Open Code GPT. Okay, make 4 options. Okay, 4 options. I will run any one of them by default. By default, it will be Open Code Opus 5.5. Okay, and whatever I will run, I will tell you. For Codex, it will be Sol 6.1, and if I am using Open Code GPT, it's also be Sol 6.1. okay, I want you to store like which task is done by which, like Open Code 5.5, Opus 5.5, Opus 5, or Codex. And why I'm storing it, I want to check, like is there really a major difference by work done by all these, as the instruction will be same, but it will also help us to analyze in future too, if we want to analyze what's getting wrong and which model to pick. Okay, so if in this part if you are still getting confused, you can ask me and add this to my suggestions, and we will work on to it."
 
 Recorded as: Q136 asked again in short, one question at a time with the why and the other option. New suggestion S9: a record of which tool and model ran each session. Four options: (1) opencode Opus 5.5 (default), (2) opencode Opus 5, (3) Codex Sol 6.1, (4) opencode GPT Sol 6.1. Ayush tells the master which one he ran; when he says nothing, the default is recorded. Purpose: compare the work of the four on the same instructions, and later pick the right model per step and find what goes wrong.
+
+ENTRY 71. 3 Nov 2026 21:26 IST (options dialog, word for word)
+1: "Usage limits (Recommended)"
+2: "Always Opus 5 (Recommended)"
+3: "No, always Opus"
+4: "Read only work only (Recommended) Why: auto may start Codex for research and static reading, which spares the Claude limit. Never for Docker or bundle edits until one pilot proves it works. plus if i mention it to use in plan mode for auto mode"
+5: "Codex yes, GPT no (Recommended)"
+6: "Yes, any case (Recommended)"
+7: "Measure 1 week first (Recommended)"
+
+Recorded as Q136: (1) the pain is usage limits, not money; (2) blinds always on opencode Opus 5, fixed in settings; (3) no cheaper models: mechanical steps stay on Opus; (4) auto starts Codex itself only for read only research and static work, plus any step Ayush names for Codex in the auto run's PLAN.md; (5) Codex research may use subagents, opencode GPT never (R32); (6) intake.py accepts DONE in any case; (7) DCP off for task sessions is measured for one week before it counts as a token saving.
