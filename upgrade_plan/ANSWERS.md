@@ -230,3 +230,5 @@ ENTRY 23. 3 Nov 2026 09:18 IST, clarification (word for word)
 Recorded as: the QC kit is written by Ayush's PL; the team works on its own. "Bypassing QC" was the wrong word: Ayush means passing QC with wordings and approaches that keep the traps hidden from the solving agent, so QC passes and the task still scores low. README GOAL item 7 updated with the agreed line.
 
 ENTRY 24. 3 Nov 2026 09:19 IST, "yes" to resume Layer B. Recorded as: Layer B run; result in STAGE2_STUDY_PLAN.md.
+
+ENTRY 25. 3 Nov 2026 09:20 IST, "yes start the pilot". Recorded as: Q96 approved; helpers W1-006 to W1-008 started.
