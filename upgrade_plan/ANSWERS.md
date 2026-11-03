@@ -354,3 +354,15 @@ ENTRY 48. 3 Nov 2026 12:39 IST (word for word)
 "Q8 yes, Q120 allow it and make them warnings, Q121 accept (yes from my end but verify from your end)"
 
 Recorded as: Q8 superseded and snapshot files move to knowledge/history/ (list in drafts/P1/FOLD_PLAN.md part 1), after PROCEED. Q120 (a) helper W1-027 allowed for the content fold table; (b) issue.py round caps become warnings, never refusals. Q121 accepted by Ayush; Claude verifies it on its side (cold test W1-028 and a check of every tool the read order names).
+
+ENTRY 49. 3 Nov 2026 14:16 IST (word for word, answered through the options dialog)
+Q122: "Split (Recommended)"
+Q123: "Confirm 4, keep careful test (Recommended)"
+Q124: "Triage, then batches (Recommended)"
+Q125: "Here its not bypass its more of a making the this feature usa dsa , mapping, or matric so anything in best possible in such a way we can hide our traps, pass the QC like my teammates are passing , using correct word or anything like this , ensure one fixes does not raise new issues like mapping kind of thing this fixes generally raises this , fixes does not remove the hardening part just to pass must find a way to pass the QC as well as keep the hardening part, many more like this"
+
+Recorded as:
+Q122: split. The 31 old numbers and wordings are deleted in the fold (today's rules win); the 7 Docker and session limits move into settings.json; the 13 design details go to the Q124 batches; the 11 lever rows follow Q123.
+Q123: R25, CR7, CR1a and R30 confirmed over the 2 Nov R0 text. The R0 condition "the primary lever is lost by the careful exact program written from the shipped files only" stays in force until CR2 is decided.
+Q124: Claude triages first (removes repeats, marks what is covered), then batches of about 10 with a suggestion each.
+Q125: the word "bypass" is not the intent. The intent is a fix MAP (a matrix): for each QC finding, the best fix that (1) passes QC the way teammates pass it, with the right wording, (2) keeps the traps hidden from the solving agent, (3) keeps the hardening, never removing it just to pass, and (4) does not raise new findings (fixes that cause new mapping findings). Claude can help build this. It is the P2 work (QC fix regression gate). The "bypass" quote is dropped from the rules; the QC safe form table becomes part of the fix map. One point checked with Ayush under R_FLAG: Q126.
