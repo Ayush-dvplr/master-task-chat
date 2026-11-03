@@ -19,3 +19,5 @@ CR1. Timeout and crash losses (W1-002 C3). Status: DECIDED 3 Nov (ENTRY 18 and 2
 DECIDED FROM THE CARDS
 CR6. Amended or retyped field (cards 058cbab3, 88ee425d, af780bef; Q104, ENTRY 34): allowed in Ayush's tasks only when one sentence in the shipped docs decides how the amended value is read.
 CR7. Misread rule as primary lever (Q111, ENTRY 39; evidence tmp/W1-025/CONFIRM.md): ALLOWED as a primary lever when the rule has one clear deciding sentence in the shipped docs and many records tempt the wrong or too wide reading. Replaces route 1 R0 point 2 ("extras only") after PROCEED.
+
+PAUSE NOTE (3 Nov): while Claude was writing up the case by case review of the DEFECT families (tmp/S2-CARDS/SUMMARY.md F1 to F6) after Q107 (b), an automatic safety check stopped the write up before anything was saved. Claude paused that review and told Ayush. Do not restart it without Ayush. CR2 to CR5 (from tmp/W1-002/CONFLICTS.md C5, C25 with C6, C1, C2 with C22) and the other W1-002 conflicts are still open; they are planned after the system fix drafts (RESUME NEXT STEPS).

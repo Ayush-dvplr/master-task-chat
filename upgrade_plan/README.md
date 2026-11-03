@@ -4,7 +4,7 @@ Started 3 Nov 2026, 01:19 IST. Planning only.
 
 STATUS: PLANNING. NOTHING OUTSIDE THIS FOLDER IS EDITED.
 
-GOAL OF THE TASK SYSTEM (Ayush, 3 Nov 2026, ANSWERS.md ENTRY 11 and 12; heading wording open, Q73)
+GOAL OF THE TASK SYSTEM (Ayush, 3 Nov 2026, ANSWERS.md ENTRY 11 and 12; heading agreed, Q73)
 0a. GOAL IN ONE LINE (agreed G1, ENTRY 30): make more and more accepted tasks the way teammates make them: each passes QC, scores under the gate, is solvable from what it ships, and is new (not a copy). Traps and levers are one tool for that, next to volume, speed, design shapes and test structure.
 0c. LEARN FROM TEAMMATES (G3): traps and levers, design shapes, test structure, rubric style, task size, and pace.
 0b. CONFLICTS (ENTRY 29, G2): conflicts between teammate practice, Ayush's rules (including DR3) and Claude's line are decided case by case with Ayush; nothing is voided automatically; in each case Claude says plainly whether it can help build it.

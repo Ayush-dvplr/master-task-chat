@@ -35,7 +35,7 @@ R2 IMPROVEMENTS (Claude suggestions, Q112)
 3. One task on demand: tools/status.py <slug> prints a single task card; the master reads it only when working on that task.
 4. Decisions in force: a generated DECISIONS_ACTIVE.md with only the decisions still in force (superseded ones marked and left out); decisions.jsonl (278 KB) is never read whole.
 5. Feedback and lessons distilled: their rules go into RULES_IN_FORCE.md; the raw feedback.jsonl and lessons.jsonl are not read after compaction.
-6. A size budget enforced by the script (the card warns above 4 KB).
+6. A size budget enforced by the script (4 KB first proposed; 6 KB proposed in Q117 after the test).
 7. Each line of the card carries its source file, so the master can open exactly one file when it needs detail.
 ACCEPTED by Ayush (Q112, ENTRY 41).
 

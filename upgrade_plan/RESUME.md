@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 11:56 IST. Claude updates this card after every step that changes the plan state. Times are IST.
+Last updated: 3 Nov 2026 11:58 IST. Claude updates this card after every step that changes the plan state. Times are IST.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session plans that upgrade. Repo Ayush-dvplr/master-task-chat, branch claude/youthful-feynman-zug0uq, planning folder upgrade_plan/. Ayush's inputs (QC kit, QC reports, harness queue, _runs, PL generator, teammate tasks anubis-stage-2/) are on origin/main: read them with git show origin/main:<path>, never merge.
@@ -27,10 +27,10 @@ READ ORDER AFTER COMPACTION
 7. Only when the next step needs them: STAGE2_STUDY_PLAN.md, PLAN.md, FINDINGS.md, tmp/W1-002/CONFLICTS.md, CONTRADICTIONS.md, UNVERIFIED_RULES.md, REQUESTS.md, inputs/.
 
 RUNNING NOW
-Nothing is running. No helper is active. Next free helper id: W1-026.
+Nothing is running. No helper is active. Next free helper id: W1-027.
 
 STATE OF THE WORK (3 Nov)
-1. Teammate study (anubis-stage-2 on main): 68 of 108 tasks studied (55 light cards, 3 pilot, 10 from 2 Nov). Families: tmp/S2-CARDS/SUMMARY.md. Design guide: tmp/W1-025/PATTERNS.md; check against R0: tmp/W1-025/CONFIRM.md. QUEUE batches B11 to B24 stay PAUSED (Ayush, credits); do not start them. The case by case review of the DEFECT families is paused (see chat 3 Nov); do not restart it without Ayush.
+1. Teammate study (anubis-stage-2 on main): 68 of 108 tasks studied (55 light cards, 3 pilot, 10 from 2 Nov). Families: tmp/S2-CARDS/SUMMARY.md. Design guide: knowledge/PATTERNS.md; check against R0: knowledge/CONFIRM.md (durable copies of tmp/W1-025). Queue of all teammate tasks: tmp/S2-CARDS/QUEUE.txt. QUEUE batches B11 to B24 stay PAUSED (Ayush, credits); do not start them. The case by case review of the DEFECT families is paused (reason in CONFLICT_REVIEW.md PAUSE NOTE); do not restart it without Ayush.
 2. Rule review batch one (R1 to R35) DONE: decisions in RULE_REVIEW.md (ENTRY 40 to 43). R28 open (Q116, Ayush comes back later).
 3. P1 compaction drafts in drafts/P1/: master.dcp.jsonc (manual), tasks.dcp.jsonc (off), README_P1.md (how files reach each session, path check), state_card.py (tested), RULES_IN_FORCE.md (one layer from the rule review), sample_STATE_CARD.md (5.9 KB).
 4. Nothing outside upgrade_plan/ has been edited. PROCEED has not been given.
@@ -48,11 +48,12 @@ KNOWN FROM RECORDS (short)
 1. After compaction the master loses format and process rules, not task facts (lessons.jsonl lines 89 and 100).
 2. 27 Oct Mac hang: 3 orphan Python solvers on the host (about 185 GB) plus other apps and VMware.
 3. 2 days of tests 100 (31 Oct and 1 Nov): misread rule levers lost to careful Opus.
-4. 182 hardening rules, 44 conflicts in the records (tmp/W1-002).
+4. 182 hardening rules and 44 rule conflicts in the records (tmp/W1-002/CONFLICTS.md C1 to C44; not the CONTRADICTIONS.md C1 to C6).
 
 NEXT STEPS (in order)
 1. Q117: card budget 6 KB or shorter rules.
 2. Add the accepted card points to state_card.py (news since last card, long running sessions, QC kit line, settings line, progress line, old questions first, uniqueness reminder, fill order).
 3. Remaining P1 steps (master recovery prompt, folding layered rule files), then the next system fixes: P2 QC fix regression gate, P3 Docker slot script (S1), P10 old templates, S7 QC kit watch, P6 tools.
-4. Then shape PLAN.md into the final plan for Ayush to approve before PROCEED.
-5. Before a compaction: prompts/COMPACT_PROMPT.md. Recovery: prompts/RECOVERY_PROMPT.md.
+4. Conflict review CR2 to CR5 (CONFLICT_REVIEW.md), with Ayush.
+5. Then shape PLAN.md into the final plan for Ayush to approve before PROCEED.
+6. Before a compaction: prompts/COMPACT_PROMPT.md. Recovery: prompts/RECOVERY_PROMPT.md.
