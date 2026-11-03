@@ -31,6 +31,8 @@ W1-012 | W1 helper | 3 Nov 2026 09:36 | third cold test of the recovery prompt (
 W1-013 | W1 helper | 3 Nov 2026 09:40 | fourth cold test (recheck after the RESUME rewrite) | recovery | verified: nothing broken; 9 small points fixed 09:40 | (chat report)
 W1-014 | W1 helper | 3 Nov 2026 09:40 | Layer D light cards, batch B04 | Q100 | verified (master checked 98ed74c1 record_dictionary.md lines 42 to 43: "the offset holds for every row on the unit's card", as cited) | tmp/S2-CARDS/ (275f885b, 98ed74c1, 91f5740c, 7c2e77a1)
   Result: 275f885b DESIGN (e, early misreads feed a total compared by digest); 98ed74c1 DEFECT (hidden data contradicts the doc, TRUTH calls it the hidden lever); 91f5740c DEFECT (same net definition contradiction as 6d12f970); 7c2e77a1 DESIGN (d or e, divergence not located). About 175k tokens.
-W1-015 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B05 | Q100 | running | tmp/S2-CARDS/
+W1-015 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B05 | Q100 | verified (master checked 43249294 tariff_code.md line 5745: "increased by 0.6000 percentage points", as cited) | tmp/S2-CARDS/ (df8f123b, 43249294, 43986de8, daaca581)
+  Result: df8f123b DESIGN (d, a documented precedence rule misread, gate on the exact set); 43249294 DESIGN (e, one override phrased differently buried in a 965k character code); 43986de8 DESIGN (a, WordprocessingML features only held out files use); daaca581 DESIGN by default, low confidence. About 181k tokens.
 W1-016 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B06 | Q100 | running | tmp/S2-CARDS/
 W1-017 | W1 helper | 3 Nov 2026 09:47 | Layer D light cards, batch B07 | Q100 | running | tmp/S2-CARDS/
+W1-018 | W1 helper | 3 Nov 2026 09:51 | Layer D light cards, batch B08 | Q100 | running | tmp/S2-CARDS/
