@@ -527,3 +527,8 @@ Q143: "first give lest of all questions to be in check box ask only which are ti
 Q144: "Unique prefix and hash (Recommended)"
 
 Recorded as: Q141 git versions the SYSTEM files only (tools, templates, rules, settings), branches stable and v2 with tags; DATA (registry, board, pending, logs, QC reports) stays out of git with a daily backup copy. Q142: the upgrade procedure is built into the system itself, so future upgrades need no cloud session: an upgrade tool on the Mac takes a new version, runs preflight checks, verifies everything, switches only when the set conditions pass, runs rechecks after the switch, and rolls back when a recheck fails (P14). Git permission for that tool versus R34: Q145. Q143: Claude first gives the full list of candidate PL questions as a checklist; Ayush ticks which go to the PL; the unticked ones Ayush answers himself. Q144: the new system uses one short system id in every container name and label, image tag, oracle and nop run folder (plus a hash per run), dockslot state folder, lock and pid file and background script name; dockslot counts the old system's containers as foreign use; nothing of the old system is renamed or touched (P17).
+
+ENTRY 76. 3 Nov 2026 22:56 IST (options dialog, word for word)
+Q145: "Print commands only"
+
+Recorded as: the built in upgrade tool runs every check and recheck itself, then prints the exact git commands (checkout, tag, rollback) for Ayush to paste; R34 stays fully strict, no exception.
