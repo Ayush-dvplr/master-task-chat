@@ -28,3 +28,5 @@ P12. The QC kit is run by an AI reviewer. Every run finds some minors or fails, 
 
 Ayush's wording for P1 to P6, kept as he wrote it:
 "1. context size and compaction or opencode heavy compress then it lost all its learning 2. fixing QC then sometimes it either loss the lever or fixes make new errors 3. although i have mac m1 max still facing issues in running multiple dockor session and they are polling and waiting and even though i know they can run at same still they poll an wait 4. hardening the task as per the proven 5. token consumption is quite high 6. align using multiple tools like using codex sometimes for sessions , or opencode claude or opecode gpt , and there are more"
+
+P13 (Ayush, 3 Nov, ENTRY 64). Intake for outside bundles, with or without a trajectory: QC check, fix, score under the gate. Scope: Q132.

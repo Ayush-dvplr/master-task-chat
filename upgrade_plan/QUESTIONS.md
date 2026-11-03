@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: none. CR1 to CR7 decided. Next: P2 fix map draft. Q116 kept for later.
+LIVE NOW: Q132. W1-030 (P2) running. Q116 kept for later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -209,3 +209,4 @@ Q128. T25 and auto mode (auto/AUTO_POLICY.md:22): (a) T25 becomes: by day the ma
 Q129. QC pass: a CL fail that the false positive review proves is a false positive (with diff evidence): does it pass like other false positive fails, or does any CL fail still block? [ANSWERED: passes like other false positives (ENTRY 59)]
 Q130. Kit JD-18 (04_Judge_QC.md:99) says the code quality criterion is a CONDUCT criterion and needs no sentence in instruction.md. Q106 and T16 say every criterion traces to an instruction sentence. Exempt conduct criteria (code quality, the honesty negative) from Q106 and T16? [ANSWERED: exempt; code quality best tied to an instruction, else conduct (ENTRY 59)]
 Q131. The fold added about 25 rules. All on the card would make it 7.8 KB and push out the uniqueness line. Proposal: split them: RULES_IN_FORCE.md (3.5 KB, on the card, master rules) and BUILD_RULES.md (3.8 KB, design, grading, rubric, QC fix steps; the master reads it before any design, harden or fix, and every build prompt cites it). Card then 7.2 KB on a normal day, under the 8 KB limit, nothing left out. Accept? [ANSWERED: accept (ENTRY 60)]
+Q132. Outside bundle intake (P13, ENTRY 64): which bundles may it take: (a) Ayush's own bundles built outside the system; (b) tasks the PL or QL assigned to Ayush to fix (QC assigned/); (c) a teammate's task fixed with their agreement, pushed under the teammate's name. Claude cannot help with pushing a teammate's task under Ayush's or a friend's name. [OPEN]

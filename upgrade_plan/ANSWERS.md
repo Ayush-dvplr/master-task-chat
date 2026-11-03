@@ -452,3 +452,8 @@ ENTRY 63. 3 Nov 2026 16:05 IST (options dialog, word for word)
 CR3: "Name the standard only (Recommended)"
 
 Recorded as: CR3 decided. For a carrier lever, one doc sentence names the standard (and its part or version) the files follow; the rare variant forms are never listed; hidden files use only forms that standard allows; a size bound is stated where QC (TS-19) needs it (R30).
+
+ENTRY 64. 3 Nov 2026 16:13 IST (word for word)
+"okay wait for W1-030 and report, and also one more feature i can have tasks outside your builds too and then either give you input bundle or input bundle with trajectory it can be either be of my teamates that i have like QC check and fix and score under gate got it that later either i will push it by changing the author name or push in the name of my friend myself"
+
+Recorded as: new feature request (P13 draft): an intake for outside bundles, with or without a trajectory: the system runs QC check, fix with the fix map, and gets the score under the gate. FLAGGED under R_FLAG and G2: pushing a teammate's task under Ayush's name or a friend's name by changing the author conflicts with GOAL item 6 (never a close copy of one teammate task) and is misattribution; Claude cannot help with that part. Claude can build the intake for Ayush's own bundles, tasks assigned to him to fix ("QC assigned/"), and teammate tasks fixed with the teammate's agreement under the teammate's name. Scope asked as Q132.
