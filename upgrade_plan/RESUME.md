@@ -55,6 +55,6 @@ NEXT STEPS (in order)
 2. Card points are in state_card.py v2 (done 12:20); registry design field planned (after PROCEED).
 3. P1 steps 3 to 5 drafted (drafts/P1/MASTER_RECOVERY.md, FOLD_PLAN.md); Q8, Q120, Q121 answered (ENTRY 48); W1-027 fold table and W1-028 cold test verified; waiting for Q122 to Q125. Then the next system fixes: P2 QC fix regression gate, P3 Docker slot script (S1), P10 old templates, S7 QC kit watch, P6 tools.
 3a. Fold review done (T1 to T46 and A1 to A13, ENTRY 51 to 59; drafts/P1/FOLD_DECISIONS.md); rules split into RULES_IN_FORCE.md and BUILD_RULES.md (Q131).
-4. Conflict review CR2 to CR5 (CONFLICT_REVIEW.md), with Ayush.
+4. Conflict review CR2 to CR5 DONE (ENTRY 61 to 63). Other W1-002 conflicts: many settled by the fold; map the rest later.
 5. Then shape PLAN.md into the final plan for Ayush to approve before PROCEED.
 6. Before a compaction: prompts/COMPACT_PROMPT.md. Recovery: prompts/RECOVERY_PROMPT.md.

@@ -447,3 +447,8 @@ CR3: "ask again in laymen terms"
 CR4 and CR5: "Yes, decided (Recommended)"
 
 Recorded as: CR4 and CR5 decided by the fold answers (T34, T44: never park on its own, report to Ayush; T1, T3, T4: carriers are valid, family D2, old SHAPE and S code fields go; template cleanup in P10). CR3 asked again in plain words.
+
+ENTRY 63. 3 Nov 2026 16:05 IST (options dialog, word for word)
+CR3: "Name the standard only (Recommended)"
+
+Recorded as: CR3 decided. For a carrier lever, one doc sentence names the standard (and its part or version) the files follow; the rare variant forms are never listed; hidden files use only forms that standard allows; a size bound is stated where QC (TS-19) needs it (R30).

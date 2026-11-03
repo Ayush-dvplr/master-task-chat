@@ -18,6 +18,7 @@ CR1. Timeout and crash losses (W1-002 C3). Status: DECIDED 3 Nov (ENTRY 18 and 2
 
 CR2. Careful exact program (W1-002 C5). Status: DECIDED 3 Nov (ENTRY 61): only a real paid run program counts; before the first paid run the lever is judged by prediction; NO CORE at 60 percent kept (setting no_core_keep_pct), report and redesign, never park on its own. P13 v2 blind stays a quick diagnostic only (T45).
 
+CR3. How much of a carrier is written down (W1-002 C25 with C6). DECIDED 3 Nov (ENTRY 63): one doc sentence names the standard (part or version); variant forms are never listed; hidden files use only forms that standard allows; a size bound is stated where TS-19 needs it (R30).
 CR4. Parking (W1-002 C1). DECIDED 3 Nov (ENTRY 62): never park on its own; report to Ayush (T34, T44).
 CR5. Carriers as primary lever (W1-002 C2 with C22). DECIDED 3 Nov (ENTRY 62): carriers are valid (D2, T4); old SHAPE and S code fields go (T1, T3); template fields cleaned in P10.
 
@@ -25,4 +26,4 @@ DECIDED FROM THE CARDS
 CR6. Amended or retyped field (cards 058cbab3, 88ee425d, af780bef; Q104, ENTRY 34): allowed in Ayush's tasks only when one sentence in the shipped docs decides how the amended value is read.
 CR7. Misread rule as primary lever (Q111, ENTRY 39; evidence tmp/W1-025/CONFIRM.md): ALLOWED as a primary lever when the rule has one clear deciding sentence in the shipped docs and many records tempt the wrong or too wide reading. Replaces route 1 R0 point 2 ("extras only") after PROCEED.
 
-PAUSE NOTE (3 Nov): while Claude was writing up the case by case review of the DEFECT families (tmp/S2-CARDS/SUMMARY.md F1 to F6) after Q107 (b), an automatic safety check stopped the write up before anything was saved. Claude paused that review and told Ayush. Do not restart it without Ayush. CR2 to CR5 (from tmp/W1-002/CONFLICTS.md C5, C25 with C6, C1, C2 with C22) and the other W1-002 conflicts are still open; they are planned after the system fix drafts (RESUME NEXT STEPS).
+PAUSE NOTE (3 Nov): while Claude was writing up the case by case review of the DEFECT families (tmp/S2-CARDS/SUMMARY.md F1 to F6) after Q107 (b), an automatic safety check stopped the write up before anything was saved. Claude paused that review and told Ayush. Do not restart it without Ayush. CR2 to CR5 were decided 3 Nov (ENTRY 61 to 63); the other W1-002 conflicts (C3 to C44 not yet mapped) are still open; they are planned after the system fix drafts (RESUME NEXT STEPS).
