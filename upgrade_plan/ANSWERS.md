@@ -344,3 +344,8 @@ ENTRY 46. 3 Nov 2026 12:25 IST (word for word)
 "Q119 accept 6.3 KB, yes add field, targets right, 3 hours ok"
 
 Recorded as: (a) a normal day card of 6.3 KB is accepted; RULES_IN_FORCE.md stays as is. (b) registry/tasks.json gets a "design" field (design family from PATTERNS.md and primary lever kind), applied only after PROCEED. (c) progress target 4 push ready a day, 20 a week. (d) long running flag after 3 hours. Values written to drafts/P1/settings.json.
+
+ENTRY 47. 3 Nov 2026 12:30 IST (word for word)
+"also flagging does not if its doing anything stop that becasue some sessions may take just report"
+
+Recorded as: the long running flag (R2 improvement 8, 3 hours) only reports to Ayush. A session that is still working is never stopped or interrupted because of the flag, since some sessions take long. Card line and RULES_IN_FORCE.md ROLE updated.

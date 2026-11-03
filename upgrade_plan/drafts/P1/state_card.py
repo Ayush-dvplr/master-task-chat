@@ -154,7 +154,7 @@ def build(R, now, S):
     for r in live[: C["sessions_shown"]]:
         age = when(r.get("issued"))
         hrs = (now - age).total_seconds() / 3600 if age else 0
-        flag = f" | LONG {hrs:.0f} h, chase" if hrs > C["long_running_hours"] else ""
+        flag = f" | LONG {hrs:.0f} h: report to Ayush, never stop it" if hrs > C["long_running_hours"] else ""
         L.append(f"{r.get('sha')} | {r.get('status')} | {r.get('slug')} | {cut(r.get('step',''), C['step_chars'])} | {r.get('prompt','')}{flag}")
     if len(live) > C["sessions_shown"]:
         L.append(f"+{len(live) - C['sessions_shown']} more: python3 tools/board.py list")
