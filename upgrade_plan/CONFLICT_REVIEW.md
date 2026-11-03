@@ -16,6 +16,8 @@ CR1. Timeout and crash losses (W1-002 C3). Status: DECIDED 3 Nov (ENTRY 18 and 2
     Or a mix, for example (a) by default plus (c) for emergencies.
   CR1a decided (ENTRY 22): extra lever by default; main lever only with Ayush's explicit word for that task, until something more reliable is found.
 
+CR2. Careful exact program (W1-002 C5). Status: DECIDED 3 Nov (ENTRY 61): only a real paid run program counts; before the first paid run the lever is judged by prediction; NO CORE at 60 percent kept (setting no_core_keep_pct), report and redesign, never park on its own. P13 v2 blind stays a quick diagnostic only (T45).
+
 DECIDED FROM THE CARDS
 CR6. Amended or retyped field (cards 058cbab3, 88ee425d, af780bef; Q104, ENTRY 34): allowed in Ayush's tasks only when one sentence in the shipped docs decides how the amended value is read.
 CR7. Misread rule as primary lever (Q111, ENTRY 39; evidence tmp/W1-025/CONFIRM.md): ALLOWED as a primary lever when the rule has one clear deciding sentence in the shipped docs and many records tempt the wrong or too wide reading. Replaces route 1 R0 point 2 ("extras only") after PROCEED.

@@ -435,3 +435,9 @@ ENTRY 60. 3 Nov 2026 15:59 IST (word for word)
 "Q131 accept the split"
 
 Recorded as: rules split accepted: RULES_IN_FORCE.md (on the card, master rules) and BUILD_RULES.md (design, grading, rubric, QC fix steps; read before any design, harden or fix; cited by every build prompt).
+
+ENTRY 61. 3 Nov 2026 16:01 IST (options dialog, word for word)
+CR2 program: "Paid run program only"
+CR2 NO CORE: "60 percent, as a setting (Recommended)"
+
+Recorded as: CR2 decided. Only a real paid run program counts as the careful exact program; no blind program stands in for it. Before the first paid run the primary lever is judged by prediction only (DESIGN.md), and the first paid run is the test. NO CORE: the paid run program keeps 60 percent or more of the primary lever's points; then report to Ayush and redesign, never park on its own (T34, T44). 60 is a setting (settings.json no_core_keep_pct).
