@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: none. Card run in progress (tmp/S2-CARDS/CARD_RUN.md).
+LIVE NOW: Q101, Q102. Card run PAUSED (ENTRY 31).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -164,5 +164,8 @@ GOAL DISCUSSION (ENTRY 29)
 G1. Draft goal in one line: "Make more and more accepted tasks the way teammates make them: each passes QC, scores under the gate, is solvable from what it ships, and is new (not a copy). Traps and levers are one tool for that, next to volume, speed, design shapes and test structure." Agree, or change the words? [ANSWERED: yes]
 G2. The cards so far mark some teammate tasks DEFECT, for example a rule that only the hidden data carries and that TRUTH.md itself calls undocumented, or a reference that contradicts the docs. These were accepted, and you want to make tasks like teammates. Your own hard requirement DR3 says a task must be solvable from what it ships. When "like teammates" and DR3 conflict, which wins, or do we decide each case together? [ANSWERED: case by case]
 G3. Besides traps, what else from teammates should the system learn and copy in approach: design shapes (for example the seeded generator plus full core gate), test structure, rubric style, task size, pace? [ANSWERED: all of them]
+
+Q101. B08, B09 and B10 were already running when you paused. Stop them now (cards written so far are kept), or let them finish? [OPEN]
+Q102. Tighter plan for the rest (B10 to B24, about 56 tasks): which option? (a) stop the cards here and go to patterns with the 34 to 46 cards we have plus the 10 from 2 Nov; (b) a free script pass first that flags likely DEFECT tasks (graded key names or ids not found in the docs), then cards only for the rest; (c) a much smaller card (about 15k tokens, verdict and kind only) for the rest; (d) a sample, for example 10 more tasks chosen to cover categories not yet seen. [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

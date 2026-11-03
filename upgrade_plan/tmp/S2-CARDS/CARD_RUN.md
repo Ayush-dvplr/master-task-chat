@@ -1,3 +1,5 @@
+STATUS: PAUSED by Ayush 3 Nov 09:55 (ENTRY 31): credits used up. Start NO new batch until Ayush agrees a tighter plan (Q102).
+
 CARD RUN PROCEDURE (Layer D light cards; read this to continue the run after a compaction)
 
 Counts: 114 teammate tasks have an Opus score; minus Ayush's own 5 = 109; minus 1 with no reward details = 108; minus 10 carded on 2 Nov and 3 pilot cards = 95 in QUEUE.txt (B01 to B23 have 4 tasks, B24 has 3).
