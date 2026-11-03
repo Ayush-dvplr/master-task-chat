@@ -532,3 +532,8 @@ ENTRY 76. 3 Nov 2026 22:56 IST (options dialog, word for word)
 Q145: "Print commands only"
 
 Recorded as: the built in upgrade tool runs every check and recheck itself, then prints the exact git commands (checkout, tag, rollback) for Ayush to paste; R34 stays fully strict, no exception.
+
+ENTRY 77. 3 Nov 2026 23:59 IST (word for word)
+"So I'm going to ask all these questions to my PLNQL. And right now these questions are not that much descriptive, so make it little in layman terms, example, scenario, anything, put that so that they can better understand few things. Like there you mentioned a rule was there, so they don't know na which rule was there, so make it that way that they can simply understand. Right now codes are correct, everything is correct, but give the scenarios or layman explanation what you are trying to ask. Okay, and keep the question and add below it the layman explanation of what is asking it or scenario, and you can add more question to it to get more clarity of it."
+
+Recorded as: Q146: all 33 items go to the PL and QL. Rewrite as PL_QUESTIONS.md: keep each question, add below it a plain explanation and a concrete scenario, explain every rule or check it names in plain words (the PL does not know our internal rule ids), and add follow up questions where they bring clarity. Q147 still open.
