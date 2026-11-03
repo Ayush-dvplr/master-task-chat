@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 11:58 IST. Claude updates this card after every step that changes the plan state. Times are IST.
+Last updated: 3 Nov 2026 12:08 IST. Claude updates this card after every step that changes the plan state. Times are IST.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session plans that upgrade. Repo Ayush-dvplr/master-task-chat, branch claude/youthful-feynman-zug0uq, planning folder upgrade_plan/. Ayush's inputs (QC kit, QC reports, harness queue, _runs, PL generator, teammate tasks anubis-stage-2/) are on origin/main: read them with git show origin/main:<path>, never merge.
@@ -51,7 +51,7 @@ KNOWN FROM RECORDS (short)
 4. 182 hardening rules and 44 rule conflicts in the records (tmp/W1-002/CONFLICTS.md C1 to C44; not the CONTRADICTIONS.md C1 to C6).
 
 NEXT STEPS (in order)
-1. Q117: card budget 6 KB or shorter rules.
+1. Q118: card budget after the time check (Q117 answered 6 KB, ENTRY 44; check says 6 KB is not enough).
 2. Add the accepted card points to state_card.py (news since last card, long running sessions, QC kit line, settings line, progress line, old questions first, uniqueness reminder, fill order).
 3. Remaining P1 steps (master recovery prompt, folding layered rule files), then the next system fixes: P2 QC fix regression gate, P3 Docker slot script (S1), P10 old templates, S7 QC kit watch, P6 tools.
 4. Conflict review CR2 to CR5 (CONFLICT_REVIEW.md), with Ayush.

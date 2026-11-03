@@ -38,7 +38,7 @@ STATE CARD GENERATOR (P1 step 2, drafted 3 Nov 10:26)
 
 RULES IN FORCE (drafted 3 Nov 11:45 from RULE_REVIEW.md batch one)
 1. drafts/P1/RULES_IN_FORCE.md: one layer, 3.0 KB, every line names the rule ids it comes from. R28 left open (Q116).
-2. Card test with the rules: 5.9 KB (sample_STATE_CARD.md), over the 4 KB budget. Proposal (Q117): budget 6 KB, about 1,500 tokens, still about one sixteenth of the old 100 KB read order.
+2. Card test with the rules: 5.9 KB (sample_STATE_CARD.md), over the 4 KB budget. Proposal (Q117): budget 6 KB, about 1,500 tokens, still about one sixteenth of the old 100 KB read order. Ayush chose 6 KB (ENTRY 44); the time check says it is not enough after the accepted points (about 6.3 to 7.9 KB a day, up to 9.5 KB at the script maximum). Decision pending in Q118.
 3. Still to add to state_card.py: the accepted points 2 and 8 to 13 (news since last card, long running sessions, QC kit line, settings line, progress line, old questions first, uniqueness reminder) and fixes a and b (priority fill order, waiting items of any age).
 
 STILL TO DRAFT (P1 steps 3 to 5 in PLAN.md)

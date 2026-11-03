@@ -329,3 +329,8 @@ ENTRY 43. 3 Nov 2026 11:44 IST (word for word)
 "R31 to R35 all as suggested but for R34: never commit or push anything int but can have read only checks or read only commands"
 
 Recorded as: R31, R32, R33, R35 as suggested. R34: the task system never commits or pushes anything in any repo (including this one); only read only checks and read only commands; Ayush runs every pull, commit and push. (This planning session keeps its own permission to push upgrade_plan/ to its branch, ENTRY 2.) Batch one of the rule review (R1 to R35) is complete except R28 (Q116).
+
+ENTRY 44. 3 Nov 2026 12:05 IST (word for word)
+"Q117 raise to 6 KB and verify with time is it will be sufficient"
+
+Recorded as: Q117 budget 6 KB, with a check that it stays enough over time. Check done 12:08 (measured from sample_STATE_CARD.md): fixed part 4.8 KB today, about 5.8 KB after the accepted card points; each running session adds about 173 bytes, each active task about 130. Quiet day (1 session, 2 tasks) about 6.3 KB, today (3, 5) about 7.0 KB, busy day with 4 lanes (6, 8) about 7.9 KB, the script maximum (12, 12) about 9.5 KB, before any new rule. Result: 6 KB is NOT enough, even on a quiet day. Flagged to Ayush under R_FLAG; follow up Q118.
