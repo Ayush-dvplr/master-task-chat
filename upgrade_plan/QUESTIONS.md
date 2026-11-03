@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q126. Q116 kept for later.
+LIVE NOW: none (W1-029 triage running). Q116 kept for later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -203,4 +203,4 @@ Q122. Fold rule (tmp/W1-027/FOLD_TABLE.md): where an old active file contradicts
 Q123. Four contradictions where the 3 Nov decision reverses a 2 Nov "proceed" (R0 v3.8): (a) primary lever from any PATTERNS.md family, against R0 kinds a, b, c only; (b) misread rule lever allowed as primary (CR7), against "extras only" and the pause of stated rule levers (LEVER_RULES_v3.md:86); (c) timeout lever only an extra (CR1), against R0 letting measured scale be primary with no cap; (d) a size bound may be stated for a runtime lever (R30), against route1 notes lines 20 and 37. Confirm the 3 Nov side for each? [ANSWERED: confirm 4, careful test kept until CR2 (ENTRY 49)]
 Q124. Rules missing from RULES_IN_FORCE.md (46 add proposals, for example: nothing parked except on your word, regrade diagnostic only, package from frozen bytes, only valid runs count as baselines, tree sha at freeze, every lever names oracle branch, program branch and a saved input, mark guesses UNVERIFIED) and 7 conflicts inside the old files (code quality criterion wording, what if criteria, time limit 3x or 4x oracle, park rule, blind reads before QC, oracle 3 runs or 2): review them in batches of about 10 like the rule review? [ANSWERED: triage, then batches (ENTRY 49)]
 Q125. Six rows touch the agreed line (QC_FIX_PLAYBOOK_v3.md:3 "bypass the QC" quote and :10, pipeline v4 PLAN.md:15 and :49 "a form QC accepts" and the QC safe form table, KNOWLEDGE.md:110, state.json:80). Proposal: they are not folded into the rules; the agreed line (README GOAL item 7) replaces them, and the table keeps only fixes that meet each QC check honestly. Accept? [ANSWERED: fix map, not bypass (ENTRY 49); FOLLOW UP Q126]
-Q126. Fix map, one case to settle (R_FLAG): when a QC finding shows that a trap is a real defect (for example a graded value the shipped docs do not decide), the fix makes the docs decide it in one sentence and rebuilds the hardness in a valid form, instead of keeping the trap as it was. Is that what you mean by keeping the hardening? [OPEN]
+Q126. Fix map, one case to settle (R_FLAG): when a QC finding shows that a trap is a real defect (for example a graded value the shipped docs do not decide), the fix makes the docs decide it in one sentence and rebuilds the hardness in a valid form, instead of keeping the trap as it was. Is that what you mean by keeping the hardening? [ANSWERED: decide it, rebuild hardness (ENTRY 50)]

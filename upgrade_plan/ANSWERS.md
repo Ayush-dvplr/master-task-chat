@@ -366,3 +366,8 @@ Q122: split. The 31 old numbers and wordings are deleted in the fold (today's ru
 Q123: R25, CR7, CR1a and R30 confirmed over the 2 Nov R0 text. The R0 condition "the primary lever is lost by the careful exact program written from the shipped files only" stays in force until CR2 is decided.
 Q124: Claude triages first (removes repeats, marks what is covered), then batches of about 10 with a suggestion each.
 Q125: the word "bypass" is not the intent. The intent is a fix MAP (a matrix): for each QC finding, the best fix that (1) passes QC the way teammates pass it, with the right wording, (2) keeps the traps hidden from the solving agent, (3) keeps the hardening, never removing it just to pass, and (4) does not raise new findings (fixes that cause new mapping findings). Claude can help build this. It is the P2 work (QC fix regression gate). The "bypass" quote is dropped from the rules; the QC safe form table becomes part of the fix map. One point checked with Ayush under R_FLAG: Q126.
+
+ENTRY 50. 3 Nov 2026 14:19 IST (word for word, options dialog)
+Q126: "Decide it, rebuild hardness (Recommended)"
+
+Recorded as: when a QC finding shows a trap is a real defect, the fix adds one deciding sentence to the docs or data so the shipped files decide the value, and rebuilds the hardness in a valid form (for example a branch only the hidden data fires, or a carrier variant). This is part of the fix map (P2).
