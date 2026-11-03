@@ -430,3 +430,8 @@ ENTRY 59. 3 Nov 2026 15:33 IST (word for word)
 "Q129 as recommended, Q130 - code quality criterion needs to be there only if it is relarted to an instrcution better if not fine as a conduct cirterion as well"
 
 Recorded as: Q129: a CL fail that the false positive review proves is a false positive (diff evidence on file) passes like any other false positive fail. Q130: the code quality criterion is always present when the agent authors code (kit JD-18 requires it); best when it relates to an instruction sentence, otherwise it is fine as a conduct criterion with no instruction sentence. Q106 and T16 get this exception. The honesty negative (minus 3, every judge) stays a conduct criterion with no instruction sentence, as before (RIF RUBRIC).
+
+ENTRY 60. 3 Nov 2026 15:59 IST (word for word)
+"Q131 accept the split"
+
+Recorded as: rules split accepted: RULES_IN_FORCE.md (on the card, master rules) and BUILD_RULES.md (design, grading, rubric, QC fix steps; read before any design, harden or fix; cited by every build prompt).

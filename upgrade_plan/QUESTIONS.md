@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q131 (rules split, card 7.2 KB). Q116 kept for later.
+LIVE NOW: CR2 (careful program), then CR3 to CR5. Q116 kept for later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -208,4 +208,4 @@ Q127. T11 holes (ENTRY 51, flagged): use the valid near form of each hole instea
 Q128. T25 and auto mode (auto/AUTO_POLICY.md:22): (a) T25 becomes: by day the master stops at DESIGN READY and waits for Ayush's go; in auto mode it checks DESIGN READY against the rules in force and the kit and sends the go itself or a correction, writes it to prompts/issued/<slug>/<ts>_go.md and lists it in REPORT.md; R7 gets the same auto mode exception. (b) AUTO_POLICY.md was not in the fold scope; Claude checks it against RULES_IN_FORCE.md and brings its conflicts as one batch (known: line 30 round cap override, now warnings; line 29 'QC-safe form' becomes the fix map; line 46 hard caps 5 workers and 2 harness into settings.json). [ANSWERED: yes to both (ENTRY 56)]
 Q129. QC pass: a CL fail that the false positive review proves is a false positive (with diff evidence): does it pass like other false positive fails, or does any CL fail still block? [ANSWERED: passes like other false positives (ENTRY 59)]
 Q130. Kit JD-18 (04_Judge_QC.md:99) says the code quality criterion is a CONDUCT criterion and needs no sentence in instruction.md. Q106 and T16 say every criterion traces to an instruction sentence. Exempt conduct criteria (code quality, the honesty negative) from Q106 and T16? [ANSWERED: exempt; code quality best tied to an instruction, else conduct (ENTRY 59)]
-Q131. The fold added about 25 rules. All on the card would make it 7.8 KB and push out the uniqueness line. Proposal: split them: RULES_IN_FORCE.md (3.5 KB, on the card, master rules) and BUILD_RULES.md (3.8 KB, design, grading, rubric, QC fix steps; the master reads it before any design, harden or fix, and every build prompt cites it). Card then 7.2 KB on a normal day, under the 8 KB limit, nothing left out. Accept? [OPEN]
+Q131. The fold added about 25 rules. All on the card would make it 7.8 KB and push out the uniqueness line. Proposal: split them: RULES_IN_FORCE.md (3.5 KB, on the card, master rules) and BUILD_RULES.md (3.8 KB, design, grading, rubric, QC fix steps; the master reads it before any design, harden or fix, and every build prompt cites it). Card then 7.2 KB on a normal day, under the 8 KB limit, nothing left out. Accept? [ANSWERED: accept (ENTRY 60)]
