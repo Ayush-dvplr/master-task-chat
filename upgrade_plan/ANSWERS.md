@@ -290,3 +290,8 @@ ENTRY 36. 3 Nov 2026 10:20 IST (word for word)
 "Q106 agree, Q107 b"
 
 Recorded as: Q106 agreed. Q107 option (b) chosen. The review step was paused by Claude after an automatic safety stop; see chat 3 Nov.
+
+ENTRY 37. 3 Nov 2026 10:22 IST (word for word)
+"start with Layer F patterns and paralley lets work on system fixes"
+
+Recorded as: Layer F started (W1-025, DESIGN cards only); system fixes drafted in parallel, starting with P1 compaction (drafts in upgrade_plan/drafts/, nothing applied before PROCEED).
