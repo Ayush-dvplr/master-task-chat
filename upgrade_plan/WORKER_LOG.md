@@ -35,6 +35,8 @@ W1-015 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B05 | Q100 | 
   Result: df8f123b DESIGN (d, a documented precedence rule misread, gate on the exact set); 43249294 DESIGN (e, one override phrased differently buried in a 965k character code); 43986de8 DESIGN (a, WordprocessingML features only held out files use); daaca581 DESIGN by default, low confidence. About 181k tokens.
 W1-016 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B06 | Q100 | verified (master checked 8956ff8b: "governing_code" is in solve.py but in neither schema.md nor instruction.md, as the card says) | tmp/S2-CARDS/ (cd6a3a55, 8956ff8b, a7e17524, 4ee62df1)
   Result: cd6a3a55 DESIGN (e, 64 interacting seeded defects, exact checks, layered gates); 8956ff8b DEFECT (output key names never fixed by the docs, whole document compare); a7e17524 mostly DESIGN (d and e), small DEFECT share; 4ee62df1 mostly DEFECT (contract silent on which journal ops feed the base), could be read as (d). About 218k tokens.
-W1-017 | W1 helper | 3 Nov 2026 09:47 | Layer D light cards, batch B07 | Q100 | running | tmp/S2-CARDS/
+W1-017 | W1 helper | 3 Nov 2026 09:47 | Layer D light cards, batch B07 | Q100 | verified (master checked 9bb234eb: the key "salaries" is in solve.py, not in schema.md or instruction.md, as the card says) | tmp/S2-CARDS/ (058cbab3, b625f36e, 75407a55, 9bb234eb)
+  Result: all 4 DEFECT: a value type the contract leaves open; a loop rule stated only in a test generator comment; and twice (same template) output ids or key names the contract never fixes, graded by one hash per bundle. About 182k tokens.
 W1-018 | W1 helper | 3 Nov 2026 09:51 | Layer D light cards, batch B08 | Q100 | running | tmp/S2-CARDS/
 W1-019 | W1 helper | 3 Nov 2026 09:52 | Layer D light cards, batch B09 | Q100 | running | tmp/S2-CARDS/
+W1-020 | W1 helper | 3 Nov 2026 09:55 | Layer D light cards, batch B10 | Q100 | running | tmp/S2-CARDS/
