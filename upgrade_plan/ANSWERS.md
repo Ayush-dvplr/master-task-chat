@@ -403,3 +403,8 @@ ENTRY 54. 3 Nov 2026 14:45 IST (word for word)
 "T22 to T40 as suggested, T40 option 1"
 
 Recorded as: T22 CHANGE, T23 CHANGE, T39 KEEP, T40 CHANGE, all as suggested; T40 current peer source = anubis-stage-2 only. Read as covering only the four items shown (T22, T23, T39, T40); T24 to T38 were not shown yet and are NOT counted as decided (flagged to Ayush).
+
+ENTRY 55. 3 Nov 2026 14:51 IST (word for word)
+"T24 yes, T25: check again its very imprtant feature for auto mode , T26 to T34 as suggested"
+
+Recorded as: T24 CHANGE with Claude's order (no hardening between QC pass and the paid run; after a gate miss, harden from what the run got wrong with the fix map, QC again, 1 new run). T26 to T32 and T34 KEEP, T33 CHANGE (runs per task into settings.json), all as suggested. T25: Ayush says the self go is a very important auto mode feature; Claude rechecked (auto/AUTO_POLICY.md line 22, approved 26 Oct) and found its suggestion would have broken auto mode. New T25 proposal and a gap (AUTO_POLICY.md was not in the W1-027 fold scope) asked as Q128.

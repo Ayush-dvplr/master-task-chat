@@ -27,3 +27,16 @@ T22 CHANGE: "No fix softens a lever just to pass QC unless Ayush says so for tha
 T23 CHANGE: issue.py refusals after a QC pass become logged warnings; RIF:7 "stop at the first pass" stays.
 T39 KEEP: "Never run generate_bundle.py --force, playground.py --model, or anything that uploads files or keys."
 T40 CHANGE: "Mine passing teammate tasks only from anubis-stage-2 (the current source Ayush named)."
+
+BATCH 4, RUNS AND PUSH (ENTRY 55)
+T24 CHANGE: "Order: design, build, full QC until it passes, 1 paid run on the frozen bytes. No hardening between the QC pass and the paid run. After a gate miss: harden from what the run got wrong with the fix map, QC again, 1 new run."
+T25 PENDING (Q128): auto mode self go.
+T26 KEEP: "Before diagnosing a run, diff its staged copy against the bundle; a score from another tree is no baseline."
+T27 KEEP: "A regrade is diagnostic only, except a judge only edit on a valid run with Ayush's written OK, repackaged by repackage_one.py."
+T28 KEEP: "Only valid runs (no grader error) count as baselines."
+T29 KEEP: "A pushed bundle is packaged from exactly the frozen bytes of the gate run, with that run's scores."
+T30 KEEP: "Before push, QC Step 10 (oracle, nop, stub, owner only) is complete on the frozen bytes."
+T31 KEEP: "Every freeze records the tree sha; a gate run counts only on that sha."
+T32 KEEP: "Only real runs measure hardness; a reviewer rating never gates."
+T33 CHANGE: runs per task while building (1) and on final approval (8) move into settings.json.
+T34 KEEP: "No task is parked except on Ayush's word."

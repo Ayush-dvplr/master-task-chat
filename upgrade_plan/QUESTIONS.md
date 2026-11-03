@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: fold review batch 4 (T24 to T34). Q116 kept for later.
+LIVE NOW: Q128 (T25 auto mode). Then fold batches 5 and 7. Q116 kept for later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -205,3 +205,4 @@ Q124. Rules missing from RULES_IN_FORCE.md (46 add proposals, for example: nothi
 Q125. Six rows touch the agreed line (QC_FIX_PLAYBOOK_v3.md:3 "bypass the QC" quote and :10, pipeline v4 PLAN.md:15 and :49 "a form QC accepts" and the QC safe form table, KNOWLEDGE.md:110, state.json:80). Proposal: they are not folded into the rules; the agreed line (README GOAL item 7) replaces them, and the table keeps only fixes that meet each QC check honestly. Accept? [ANSWERED: fix map, not bypass (ENTRY 49); FOLLOW UP Q126]
 Q126. Fix map, one case to settle (R_FLAG): when a QC finding shows that a trap is a real defect (for example a graded value the shipped docs do not decide), the fix makes the docs decide it in one sentence and rebuilds the hardness in a valid form, instead of keeping the trap as it was. Is that what you mean by keeping the hardening? [ANSWERED: decide it, rebuild hardness (ENTRY 50)]
 Q127. T11 holes (ENTRY 51, flagged): use the valid near form of each hole instead (documented branch only hidden data fires; one deciding sentence buried among tempting records; variants inside a named standard stated in one sentence; behaviour tests on hidden inputs), or decide case by case per task? Claude cannot help build the holes as they are. [ANSWERED: case by case (ENTRY 52)]
+Q128. T25 and auto mode (auto/AUTO_POLICY.md:22): (a) T25 becomes: by day the master stops at DESIGN READY and waits for Ayush's go; in auto mode it checks DESIGN READY against the rules in force and the kit and sends the go itself or a correction, writes it to prompts/issued/<slug>/<ts>_go.md and lists it in REPORT.md; R7 gets the same auto mode exception. (b) AUTO_POLICY.md was not in the fold scope; Claude checks it against RULES_IN_FORCE.md and brings its conflicts as one batch (known: line 30 round cap override, now warnings; line 29 'QC-safe form' becomes the fix map; line 46 hard caps 5 workers and 2 harness into settings.json). [OPEN]
