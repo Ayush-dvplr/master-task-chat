@@ -223,3 +223,8 @@ CR1a: both: extra by default, main only with your word. (till we find anything r
 
 Recorded as: Q93 Layer A and B approved. Q94 no separate gate per category. Q95 working QC definition agreed, plus a false positive review step after every QC result (the AI QC can be wrong). CR1a decided: timeout lever is an extra by default, main lever only with Ayush's word. Q84 new root = one git folder holding master_chat_tasks, master_chat_work, QC and anything else needed.
 CORRECTION by Claude: the test counts in tmp/S2-INDEX (median 186) were wrong; they were total weights, not counts. reward-details.json lists each check; real median is about 35 test checks per task (Layer A, tmp/S2-FEATURES, not yet committed).
+
+ENTRY 23. 3 Nov 2026 09:18 IST, clarification (word for word)
+"the QC is made by my PL not client and we don't have any client we are working on our own and as you can check my teamates are doing the same and i am not doing off the way here sorry for saying the word bypassing QC , its like passing QC using the rewordings or approaches that can hide our traps and all so the QC is passed and tasks also get a good score"
+
+Recorded as: the QC kit is written by Ayush's PL; the team works on its own. "Bypassing QC" was the wrong word: Ayush means passing QC with wordings and approaches that keep the traps hidden from the solving agent, so QC passes and the task still scores low. README GOAL item 7 updated with the agreed line.
