@@ -305,3 +305,8 @@ ENTRY 39. 3 Nov 2026 10:31 IST (word for word)
 "Q110 yes start rule review, Q111 allow it"
 
 Recorded as: Q110 rule review started (RULE_REVIEW.md, batch 1 = R1 to R10). Q111 decided as CR7: a misread rule lever may be a primary lever when the rule has one clear deciding sentence and many records tempt the wrong reading (changes route 1 R0 point 2 after PROCEED).
+
+ENTRY 40. 3 Nov 2026 11:10 IST (word for word)
+"R1. along side it must verify response , flag me if something is wrong , tune prompts if needed , tell me about updates (like a brain which uses heavy sessions work on another sessiosn not just a simple prompt generator and record maintainer) R2. okay or better few more improve instead of reading complete database of all context it should get smartly like open ones, issues , running , not long completed ones also there can many more improvements you suggest me R3. yes R4. okay R5. keep R6. keep R7. Keep R8. keep R9. go check evidence and let me know R10. keep"
+
+Recorded as: batch 1 decisions in RULE_REVIEW.md. R1 CHANGED (the master is a brain, not a prompt generator). R2 CHANGED with smart loading (only open, running, issues, recent), Claude to suggest more improvements. R9: Claude checked evidence (study 3b00450) and suggests KEEP; Ayush to confirm.

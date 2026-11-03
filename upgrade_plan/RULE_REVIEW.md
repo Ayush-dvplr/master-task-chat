@@ -23,4 +23,41 @@ R9. G2: never move an assert into an existing check; never move weight onto a co
   Note: Claude has no evidence for or against from the cards. Ayush's call.
 R10. G3: never delete a clause or grader without naming what grades the rest.
   Note: protects against silent loss of a lever in a fix (P2). Suggest KEEP.
+Decisions (Ayush, ENTRY 40, 3 Nov):
+R1 CHANGED to: "The master is the brain of the system, not just a prompt generator and record keeper. It plans the next step; writes and tunes prompts; sends all heavy work to other sessions; verifies every session result on disk before recording it; flags to Ayush anything wrong, missing or contradictory; and tells Ayush about updates (finished sessions, QC kit changes, new findings)."
+R2 CHANGED to: "After any compaction, read STATE_CARD.md first. Load only what is live: open items, open issues, running and issued sessions, and items changed recently; never the full history of long completed work. Read more only when the next step needs it." Improvements: see R2 IMPROVEMENTS below (Q112).
+R3 KEEP. R4 CHANGED as suggested ("a lesson that repeats becomes a tool check, not another note"). R5 KEEP. R6 KEEP. R7 KEEP. R8 KEEP. R10 KEEP.
+R9 EVIDENCE (Claude, 3 Nov): study master_chat_work/_dev_research/qc_loop_analysis/3b00450/ANALYSIS.md lines 59 to 60: a fix prompt that moved an assert into the config criterion caused a TS-13 finding, and one that moved rubric points from R6 to R7 to R9 caused a JD-15 finding; in the same study TS-13 appears 17 times and JD-15 10 times among later findings. The kit rules: TS-13 "One property per test" (03_Tests_QC.md line 44); JD-15 limits what a criterion may require (04_Judge_QC.md line 92). Suggest KEEP (Q113).
+
+R2 IMPROVEMENTS (Claude suggestions, Q112)
+1. The state card lists only live things: running and issued sessions, open items, active tasks, and anything that changed in the last 48 hours. Closed work is never loaded.
+2. "Since last card" block: what changed since the previous card (finished sessions, new scores, new QC results), so the master sees news first.
+3. One task on demand: tools/status.py <slug> prints a single task card; the master reads it only when working on that task.
+4. Decisions in force: a generated DECISIONS_ACTIVE.md with only the decisions still in force (superseded ones marked and left out); decisions.jsonl (278 KB) is never read whole.
+5. Feedback and lessons distilled: their rules go into RULES_IN_FORCE.md; the raw feedback.jsonl and lessons.jsonl are not read after compaction.
+6. A size budget enforced by the script (the card warns above 4 KB).
+7. Each line of the card carries its source file, so the master can open exactly one file when it needs detail.
+
+
+BATCH 2 (R11 to R20), asked 3 Nov
+R11. G4: recheck every touched check against its rule list, one row each in RECHECK_FIX.md.
+  Note: the 3b00450 study says 45 of 67 fix caused findings carried a rule id a recheck pass would test. Suggest KEEP, done by script where possible.
+R12. G5: rerun the vacuity probe after fixes (the unchanged shipped tool and data must not pass any positive check).
+  Suggest KEEP.
+R13. G6: docs and TRUTH.md regenerated last, by script.
+  Suggest KEEP.
+R14. G7: never regenerate tests without a byte diff of tests/ before and after.
+  Note: this is the base of the P2 lever regression gate. Suggest KEEP.
+R15. Caps: 2 fix rounds per QC, 2 QC rounds, drop at 3 edit rounds, 8 session time box.
+  Note: with an AI QC that finds something every run (P12), a hard cap of 2 QC rounds may stop good tasks. Suggest CHANGE to settings (like the gate), with the values Ayush wants.
+R16. U12: stop at the first QC PASS; no hardening after a QC PASS.
+  Note: QC PASS now means the working definition of Q95. Suggest KEEP.
+R17. U13: a finding on lines unchanged since a passed round is reviewer noise; keep the code, with the diff as evidence.
+  Note: fits Q95 (false positive review). Suggest KEEP.
+R18. Acceptance is zero QC findings including warns.
+  Note: contradicts Q95 (minors accepted if they do not repeat) and the count cap warn above 35. Suggest CHANGE to the Q95 definition.
+R19. Kill tests run in Docker only, memory 4g, cpus 2, perl alarm.
+  Note: the 27 Oct hang came from solvers run on the host, outside Docker (Q65b). Suggest KEEP.
+R20. dockfree.py: 3 GiB headroom, a container without a limit counts as 4 GiB, CPU cap 12.
+  Note: to be replaced by the background Docker slot script (S1, P3), which measures real use. Suggest CHANGE: keep as a fallback until S1 exists.
 Decisions: (open)
