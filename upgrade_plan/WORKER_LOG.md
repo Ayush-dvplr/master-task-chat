@@ -29,6 +29,8 @@ W1-011 | W1 helper | 3 Nov 2026 09:34 | Layer D light cards, batch B03 | Q100 | 
 W1-012 | W1 helper | 3 Nov 2026 09:36 | third cold test of the recovery prompt (Ayush asked), while Layer D batches B01 to B03 run | recovery | verified (master checked: queue path, no "how to continue" method, stale lines; true) | reports/W1-012_recovery_test.md
   Result: state, goal, line, decisions and running work recovered correctly. 14 gaps (no procedure to tell finished batches, helper id clash, counts unexplained, stale live lines and statuses, card too long). Fixed 09:39: RESUME.md rewritten, tmp/S2-CARDS/CARD_RUN.md added, statuses fixed. About 88k tokens.
 W1-013 | W1 helper | 3 Nov 2026 09:40 | fourth cold test (recheck after the RESUME rewrite) | recovery | verified: nothing broken; 9 small points fixed 09:40 | (chat report)
-W1-014 | W1 helper | 3 Nov 2026 09:40 | Layer D light cards, batch B04 | Q100 | running | tmp/S2-CARDS/
+W1-014 | W1 helper | 3 Nov 2026 09:40 | Layer D light cards, batch B04 | Q100 | verified (master checked 98ed74c1 record_dictionary.md lines 42 to 43: "the offset holds for every row on the unit's card", as cited) | tmp/S2-CARDS/ (275f885b, 98ed74c1, 91f5740c, 7c2e77a1)
+  Result: 275f885b DESIGN (e, early misreads feed a total compared by digest); 98ed74c1 DEFECT (hidden data contradicts the doc, TRUTH calls it the hidden lever); 91f5740c DEFECT (same net definition contradiction as 6d12f970); 7c2e77a1 DESIGN (d or e, divergence not located). About 175k tokens.
 W1-015 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B05 | Q100 | running | tmp/S2-CARDS/
 W1-016 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B06 | Q100 | running | tmp/S2-CARDS/
+W1-017 | W1 helper | 3 Nov 2026 09:47 | Layer D light cards, batch B07 | Q100 | running | tmp/S2-CARDS/
