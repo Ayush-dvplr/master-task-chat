@@ -77,3 +77,5 @@ LESSONS FOR SCALING
 PROPOSED CHANGE (Q100): light cards with a hard budget of about 40k tokens and no reproduction runs; first field DEFECT or DESIGN; deep cards (with reproduction) only for tasks whose loss looks like DESIGN.
 
 LAYER D (approved Q100, started 3 Nov 09:34): 95 tasks (108 minus 10 carded on 2 Nov and 3 pilot) in 24 batches of 4, lowest Opus tests first: tmp/S2-CARDS/QUEUE.txt. Brief: prompts/LIGHT_CARD_BRIEF.md. Cards: tmp/S2-CARDS/<id>.md. 3 helpers at a time; the master spot checks one card per batch.
+
+SCOPE ADDED (G3, ENTRY 30): Layer F patterns must cover not only levers but also design shapes, test structure, rubric style, task size, and pace. Card fields 5 to 7 already capture test design, instruction and rubric; task size comes from FEATURES.csv; pace needs Ayush (no data on build time in the folder).

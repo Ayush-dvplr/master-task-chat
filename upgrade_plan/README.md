@@ -5,8 +5,9 @@ Started 3 Nov 2026, 01:19 IST. Planning only.
 STATUS: PLANNING. NOTHING OUTSIDE THIS FOLDER IS EDITED.
 
 GOAL OF THE TASK SYSTEM (Ayush, 3 Nov 2026, ANSWERS.md ENTRY 11 and 12; heading wording open, Q73)
-0a. GOAL IN ONE LINE (ENTRY 29, being agreed, G1): make more and more accepted tasks the way teammates make them; traps and levers are one part of that, not the whole goal.
-0b. CONFLICTS (ENTRY 29): conflicts between teammate practice, Ayush's rules and Claude's line are reviewed case by case with Ayush; nothing is voided automatically.
+0a. GOAL IN ONE LINE (agreed G1, ENTRY 30): make more and more accepted tasks the way teammates make them: each passes QC, scores under the gate, is solvable from what it ships, and is new (not a copy). Traps and levers are one tool for that, next to volume, speed, design shapes and test structure.
+0c. LEARN FROM TEAMMATES (G3): traps and levers, design shapes, test structure, rubric style, task size, and pace.
+0b. CONFLICTS (ENTRY 29, G2): conflicts between teammate practice, Ayush's rules (including DR3) and Claude's line are decided case by case with Ayush; nothing is voided automatically; in each case Claude says plainly whether it can help build it.
 0. TOP PRIORITY (ENTRY 19): the system exists to fix, rebuild and harden existing tasks, and to create new hard tasks that score under the gate. Problems P1 to P12 matter because they block this.
 1. Ayush's job is to produce many tasks. His count is low now, so the system must make tasks fast and reliably.
 2. Score target on the harness (Opus 5): today tests under 85, rubric under 85, final under 40 (gate v3.7). The gate is a SETTING, not a fixed rule: the PL may lower it (for example final under 30 or 35) and the system must follow a change in one place (DR2).
