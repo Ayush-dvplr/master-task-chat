@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 12:47 IST. Claude updates this card after every step that changes the plan state. Times are IST.
+Last updated: 3 Nov 2026 13:15 IST. Claude updates this card after every step that changes the plan state. Times are IST.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session plans that upgrade. Repo Ayush-dvplr/master-task-chat, branch claude/youthful-feynman-zug0uq, planning folder upgrade_plan/. Ayush's inputs (QC kit, QC reports, harness queue, _runs, PL generator, teammate tasks anubis-stage-2/) are on origin/main: read them with git show origin/main:<path>, never merge.
@@ -27,7 +27,7 @@ READ ORDER AFTER COMPACTION
 7. Only when the next step needs them: STAGE2_STUDY_PLAN.md, PLAN.md, FINDINGS.md, tmp/W1-002/CONFLICTS.md, CONTRADICTIONS.md, UNVERIFIED_RULES.md, REQUESTS.md, inputs/.
 
 RUNNING NOW
-Nothing is running. No helper is active. Next free helper id: W1-027.
+Nothing is running. No helper is active. Next free helper id: W1-029.
 
 STATE OF THE WORK (3 Nov)
 1. Teammate study (anubis-stage-2 on main): 68 of 108 tasks studied (55 light cards, 3 pilot, 10 from 2 Nov). Families: tmp/S2-CARDS/SUMMARY.md. Design guide: knowledge/PATTERNS.md; check against R0: knowledge/CONFIRM.md (durable copies of tmp/W1-025). Queue of all teammate tasks: tmp/S2-CARDS/QUEUE.txt. QUEUE batches B11 to B24 stay PAUSED (Ayush, credits); do not start them. The case by case review of the DEFECT families is paused (reason in CONFLICT_REVIEW.md PAUSE NOTE); do not restart it without Ayush.
@@ -53,7 +53,7 @@ KNOWN FROM RECORDS (short)
 NEXT STEPS (in order)
 1. Card budget settled (Q117 to Q119, ENTRY 44 to 46): 8 KB hard, 6 KB target, 6.3 KB accepted; settings in drafts/P1/settings.json.
 2. Card points are in state_card.py v2 (done 12:20); registry design field planned (after PROCEED).
-3. P1 steps 3 to 5 drafted (drafts/P1/MASTER_RECOVERY.md, FOLD_PLAN.md); waiting for Q8, Q120, Q121. Then the next system fixes: P2 QC fix regression gate, P3 Docker slot script (S1), P10 old templates, S7 QC kit watch, P6 tools.
+3. P1 steps 3 to 5 drafted (drafts/P1/MASTER_RECOVERY.md, FOLD_PLAN.md); Q8, Q120, Q121 answered (ENTRY 48); W1-027 fold table and W1-028 cold test verified; waiting for Q122 to Q125. Then the next system fixes: P2 QC fix regression gate, P3 Docker slot script (S1), P10 old templates, S7 QC kit watch, P6 tools.
 4. Conflict review CR2 to CR5 (CONFLICT_REVIEW.md), with Ayush.
 5. Then shape PLAN.md into the final plan for Ayush to approve before PROCEED.
 6. Before a compaction: prompts/COMPACT_PROMPT.md. Recovery: prompts/RECOVERY_PROMPT.md.
