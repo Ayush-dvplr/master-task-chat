@@ -45,4 +45,6 @@ W1-020 | W1 helper | 3 Nov 2026 09:55 | Layer D light cards, batch B10 | Q100 | 
   Result: 88ee425d and af780bef DEFECT (same open type question as 058cbab3: amended JSON field type); e08c051f DESIGN (a, schema says integer, quoted strings must be rejected); d7898e6d MIXED leaning DEFECT (behaviour only searchable against digests inside later inputs). Rubric note: several criteria ask for examples the instruction never asks for. About 163k tokens.
 W1-021 | W1 helper | 3 Nov 2026 10:07 | Layer D light cards, batch S01 (sample) | Q103 | running | tmp/S2-CARDS/
 W1-022 | W1 helper | 3 Nov 2026 10:07 | Layer D light cards, batch S02 (sample) | Q103 | running | tmp/S2-CARDS/
-W1-023 | W1 helper | 3 Nov 2026 10:07 | Layer D light cards, batch S03 (sample) | Q103 | running | tmp/S2-CARDS/
+W1-023 | W1 helper | 3 Nov 2026 10:07 | Layer D light cards, batch S03 (sample) | Q103 | verified (master checked 11750b7a instruction.md: "settled by neither the specification nor its companion notes", as cited) | tmp/S2-CARDS/ (11750b7a, f5fe93be, 816cdd80, 4a9d67f2)
+  Result: 11750b7a MIXED mostly DEFECT (instruction admits 8 unsettled situations, each graded against one fixed choice); f5fe93be DESIGN (d and c: alias misuse, linear scan too slow); 816cdd80 and 4a9d67f2 DESIGN (e, about 56 unwritten constants confirmed only by digests; uniqueness not proven, flagged). About 142k tokens.
+W1-024 | W1 helper | 3 Nov 2026 10:11 | Layer D light cards, batch S04 (sample) | Q103 | running | tmp/S2-CARDS/
