@@ -27,7 +27,7 @@ READ ORDER AFTER COMPACTION
 7. Only when the next step needs them: STAGE2_STUDY_PLAN.md, PLAN.md, FINDINGS.md, tmp/W1-002/CONFLICTS.md, CONTRADICTIONS.md, UNVERIFIED_RULES.md, REQUESTS.md, inputs/.
 
 RUNNING NOW
-1. Layer D light cards: 95 tasks in tmp/S2-CARDS/QUEUE.txt; batches B01 to B03 started 09:34 (helpers W1-009 to W1-011). Continue with tmp/S2-CARDS/CARD_RUN.md. B03 done and verified; B04 started with W1-014 (W1-013 was the fourth cold test). Next free helper id: W1-015.
+1. Layer D light cards: 95 tasks in tmp/S2-CARDS/QUEUE.txt; batches B01 to B03 started 09:34 (helpers W1-009 to W1-011). Continue with tmp/S2-CARDS/CARD_RUN.md. B01 to B03 done and verified; B04 to B06 running (W1-014 to W1-016). Next free helper id: W1-017.
 
 DECISIONS SO FAR (short)
 1. P1 compaction cause: the DCP plugin on defaults (pushes compression from 100k tokens, about 10 percent of the 1 million window; nothing protected, not even Ayush's messages). Decided: master DCP B (manual), task sessions DCP C (off). DCP 3.2.0 reads a per folder .opencode/dcp.jsonc and OPENCODE_CONFIG_DIR (FINDINGS F1.8 to F1.10, PLAN.md P1).
