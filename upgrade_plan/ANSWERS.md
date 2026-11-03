@@ -393,3 +393,8 @@ ENTRY 52. 3 Nov 2026 14:36 IST (word for word)
 "Q127 option 2"
 
 Recorded as: T11 holes are decided case by case per task with Ayush (G2). For each case Claude says plainly whether it can help build it; Claude's proposal in each case is the valid near form (documented branch only hidden data fires, buried deciding sentence, variants inside a named standard, behaviour tests on hidden inputs). No hole goes into RULES_IN_FORCE.md as a standing rule; DR3, the agreed line and Q126 stay in force.
+
+ENTRY 53. 3 Nov 2026 14:42 IST (word for word)
+"T12 to T21 as suggested, margin 5"
+
+Recorded as: fold review batch 2: T12, T13, T14, T15, T18, T19 KEEP; T16, T17, T20 CHANGE; T21 DROP; all as suggested. Design margin 5 points: DESIGN READY needs a predicted final under 35 (gate 40 minus 5), set in settings.json as design_margin.
