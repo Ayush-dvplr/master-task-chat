@@ -1,3 +1,5 @@
+WARNING (3 Nov): the "test checks (est)" column is WRONG. It is the total test weight, not the number of checks. Real counts are in tmp/S2-FEATURES (median about 35).
+
 TEAMMATE TASKS: AUTHORS, COUNTS AND OPUS 5 SCORES (from anubis-stage-2 on main, 3 Nov 2026; names from task.toml, emails left out; test count is estimated as 1 / test weight in reward.toml)
 
 | authors | task | test checks (est) | rubric criteria | Opus tests | Opus rubric | Opus final | under gate |

@@ -210,3 +210,16 @@ ENTRY 21. 3 Nov 2026 09:02 IST, answers in chat (word for word)
 ask me me again in short and laymen terms : Still open: CR1a (the form of the timeout rule) and Q84 (the new root folder)."
 
 Recorded as: gate: tasks fill quotas in easy, medium and hard categories; the gate fell 70 to 50 and will fall to 35; every pushed teammate task was accepted under the gate of its time (Q94). Work mostly on tests (rubric already low in Ayush's tasks). Q90: author table made (tmp/S2-INDEX/AUTHORS.md). Q91: study ALL tasks smartly, not only the lowest; easy tasks also hold good levers; find levers common to all tasks; plan carefully so nothing is missed; find new things and confirm our own findings; skip Ayush's own 5 tasks (337a1262, 42e79476, 8fbe0e42, b47fd5f7, b5c7b14c) unless needed. Revised plan v2 in STAGE2_STUDY_PLAN.md (Q93). Q92: both: a working definition now, refined after the cards; CL findings count as major (Q95). CR1a and Q84 asked again in plain words.
+
+ENTRY 22. 3 Nov 2026 09:12 IST, answers in chat (word for word)
+"93. yes start with layer A and B
+
+94. no 
+95. agree (also one more thing while we run the QC and when result come we ask it for false positive ones as its not rigid checks as ai based QC so sometimes it halicinates in the QC) 
+
+CR1a: both: extra by default, main only with your word. (till we find anything rigid like this that have more changes of goal achieval)
+
+84. main folder (.git here)/ (inside)1. master_task_chat 2. master_work_chat 3. QC (anythoing else if required)"
+
+Recorded as: Q93 Layer A and B approved. Q94 no separate gate per category. Q95 working QC definition agreed, plus a false positive review step after every QC result (the AI QC can be wrong). CR1a decided: timeout lever is an extra by default, main lever only with Ayush's word. Q84 new root = one git folder holding master_chat_tasks, master_chat_work, QC and anything else needed.
+CORRECTION by Claude: the test counts in tmp/S2-INDEX (median 186) were wrong; they were total weights, not counts. reward-details.json lists each check; real median is about 35 test checks per task (Layer A, tmp/S2-FEATURES, not yet committed).

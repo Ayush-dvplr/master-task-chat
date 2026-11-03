@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q93, Q94, Q95, CR1a, Q84.
+LIVE NOW: see chat 3 Nov (pause on the stage 2 study).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -134,7 +134,7 @@ Q82. Still open from before: shall the conflict review (5 most serious hardening
 
 Q83. Kit change (W1-005): verdict MAJOR because of one change only (C6, one finding gets one check id). Do you agree with MAJOR, or do you count it MINOR because no bundle needs rework? [ANSWERED: MINOR; a name for lenient changes wanted (Q86)]
 
-Q84. New root folder: what should it hold (master_chat_tasks, master_chat_work, bundles, QC, _runs, the harness clone, the generator)? Should THIS git repo become that root? Where would the large folders (_runs has about 62 thousand files) live? [OPEN]
+Q84. New root folder: what should it hold (master_chat_tasks, master_chat_work, bundles, QC, _runs, the harness clone, the generator)? Should THIS git repo become that root? Where would the large folders (_runs has about 62 thousand files) live? [ANSWERED: one git root holding master_chat_tasks, master_chat_work, QC and anything else needed]
 Q85. Teammate tasks: where are they (Anubis_Tasks_Samples, Finalized_Tasks_RFP, a shared drive, the PL repo)? Can a helper read them (they are your teammates' work; are you allowed to study them)? This decides how S8 research prompts are built. [OPEN; Ayush offers to push them, ENTRY 18. Answer given in chat: yes, needed]
 
 Q86. Kit change classes: proposal LENIENT (a change that only makes QC easier for us; act on it freely), MINOR (a stricter or reworded rule that does not touch fix mapping or hiding), MAJOR (touches fix mapping, hiding or traps). Under this, W1-005's 8 changes are LENIENT and C6 is MAJOR or MINOR as you decide (you said MINOR). Is that what you meant by "better name it"? [ANSWERED: LENIENT, MINOR, MAJOR agreed]
@@ -147,8 +147,8 @@ Q90. FLAG on the count cap (Q75, your own hard cap 100): teammate tasks have a m
 Q91. Phase 1 pick: 26 under gate tasks not yet carded plus 5 high scoring contrast tasks (31 cards, about 2 to 3 million tokens). Approve, or change the list (for example only the lowest 15)? [ANSWERED: study all tasks smartly, skip Ayush's own; plan v2 (Q93)]
 Q92. P12 (QC is noisy): shall we set a working definition now, for example "QC passed = no fail findings in 2 runs in a row, minors allowed if they repeat no evidence", or discuss it after the cards show what teammate tasks still carry? [ANSWERED: both; working definition now, refined after cards; CL findings are major (Q95)]
 
-Q93. Approve STAGE2_STUDY_PLAN.md plan v2 (layers A to G, starting with the free script layers A and B and a 3 card pilot)? [OPEN]
-Q94. Gate categories: tasks fill quotas in easy, medium and hard, and the gate falls over time (70, 50, then 35). Does each category have its own gate today, and which category are your new tasks meant for? The system needs this to know which gate a task must meet. [OPEN]
-Q95. Working QC definition (draft): "QC passed = no fail finding in 2 QC runs in a row; any CL fail blocks; a minor is accepted if it does not come back with the same evidence in the second run". Agree, or change? [OPEN]
+Q93. Approve STAGE2_STUDY_PLAN.md plan v2 (layers A to G, starting with the free script layers A and B and a 3 card pilot)? [ANSWERED: Layer A and B approved]
+Q94. Gate categories: tasks fill quotas in easy, medium and hard, and the gate falls over time (70, 50, then 35). Does each category have its own gate today, and which category are your new tasks meant for? The system needs this to know which gate a task must meet. [ANSWERED: no separate gate per category]
+Q95. Working QC definition (draft): "QC passed = no fail finding in 2 QC runs in a row; any CL fail blocks; a minor is accepted if it does not come back with the same evidence in the second run". Agree, or change? [ANSWERED: agreed, plus a false positive review step after each QC result]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
