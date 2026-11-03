@@ -15,7 +15,7 @@ GOAL OF THE TASK SYSTEM (Ayush, 3 Nov 2026, ANSWERS.md ENTRY 11 and 12; heading 
 7. The agreed line (ENTRY 23): hiding a trap from the SOLVING AGENT is normal task design (hidden test data, no trap announcement, which the kit itself requires under IN-17). Every trap must still meet what each QC check asks for: solvable from what the task ships, every graded value decided by the shipped instruction and data, no underspecified grading. Claude helps with the first and with meeting the checks; Claude does not help make a real defect look valid to the QC.
 8. Every upgrade decision is checked against this goal.
 9. Solvability is also a QC check (DS-21, F0e, CL-10 "solvable from visible files"). SOLVABILITY_PROMPT, Ayush's extra check, used only if the QL asks: "Read only the prompt in instruction.md and the artifacts in environment/ except for Dockerfile and check if the all the things requested by prompt are completely solveable or not, if an agent is given more than enough time and resources."
-10. Count caps (Ayush, ENTRY 13; Q75 open): tests and rubric criteria each at least the QC minimum, personal soft cap 70, hard cap 100. Settings, like the gate.
+10. Count caps (Ayush, ENTRY 13; Q75: hard cap 100 is his own rule): tests and rubric criteria each at least the QC minimum, personal soft cap 70, hard cap 100. Settings, like the gate.
 
 The edit rule (Ayush, 3 Nov 2026)
 1. No file outside upgrade_plan/ is created, edited, moved or deleted until Ayush types the exact word PROCEED.
@@ -57,7 +57,7 @@ All times are IST.
 Files
 0. RESUME.md: the recovery card. Read first after any compaction or in a new session. Kept current after every step.
 1. README.md: this file. Rules of the planning process and the index.
-2. PROBLEMS.md: the problems (P1 to P10 so far) in Ayush's words, plus any new problems he adds.
+2. PROBLEMS.md: the problems (P1 to P12 so far) in Ayush's words, plus any new problems he adds.
 3. FINDINGS.md: what Claude found in the repo for each problem, with file and line evidence.
 4. QUESTIONS.md: every question, with id and status.
 5. ANSWERS.md: Ayush's answers word for word, with date and time.

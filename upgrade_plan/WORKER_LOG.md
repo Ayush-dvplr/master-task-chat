@@ -23,4 +23,5 @@ W1-008 | W1 helper | 3 Nov 2026 09:20 | Layer C pilot card, high scorer 7e0d8feb
 W1-009 | W1 helper | 3 Nov 2026 09:34 | Layer D light cards, batch B01 | Q100 | running | tmp/S2-CARDS/
 W1-010 | W1 helper | 3 Nov 2026 09:34 | Layer D light cards, batch B02 | Q100 | running | tmp/S2-CARDS/
 W1-011 | W1 helper | 3 Nov 2026 09:34 | Layer D light cards, batch B03 | Q100 | running | tmp/S2-CARDS/
-W1-012 | W1 helper | 3 Nov 2026 09:36 | third cold test of the recovery prompt (Ayush asked), while Layer D batches B01 to B03 run | recovery | running | reports/W1-012_recovery_test.md
+W1-012 | W1 helper | 3 Nov 2026 09:36 | third cold test of the recovery prompt (Ayush asked), while Layer D batches B01 to B03 run | recovery | verified (master checked: queue path, no "how to continue" method, stale lines; true) | reports/W1-012_recovery_test.md
+  Result: state, goal, line, decisions and running work recovered correctly. 14 gaps (no procedure to tell finished batches, helper id clash, counts unexplained, stale live lines and statuses, card too long). Fixed 09:39: RESUME.md rewritten, tmp/S2-CARDS/CARD_RUN.md added, statuses fixed. About 88k tokens.
