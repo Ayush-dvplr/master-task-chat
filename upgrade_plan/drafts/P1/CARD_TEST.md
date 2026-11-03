@@ -33,3 +33,4 @@ Decisions (ENTRY 46, Q119)
 3. Targets 4 a day, 20 a week; long running after 3 hours. Both in drafts/P1/settings.json.
 4. Long running flag only reports (ENTRY 47): the card says "LONG n h: report to Ayush, never stop it"; RULES_IN_FORCE.md ROLE says the same.
 5. Cold test W1-028 (3 Nov): passed; fixes from it applied, card now 6.9 KB on the test day (was 6.5 KB), within the 8 KB hard limit, over the accepted 6.3 KB (to tell Ayush).
+6. Fold applied (ENTRY 51 to 59): rules split in two. RULES_IN_FORCE.md (3.5 KB, on the card) holds master rules; BUILD_RULES.md (3.8 KB, read before any design, harden or fix) holds design, grading, rubric and QC fix step rules. Card on the test day: 7.2 KB, under the 8 KB hard limit, nothing left out. Without the split the card was 7.8 KB and dropped the uniqueness line.

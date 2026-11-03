@@ -11,7 +11,7 @@ Read order after any compaction or in a new session
 3. Then read only what the next step needs:
    a. one task: python3 tools/status.py <slug>
    b. one session Ayush names: python3 tools/board.py show <sha>
-   c. a design or lever question: knowledge/PATTERNS.md (DESIGN families) and the current LEVER_RULES (one file, FOLD_PLAN.md)
+   c. a design, harden or fix step: BUILD_RULES.md, then knowledge/PATTERNS.md (DESIGN families)
    d. a QC fix: knowledge/QC_FIX_PLAYBOOK.md (current version only)
    e. a decision's history: DECISIONS_ACTIVE.md (generated, R2 point 4; the generator is still to be built after PROCEED), never the whole decisions.jsonl
    f. research: knowledge/INDEX.md first (U5)
