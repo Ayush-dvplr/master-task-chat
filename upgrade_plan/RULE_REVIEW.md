@@ -129,3 +129,4 @@ BATCH ONE COMPLETE (R1 to R35), 3 Nov. Open: R28 (Q116, later). Next: RULES_IN_F
 
 
 CHANGE 3 Nov (ENTRY 57): R18 and Q95 QC pass is now 1 complete QC pass with no fail; the 2 runs in a row condition is removed.
+R28 DECIDED (ENTRY 67): KEEP, worded to match T7. Batch one has no open rule left.

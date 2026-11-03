@@ -31,7 +31,7 @@ W1-031 running (P3 Docker slots). Next free helper id: W1-032. P2 fix map draft 
 
 STATE OF THE WORK (3 Nov)
 1. Teammate study (anubis-stage-2 on main): 68 of 108 tasks studied (55 light cards, 3 pilot, 10 from 2 Nov). Families: tmp/S2-CARDS/SUMMARY.md. Design guide: knowledge/PATTERNS.md; check against R0: knowledge/CONFIRM.md (durable copies of tmp/W1-025). Queue of all teammate tasks: tmp/S2-CARDS/QUEUE.txt. QUEUE batches B11 to B24 stay PAUSED (Ayush, credits); do not start them. The case by case review of the DEFECT families is paused (reason in CONFLICT_REVIEW.md PAUSE NOTE); do not restart it without Ayush.
-2. Rule review batch one (R1 to R35) DONE: decisions in RULE_REVIEW.md (ENTRY 40 to 43). R28 open (Q116, Ayush comes back later).
+2. Rule review batch one (R1 to R35) DONE: decisions in RULE_REVIEW.md (ENTRY 40 to 43). R28 KEEP (ENTRY 67).
 3. P1 compaction drafts in drafts/P1/: master.dcp.jsonc (manual), tasks.dcp.jsonc (off), README_P1.md (how files reach each session, path check), state_card.py v2 (tested, CARD_TEST.md), RULES_IN_FORCE.md (one layer from the rule review), sample_STATE_CARD.md (5.9 KB).
 4. Nothing outside upgrade_plan/ has been edited. PROCEED has not been given.
 

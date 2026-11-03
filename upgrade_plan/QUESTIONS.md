@@ -2,10 +2,10 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: none. W1-031 (P3) running. Q116 kept for later.
+LIVE NOW: none. W1-031 (P3) running.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, Q19, Q21, Q23 to Q29.
-LATER (Ayush): Q37.
+LATER (Ayush): none.
 
 PROCESS
 Q0. You wrote "Do not edit when you are 100% sure". I read it as "do not edit UNTIL we are both 100% sure". Is that right? [ANSWERED: yes]
@@ -61,7 +61,7 @@ NEW PROBLEMS P7 TO P10 (from the Q3 answer, 3 Nov)
 Q34. Is your Q3 list in priority order, so compaction (P1) comes first, then the others in the order you wrote them? [ANSWERED: yes]
 Q35. P7: when you "upgrade the master chat session", what kind of upgrade do you mean (new template versions, new rules, new tools, a new plan like v3.7 or v3.8)? What became worse afterwards? One real example. [ANSWERED: an upgrade led to 2 days of tasks scoring tests 100; details are in the records, read later]
 Q36. P8: do your teammates use the same QC kit and the same generator as you? Do they build by hand, with their own chat, or with a system like yours? [ANSWERED: same QC; generator differs, it only gives structure and a plan, Ayush sometimes finds it useless; some friends use direct prompts with everything in them]
-Q37. P8: can you share one or two teammate tasks that passed QC and scored well, with their scores? I saw master_chat_work/20261102_test_design_study (10 teammate tasks). Are those the right examples, or are there better ones? [LATER, Ayush will answer]
+Q37. P8: can you share one or two teammate tasks that passed QC and scored well, with their scores? I saw master_chat_work/20261102_test_design_study (10 teammate tasks). Are those the right examples, or are there better ones? [CLOSED (ENTRY 67): anubis-stage-2 replaces it]
 Q38. P9: "very bad at creating new tasks with respect to the fixing tasks". Which do you mean: (a) new tasks built from scratch come out worse than tasks that get fixed, (b) the system is good at fixing but bad at designing new tasks, or (c) something else? [ANSWERED: (b)]
 Q39. P10: which templates were still old after an upgrade? Name one case (which upgrade, which template, which session used the old one). I already found one: state.json and README line 31 still say P12 v4 while INDEX says v5 is active (CONTRADICTIONS C3). [ANSWERED FROM RECORDS: 5 cases in tmp/W1-003/ANSWERS_FROM_RECORDS.md]
 
@@ -190,7 +190,7 @@ Q113. R9: evidence supports it (3b00450 ANALYSIS.md lines 59 to 60); KEEP? [ANSW
 Q114. R15 caps as settings: what values today for fix rounds per QC (now 2), QC rounds (now 2), edit rounds before drop (now 3), and the session time box (now 8)? Or "no cap, Ayush decides each time"? [ANSWERED: no cap, Ayush decides each time]
 Q115. R2 CHECK: accept the 2 fixes (a, b) and the 6 added points (8 to 13)? [ANSWERED: accepted]
 
-Q116. R28 "Difficulty comes from computation on hidden data, never from withheld rules": keep, change or drop? Ayush will come back to it (ENTRY 42). [OPEN, LATER]
+Q116. R28 "Difficulty comes from computation on hidden data, never from withheld rules": keep, change or drop? Ayush will come back to it (ENTRY 42). [ANSWERED: KEEP, worded to match T7 (ENTRY 67)]
 
 Q117. The state card with the full rules in force is 5.9 KB (sample in drafts/P1/sample_STATE_CARD.md). Raise the budget to 6 KB (about 1,500 tokens), or shorten the rules? [ANSWERED: 6 KB, verify it stays enough (ENTRY 44); check says it does not; FOLLOW UP Q118]
 Q118. Measured: 6 KB is not enough (quiet day about 6.3 KB, today about 7.0 KB, busy day about 7.9 KB, after the accepted card points). Choose: (a) 8 KB, about 2,000 tokens, with the fill order cutting from the bottom and a line naming what was left out; (b) keep 6 KB and trim: open items top 5 instead of 10, shorter task lines, sessions over 6 shown as a count; (c) both: 8 KB hard limit, 6 KB target with the trims. [ANSWERED: (c) (ENTRY 45); built and tested, drafts/P1/CARD_TEST.md]

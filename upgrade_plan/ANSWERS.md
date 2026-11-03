@@ -467,3 +467,8 @@ ENTRY 66. 3 Nov 2026 16:38 IST (options dialog, word for word)
 Q133: "see i do QC one time if it passes then i give to my QL he does QC again if something or large number of major fails are there then give back report then i check false positives ones or the vague ones and fix only the real ones , then qc then harness"
 
 Recorded as: Q133: false positives are judged by Ayush, on the QL's report. Flow: Ayush's QC once; on a pass the bundle goes to the QL, who runs QC again; if the QL finds fails (or many majors) he returns the report; Ayush marks the false positive and vague findings; only the real ones are fixed (fix map, regression check); QC again; then the harness. The system prepares a triage table for each QL report (P16 ql_report_triage template): per finding, the diff since the passed copy and the kit line read in full, with a suggestion real, false positive or vague; Ayush decides. ORDER rule (T24) gets the QL step before the paid run.
+
+ENTRY 67. 3 Nov 2026 17:01 IST (word for word)
+"Q116 keep as suggested, Q37 close"
+
+Recorded as: R28 KEEP, worded to match T7: "Difficulty comes from computation on hidden data, never from withheld rules: every hidden branch has its sentence in the docs." Holes stay case by case (Q127). Q37 closed: the 108 anubis-stage-2 tasks replace it.
