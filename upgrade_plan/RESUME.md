@@ -1,6 +1,6 @@
 RESUME CARD FOR THE UPGRADE SESSION
 
-Last updated: 3 Nov 2026 09:39 IST. Claude updates this card after every step that changes the plan state. Times are IST.
+Last updated: 3 Nov 2026 09:40 IST. Claude updates this card after every step that changes the plan state. Times are IST.
 
 WHO AND WHAT
 Ayush is upgrading his "master chat" system (master_chat_tasks/ records and tools, master_chat_work/ session outputs) that builds Harbor 0.24 evaluation tasks. This session plans that upgrade. Repo Ayush-dvplr/master-task-chat, branch claude/youthful-feynman-zug0uq, planning folder upgrade_plan/. Ayush's inputs (QC kit, QC reports, harness queue, _runs, PL generator, teammate tasks anubis-stage-2/) are on origin/main: read them with git show origin/main:<path>, never merge.
@@ -21,20 +21,20 @@ READ ORDER AFTER COMPACTION
 1. This card.
 2. README.md.
 3. PROBLEMS.md, AYUSH_SUGGESTIONS.md, CONFLICT_REVIEW.md.
-4. QUESTIONS.md top lines (LIVE NOW and the parked lists).
+4. QUESTIONS.md first 30 lines (LIVE NOW and the parked lists).
 5. The last two entries of ANSWERS.md (grep -n "^ENTRY" ANSWERS.md).
 6. WORKER_LOG.md, and if a card run is in progress, tmp/S2-CARDS/CARD_RUN.md (it says how to continue).
 7. Only when the next step needs them: STAGE2_STUDY_PLAN.md, PLAN.md, FINDINGS.md, tmp/W1-002/CONFLICTS.md, CONTRADICTIONS.md, UNVERIFIED_RULES.md, REQUESTS.md, inputs/.
 
 RUNNING NOW
-1. Layer D light cards: 95 tasks in tmp/S2-CARDS/QUEUE.txt; batches B01 to B03 started 09:34 (helpers W1-009 to W1-011). Continue with tmp/S2-CARDS/CARD_RUN.md. Next free helper id: W1-013.
+1. Layer D light cards: 95 tasks in tmp/S2-CARDS/QUEUE.txt; batches B01 to B03 started 09:34 (helpers W1-009 to W1-011). Continue with tmp/S2-CARDS/CARD_RUN.md. B03 done and verified; B04 started with W1-014 (W1-013 was the fourth cold test). Next free helper id: W1-015.
 
 DECISIONS SO FAR (short)
 1. P1 compaction cause: the DCP plugin on defaults (pushes compression from 100k tokens, about 10 percent of the 1 million window; nothing protected, not even Ayush's messages). Decided: master DCP B (manual), task sessions DCP C (off). DCP 3.2.0 reads a per folder .opencode/dcp.jsonc and OPENCODE_CONFIG_DIR (FINDINGS F1.8 to F1.10, PLAN.md P1).
 2. Order: task making first, system fixes in parallel (Q87).
 3. CR1 timeouts: extra lever by default, main lever only with Ayush's word (CONFLICT_REVIEW.md).
 4. QC working definition: no fail in 2 runs in a row, any CL fail blocks, minor accepted if it does not repeat; plus a false positive review after each QC result (Q95).
-5. Pilot cards: 2 of 3 low teammate scores were DEFECTS (oracle bug, unreadable program file), not levers; light cards mark DEFECT or DESIGN first (Q100).
+5. Pilot cards: in 2 of the 3 pilot cards the main loss was a DEFECT (oracle bug, unreadable program file), not levers; light cards mark DEFECT or DESIGN first (Q100).
 6. New root later: one git folder with master_chat_tasks, master_chat_work, QC and anything needed (Q84).
 7. Gate per category: none (Q94). Work mostly on tests (rubric already low).
 
@@ -49,4 +49,4 @@ NEXT STEPS (in order)
 1. Keep the card run going (CARD_RUN.md) and update Ayush after every 3 batches.
 2. In parallel: conflict review CR2 (tmp/W1-002/CONFLICTS.md C5, the careful program), then CR3 to CR5.
 3. Then the UNVERIFIED_RULES review (Q4 first), then Layer F patterns, then shape PLAN.md.
-4. Recovery prompt: prompts/RECOVERY_PROMPT.md (version 3), cold tested three times (W1-001, W1-004, W1-012).
+4. Recovery prompt: prompts/RECOVERY_PROMPT.md (version 3), cold tested four times (W1-001, W1-004, W1-012, W1-013).

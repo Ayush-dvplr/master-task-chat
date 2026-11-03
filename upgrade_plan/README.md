@@ -5,7 +5,7 @@ Started 3 Nov 2026, 01:19 IST. Planning only.
 STATUS: PLANNING. NOTHING OUTSIDE THIS FOLDER IS EDITED.
 
 GOAL OF THE TASK SYSTEM (Ayush, 3 Nov 2026, ANSWERS.md ENTRY 11 and 12; heading wording open, Q73)
-0. TOP PRIORITY (ENTRY 19): the system exists to fix, rebuild and harden existing tasks, and to create new hard tasks that score under the gate. Problems P1 to P11 matter because they block this.
+0. TOP PRIORITY (ENTRY 19): the system exists to fix, rebuild and harden existing tasks, and to create new hard tasks that score under the gate. Problems P1 to P12 matter because they block this.
 1. Ayush's job is to produce many tasks. His count is low now, so the system must make tasks fast and reliably.
 2. Score target on the harness (Opus 5): today tests under 85, rubric under 85, final under 40 (gate v3.7). The gate is a SETTING, not a fixed rule: the PL may lower it (for example final under 30 or 35) and the system must follow a change in one place (DR2).
 3. Every task must pass the current QC kit. Ayush's PL and QL said a task that passes QC is acceptable.
@@ -72,5 +72,4 @@ Files
 11. PLAN.md: the draft fix for each problem. Not approved.
 
 What Claude has seen so far
-This repo only: master_chat_tasks/ and master_chat_work/ at commit 10d3e3ff ("Work till now").
-Not seen: the harness repo (Terminal_2.0_Harbor_Harness, including scripts/master_queue.py), the QC kit (Input_Bundle_QC), the generator, opencode config, Docker settings, chat transcripts.
+This repo (master_chat_tasks/, master_chat_work/ at 10d3e3ff) plus Ayush's inputs on origin/main: Input_Bundle_QC, QC reports, harness queue, _runs, PL generator, opencode_dcp, anubis-stage-2 (teammate tasks). Not seen: the Mac itself, transcripts.

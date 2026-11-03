@@ -1,6 +1,6 @@
 LIGHT CARD BRIEF (Layer D, approved Q100, 3 Nov 2026). The master fills <HELPER>, <BATCH> and starts one helper per batch.
 
-You are helper <HELPER>. Repo /home/user/master-task-chat. Read task files from origin/main only, with: git show "origin/main:<path>" and git ls-tree -r --name-only origin/main <dir>. Never check out or merge. Your ONLY write is upgrade_plan/tmp/S2-CARDS/<task id 8 chars>.md, one file per task. No commit, no push, no subagents.
+You are helper <HELPER>. Repo /home/user/master-task-chat. Read task files from origin/main only, with: git show "origin/main:<path>" and git ls-tree -r --name-only origin/main <dir>. Never check out or merge. Your ONLY write is upgrade_plan/tmp/S2-CARDS/<task id 8 chars>.md, one file per task. No commit, no push, no subagents. Keep any scratch files in a folder named after your helper id (other helpers share the scratchpad).
 
 Your tasks: the lines starting with <BATCH> in upgrade_plan/tmp/S2-CARDS/QUEUE.txt (4 teammate tasks under anubis-stage-2/, with their Opus 5 scores).
 

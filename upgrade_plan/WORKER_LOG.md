@@ -22,6 +22,9 @@ W1-008 | W1 helper | 3 Nov 2026 09:20 | Layer C pilot card, high scorer 7e0d8feb
   Result: tests did not bite because the shipped data is the test generator on the sample seed and every trap appears in every instance (visible); only loss: one branch the shipped day never fired (no earlier fixed junction). Rubric loss: 62 of 65 points from "show one concrete instance" criteria. About 113k tokens.
 W1-009 | W1 helper | 3 Nov 2026 09:34 | Layer D light cards, batch B01 | Q100 | running | tmp/S2-CARDS/
 W1-010 | W1 helper | 3 Nov 2026 09:34 | Layer D light cards, batch B02 | Q100 | running | tmp/S2-CARDS/
-W1-011 | W1 helper | 3 Nov 2026 09:34 | Layer D light cards, batch B03 | Q100 | running | tmp/S2-CARDS/
+W1-011 | W1 helper | 3 Nov 2026 09:34 | Layer D light cards, batch B03 | Q100 | verified (master checked b42c61b9.md: test_output.py line 2458 is _full_core, as cited) | tmp/S2-CARDS/ (6285fcad, 9d1784a5, ceadc676, b42c61b9)
+  Result: all 4 DESIGN, confidence low: one shared template (seeded generator in test_output.py, a full core gate over held out corpora, rubric rewarding self tests on changed inputs); losses are cases only held out corpora trigger. About 141k tokens for 4 tasks.
 W1-012 | W1 helper | 3 Nov 2026 09:36 | third cold test of the recovery prompt (Ayush asked), while Layer D batches B01 to B03 run | recovery | verified (master checked: queue path, no "how to continue" method, stale lines; true) | reports/W1-012_recovery_test.md
   Result: state, goal, line, decisions and running work recovered correctly. 14 gaps (no procedure to tell finished batches, helper id clash, counts unexplained, stale live lines and statuses, card too long). Fixed 09:39: RESUME.md rewritten, tmp/S2-CARDS/CARD_RUN.md added, statuses fixed. About 88k tokens.
+W1-013 | W1 helper | 3 Nov 2026 09:40 | fourth cold test (recheck after the RESUME rewrite) | recovery | verified: nothing broken; 9 small points fixed 09:40 | (chat report)
+W1-014 | W1 helper | 3 Nov 2026 09:40 | Layer D light cards, batch B04 | Q100 | running | tmp/S2-CARDS/
