@@ -441,3 +441,9 @@ CR2 program: "Paid run program only"
 CR2 NO CORE: "60 percent, as a setting (Recommended)"
 
 Recorded as: CR2 decided. Only a real paid run program counts as the careful exact program; no blind program stands in for it. Before the first paid run the primary lever is judged by prediction only (DESIGN.md), and the first paid run is the test. NO CORE: the paid run program keeps 60 percent or more of the primary lever's points; then report to Ayush and redesign, never park on its own (T34, T44). 60 is a setting (settings.json no_core_keep_pct).
+
+ENTRY 62. 3 Nov 2026 16:03 IST (options dialog, word for word)
+CR3: "ask again in laymen terms"
+CR4 and CR5: "Yes, decided (Recommended)"
+
+Recorded as: CR4 and CR5 decided by the fold answers (T34, T44: never park on its own, report to Ayush; T1, T3, T4: carriers are valid, family D2, old SHAPE and S code fields go; template cleanup in P10). CR3 asked again in plain words.

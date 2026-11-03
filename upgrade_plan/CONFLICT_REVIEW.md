@@ -18,6 +18,9 @@ CR1. Timeout and crash losses (W1-002 C3). Status: DECIDED 3 Nov (ENTRY 18 and 2
 
 CR2. Careful exact program (W1-002 C5). Status: DECIDED 3 Nov (ENTRY 61): only a real paid run program counts; before the first paid run the lever is judged by prediction; NO CORE at 60 percent kept (setting no_core_keep_pct), report and redesign, never park on its own. P13 v2 blind stays a quick diagnostic only (T45).
 
+CR4. Parking (W1-002 C1). DECIDED 3 Nov (ENTRY 62): never park on its own; report to Ayush (T34, T44).
+CR5. Carriers as primary lever (W1-002 C2 with C22). DECIDED 3 Nov (ENTRY 62): carriers are valid (D2, T4); old SHAPE and S code fields go (T1, T3); template fields cleaned in P10.
+
 DECIDED FROM THE CARDS
 CR6. Amended or retyped field (cards 058cbab3, 88ee425d, af780bef; Q104, ENTRY 34): allowed in Ayush's tasks only when one sentence in the shipped docs decides how the amended value is read.
 CR7. Misread rule as primary lever (Q111, ENTRY 39; evidence tmp/W1-025/CONFIRM.md): ALLOWED as a primary lever when the rule has one clear deciding sentence in the shipped docs and many records tempt the wrong or too wide reading. Replaces route 1 R0 point 2 ("extras only") after PROCEED.
