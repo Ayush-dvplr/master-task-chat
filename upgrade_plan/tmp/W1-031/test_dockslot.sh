@@ -35,5 +35,14 @@ sleep 0.5
 $DS status
 wait
 echo
+echo "== T5: fast lane: oracle and nop pass a paid run that is waiting for room"
+$DS run --kind kill -- bash -c 'job KILL 6' &
+sleep 1
+$DS run --kind paid --mb 8192 -- bash -c 'job PAID2 1' &
+sleep 1
+$DS run --kind oracle -- bash -c 'job ORACLE 1' &
+$DS run --kind nop -- bash -c 'job NOP 1' &
+wait
+echo
 echo "== events.log"
 cut -c1-160 "$DOCKSLOT_DIR/events.log"

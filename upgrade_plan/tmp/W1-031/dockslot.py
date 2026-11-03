@@ -49,8 +49,8 @@ DEFAULTS = {
     "dead_grace_s": 120,
     "kinds": {
         "kill": {"mb": 4096, "cpus": 2, "priority": 1, "long_h": 1},
-        "oracle": {"mb": 4096, "cpus": 2, "priority": 1, "long_h": 2},
-        "nop": {"mb": 4096, "cpus": 2, "priority": 1, "long_h": 2},
+        "oracle": {"mb": 2048, "cpus": 1, "priority": 1, "long_h": 2, "fast": True},
+        "nop": {"mb": 2048, "cpus": 1, "priority": 1, "long_h": 2, "fast": True},
         "paid": {"mb": 8192, "cpus": 4, "priority": 0, "long_h": 6, "max_running": 2},
     },
     "host": {"min_free_pct": 15, "max_swap_mb": 8192, "orphan_rss_mb": 2048, "orphan_hold_mb": 8192,
@@ -350,12 +350,24 @@ def schedule(ctx, force_measure=False):
     running = {}
     for l in ls:
         running[l["kind"]] = running.get(l["kind"], 0) + 1
+    blocked = None  # first waiter that does not fit (head of line)
+    fast_max = ctx.s.get("fast_max_running", 4)
+    starve_s = ctx.s.get("fast_starve_s", 300)
     for w in waiters(ctx):
         k = ctx.kind(w["kind"])
         if running.get(w["kind"], 0) >= k.get("max_running", 10 ** 6):
             continue  # waits for its own kind's slot; does not block other kinds
+        if blocked is not None:
+            # Fast lane (Ayush, ENTRY 68): short QC oracle and nop jobs may pass a blocked big job
+            # while they fit, at most fast_max_running at once, and only until the blocked job
+            # has waited fast_starve_s, so a big job is never starved.
+            fast_now = sum(n for kn, n in running.items() if ctx.s["kinds"].get(kn, {}).get("fast"))
+            if not k.get("fast") or fast_now >= fast_max or time.time() - blocked["created"] >= starve_s:
+                continue
         if w["mb"] > free or cpus + w["cpus"] > r["cpu_cap"]:
-            break  # head of line: nobody behind it overtakes
+            if blocked is None:
+                blocked = w
+            continue
         lease = {"id": w["id"], "kind": w["kind"], "mb": w["mb"], "cpus": w["cpus"], "pid": w["owner_pid"],
                  "note": w.get("note", ""), "created": w["created"], "granted": time.time()}
         write_json(ctx.dir / "leases" / f"{w['id']}.json", lease)

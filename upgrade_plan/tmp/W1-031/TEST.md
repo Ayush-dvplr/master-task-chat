@@ -118,3 +118,13 @@ Stats parsing check (stub docker on PATH that prints fixed `docker info`, `docke
 7. The overuse of kill-x counts at its real 5222 MB, the unlabelled 4536 MB are first covered by oracle-y's 4096 MB reservation, and the remaining 440 MB count as foreign. dockfree would have said free = 12898 minus limits (4096 + 6144 + 4096 for the no limit container) = negative, START=no; dockslot sees 3140 MB free.
 
 Not tested here: a real Docker daemon, macOS sysctl values and orphan detection on the Mac (ps output format is the same on both systems), and many hours of uptime. Those belong in the first run on the Mac with docker.manager still "dockfree".
+
+T5 FAST LANE (added by the master, 3 Nov, ENTRY 68). Fake VM 11264 MB minus 3072 headroom = 8192 MB. A kill job (4096) runs; a paid job of 8192 MB waits for room; oracle and nop (2048 each, fast) pass it while they fit; the paid job starts when the kill job ends. Fast jobs pass a blocked job only up to fast_max_running (4) at once and only until it has waited fast_starve_s (300 s).
+14:41:03 KILL START lease=kill-1103-144103-563
+14:41:05 NOP START lease=nop-1103-144105-571
+14:41:05 ORACLE START lease=oracle-1103-144105-570
+14:41:06 NOP END
+14:41:06 ORACLE END
+14:41:09 KILL END
+14:41:09 PAID2 START lease=paid-1103-144104-568
+14:41:10 PAID2 END
