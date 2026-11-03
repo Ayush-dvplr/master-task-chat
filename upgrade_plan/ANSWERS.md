@@ -310,3 +310,12 @@ ENTRY 40. 3 Nov 2026 11:10 IST (word for word)
 "R1. along side it must verify response , flag me if something is wrong , tune prompts if needed , tell me about updates (like a brain which uses heavy sessions work on another sessiosn not just a simple prompt generator and record maintainer) R2. okay or better few more improve instead of reading complete database of all context it should get smartly like open ones, issues , running , not long completed ones also there can many more improvements you suggest me R3. yes R4. okay R5. keep R6. keep R7. Keep R8. keep R9. go check evidence and let me know R10. keep"
 
 Recorded as: batch 1 decisions in RULE_REVIEW.md. R1 CHANGED (the master is a brain, not a prompt generator). R2 CHANGED with smart loading (only open, running, issues, recent), Claude to suggest more improvements. R9: Claude checked evidence (study 3b00450) and suggests KEEP; Ayush to confirm.
+
+ENTRY 41. 3 Nov 2026 11:34 IST (word for word)
+"Q112: accept but you too verify is all correct and and will align with our goal and is there anything else that is missed 
+
+113. keep 
+
+R11. keep r12. keep r13. keep r14. keep r15. change r16. keep r17. keep r18. change r19. keep r20. change"
+
+Recorded as: Q112 accepted, Claude checks them against the goal and adds what is missing (R2 CHECK in RULE_REVIEW.md). Q113 R9 KEEP. Batch 2 decided; R15 values asked (Q114).

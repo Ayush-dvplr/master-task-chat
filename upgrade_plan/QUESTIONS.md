@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q112, Q113, rule review batch 2 (R11 to R20).
+LIVE NOW: Q114, Q115, rule review batch 3 (R21 to R30).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -184,7 +184,10 @@ Q110. The state card needs one current list of rules (RULES_IN_FORCE.md), built 
 
 Q111. FLAG against your own rule (CONFIRM.md): route 1 R0 point 2 (2 Nov) says a misread rule lever may only be an extra, never the primary lever. In teammate tasks, one misread documented rule carried most of the lost weight in 5 tasks (df8f123b, 4a5f9738, b6237098, d4e8c327, 43249294). Keep R0 point 2, or allow a misread rule lever as a primary lever again when the rule has one clear deciding sentence and many tempting records? [ANSWERED: allow it (CR7)]
 
-Q112. R2 improvements (RULE_REVIEW.md, 7 points): accept all, or which to drop? [OPEN]
-Q113. R9: evidence supports it (3b00450 ANALYSIS.md lines 59 to 60); KEEP? [OPEN]
+Q112. R2 improvements (RULE_REVIEW.md, 7 points): accept all, or which to drop? [ANSWERED: accepted; checked and 6 points added (Q115)]
+Q113. R9: evidence supports it (3b00450 ANALYSIS.md lines 59 to 60); KEEP? [ANSWERED: keep]
+
+Q114. R15 caps as settings: what values today for fix rounds per QC (now 2), QC rounds (now 2), edit rounds before drop (now 3), and the session time box (now 8)? Or "no cap, Ayush decides each time"? [OPEN]
+Q115. R2 CHECK: accept the 2 fixes (a, b) and the 6 added points (8 to 13)? [OPEN]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
