@@ -13,7 +13,7 @@ Read order after any compaction or in a new session
    b. one session Ayush names: python3 tools/board.py show <sha>
    c. a design or lever question: knowledge/PATTERNS.md (DESIGN families) and the current LEVER_RULES (one file, FOLD_PLAN.md)
    d. a QC fix: knowledge/QC_FIX_PLAYBOOK.md (current version only)
-   e. a decision's history: tools/decisions.py <topic> (DECISIONS_ACTIVE.md), never the whole decisions.jsonl
+   e. a decision's history: DECISIONS_ACTIVE.md (generated, R2 point 4; the generator is still to be built after PROCEED), never the whole decisions.jsonl
    f. research: knowledge/INDEX.md first (U5)
 4. Never read: files marked history, the whole feedback.jsonl or lessons.jsonl (their rules are in RULES_IN_FORCE.md), old template versions.
 5. Before writing any time: TZ=Asia/Kolkata date. Before trusting the QC kit or the generator: the card's QC KIT line.

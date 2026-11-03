@@ -349,3 +349,8 @@ ENTRY 47. 3 Nov 2026 12:30 IST (word for word)
 "also flagging does not if its doing anything stop that becasue some sessions may take just report"
 
 Recorded as: the long running flag (R2 improvement 8, 3 hours) only reports to Ayush. A session that is still working is never stopped or interrupted because of the flag, since some sessions take long. Card line and RULES_IN_FORCE.md ROLE updated.
+
+ENTRY 48. 3 Nov 2026 12:39 IST (word for word)
+"Q8 yes, Q120 allow it and make them warnings, Q121 accept (yes from my end but verify from your end)"
+
+Recorded as: Q8 superseded and snapshot files move to knowledge/history/ (list in drafts/P1/FOLD_PLAN.md part 1), after PROCEED. Q120 (a) helper W1-027 allowed for the content fold table; (b) issue.py round caps become warnings, never refusals. Q121 accepted by Ayush; Claude verifies it on its side (cold test W1-028 and a check of every tool the read order names).

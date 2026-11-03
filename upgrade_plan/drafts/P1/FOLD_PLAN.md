@@ -11,7 +11,7 @@ Old template versions (prompts/templates/*_v1 to v4) belong to P10, not here.
 a. LEVER_RULES_v3.md (62.7 KB): v3.3 to v3.8 changes stacked in one file, and route1 notes R0 "overrides LEVER_RULES_v3 where they differ". Fold R0 into it, delete the overridden text, keep one version line.
 b. README.md pipeline paragraph (line 31): says gate "tests<100, rubric<100, overall<70", "Count cap option A (over 35 = warn)" and "every strong solver loses by WRONG output"; its own bracket says this is superseded by v3.8. Replace with one line pointing at STATE_CARD.md and settings.json.
 c. QC_FIX_PLAYBOOK_v3.md: "count cap option A (over 35 = warn)" against the caps decided now (QC minimum, soft 70, hard 100, R15 no round caps).
-d. tools/issue.py: refuses past caps (2 fix rounds per QC, 2 QC rounds, 3 edit rounds, 8 session time box). Q114 says no caps; Ayush decides each time. The caps become warnings, or are dropped (to confirm, Q120).
+d. tools/issue.py: refuses past caps (2 fix rounds per QC, 2 QC rounds, 3 edit rounds, 8 session time box). Q114 says no caps; Ayush decides each time. DECIDED (ENTRY 48): the caps become warnings, never refusals.
 e. _COMMON_RULES_v5.md (19.7 KB) and pipeline v4 PLAN.md: checked line by line against RULES_IN_FORCE.md.
 f. KNOWLEDGE.md and state.json "standing rules": same check.
 

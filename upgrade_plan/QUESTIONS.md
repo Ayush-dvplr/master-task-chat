@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q8, Q120, Q121. Q116 kept for later.
+LIVE NOW: none (W1-027 and W1-028 running). Q116 kept for later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -18,7 +18,7 @@ P1 COMPACTION
 Q5. Does the master chat run in the opencode TUI (auto.py mentions "oc master")? Which model and provider? [ANSWERED: opencode TUI session "Master Task Chat", Opus 5.5 (Q40, Q50, Q56)]
 Q6. Is opencode auto compaction on? Do you also compact by hand? About how many compactions per day? (RQ4 may answer this.) [ANSWERED: native auto compaction OFF; DCP compresses on its own (Q41, Q44, Q49)]
 Q7. After a compaction, what exactly did the master get wrong? Old lever rules, your feedback (links, tables), running sessions, something else? One or two real examples. [FROM RECORDS (tmp/W1-003/ANSWERS_FROM_RECORDS.md), waiting for Ayush to confirm via Q65a to Q65d]
-Q8. May superseded files (LEVER_RULES v1 and v2, snapshots, old template versions) move to a history folder the master never reads? [OPEN again 3 Nov: list in drafts/P1/FOLD_PLAN.md part 1]
+Q8. May superseded files (LEVER_RULES v1 and v2, snapshots, old template versions) move to a history folder the master never reads? [ANSWERED: yes (ENTRY 48)]
 Q9. Would you accept the master reading one small generated state card (under about 4 KB) after compaction, instead of the 7 step read order? [PARKED until its problem is planned]
 
 P2 QC FIXES
@@ -197,5 +197,5 @@ Q118. Measured: 6 KB is not enough (quiet day about 6.3 KB, today about 7.0 KB, 
 Q119. Card v2 gaps (drafts/P1/CARD_TEST.md): (a) a normal day is 6.3 KB, a little over the 6 KB target: accept, or shorten RULES_IN_FORCE.md? (b) add a registry field for the design family and primary lever kind, so the uniqueness line can show them (after PROCEED)? (c) progress target: 4 push ready a day, 20 a week, right? (d) long running flag after 3 hours, right? [ANSWERED: accept, add field, targets right, 3 hours (ENTRY 46)]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.
-Q120. P1 fold (drafts/P1/FOLD_PLAN.md): (a) may helper W1-027 read the active rule files (LEVER_RULES_v3, route1 R0, QC_FIX_PLAYBOOK_v3, _COMMON_RULES_v5, pipeline v4 PLAN, KNOWLEDGE, state.json) and list every rule against RULES_IN_FORCE.md? (b) issue.py round caps (2 fix rounds, 2 QC rounds, 3 edit rounds, 8 session time box): turn them into warnings, or drop them (Q114 no caps)? [OPEN]
-Q121. Master recovery (drafts/P1/MASTER_RECOVERY.md): accept the new read order (card first, then only what the next step needs) and the paste prompt in part B? [OPEN]
+Q120. P1 fold (drafts/P1/FOLD_PLAN.md): (a) may helper W1-027 read the active rule files (LEVER_RULES_v3, route1 R0, QC_FIX_PLAYBOOK_v3, _COMMON_RULES_v5, pipeline v4 PLAN, KNOWLEDGE, state.json) and list every rule against RULES_IN_FORCE.md? (b) issue.py round caps (2 fix rounds, 2 QC rounds, 3 edit rounds, 8 session time box): turn them into warnings, or drop them (Q114 no caps)? [ANSWERED: helper allowed; caps become warnings (ENTRY 48)]
+Q121. Master recovery (drafts/P1/MASTER_RECOVERY.md): accept the new read order (card first, then only what the next step needs) and the paste prompt in part B? [ANSWERED: accept, Claude verifies on its side (ENTRY 48)]
