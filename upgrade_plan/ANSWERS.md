@@ -263,3 +263,8 @@ ENTRY 31. 3 Nov 2026 09:55 IST (word for word)
 "i guess we have to make it little tighter : B10 to B24 (becasue all of my credits are exhasuted ) so do not run any new BO agents lets discuss first"
 
 Recorded as: card run PAUSED. No new batch helpers. B08, B09 and B10 were already running at that time (Q101 asks whether to stop them). A tighter plan for B10 to B24 is to be discussed (Q102).
+
+ENTRY 32. 3 Nov 2026 10:00 IST (word for word)
+"Q101  keep them running, Q102 b then d"
+
+Recorded as: B08 to B10 keep running. Option (b) free triage script run; then option (d) sample.
