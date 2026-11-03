@@ -477,3 +477,8 @@ ENTRY 68. 3 Nov 2026 20:11 IST (word for word)
 "Q134 all as recommended also one imprvement ifyou verify and can add that is during QC we run oracle and nop which takes around a min max if docker is free so add this too for QC part keep those oracle and nop jobs coming they will not take that much resources or images , start P10"
 
 Recorded as: Q134 (a) to (f) as recommended. New: QC fast lane in dockslot: oracle and nop jobs (about a minute, light) are marked fast with smaller default sizes (2048 MB, 1 CPU until MEASURE.md gives real numbers); they may pass a big job that is waiting for room while they fit, at most fast_max_running (4) at once, and only until the waiting job has waited fast_starve_s (300 s), so a paid run is never starved. Added to tmp/W1-031/dockslot.py and settings, tested by the master (TEST.md T5, all T1 to T5 pass). P10 started.
+
+ENTRY 69. 3 Nov 2026 20:37 IST (word for word)
+"Q135 all as recommended, start P6"
+
+Recorded as: Q135 (1) to (10) as recommended: settings keys added to drafts/P1/settings.json (limits, docker, oracle_runs 3, 2 auto, 5 final, time_limit_factor 4, runs_per_task 1 and 8, lever_keep_pct 90, models); issue.py refuses a retired template and warns on an older or dormant one; honesty negatives J3a minus 3, J3b minus 5, J3c (BUILD_RULES fixed); judge probe band is how to text; retire P3, P5, P6, keep and update P4 for rebuild; new kit snapshot with a text copy from the Mac kit after PROCEED on Ayush's word; snapshots in knowledge/fingerprints/ with qc_text per kit head; a LENIENT change may update templates right after the report; a new check id is MAJOR by default, MINOR only when its fix touches author side files alone. P6 started.
