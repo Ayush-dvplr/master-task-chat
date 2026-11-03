@@ -234,3 +234,12 @@ ENTRY 24. 3 Nov 2026 09:19 IST, "yes" to resume Layer B. Recorded as: Layer B ru
 ENTRY 25. 3 Nov 2026 09:20 IST, "yes start the pilot". Recorded as: Q96 approved; helpers W1-006 to W1-008 started.
 
 ENTRY 26. 3 Nov 2026 09:23 IST, "okay let me know when the pilot cards are done and till the time its running lets parallely work on system compactatibility part". Recorded as: P1 work started in parallel with the pilot.
+
+ENTRY 27. 3 Nov 2026 09:29 IST, answers in chat (word for word, RQ9 output condensed)
+"98 B for master, A for task sessions or it can C as for task sessions i run one a time and then never reuses that (like not never) but generally i use 1 work for 1 sessions so with 1 million context wondow it can handle that verify from the promts generated as of board ids 
+
+97. ask me again in laymen terms 
+
+response from opencode: (RQ9 output, about 40 KB, condensed in inputs/dcp/RQ9_dcp_3.2.0_summary.md)"
+
+Recorded as: Q98 master = B (manual); task sessions = A or C, since one session is used for one job and the model has a 1 million token window. Claude checked the board: 445 sessions and 599 issued prompts, of which 56 are follow ups (go, answer, continue), so most sessions get one prompt; this supports C (DCP off) or a light A for task sessions. RQ9 done: DCP 3.2.0 supports every option needed, and reads a per folder .opencode/dcp.jsonc, so master and task sessions can have different settings. Q97 asked again.
