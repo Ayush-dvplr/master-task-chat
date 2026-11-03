@@ -33,6 +33,8 @@ W1-014 | W1 helper | 3 Nov 2026 09:40 | Layer D light cards, batch B04 | Q100 | 
   Result: 275f885b DESIGN (e, early misreads feed a total compared by digest); 98ed74c1 DEFECT (hidden data contradicts the doc, TRUTH calls it the hidden lever); 91f5740c DEFECT (same net definition contradiction as 6d12f970); 7c2e77a1 DESIGN (d or e, divergence not located). About 175k tokens.
 W1-015 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B05 | Q100 | verified (master checked 43249294 tariff_code.md line 5745: "increased by 0.6000 percentage points", as cited) | tmp/S2-CARDS/ (df8f123b, 43249294, 43986de8, daaca581)
   Result: df8f123b DESIGN (d, a documented precedence rule misread, gate on the exact set); 43249294 DESIGN (e, one override phrased differently buried in a 965k character code); 43986de8 DESIGN (a, WordprocessingML features only held out files use); daaca581 DESIGN by default, low confidence. About 181k tokens.
-W1-016 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B06 | Q100 | running | tmp/S2-CARDS/
+W1-016 | W1 helper | 3 Nov 2026 09:43 | Layer D light cards, batch B06 | Q100 | verified (master checked 8956ff8b: "governing_code" is in solve.py but in neither schema.md nor instruction.md, as the card says) | tmp/S2-CARDS/ (cd6a3a55, 8956ff8b, a7e17524, 4ee62df1)
+  Result: cd6a3a55 DESIGN (e, 64 interacting seeded defects, exact checks, layered gates); 8956ff8b DEFECT (output key names never fixed by the docs, whole document compare); a7e17524 mostly DESIGN (d and e), small DEFECT share; 4ee62df1 mostly DEFECT (contract silent on which journal ops feed the base), could be read as (d). About 218k tokens.
 W1-017 | W1 helper | 3 Nov 2026 09:47 | Layer D light cards, batch B07 | Q100 | running | tmp/S2-CARDS/
 W1-018 | W1 helper | 3 Nov 2026 09:51 | Layer D light cards, batch B08 | Q100 | running | tmp/S2-CARDS/
+W1-019 | W1 helper | 3 Nov 2026 09:52 | Layer D light cards, batch B09 | Q100 | running | tmp/S2-CARDS/
