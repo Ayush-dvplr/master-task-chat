@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q114, Q115, rule review batch 3 (R21 to R30).
+LIVE NOW: rule review batch 4 (R31 to R35). Q116 kept open for later (Ayush).
 FROM RECORDS, WAITING FOR AYUSH TO CONFIRM (Q65a to Q65e): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33, and which episode for Q35. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned (Q4 is taken up before the UNVERIFIED_RULES review): Q2, Q4, Q8, Q9, Q13, Q19, Q21, Q23 to Q29.
 LATER (Ayush): Q37.
@@ -187,7 +187,9 @@ Q111. FLAG against your own rule (CONFIRM.md): route 1 R0 point 2 (2 Nov) says a
 Q112. R2 improvements (RULE_REVIEW.md, 7 points): accept all, or which to drop? [ANSWERED: accepted; checked and 6 points added (Q115)]
 Q113. R9: evidence supports it (3b00450 ANALYSIS.md lines 59 to 60); KEEP? [ANSWERED: keep]
 
-Q114. R15 caps as settings: what values today for fix rounds per QC (now 2), QC rounds (now 2), edit rounds before drop (now 3), and the session time box (now 8)? Or "no cap, Ayush decides each time"? [OPEN]
-Q115. R2 CHECK: accept the 2 fixes (a, b) and the 6 added points (8 to 13)? [OPEN]
+Q114. R15 caps as settings: what values today for fix rounds per QC (now 2), QC rounds (now 2), edit rounds before drop (now 3), and the session time box (now 8)? Or "no cap, Ayush decides each time"? [ANSWERED: no cap, Ayush decides each time]
+Q115. R2 CHECK: accept the 2 fixes (a, b) and the 6 added points (8 to 13)? [ANSWERED: accepted]
+
+Q116. R28 "Difficulty comes from computation on hidden data, never from withheld rules": keep, change or drop? Ayush will come back to it (ENTRY 42). [OPEN, LATER]
 
 Note: these ids replace the unnumbered list Claude gave in chat on 2 Nov. Same questions, new numbers.

@@ -43,7 +43,7 @@ R2 CHECK AGAINST THE GOAL (Claude, 3 Nov)
 The goal is many accepted tasks, fast, with a master that is a brain (R1) and light on tokens (DR1). Points 1 to 7 serve that: they cut what the master reads after compaction and put news and live work first. Two risks found and fixed:
   a. "Changed in the last 48 hours" could hide an old item that is blocked and waiting for Ayush. Fix: blocked items and questions waiting for Ayush are always shown, whatever their age.
   b. The 4 KB limit can push useful lines out. Fix: the card fills in a fixed priority order (rules, news, waiting for Ayush, running, active tasks, the rest) and says what it left out.
-MISSING, added (Q115):
+MISSING, added (Q115; ACCEPTED with fixes a and b, ENTRY 42):
 8. Sessions running longer than expected are flagged (so the master can chase them, per R1).
 9. QC kit status line: the kit fingerprint compared with the stored snapshot, and LENIENT, MINOR or MAJOR if it changed (S7, R_QC_UPSTREAM).
 10. Settings line: the current gate and caps, read from the one settings file (DR2), so every session uses the same values.
@@ -74,7 +74,7 @@ R19. Kill tests run in Docker only, memory 4g, cpus 2, perl alarm.
 R20. dockfree.py: 3 GiB headroom, a container without a limit counts as 4 GiB, CPU cap 12.
   Note: to be replaced by the background Docker slot script (S1, P3), which measures real use. Suggest CHANGE: keep as a fallback until S1 exists.
 Decisions (Ayush, ENTRY 41, 3 Nov): R11 KEEP, R12 KEEP, R13 KEEP, R14 KEEP, R16 KEEP, R17 KEEP, R19 KEEP.
-R15 CHANGE: the caps become settings (values asked in Q114).
+R15 CHANGE: no caps on fix rounds, QC rounds, edit rounds or session count; Ayush decides each time (Q114, ENTRY 42).
 R18 CHANGE to: "A task is QC passed by the working definition (Q95): no fail finding in 2 QC runs in a row, any CL fail blocks, a minor is accepted if it does not come back with the same evidence, and a false positive review follows every QC result."
 R20 CHANGE to: "dockfree.py stays only as a fallback until the background Docker slot script (S1) exists; then S1 decides, from real use."
 
@@ -99,4 +99,24 @@ R29. An honesty negative of minus 3 in every judge.
   Note: the cards show it fires (for example 7e0d8feb R31 minus 3, 9f5486ac R9 minus 3). Suggest KEEP.
 R30. Nothing in the docs announces a lever: no "note that", no trap list, no method word, no stated size bound.
   Note: Layer F found that fd7a2544 states the hidden size and still lost 64 of 86 points (CONFIRM.md). Suggest CHANGE: drop "no stated size bound" when a runtime lever needs it; keep the rest.
+Decisions (Ayush, ENTRY 42, 3 Nov): all as suggested.
+R21 CHANGE to settings (busy workers, builds per run, harness runs), set by the S1 script and Ayush.
+R22 CHANGE to settings, same as R21.
+R23 KEEP. R24 CHANGE to a setting (paid runs per day, Ayush's value). R26 KEEP as the current gate setting. R27 KEEP. R29 KEEP.
+R25 CHANGE to: "The primary lever comes from the DESIGN families in tmp/W1-025/PATTERNS.md, carries at least 40 percent of positive test weight, and fires in most hidden inputs" (with CR7).
+R30 CHANGE to: "Nothing in the docs announces a lever: no 'note that', no trap list, no method word. A size bound may be stated when a runtime lever needs it."
+R28 OPEN (Q116): "Difficulty comes from computation on hidden data, never from withheld rules." Ayush will come back to it.
+
+
+BATCH 4 (R31 to R35, last of batch one), asked 3 Nov
+R31. Workers run anthropic/claude-opus-5-5, variant high.
+  Note: Ayush also uses GPT Sol 6.1 and Codex for task sessions (Q40, Q48). Suggest CHANGE to a setting per step and tool (P6 adapter).
+R32. GPT prompts in opencode must say "strictly do not run subagents".
+  Note: the reason is cost and subagents starting on Claude (F6.7). Suggest KEEP until the subagent model can follow the session's provider, then review.
+R33. Never hardcode generator or QC rules into prompts; prompts read the live files.
+  Note: the kit changes upstream (R_QC_UPSTREAM). Suggest KEEP.
+R34. Allowed repos only Terminal_2.0_Harbor_Harness, Anubis_Tasks_Samples, beta-task-generator, Finalized_Tasks_RFP, read only; Ayush runs every pull, commit and push.
+  Note: matches R_REPOS. The teammate tasks now come from anubis-stage-2 (this repo on main). Suggest CHANGE: add this repo (Ayush-dvplr/master-task-chat) as the place the upgraded system lives.
+R35. Never edit the generator, the QC kit, "QC assigned/" or "my tasks/" without Ayush's explicit "proceed".
+  Suggest KEEP.
 Decisions: (open)

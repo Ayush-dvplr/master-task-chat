@@ -319,3 +319,8 @@ ENTRY 41. 3 Nov 2026 11:34 IST (word for word)
 R11. keep r12. keep r13. keep r14. keep r15. change r16. keep r17. keep r18. change r19. keep r20. change"
 
 Recorded as: Q112 accepted, Claude checks them against the goal and adds what is missing (R2 CHECK in RULE_REVIEW.md). Q113 R9 KEEP. Batch 2 decided; R15 values asked (Q114).
+
+ENTRY 42. 3 Nov 2026 11:42 IST (word for word)
+"Q114 no cap, Q115 accept, R21 to R30 all as suggested and for R28. we will come back to this as of now make it an open question"
+
+Recorded as: Q114 no caps (Ayush decides each time). Q115 accepted. Batch 3: all as suggested, except R28, which stays an open question (Q116).
