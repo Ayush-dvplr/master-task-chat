@@ -68,7 +68,7 @@ Every ID:
       Author", or digits/symbols fail); email domain is ethara.ai or a
       subdomain; an email that cannot be related to the name warns.
   T15 [verifier.env] is exactly OPENAI_API_KEY = "${OPENAI_API_KEY:-}".
-  X1  no em/en dash in any text file; binary-skipped files warn.
+  X1  no em/en dash in any text file; a text-named file read as binary warns.
   X2  unresolved generator placeholders fail; TODO/FIXME/XXX/PLACEHOLDER
       markers warn (read each in context).
   X3  no file over 100 MB.
@@ -760,6 +760,14 @@ def check_toml(bundle: Path) -> dict | None:
 DASH_RE = re.compile("[\u2013\u2014]")
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}|__[A-Z][A-Z0-9_]*__|<TAG>")
 WORK_MARKER_RE = re.compile(r"\b(TODO|FIXME|XXX|PLACEHOLDER)\b")
+# A skipped binary is only worth reporting when its name says it should have
+# been text, since a corpus of spreadsheets and archives is ordinary.
+TEXT_SUFFIXES = {
+    ".bash", ".cfg", ".conf", ".css", ".csv", ".env", ".html", ".ini", ".js",
+    ".json", ".jsonl", ".log", ".md", ".properties", ".py", ".rst", ".sh",
+    ".sql", ".toml", ".ts", ".tsv", ".txt", ".xml", ".yaml", ".yml",
+}
+TEXT_NAMES = {"Dockerfile", "Makefile", "README", "LICENSE", "CHANGELOG"}
 AGENT_UID = "1000"
 WORLD_WRITABLE_MODES = re.compile(r"^(0*[0-7]{0,2}[0-7][0-7][2367]|[ugo]*[ao][ugoa]*\+[rwxXst]*w[rwxXst]*)$")
 
@@ -1077,8 +1085,8 @@ def check_bundle_text(bundle: Path) -> None:
 
     X1  em dash (U+2014) and en dash (U+2013) are banned in every text file,
         including environment/ input - plain hyphen-minus is always fine.
-        Files skipped as binary warn, so a text file misdetected as binary
-        gets re-checked by hand.
+        Binary files are skipped silently; only one whose name says it should
+        have been text warns, so a real misdetection still gets looked at.
     X2  unresolved generator placeholders ({{NAME}}, __NAME__, <TAG>) mean the
         bundle is unfinished - fail. The author markers TODO/FIXME/XXX/
         PLACEHOLDER warn: a task that ships a real source tree to be debugged
@@ -1093,7 +1101,8 @@ def check_bundle_text(bundle: Path) -> None:
         if p.stat().st_size > MAX_FILE_BYTES:
             fail("X3", f"{rel} is {p.stat().st_size / 1048576:.0f} MB (> 100 MB ceiling)")
         if not is_text(p):
-            skipped.append(str(rel))
+            if p.suffix.lower() in TEXT_SUFFIXES or p.name in TEXT_NAMES:
+                skipped.append(str(rel))
             continue
         text = p.read_text(encoding="utf-8", errors="replace")
         for i, line in enumerate(text.splitlines(), 1):
@@ -1109,8 +1118,8 @@ def check_bundle_text(bundle: Path) -> None:
     if not fails_for("X1"):
         ok("X1", "no em/en dashes in text files")
     if skipped:
-        warn("X1", f"{len(skipped)} file(s) skipped as binary, re-check any that are "
-                   f"text: {', '.join(skipped[:10])}")
+        warn("X1", f"{len(skipped)} file(s) named like text but read as binary, "
+                   f"re-check by hand: {', '.join(skipped[:10])}")
     if not fails_for("X3"):
         ok("X3", "no file over 100 MB")
 

@@ -12,6 +12,7 @@ This QC exists because defective bundles that passed a careless review reached p
 - Judgment checks get real judgment. Checks like overlap, double payment, trigger depth, and truth-against-the-oracle cannot be pattern-matched; they require you to hold two files in your head and reason. Spend the time. One criterion compared against one test at a time, every pair.
 - No batching shortcuts. Do not close "JD-1 through JD-14 verified" in one glance. Each ID gets its own pass over the material.
 - Slow is correct. A full QC of one bundle is expected to take a long session and read every byte of the bundle. If your pass felt quick, it was wrong; go back.
+- Withholding is the default, not a defect. The task is supposed to be hard: traps, misleading surfaces, decoy files, data whose shape only emerges from reading it, and rules that show themselves under one condition are all legitimate, and none of them belong in your report (DS-21, IN-17, CL-10). The fairness checks ask whether the agent COULD have known, and working it out from the shipped data counts fully; they never ask whether the prompt said it. Every one of them decides this with the same four-step grounding test, defined once in gate 05 under AL-1. A finding that amounts to "the instruction should have mentioned this" is valid only where the thing is a rule of engagement the agent could not have derived by doing the work.
 
 ## Step 0: gather your inputs
 
@@ -51,7 +52,7 @@ Each gate names one or two files it judges, and several more it reads as evidenc
 | 8 | `04_Judge_QC.md` | tests/judge.toml | solution/, tests/test_output.py, tests/reward.toml, instruction.md, the input directories environment/Dockerfile copies into the agent image |
 | 9 | `05_Alignment_Integrity_QC.md` | the whole bundle, cross-layer, including the client feedback checks CL-1..CL-10 | everything |
 
-Gate 9 carries one block that is not like the others: the client feedback checks CL-1..CL-10. Every one of them exists because the client found that exact defect in tasks we already delivered and measured what it cost, so none of them may be marked ✅ on a reading alone. Each names a number to compute or a file and line to quote, and the sign-off wants that number or that quote. The full wording is in `Final_checklist.md`; gate 05 repeats it so the gate stands on its own.
+Gate 9 carries one block that is not like the others: the client feedback checks CL-1..CL-10. Every one of them exists because the client found that exact defect in tasks we already delivered and measured what it cost, so none of them may be marked ✅ on a reading alone. Each names a number to compute or a file and line to quote, and the sign-off wants that number or that quote. The full wording is in `Final_checklist.md`; gate 05 repeats it so the gate stands on its own. They also outrank every lenient rule in the bundle: if a lenient reading would clear something a client check is about, run the client check fresh on its own terms and fail it if the bundle reproduces what the client found.
 
 Run the gates sequentially yourself, one at a time, and base every claim only on what you have actually read in that gate's own material, never on a conclusion carried over from an earlier gate.
 
@@ -79,7 +80,7 @@ Read and follow the `Step 11` section of `Final_checklist.md` exactly. It names 
 
 End with one consolidated report in the fixed output format from `Final_checklist.md`, human-readable from the first line:
 
-1. The verdict line at the very top: `Verdict: ❌ FAIL (n fails, n minors, n warns)` (or ⚠️ WARN / 🟡 MINOR / ✅ PASS). The worst finding anywhere decides: fail = must be fixed and re-run; minor = fix or get tasker approval; warn = push-ready once the tasker approves; pass = clean.
+1. The verdict line at the very top: `Verdict: ❌ FAIL (n fails, n minors, n warns)` (or ⚠️ WARN / 🟡 MINOR / ✅ PASS). The worst finding anywhere decides: fail = must be fixed and re-run, except an IN-17 fail marked `(waivable by tasker)`, which stops counting once the tasker waives it (see Verdicts in Final_checklist.md); minor = fix or get tasker approval; warn = push-ready once the tasker approves; pass = clean.
 2. The per-gate summary table: one row per script, one per model gate, one for Step 10, one for Step 11, each with its own ❌/🟡/⚠️/✅ verdict and counts, and the overall verdict as the last row. Step 10 is the only row that may read `⏸️ not run` with zero counts; that state never changes the overall verdict, so say under the table that the bundle is not cleared to ship until it is run.
 3. Findings, grouped by severity, worst first: ❌/🟡/⚠️ + gate and check ID + what is wrong in one sentence + file and line + quoted evidence + Bug/Error or Suggestion/Improvement.
 4. The consolidated sign-off checklist from `Final_checklist.md`, every item marked ✅ or ❌; every ❌ must have a matching entry in Findings.
