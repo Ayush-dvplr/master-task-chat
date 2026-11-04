@@ -1,0 +1,45 @@
+>>> cd "E/mc2_root"
+    [exit 0]
+>>> git status --porcelain            # must print nothing: no uncommitted system edits
+ M master_chat_tasks/settings.json
+    [exit 0]
+>>> git fetch origin --tags           # brings the new tag from GitHub
+    [exit 0]
+>>> git tag before-mc2-v2.3-20261104T1555   # marks the version you run now (mc2-v2.2), local only
+    [exit 0]
+>>> git checkout mc2-v2.3
+Previous HEAD position was 37f2a6d mc2-v2.2: rollout step 2 (state card, read order, prompts, DCP and opencode files)
+HEAD is now at 7634e0e mc2-v2.3: rollout step 3 (templates manifest, fill tokens, issue.py checks and runner, mc2 names)
+M	master_chat_tasks/settings.json
+    [exit 0]
+>>> python3 master_chat_tasks/tools/upgrade.py recheck --from mc2-v2.2 --to mc2-v2.3
+== RECHECK after mc2-v2.2 -> mc2-v2.3  (2026-11-04 15:55 IST, root E/mc2_root)
+  PASS  SYSTEM_VERSION
+        mc2-v2.3
+  WARN  settings.json valid
+        upgrade.known_bundle empty: Ayush sets a QC passed bundle for the recheck dry precheck
+        gate 85/85/40, manager dockfree; kit E/mc2_root/Terminal_2.0_Harbor_
+  PASS  state card builds
+        7.9 KB (hard 8 KB), 58 lines
+  PASS  opencode and DCP files
+        opencode.jsonc, .opencode/dcp.jsonc, master_chat_tasks/.opencode/dcp.jsonc
+        layering UNVERIFIED until the Mac check (G1): /dcp shows manual in the master, no DCP notice in a task session at ROOT
+  PASS  template_check clean
+        TOTAL templates 14  conflicting lines 0  SETTING 0  RETIRED 0  POINTER 0  SYSID 0  TOKEN 0  stale pointers outside templates 0  manifest problems 0
+  WAIT  cold recovery test
+        paste this prompt into a fresh master session, then rerun with --cold-result pass|fail:
+        Context recovery for the master chat. You are the master (the brain of the task system). Read master_chat_tasks/STATE_CARD.md first (regenerate it with python3 
+        PASS when the reply: names the goal, and the gate read from settings.json (not a typed number); names the running sessions and says a LONG session is only repor
+  WAIT  dry precheck on a known bundle
+        no bundle: give --known-bundle or settings upgrade.known_bundle
+  WARN  dockslot status
+        not delivered yet: arrives in mc2-v2.7 (running v2.3)
+
+VERDICT: WAITING for the manual items above. Keep the new version only if they pass. If one fails:
+  cd "E/mc2_root"
+  git checkout mc2-v2.2                # back to the version that worked (leaving mc2-v2.3)
+  python3 master_chat_tasks/tools/upgrade.py recheck --from mc2-v2.3 --to mc2-v2.2
+  # Only if the failed version changed DATA (for example a registry field): restore the records
+  # from today's backup. Look first with --dry-run, then run without it.
+  rsync -a --dry-run "E/mc2_backup/20261104/records/" "E/mc2_root/"
+    [exit 3]

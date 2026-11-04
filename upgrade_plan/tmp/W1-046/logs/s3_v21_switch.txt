@@ -1,0 +1,66 @@
+>>> cd "E/mc2_root"
+    [exit 0]
+>>> git status --porcelain            # must print nothing: no uncommitted system edits
+    [exit 0]
+>>> git fetch origin --tags           # brings the new tag from GitHub
+    [exit 0]
+>>> git tag before-mc2-v2.1-20261104T1553   # marks the version you run now (mc2-v2.0), local only
+    [exit 0]
+>>> git checkout mc2-v2.1
+Note: switching to 'mc2-v2.1'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 6fc6ae5 mc2-v2.1: rollout step 1 (settings, rules, fix map, history move)
+    [exit 0]
+>>> python3 master_chat_tasks/tools/upgrade.py recheck --from mc2-v2.0 --to mc2-v2.1
+== RECHECK after mc2-v2.0 -> mc2-v2.1  (2026-11-04 15:54 IST, root E/mc2_root)
+  PASS  SYSTEM_VERSION
+        mc2-v2.1
+  WARN  settings.json valid
+        upgrade.known_bundle empty: Ayush sets a QC passed bundle for the recheck dry precheck
+        gate 85/85/40, manager dockfree; kit E/mc2_root/Terminal_2.0_Harbor_
+  WARN  state card builds
+        not delivered yet: arrives in mc2-v2.2 (running v2.1)
+  WARN  template_check clean
+        template_check.py not delivered yet (arrives in mc2-v2.3); built in SYSID scan:
+        17 current templates type the old root or a /tmp path without mc2:
+        P10_upstream_diff_v2.md: old root x6, /tmp x0
+        P11_full_qc_v3.md: old root x16, /tmp x2
+        P12_recheck_fix_v5.md: old root x6, /tmp x0
+        P13_blind_solve_v2.md: old root x2, /tmp x0
+        P14_task_analysis_v2.md: old root x6, /tmp x0
+        P15_research_angle_v2.md: old root x3, /tmp x1
+        P16_ql_report_triage_v1.md: old root x6, /tmp x1
+        P17_ql_handback_v1.md: old root x5, /tmp x2
+        P2_build_v5.md: old root x12, /tmp x0
+        P3_hardness_check_v2.md: old root x6, /tmp x0
+        a prompt issued from ROOT with these templates points at the old folder: fixed by step 3
+  WARN  cold recovery test
+        needs the state card (arrives in mc2-v2.2)
+  WAIT  dry precheck on a known bundle
+        no bundle: give --known-bundle or settings upgrade.known_bundle
+  WARN  dockslot status
+        not delivered yet: arrives in mc2-v2.7 (running v2.1)
+
+VERDICT: WAITING for the manual items above. Keep the new version only if they pass. If one fails:
+  cd "E/mc2_root"
+  git checkout mc2-v2.0                # back to the version that worked (leaving mc2-v2.1)
+  python3 master_chat_tasks/tools/upgrade.py recheck --from mc2-v2.1 --to mc2-v2.0
+  # Only if the failed version changed DATA (for example a registry field): restore the records
+  # from today's backup. Look first with --dry-run, then run without it.
+  rsync -a --dry-run "E/mc2_backup/20261104/records/" "E/mc2_root/"
+    [exit 3]
