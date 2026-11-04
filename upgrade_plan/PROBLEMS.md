@@ -35,3 +35,4 @@ P15 (ENTRY 74). A README for the PL with questions in plain words, each naming t
 P16 (ENTRY 74). The generator or the way tasks are generated seems to give the exact steps in contracts or handoff data, which tells the model how to build the task step by step; suspected reason tests reach 100. Verify on 2 to 3 tasks.
 P17 (ENTRY 74). Old and new master systems may run at the same time on the Mac: every runner, Docker container, oracle and nop run and background script gets a unique id or hash so the two never clash.
 P18 (Ayush, 3 Nov, ENTRY 78). Drop the PL generator (blank data, blank sheets, a rigid format); build from our own prompts in two sessions: stage 1 design documents everything, stage 2 a fresh session builds end to end.
+P19 (Ayush, 4 Nov, ENTRY 95, 97). Triage of old teammate or assigned tasks: a read only script and an opencode prompt that rank which tasks to fix and push under the gate, separating real scores from scores broken by verifier errors.

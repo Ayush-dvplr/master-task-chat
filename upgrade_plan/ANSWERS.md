@@ -690,3 +690,14 @@ Volumes 4: "ask me again in laymen terms", then: "Desktop, Terminal Bench"
 Personal folder: "/Volumes/ayush_prsnl/"
 
 Recorded as: one Mac; git picks the personal or company account by folder, by itself. Personal place: /Volumes/ayush_prsnl/ (the planning clone goes to /Volumes/ayush_prsnl/mc2_upgrade, and the mc2 worktree next to it at /Volumes/ayush_prsnl/mc2_worktree). The new system root stays on the company side next to the old folder: /Users/mac/Desktop/mc2_root. The old folder stays /Users/mac/Desktop/Terminal Bench.
+
+ENTRY 97. 4 Nov 2026 19:17 IST (options dialogs, word for word)
+Old tasks 1: "Teammate or assigned tasks"
+Old tasks 2: "Full bundle,Trajectories,Not sure, mixed"
+Old tasks 3: "Worth working on, ranked (Recommended),Real score vs broken score,Levers and traps found,What to do next"
+Old tasks 4: "Read only first (Recommended)"
+Old tasks 5: (a folder path inside Terminal Bench named after a teammate; kept in chat only, the files use a TASKS_DIR setting)
+Old tasks 6: "Fix and push under gate (Recommended)"
+Old tasks 7: "Permission denied,Grader crash or timeout,Judge or API error,Not sure"
+
+Recorded as P19: a read only triage script (no Docker, no AI tokens) over a folder of teammate or assigned tasks (full bundles, trajectories, mixed), output a ranked table: worth working on (fix and push under the gate through the P13 intake, owner design and author kept), real score versus broken score (signs: permission denied, grader crash or timeout, judge or API error, anything unusual flagged), levers and traps found (D1 to D9, points lost), what to do next (fix QC, harden with owner agreement, re run, regrade, drop). Then a precise opencode prompt runs it and reads only the top picks deeply, asking Ayush before any Docker run.
