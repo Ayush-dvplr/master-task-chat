@@ -662,3 +662,8 @@ ENTRY 92. 4 Nov 2026 16:11 IST (word for word)
 "fix all"
 
 Recorded as: fix all 26 problems of tmp/W1-046/E2E_REPORT.md as proposed. The fixes go into a fix release tagged mc2-v2.5.1 (not mc2-v2.6, so the step numbers keep meaning rollout step N = mc2-v2.N; STAGE B step 6 stays mc2-v2.6). Delivery and setup guides become one clean install guide. Then the same end to end check runs again and its result goes to Ayush before he installs anything.
+
+ENTRY 93. 4 Nov 2026 17:23 IST (word for word)
+"fix all"
+
+Recorded as: fix the 9 issues of tmp/W1-048/E2E2_REPORT.md as a small release mc2-v2.5.2; rebuild the bundle; rerun the tests. Claude fixes the stale RESUME.md and QUESTIONS.md lines itself.

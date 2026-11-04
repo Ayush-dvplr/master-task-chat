@@ -28,13 +28,13 @@ READ ORDER AFTER COMPACTION
 7. Only when the next step needs them: STAGE2_STUDY_PLAN.md, PLAN.md, FINDINGS.md, tmp/W1-002/CONFLICTS.md, CONTRADICTIONS.md, UNVERIFIED_RULES.md, REQUESTS.md, inputs/.
 
 RUNNING NOW
-STAGE A BUILT and fixed: tags mc2-v2.0 to mc2-v2.5 plus fix release mc2-v2.5.1 (W1-047, 26 problems from the W1-046 end to end check) on branch mc2-v2; mc2-stable at mc2-v2.0; delivered as upgrade_plan/delivery/mc2.bundle (GitHub refused new branches from this session). INSTALL guide: upgrade_plan/delivery/README.md. Running: W1-048 second end to end check, report only. STAGE B needs its blockers and a second PROCEED. Next free helper id: W1-049.
+STAGE A BUILT and fixed: tags mc2-v2.0 to mc2-v2.5 plus fix release mc2-v2.5.1 (W1-047, 26 problems from the W1-046 end to end check) on branch mc2-v2; mc2-stable at mc2-v2.0; delivered as upgrade_plan/delivery/mc2.bundle (GitHub refused new branches from this session). INSTALL guide: upgrade_plan/delivery/README.md. W1-048 second end to end check: 0 breaks, 9 small issues; Ayush said fix all (ENTRY 93); W1-049 fixing into mc2-v2.5.2. STAGE B needs its blockers and a second PROCEED. Next free helper id: W1-050.
 
 STATE OF THE WORK (3 Nov)
 1. Teammate study (anubis-stage-2 on main): 68 of 108 tasks studied (55 light cards, 3 pilot, 10 from 2 Nov). Families: tmp/S2-CARDS/SUMMARY.md. Design guide: knowledge/PATTERNS.md; check against R0: knowledge/CONFIRM.md (durable copies of tmp/W1-025). Queue of all teammate tasks: tmp/S2-CARDS/QUEUE.txt. QUEUE batches B11 to B24 stay PAUSED (Ayush, credits); do not start them. The case by case review of the DEFECT families is paused (reason in CONFLICT_REVIEW.md PAUSE NOTE); do not restart it without Ayush.
 2. Rule review batch one (R1 to R35) DONE: decisions in RULE_REVIEW.md (ENTRY 40 to 43). R28 KEEP (ENTRY 67).
 3. P1 compaction drafts in drafts/P1/: master.dcp.jsonc (manual), tasks.dcp.jsonc (off), README_P1.md (how files reach each session, path check), state_card.py v2 (tested, CARD_TEST.md), RULES_IN_FORCE.md (one layer from the rule review), sample_STATE_CARD.md (5.9 KB).
-4. Nothing outside upgrade_plan/ has been edited. PROCEED has not been given.
+4. PROCEED for STAGE A given (ENTRY 89). Outside upgrade_plan/ only the mc2 worktree (scratchpad) was changed; main and the Mac folders never.
 
 DECISIONS SO FAR (short; details in the named files)
 1. Compaction (P1): master DCP manual (Q98), task sessions DCP off (Q99); master starts from master_chat_tasks/ (Q108); protected files list accepted (Q109).
