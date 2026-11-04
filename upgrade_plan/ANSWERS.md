@@ -667,3 +667,8 @@ ENTRY 93. 4 Nov 2026 17:23 IST (word for word)
 "fix all"
 
 Recorded as: fix the 9 issues of tmp/W1-048/E2E2_REPORT.md as a small release mc2-v2.5.2; rebuild the bundle; rerun the tests. Claude fixes the stale RESUME.md and QUESTIONS.md lines itself.
+
+ENTRY 94. 4 Nov 2026 17:50 IST (word for word)
+"update SETUP_STEPS so opencode is the only writer"
+
+Recorded as: from now on the opencode session on the Mac is the only writer of the new system branch mc2-v2 and its tags; the cloud planning session never changes it again; mc2.bundle stays frozen at mc2-v2.5.2 as the starting point. SETUP_STEPS step 5, AGENTS.md, NEXT.md and RESUME.md updated; ROOT gets later versions from the planning clone (one remote set-url).

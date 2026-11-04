@@ -16,7 +16,7 @@ HOW YOU WORK WITH AYUSH
 EDITS AND GIT
 1. Edit freely only inside upgrade_plan/. STAGE A of the new system is approved and built (tags mc2-v2.0 to mc2-v2.5.2; install it by upgrade_plan/delivery/README.md only). If upgrade_plan/RESUME.md still says "edit nothing until PROCEED" for STAGE A, it lags: this item wins. STAGE B (rollout steps 6 to 10) needs Ayush's second approval: he types the exact word PROCEED for STAGE B. Before that, build nothing outside upgrade_plan/ and the mc2 worktree drafts.
 2. Never edit the generator, the QC kit, "QC assigned/" or "my tasks/" without Ayush's "proceed" (R35). Never harbor delete. Never run generate_bundle.py --force, playground.py --model, or anything that uploads files or keys.
-3. Git: you may git add and git commit inside upgrade_plan/ and inside the mc2 worktree (one writer of mc2-v2 at a time, SETUP_STEPS.md step 5; new tags are lightweight). You never push; you print the push command and Ayush runs it. Never commit secrets (~/.codex/auth.json, ~/.tb-master-key, ~/.ssh, opencode transcripts, any API key).
+3. Git: you may git add and git commit inside upgrade_plan/ and inside the mc2 worktree (you are the ONLY writer of mc2-v2 and its tags from 4 Nov, ENTRY 94; the cloud session never changes it again; SETUP_STEPS.md step 5; new tags are lightweight; never force a branch or move an existing tag). You never push; you print the push command and Ayush runs it. Never commit secrets (~/.codex/auth.json, ~/.tb-master-key, ~/.ssh, opencode transcripts, any API key).
 
 HELPERS (subagents)
 1. Heavy reading goes to helpers. Each helper writes only in upgrade_plan/tmp/<id>/ (ids W1-046 and up, next free id in RESUME.md), self checks, and returns a short report.

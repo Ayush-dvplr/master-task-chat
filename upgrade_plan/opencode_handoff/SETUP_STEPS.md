@@ -25,10 +25,11 @@ Every line indented by four spaces is one command for Terminal (zsh). Paths are 
     cd "$PLAN"
     git fetch upgrade_plan/delivery/mc2.bundle "+refs/heads/mc2-v2:refs/remotes/bundle/mc2-v2" "+refs/heads/mc2-stable:refs/remotes/bundle/mc2-stable" --tags
     git worktree add -b mc2-v2 "/Users/mac/Desktop/mc2_worktree" bundle/mc2-v2
-   If "/Users/mac/Desktop/mc2_worktree" already exists from an earlier setup, skip the worktree add line and use the two update lines below. The fetch goes into bundle/... names, never into the branch the worktree has checked out, so it can be run again. When a newer mc2.bundle arrives (after git -C "$PLAN" pull), run the same fetch again and then move the worktree forward:
-    git fetch upgrade_plan/delivery/mc2.bundle "+refs/heads/mc2-v2:refs/remotes/bundle/mc2-v2" "+refs/heads/mc2-stable:refs/remotes/bundle/mc2-stable" --tags
-    git -C "/Users/mac/Desktop/mc2_worktree" merge --ff-only bundle/mc2-v2
-   One writer at a time for mc2-v2: until Ayush says otherwise, the cloud planning session writes it and ships it in mc2.bundle (now mc2-v2.5.2). The opencode session commits in the worktree only after Ayush says so, and only on top of the newest bundle. If merge --ff-only refuses, the two sides diverged: stop and ask; never force. New commits get new tags (mc2-v2.6 and up after the STAGE B approval; a fix release gets three numbers such as mc2-v2.5.3), always lightweight tags.
+   If "/Users/mac/Desktop/mc2_worktree" already exists from an earlier setup, skip both lines: the worktree is already there.
+   Only writer of mc2-v2 (Ayush, 4 Nov, ENTRY 94): from now on the opencode session on the Mac is the ONLY writer of the new system's branch mc2-v2 and its tags. The cloud planning session never changes it again, and mc2.bundle stays frozen at mc2-v2.5.2: it is only the starting point for this worktree and for ROOT, and no newer bundle will come. The opencode session commits in the worktree (its commits and tags land in this planning clone's git, since the worktree shares it). New commits get new tags (mc2-v2.6 and up after the STAGE B approval; a fix release gets three numbers such as mc2-v2.5.3), always lightweight tags. Never force a branch or move an existing tag.
+   How ROOT gets a version made here: ROOT's git remote "origin" first points at the bundle file. Before the first new version, point it at this planning clone once, so the fetch line that upgrade.py prints brings the new tags from here:
+    git -C "/Users/mac/Desktop/mc2_root" remote set-url origin "/Users/mac/Desktop/mc2_upgrade"
+   Then upgrade ROOT as usual (INSTALL guide: backup, preflight, the printed commands, recheck).
 
 6. Before every compression paste COMPACT_PROMPT.md, compress, then paste START_PROMPT.md again.
 
