@@ -652,3 +652,8 @@ ENTRY 90. 4 Nov 2026 15:42 IST (word for word)
 "okay whatever is left and needed to be i will continue in opencode can you setup that accordingly so that i can from this point on in my local using opencode opus 5.5 the same you ask me flag me , etc also give steps to do that"
 
 Recorded as: the planning and rollout continue in opencode (Opus 5.5) on the Mac. Handoff kit: upgrade_plan/opencode_handoff/ (AGENTS.md session rules, START_PROMPT.md, COMPACT_PROMPT.md, NEXT.md, SETUP_STEPS.md, .opencode/dcp.jsonc manual). The opencode session commits upgrade_plan/ and the mc2 worktree; Ayush pushes.
+
+ENTRY 91. 4 Nov 2026 15:50 IST (word for word)
+"verify end to end verify and will work on my local too if anything is breaking then do not directly fix it first report it then fix it okay ?"
+
+Recorded as: a full end to end verification of the delivery and the opencode handoff, as close to the Mac as this container allows; every problem is reported to Ayush first and fixed only after he says so.
