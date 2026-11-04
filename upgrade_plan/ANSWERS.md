@@ -562,3 +562,8 @@ ENTRY 81. 4 Nov 2026 00:41 IST (word for word)
 "yes remove PL31"
 
 Recorded as: PL31 (old Anubis 07 to 10 runs) removed from PL_QUESTIONS.md: the four tasks are teammate sample tasks from the 22 Oct low score study (authors are three teammates, not Ayush), the study is finished and anubis-stage-2 is the only teammate source now. 30 questions remain. Old pending item Q47 is settled the same way.
+
+ENTRY 82. 4 Nov 2026 10:46 IST (word for word)
+"there's a change in QC and rules are more lininent so that more and more traps, hidden cases , decoys and many things can be added in that ask me and i will push the updated QC and also all these questions are sent when they sent be back i will give you"
+
+Recorded as: the PL changed the QC kit; Ayush says it is more lenient, so more traps, hidden cases and decoys can be added. Ayush will push the updated kit (RQ10); Claude then runs kit_watch against the 57c22748 kit, classifies each change (LENIENT, MINOR, MAJOR, Q86), and rechecks the fix map, BUILD_RULES and PL_QUESTIONS.md against it. DR3 and the agreed line still apply to every new trap. PL_QUESTIONS.md (30 questions) has been sent to the PL and QL; Ayush will paste the answers when they arrive.
