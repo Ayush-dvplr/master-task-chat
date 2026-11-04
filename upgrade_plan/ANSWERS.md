@@ -681,3 +681,12 @@ ENTRY 95. 4 Nov 2026 18:48 IST (word for word)
 4. two readme files a. a shallow copy like book for me to understand what is complete idea b. a detailed that everything in technical and in detail about the this complete project"
 
 Recorded as: four new requests. (1) Two volumes on the Mac: a personal volume with Ayush's personal git login (this project lives there) and the company volume with Terminal Bench, the QC kit and everything on the company git; the setup must say where each clone goes and which git identity each uses. (2) P19: a prompt (and the script it builds) for Ayush's local opencode that checks a set of old tasks and ranks which are worth working on by our levers, traps and trajectory scores, treating scores as possibly wrong when the verifier had access errors; Claude asks questions first. (3) A detailed setup and run guide for the local opencode, again. (4) Two READMEs: a simple book like overview, and a detailed technical one. Questions Q159 to Q166.
+
+ENTRY 96. 4 Nov 2026 19:13 IST (options dialogs, word for word)
+Volumes 1: "did not get it ask me in laymen terms", then: "Two folders, two git logins"
+Volumes 2: "but i will clone there if i select option", then: "ask again in laymen terms in little more detail", then: "Company side, next to A (Recommended)"
+Volumes 3: "did not get it ask me again in laymen terms", then: "Yes, it switches by itself"
+Volumes 4: "ask me again in laymen terms", then: "Desktop, Terminal Bench"
+Personal folder: "/Volumes/ayush_prsnl/"
+
+Recorded as: one Mac; git picks the personal or company account by folder, by itself. Personal place: /Volumes/ayush_prsnl/ (the planning clone goes to /Volumes/ayush_prsnl/mc2_upgrade, and the mc2 worktree next to it at /Volumes/ayush_prsnl/mc2_worktree). The new system root stays on the company side next to the old folder: /Users/mac/Desktop/mc2_root. The old folder stays /Users/mac/Desktop/Terminal Bench.
