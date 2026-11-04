@@ -645,3 +645,5 @@ ENTRY 89. 4 Nov 2026 14:15 IST (word for word)
 Recorded as: PROCEED for STAGE A (rollout steps 0 to 5 of PLAN_FINAL.md). Claude may build the system files and push them to two new branches of this repo, mc2-v2 and mc2-stable. main and the Mac folders are never touched. STAGE B needs a second approval.
 
 NOTE 4 Nov 2026 14:30 IST (Claude): step 0 committed and tagged mc2-v2.0 on branch mc2-v2 (mc2-stable at the same commit). Pushing the new branches to GitHub was refused (HTTP 403: this session may push only to its own branch). Delivered instead as upgrade_plan/delivery/mc2.bundle on this branch; Ayush clones ROOT from it and may push the branches to GitHub himself (delivery/README.md).
+
+NOTE 4 Nov 2026 15:15 IST (Claude): STAGE A built: tags mc2-v2.0 to mc2-v2.5 on branch mc2-v2 (mc2-stable stays at mc2-v2.0 until Ayush rechecks each step on the Mac), delivered in upgrade_plan/delivery/mc2.bundle. Open small points for Ayush: a glossary of old lever labels in templates; a missing Template line only warns.
