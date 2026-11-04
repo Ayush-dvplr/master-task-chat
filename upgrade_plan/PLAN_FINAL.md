@@ -135,3 +135,11 @@ J. OPEN ITEMS AND RISKS
 3. Risks: rules drift from settings (template_check, upgrade gate); same task in both systems (rule, warnings, STAGE B guard); dockslot untested on macOS (dockfree fallback); lenient kit tempts forbidden traps (CL-1 to CL-10, DR3 absolute); first data copy misses a file (manifest, registry_check); an old running task forgotten (carry_over.py lists them; the card shows them until copied).
 
 Decision coverage: upgrade_plan/tmp/W1-039/CHECK.md maps ENTRY 40 to 83 (same section letters); ENTRY 84 is in C2, C4, E, G6, B10; ENTRY 85 in C5, F, H3. Cold test fixes: upgrade_plan/tmp/W1-042/CHANGES.md.
+
+K. ADDENDUM 4 NOV: PL AND QL ANSWERS (ENTRY 87, 88). These replace the matching lines above where they differ.
+1. QC pass: one complete QC pass; every real fail fixed; a false positive is closed only when it is truly false against the check text, with a note; an IN-17 fail Ayush may waive; warns fixed except the test and rubric count warns; minors decided per QC by Ayush on the master's proposal, stored in minor_decisions.jsonl and reused as proposals; every finding judged on its merits; then the QL runs a full QC.
+2. Which run counts after a fix: solution change nothing; tests or judge change regrade the last valid run; data or instruction change new paid run; task.toml change ask Ayush.
+3. Grading: no single wrong reading may cost more than 50 percent of positive test points (slip_cap_pct); tests check per row or per field.
+4. Settings: oracle runs 2 everywhere; time limit at least 2x the reference time on a busy machine; at most 3 what if figure criteria per judge.
+5. Q19 (Mac measurement) is a STAGE B blocker only. Q138 settled: helper labels used, 3 ids unsure.
+6. Files: upgrade_plan/drafts/P1/RULES_IN_FORCE.md, upgrade_plan/drafts/P1/BUILD_RULES.md, upgrade_plan/drafts/P1/settings.json. State card on the test day: 7.6 KB, under the 8 KB limit.
