@@ -647,3 +647,8 @@ Recorded as: PROCEED for STAGE A (rollout steps 0 to 5 of PLAN_FINAL.md). Claude
 NOTE 4 Nov 2026 14:30 IST (Claude): step 0 committed and tagged mc2-v2.0 on branch mc2-v2 (mc2-stable at the same commit). Pushing the new branches to GitHub was refused (HTTP 403: this session may push only to its own branch). Delivered instead as upgrade_plan/delivery/mc2.bundle on this branch; Ayush clones ROOT from it and may push the branches to GitHub himself (delivery/README.md).
 
 NOTE 4 Nov 2026 15:15 IST (Claude): STAGE A built: tags mc2-v2.0 to mc2-v2.5 on branch mc2-v2 (mc2-stable stays at mc2-v2.0 until Ayush rechecks each step on the Mac), delivered in upgrade_plan/delivery/mc2.bundle. Open small points for Ayush: a glossary of old lever labels in templates; a missing Template line only warns.
+
+ENTRY 90. 4 Nov 2026 15:42 IST (word for word)
+"okay whatever is left and needed to be i will continue in opencode can you setup that accordingly so that i can from this point on in my local using opencode opus 5.5 the same you ask me flag me , etc also give steps to do that"
+
+Recorded as: the planning and rollout continue in opencode (Opus 5.5) on the Mac. Handoff kit: upgrade_plan/opencode_handoff/ (AGENTS.md session rules, START_PROMPT.md, COMPACT_PROMPT.md, NEXT.md, SETUP_STEPS.md, .opencode/dcp.jsonc manual). The opencode session commits upgrade_plan/ and the mc2 worktree; Ayush pushes.

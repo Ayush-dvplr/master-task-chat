@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: Q19 (Mac measurement, when convenient). Waiting for RQ11 (PL answers). Kit 487b4697 classified (ENTRY 83). Final plan drafted (PLAN_FINAL.md), Q152 to Q156 asked, W1-040 cold test running. Q138, Q140 later. Q138 later.
+LIVE NOW: STAGE A built and delivered (upgrade_plan/delivery). Session continues in opencode on the Mac (upgrade_plan/opencode_handoff/NEXT.md). Open: glossary of old lever labels, Template line warn or refuse, kit snapshot save at mc2-v2.5, STAGE B blockers, Q140 later.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, (Q19 now live: tmp/W1-031/MEASURE.md), Q19, Q21, Q23 to Q29.
 LATER (Ayush): none.

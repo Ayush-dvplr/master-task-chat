@@ -18,6 +18,7 @@ RULES THAT ALWAYS APPLY
 7. Other rules: R_QC_UPSTREAM (kit classes LENIENT, MINOR, MAJOR), R_SUGGEST (AYUSH_SUGGESTIONS.md), R_QL (QL_QUESTIONS.md), DR1 (tokens free while building, finished system token light).
 
 READ ORDER AFTER COMPACTION
+0. In opencode on the Mac: upgrade_plan/opencode_handoff/AGENTS.md (session rules) and NEXT.md (what is left).
 1. This card.
 2. README.md.
 3. PROBLEMS.md, AYUSH_SUGGESTIONS.md, CONFLICT_REVIEW.md, RULE_REVIEW.md.
