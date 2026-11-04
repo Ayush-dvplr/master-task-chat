@@ -8,7 +8,7 @@ How to read this guide: every line indented by four spaces is one command to pas
     setopt interactivecomments
     OLD="/Users/mac/Desktop/Terminal Bench"
     ROOT="/Users/mac/Desktop/mc2_root"
-    PLAN="/Users/mac/Desktop/mc2_upgrade"
+    PLAN="/Volumes/ayush_prsnl/mc2_upgrade"
     BUNDLE="$PLAN/upgrade_plan/delivery/mc2.bundle"
     UP="$ROOT/master_chat_work/_upgrade/upgrade.py"
     python3 --version

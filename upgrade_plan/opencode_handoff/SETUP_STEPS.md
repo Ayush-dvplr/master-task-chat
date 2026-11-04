@@ -2,9 +2,11 @@ SETUP: continue the upgrade in opencode (Opus 5.5) on the Mac. These steps make 
 
 Every line indented by four spaces is one command for Terminal (zsh). Paths are in double quotes.
 
+0. Two places on this Mac (ENTRY 96): your PERSONAL folder /Volumes/ayush_prsnl/ (git uses your personal GitHub there by itself) holds this planning clone and the mc2 worktree; the COMPANY side holds the old system "/Users/mac/Desktop/Terminal Bench" and the new system root "/Users/mac/Desktop/mc2_root" (made in the INSTALL guide). Check the personal folder is mounted before you start: ls /Volumes/ayush_prsnl
+
 1. Get the planning branch into its own new folder. Never run these commands inside "/Users/mac/Desktop/Terminal Bench": that folder is the live old system, and a checkout there would switch the files the old system runs on. Never use the new root "/Users/mac/Desktop/mc2_root" either.
     setopt interactivecomments
-    PLAN="/Users/mac/Desktop/mc2_upgrade"
+    PLAN="/Volumes/ayush_prsnl/mc2_upgrade"
     git clone -b claude/youthful-feynman-zug0uq https://github.com/Ayush-dvplr/master-task-chat.git "$PLAN"
    Size: the branch carries master_chat_work, so the clone is about 2.2 GB checked out (about 40000 files) plus about 840 MB in .git; keep 4 GB free and expect several minutes. If "$PLAN" already exists and is this planning clone (git -C "$PLAN" branch --show-current prints claude/youthful-feynman-zug0uq), update it instead:
     git -C "$PLAN" pull
@@ -24,11 +26,11 @@ Every line indented by four spaces is one command for Terminal (zsh). Paths are 
 5. The mc2 worktree: the session's working copy of the new system's git branch mc2-v2, used only to change the new system (new commits and tags). It is not ROOT and nothing runs from it. Run from the clone root; the worktree goes to a fixed folder next to the clone:
     cd "$PLAN"
     git fetch upgrade_plan/delivery/mc2.bundle "+refs/heads/mc2-v2:refs/remotes/bundle/mc2-v2" "+refs/heads/mc2-stable:refs/remotes/bundle/mc2-stable" --tags
-    git worktree add -b mc2-v2 "/Users/mac/Desktop/mc2_worktree" bundle/mc2-v2
-   If "/Users/mac/Desktop/mc2_worktree" already exists from an earlier setup, skip both lines: the worktree is already there.
+    git worktree add -b mc2-v2 "/Volumes/ayush_prsnl/mc2_worktree" bundle/mc2-v2
+   If "/Volumes/ayush_prsnl/mc2_worktree" already exists from an earlier setup, skip both lines: the worktree is already there.
    Only writer of mc2-v2 (Ayush, 4 Nov, ENTRY 94): from now on the opencode session on the Mac is the ONLY writer of the new system's branch mc2-v2 and its tags. The cloud planning session never changes it again, and mc2.bundle stays frozen at mc2-v2.5.2: it is only the starting point for this worktree and for ROOT, and no newer bundle will come. The opencode session commits in the worktree (its commits and tags land in this planning clone's git, since the worktree shares it). New commits get new tags (mc2-v2.6 and up after the STAGE B approval; a fix release gets three numbers such as mc2-v2.5.3), always lightweight tags. Never force a branch or move an existing tag.
    How ROOT gets a version made here: ROOT's git remote "origin" first points at the bundle file. Before the first new version, point it at this planning clone once, so the fetch line that upgrade.py prints brings the new tags from here:
-    git -C "/Users/mac/Desktop/mc2_root" remote set-url origin "/Users/mac/Desktop/mc2_upgrade"
+    git -C "/Users/mac/Desktop/mc2_root" remote set-url origin "/Volumes/ayush_prsnl/mc2_upgrade"
    Then upgrade ROOT as usual (INSTALL guide: backup, preflight, the printed commands, recheck).
 
 6. Before every compression paste COMPACT_PROMPT.md, compress, then paste START_PROMPT.md again.
