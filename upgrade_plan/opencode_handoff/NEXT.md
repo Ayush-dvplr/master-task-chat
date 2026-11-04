@@ -7,3 +7,9 @@ WHAT IS LEFT (4 Nov 2026, handed over from the cloud planning session; updated f
 5. Not blocking: Q140 (classify 6 old intake tasks); the 40 unstudied teammate tasks (batches B11 to B24 paused for credits); the paused DEFECT family review (CONFLICT_REVIEW.md PAUSE NOTE, never restart without Ayush); 4 cleanup notes in tmp/W1-041/MAP.md; DCP off for task sessions measured for one week.
 6. The mc2 worktree (the session's copy of branch mc2-v2, for changing the new system only): make it or move it forward from the bundle by SETUP_STEPS.md step 5 before changing the new system; the opencode session is the only writer of mc2-v2 (ENTRY 94); mc2.bundle stays frozen at mc2-v2.5.2.
 7. upgrade_plan/RESUME.md may lag behind this file: STAGE A is approved and built (tags mc2-v2.0 to mc2-v2.5.2); STAGE B still waits for PROCEED. When RESUME.md says otherwise, AGENTS.md EDITS AND GIT item 1 and this file win; update RESUME.md (date, RUNNING NOW, RULES item 1) at the next step.
+
+FIRST SMALL TASK FOR THE OPENCODE SESSION (Ayush agreed, ENTRY 98): fix release mc2-v2.5.3 in the mc2 worktree, three text and code fixes the cloud session found while writing TECHNICAL.md:
+1. master_chat_tasks/knowledge/REGRESSION_CHECK.md step 3 still says 3 oracle runs (5 in the final QC); the decision is 2 everywhere (PL10, ENTRY 88): read the count from settings oracle_runs.
+2. master_chat_tasks/README.md rule U13 and the knowledge/BUILD_RULES.md QC FIX STEPS line still call a finding on unchanged lines "noise"; PL5 (ENTRY 88) dropped that rule: every finding is judged on its merits.
+3. tools/intake.py has the gate numbers written in its code; read them from settings gate (planned as STAGE B step 6, may be done now on Ayush's word).
+Then run the self tests and template_check, tag mc2-v2.5.3 (lightweight), and upgrade ROOT through the normal loop (backup, preflight, printed commands, recheck), after the one time remote set-url in SETUP_STEPS step 5.

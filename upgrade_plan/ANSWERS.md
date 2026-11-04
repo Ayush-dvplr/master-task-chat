@@ -701,3 +701,8 @@ Old tasks 6: "Fix and push under gate (Recommended)"
 Old tasks 7: "Permission denied,Grader crash or timeout,Judge or API error,Not sure"
 
 Recorded as P19: a read only triage script (no Docker, no AI tokens) over a folder of teammate or assigned tasks (full bundles, trajectories, mixed), output a ranked table: worth working on (fix and push under the gate through the P13 intake, owner design and author kept), real score versus broken score (signs: permission denied, grader crash or timeout, judge or API error, anything unusual flagged), levers and traps found (D1 to D9, points lost), what to do next (fix QC, harden with owner agreement, re run, regrade, drop). Then a precise opencode prompt runs it and reads only the top picks deeply, asking Ayush before any Docker run.
+
+ENTRY 98. 4 Nov 2026 19:32 IST (word for word)
+"yes do that"
+
+Recorded as: the 3 new system issues (REGRESSION_CHECK oracle count, the "noise" lines, intake.py gate numbers) become the first task for the opencode session, fix release mc2-v2.5.3, written in opencode_handoff/NEXT.md. Claude fixed the 2 planning file issues: drafts/P1/BUILD_RULES.md now mirrors the final version in mc2-v2.5.2, and PLAN_FINAL.md C4 says one backup folder per run.
