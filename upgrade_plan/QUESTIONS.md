@@ -2,7 +2,7 @@ QUESTIONS FOR AYUSH
 
 Answer in chat with the id (for example "Q9: 64 GB"). Claude records answers in ANSWERS.md and changes the status here.
 
-LIVE NOW: STAGE A built and delivered (upgrade_plan/delivery); the opencode session on the Mac is installing ROOT to mc2-v2.5.2 (ROOT at mc2-v2.5.2, recheck WAITING by choice, ENTRY 103: cold test fixes and the cold test itself move to mc2-v2.5.3; mc2-v2.5.3 tagged 5 Nov 00:14, ROOT round to it next; open later: P11 and P16 carry-over, ENTRY 104), then makes fix release mc2-v2.5.3 (ENTRY 99). Asked after the install (ENTRY 99): glossary of old lever labels, Template line warn or refuse, kit snapshot save, STAGE B blockers and PROCEED, Q140, the 5 TO BE CONFIRMED facts in TECHNICAL.md.
+LIVE NOW: STAGE A built and delivered (upgrade_plan/delivery); the opencode session on the Mac is installing ROOT to mc2-v2.5.2 (ROOT at mc2-v2.5.2, recheck WAITING by choice, ENTRY 103: cold test fixes and the cold test itself move to mc2-v2.5.3; mc2-v2.5.3 tagged 5 Nov 00:14, ROOT round to it next; P11 and P16 carry-over decided ENTRY 105; after the round: the 3 data-product flags one at a time and .omo/ in .gitignore next release, ENTRY 107), then makes fix release mc2-v2.5.3 (ENTRY 99). Asked after the install (ENTRY 99): glossary of old lever labels, Template line warn or refuse, kit snapshot save, STAGE B blockers and PROCEED, Q140, the 5 TO BE CONFIRMED facts in TECHNICAL.md.
 FROM RECORDS, CONFIRMED by Ayush through Q65a to Q65e (ENTRY 13): Q1, Q7, Q10, Q11, Q12, Q16, Q17, Q18, Q22, Q30 to Q33; Q35 = episode B. Answers in tmp/W1-003/ANSWERS_FROM_RECORDS.md.
 PARKED until their problem is planned: Q2, Q13, (Q19 now live: tmp/W1-031/MEASURE.md), Q19, Q21, Q23 to Q29.
 LATER (Ayush): none.
