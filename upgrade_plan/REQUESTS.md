@@ -53,4 +53,4 @@ Push to main under teammate_tasks/<task name>/: the full bundle (instruction.md,
 
 RQ9. Installed DCP 3.2.0 options (DONE 3 Nov, inputs/dcp/RQ9_dcp_3.2.0_summary.md). Paste into opencode GPT Sol 6.1, bring back the reply. Prompt saved in prompts/RQ9_dcp_options.md.
 RQ10 (4 Nov, ENTRY 82). Push the updated QC kit to origin/main in the same folder as before (Input_Bundle_QC/, all files including Final_checklist.md and any scripts), and tell Claude the PL's kit commit hash and date if you have them. Status: DONE (487b4697, ENTRY 83).
-RQ11 (4 Nov, ENTRY 82). Paste the PL and QL answers to PL_QUESTIONS.md (PL1 to PL30) when they come back. Status: OPEN.
+RQ11 (4 Nov, ENTRY 82). Paste the PL and QL answers to PL_QUESTIONS.md (PL1 to PL30) when they come back. Status: DONE (ENTRY 87).

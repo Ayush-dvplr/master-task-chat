@@ -593,3 +593,37 @@ ENTRY 86. 4 Nov 2026 13:16 IST (word for word)
 "Q157 all as recommended, Q158 accept all"
 
 Recorded as: Q157 (old clashes, tmp/W1-041/MAP.md): C13 a design predicting a final between 35 and 40 is shown to Ayush and goes ahead only on his word for that task; C16 after a harden that changes tests, judge or docs the next QC is a full QC; C19 stub and forgery judged by the kit's own checks only; C28 by day, after QC pass and freeze, the master starts the paid run itself within the settings budget; C34 a paid run in parallel with QC never by default, on Ayush's word only and counting only on the frozen QC passed sha; C38 method words: the stage 1 leak check plus a word list that only warns; C39 the reference time for the 4x limit is measured in the 2 CPU container with a second copy running; C40 2,000 variants from the task's own generator, counting only differences the docs decide, hand made cases reported separately; C41 hidden inputs stay at the shipped size unless a timeout lever is used, then with a stated bound; C44 any wording that clearly states exactness (not one fixed sentence, Claude's recommendation over the helper's). Q158: branches mc2-stable and mc2-v2 without history from main, pushed by Claude only after PROCEED; backup folder mc2_backup next to the root; carry_over.py; root folder name: default mc2_root, changeable at step 0 (nothing depends on the name).
+
+ENTRY 87. 4 Nov 2026 13:41 IST (word for word; PL and QL answers to PL_QUESTIONS.md, relayed by Ayush)
+"19. ask again , 138. ask again 3. Here are the pl answers flag me if something is conflicting : If its a minor needs (overhang ones) 
+2. Warn fixes according expect cap on test and rubrics 
+3. Ignore
+4. If a false positive is an actual positive check gain and very its a false positive not a personal opinion then only can be ignore with a note
+5. Check again if it an issue whether privies finding mention as a issue or not 
+6. Twice
+7. Verify from updated QC bundle one its fixed in that 
+8. full QC 
+9. Again 
+10. For oracle 2 times is enough 
+11. Then follow according to instruction and this will be updated and fixed soon 
+12. Accept it as one criteria 
+13. This is not stacking 
+14. 6 such criteria per judge is too many keep at 3 max, acceptable
+15. Yes 
+16. Yes
+17. No it is fine and fare, follow up- no
+18. RFC 4180 if the standard is stated then it is fine and follow up- the standard should at least a frontier model knows about 
+19. As long as oracle passes just keep small gap that is fine 
+20. Accept it 
+21. It should fail 
+22. It is fine if truth.md names it 
+23.  Tests and rubrics should not be created in a way that one wrong answer fails everything what client flagged here was that changing the word form emit to omit took away 96% of tests, after that this rule came in place so plan accordingly.
+24. It should not state these things 
+25. Check only latest QC bundle 
+26. As long as it pass QC bundle its fine 
+27. Its actually bette ref they do not align with them, those archtypes were just there as a sample, we do not want repetition of same tasks
+28. Ask ayush before changing name to his name by default will be tasters name 
+29. If solution folder changes nothing needed, test folder changes needs a regrade of test and rubric, if data or instrcution.md changes need a re run,. For task.toml changes usually do not affct run, depends on change if ti trigeerrs a re run. 
+30. Yes more explained in 29"
+
+Recorded as (by PL number, current PL_QUESTIONS.md): PL1 minors must be fixed (reading of "needs", to confirm); PL2 warns are fixed too, except the test and rubric count cap warns; PL3 count cap warns ignored; PL4 a fail is closed as a false positive only when it is truly false against the check (not opinion), with a note; PL5 a finding on unchanged lines is checked again on its merits, whatever the earlier round said; PL6 file twice (CL id and the precise id); PL7 follow the updated kit (new CL-5 text); PL8 the QL runs a full QC; PL9 the QL runs Step 10 again; PL10 oracle 2 runs are enough; PL11 label by the instruction, kit fix coming; PL12 one code quality criterion is fine; PL13 honesty negatives are not stacking; PL14 at most 3 what if figure criteria per judge; PL15 yes; PL16 IN-17 applies to spec files too; PL17 fine; PL18 naming the standard is fine if it is one a frontier model knows; PL19 fine as long as the oracle passes, a small gap is fine; PL20 accepted; PL21 step lists in spec or handoff files fail; PL22 fine if TRUTH.md names it; PL23 tests and rubric must not be built so one wrong answer fails everything (client case: one word change, emit to omit, took away 96 percent of tests); PL24 TRUTH.md must not state run scores; PL25 check only the latest kit; PL26 passing the kit is enough; PL27 better not to follow the archetypes, no repetition; PL28 author stays the tasker's name by default, ask before changing; PL29 solution change: nothing; tests change: regrade tests and rubric; data or instruction change: rerun; task.toml: depends; PL30 yes (judge only edit: regrade). Conflicts with our rules flagged to Ayush (Q159 to Q163). Q19 and Q138 asked again in plain words.
