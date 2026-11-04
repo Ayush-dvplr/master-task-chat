@@ -120,7 +120,7 @@ How to read this guide: every line indented by four spaces is one command to pas
 
 13. Rollback, any time after a step (the tool only prints; you paste). Example from mc2-v2.5.1 back to mc2-v2.5:
     python3 "$UP" rollback --from mc2-v2.5.1 --to mc2-v2.5
-   It prints: git checkout of the older tag, a recheck (which then says "ROLLBACK DONE" and prints no further commands), and, only if the failed version changed DATA, an rsync line that restores the records from the backup taken while the older version ran (look with --dry-run first). Every backup run has its own folder, so a rollback over two steps finds the records from before the first.
+   It prints: git checkout of the older tag, a recheck (which then says "ROLLBACK DONE"; it prints a git branch -f mc2-stable line only when mc2-stable still points at the version you left), and, only if the failed version changed DATA, an rsync line that restores the records from the backup taken while the older version ran (look with --dry-run first). Every backup run has its own folder, so a rollback over two steps finds the records from before the first.
 
 14. Optional: keep the versions on GitHub too. Push only named refs; the local before-* marker tags are never pushed this way. If GitHub refuses the mc2 branches, keep them local; the bundle and ROOT hold everything.
     git -C "$ROOT" remote add github https://github.com/Ayush-dvplr/master-task-chat.git
