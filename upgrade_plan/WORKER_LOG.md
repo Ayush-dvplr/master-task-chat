@@ -96,4 +96,5 @@ W1-048 | W1 helper | 4 Nov 2026 16:47 | second end to end check of the new INSTA
 W1-049 | W1 helper | 4 Nov 2026 17:23 | fix the 9 W1-048 issues as mc2-v2.5.2 in the mc2 worktree, update INSTALL guide and handoff files, rerun tests | ENTRY 93 | verified (master: tag mc2-v2.5.2 fe8e377a, SYSTEM_VERSION v2.5.2, 65 passed 29 skipped, template_check 0, secret scan clean, bundle rebuilt and verified, guide names mc2-v2.5.2) | tmp/W1-049/FIX2_REPORT.md
   Result: 8 of 8 fixed (issue 9 by the master); zsh upgrade v2.5.1 to v2.5.2 UP TO DATE. About 155k tokens.
 W1-050 | W1 helper | 4 Nov 2026 19:17 | P19 triage script triage_tasks.py and the opencode triage prompt, tested on teammate bundles and the permission blocked runs | ENTRY 97 | running | tmp/W1-050/
-W1-051 | W1 helper | 4 Nov 2026 19:17 | two READMEs: BOOK.md (simple overview) and TECHNICAL.md (full detail) | ENTRY 95 | running | tmp/W1-051/
+W1-051 | W1 helper | 4 Nov 2026 19:17 | two READMEs: BOOK.md (simple overview) and TECHNICAL.md (full detail) | ENTRY 95 | verified (master checked the tag facts it cites against the worktree and its list of source disagreements) | BOOK.md 63b521c0, TECHNICAL.md f05dee14, tmp/W1-051/NOTES.md
+  Result: BOOK 3,141 words, TECHNICAL 5,222 words; 5 facts marked TO BE CONFIRMED; 5 disagreements between sources found (reported to Ayush, not fixed).
