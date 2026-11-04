@@ -223,8 +223,8 @@ Q145. The built in upgrade tool needs to switch git branches and tags on the Mac
 Q146. Tick which of PL1 to PL33 (tmp/W1-036/PL_CHECKLIST.md) go to the PL or QL; Ayush answers the unticked ones himself. [ANSWERED: all 33 go to the PL and QL, rewritten in plain words with scenarios (ENTRY 77)]
 Q147. P16 step leak (tmp/W1-037/STEP_LEAK.md): add BR-SL1 to BR-SL4 to BUILD_RULES and remove the coupling sentence demand from the build prompt? [ANSWERED: yes, in stage 1 (ENTRY 78, 79)]
 Q148 to Q151 asked in the dialog 3 Nov and answered (ENTRY 79).
-Q152. New root folder: its name, a backup folder outside it, and whether the v2 branch and tags live only in the root's local git or also on GitHub (this session may push only upgrade_plan/ to its branch today). [OPEN]
-Q153. System id for the new system: mc2? [OPEN]
-Q154. New standing rule: the same task never runs in both systems at once, because the harness master_queue.py (lines 272 to 287) removes containers by task name, so a stop in one system can remove the other's containers. [OPEN]
-Q155. DCP keeps protect tags only in your own messages, so the rules block of the state card may not survive a compression when it arrives as tool output. Fallback: the master rereads the card after every compression (the recovery prompt), and you paste the rules once in a protect block only if a cold test shows a loss. [OPEN]
-Q156. 13 current templates type the old root path 119 times; after PROCEED each becomes a ROOT fill token so the new system never writes into the old folders. [OPEN]
+Q152. New root folder: its name, a backup folder outside it, and whether the v2 branch and tags live only in the root's local git or also on GitHub (this session may push only upgrade_plan/ to its branch today). [ANSWERED: GitHub branch (ENTRY 84)]
+Q153. System id for the new system: mc2? [ANSWERED: mc2 (ENTRY 84)]
+Q154. New standing rule: the same task never runs in both systems at once, because the harness master_queue.py (lines 272 to 287) removes containers by task name, so a stop in one system can remove the other's containers. [ANSWERED: never both at once (ENTRY 84)]
+Q155. DCP keeps protect tags only in your own messages, so the rules block of the state card may not survive a compression when it arrives as tool output. Fallback: the master rereads the card after every compression (the recovery prompt), and you paste the rules once in a protect block only if a cold test shows a loss. [ANSWERED: compact prompt then restore prompt, as here (ENTRY 84)]
+Q156. 13 current templates type the old root path 119 times; after PROCEED each becomes a ROOT fill token so the new system never writes into the old folders. [ANSWERED: part of Q144, P17 (ENTRY 84)]

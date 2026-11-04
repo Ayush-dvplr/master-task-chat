@@ -29,3 +29,7 @@ PART D. COLD TEST (after PROCEED, once)
 1. A fresh opencode session with only Part B and a copy of the records.
 2. Pass when it names: the goal, the gate from settings, the running sessions, the oldest question for Ayush, the handoff format (table with board sha, step, status, clickable link), and that a LONG session is only reported.
 3. Fail on: reading a history file, quoting README line 31 lever text, or a gate other than the settings value.
+
+PART E. THE COMPACT PROMPT AYUSH PASTES BEFORE A COMPRESSION (Q155, ENTRY 84)
+The master's DCP is manual, so a compression only happens when Ayush starts it. He pastes this first, then runs the DCP compress command, then pastes the restore prompt in part B.
+Before I compress this chat: write a checkpoint into the records with the tools (running sessions, open questions to me, the next step you proposed, anything I told you in this chat that is not yet in the records, word for word in feedback.jsonl). Then regenerate STATE_CARD.md and tell me in one line that it is current. Keep nothing important only in this chat.

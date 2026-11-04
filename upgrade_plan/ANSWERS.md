@@ -572,3 +572,11 @@ ENTRY 83. 4 Nov 2026 10:55 IST (word for word)
 "pushed the updated QC kit to main, check it"
 
 Recorded as: RQ10 done. Kit 57c22748 to 487b4697 read and classified by the master: 9 LENIENT changes, 1 MINOR (client checks outrank lenient rules; CL-6), no MAJOR (reports/KIT_CHANGE_487b4697.md). Acted on per Q86: BUILD_RULES and the fix map approach updated; PL answers to be read with this note.
+
+ENTRY 84. 4 Nov 2026 11:33 IST (options dialogs, word for word)
+Q152: "GitHub branch (Recommended)"
+Q153: "mc2 (Recommended)"
+Q154: "Never both at once (Recommended)"
+Q155: "ask me again in laymen terms", then: "similar to that context restore thing i will paste the prompt for both compact and then followed by restore one (flag me if i am wrong)"
+
+Recorded as: Q152 the system files go on a new GitHub branch of this repo, cloned into the new root folder; stable and v2 versions and tags on GitHub too; data out of git with a daily backup in a folder outside the root. Q153 system id mc2. Q154 standing rule: the same task never runs in both systems at once; the upgrade tool and the state card warn. Q155: Ayush pastes a compact prompt and then the restore prompt, as in this session. Claude's check: correct, not wrong, because the master's DCP is manual (Q98), so a compression only happens when Ayush starts it, and the restore prompt (MASTER_RECOVERY part B) makes the master reread the card. Claude adds a master compact prompt next to the restore prompt. Q156 (templates' old root path becomes a ROOT fill token) is part of Q144 and P17, no separate answer needed.
