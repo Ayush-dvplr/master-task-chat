@@ -1,0 +1,95 @@
+UPGRADE DRY RUN (W1-039, 04 Nov 2026 11:05 IST). upgrade.py in --layout drafts: system files read from upgrade_plan/drafts and upgrade_plan/tmp, records from the repo copy of master_chat_tasks (read only), every write under tmp/W1-039/dry (removed after the run). Live kit: origin/main 487b4697 extracted into dry/; snapshot: tmp/W1-032/kit_test/snap_57c22748. Nothing outside tmp/W1-039 was written.
+
+$ python3 upgrade.py --layout drafts --drafts upgrade_plan --work dry status
+system id      mc2
+version        v2.0-draft
+layout         drafts  root /home/user/master-task-chat
+settings       /home/user/master-task-chat/upgrade_plan/drafts/P1/settings.json
+work folder    /home/user/master-task-chat/upgrade_plan/tmp/W1-039/dry
+data records   17 of 20 paths present; work master_chat_work
+[exit 0]
+
+$ python3 upgrade.py --layout drafts --drafts upgrade_plan --work dry backup --records-only
+BACKUP /home/user/master-task-chat/upgrade_plan/tmp/W1-039/dry/backup/20261104: 157 record files (records only; master_chat_work mirror skipped)
+[exit 0]
+
+$ python3 upgrade.py --layout drafts --drafts upgrade_plan --work dry preflight --to v2.0 --kit dry/kit_487b4697/Input_Bundle_QC --snapshot ../W1-032/kit_test/snap_57c22748/qc.json
+== PREFLIGHT mc2 v2.0-draft -> v2.0  (2026-11-04 11:05 IST, layout drafts)
+  WARN  settings.json valid
+        no system.id key: P17 needs "system": {"id": "mc2"} (SYSTEM_ID.md)
+  PASS  rules files present
+        RULES_IN_FORCE.md 3576 B, BUILD_RULES.md 7200 B
+  FAIL  template_check clean
+        TOTAL templates 13  conflicting lines 87  SETTING 41  RETIRED 71  POINTER 47  stale pointers outside templates 1
+        current templates still hold retired rules or typed settings (P10 step)
+  WARN  kit_watch status
+        QC KIT: CHANGED 8 files (01_Instruction_QC.md, 02_Data_Solution_QC.md, 03_Tests_QC.md, 04_Judge_QC.md, 05_Alignment_Integrity_QC.md, Final_checkl); 22
+        kit changed since the snapshot: classify it (S7, Q86) before or after the switch; a MAJOR change blocks
+  PASS  state card builds
+        7.9 KB (hard 8 KB), 66 lines; LEFT OUT (over the hard limit; read the named source): uniqueness
+  PASS  tool self tests
+        23 Python files compile; --help ok: state_card.py, template_check.py, kit_watch.py, dockslot.py; dockslot fake status ok
+  FAIL  no session running
+        3 busy:
+        board dabfeb4 running hangar-check-replan
+        board ffd3a8e running sensor-network-lsq-correlated-adjustment
+        board 420bf9a running flood-repair-portfolio
+        (records copy in the repo; on the Mac this must read 0)
+  PASS  data backup done today
+        2026-11-04 11:05 IST: 157 record files match; work mirror 0 files
+
+VERDICT: BLOCKED. Fix every FAIL above, then run preflight again. No git command is printed.
+(dry mode only) On READY it would print these commands for Ayush:
+  cd "/home/user/master-task-chat"
+  git status --porcelain            # must print nothing: no uncommitted system edits
+  git fetch origin --tags           # only if the new version comes from GitHub
+  git tag before-v2.0-20261104T1105   # marks the version you run now (v2.0-draft), local only
+  git checkout v2.0
+  python3 master_chat_tasks/tools/upgrade.py recheck --from v2.0-draft --to v2.0
+[exit 1]
+
+$ python3 upgrade.py --layout drafts --drafts upgrade_plan --work dry recheck --from v1-old --to v2.0 --known-bundle ../../../master_chat_work/bundles/assay-plate-triage
+== RECHECK after v1-old -> v2.0  (2026-11-04 11:05 IST, layout drafts)
+  WARN  settings.json valid
+        no system.id key: P17 needs "system": {"id": "mc2"} (SYSTEM_ID.md)
+  PASS  state card builds
+        7.9 KB (hard 8 KB), 66 lines; LEFT OUT (over the hard limit; read the named source): uniqueness
+  FAIL  template_check clean
+        TOTAL templates 13  conflicting lines 87  SETTING 41  RETIRED 71  POINTER 47  stale pointers outside templates 1
+        current templates still hold retired rules or typed settings (P10 step)
+  WAIT  cold recovery test
+        paste this prompt into a fresh master session, then rerun with --cold-result pass|fail:
+        Context recovery for the master chat. You are the master (the brain of the task system). Read master_chat_tasks/STATE_CARD.md first (regenerate it wit
+        PASS when the reply: names the goal, and the gate read from settings.json (not a typed number); names the running sessions and says a LONG session is 
+  SKIP  dry precheck on a known bundle
+        precheck.sh reads the kit at a fixed path /Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Input_Bundle_QC, not present here (needs the M
+  PASS  dockslot status
+        manager dockfree (fake capacity, dry)
+        DOCKSLOT source=fake vm=15970MB cap=12898MB used=0MB (reserved 0, measured 0, foreign 0) free=12898MB cpus=0/12 hold=no leases=0 waiters=0 idle=yes da
+
+VERDICT: RECHECK FAILED. Roll back with these commands (paste them yourself):
+  cd "/home/user/master-task-chat"
+  git checkout v1-old                # back to the version that worked
+  python3 master_chat_tasks/tools/upgrade.py recheck --from v2.0 --to v1-old
+  # Only if the failed version changed DATA (for example a registry field): restore the records
+  # from today's backup. Look first with --dry-run, then run without it.
+  rsync -a --dry-run "/home/user/master-task-chat/upgrade_plan/tmp/W1-039/dry/backup/20261104/records/" "/home/user/master-task-chat/"
+[exit 1]
+
+$ python3 upgrade.py --layout drafts --drafts upgrade_plan --work dry rollback --from v2.0 --to stable
+ROLLBACK v2.0 -> stable. Paste these commands yourself (upgrade.py never runs git):
+  cd "/home/user/master-task-chat"
+  git checkout stable                # back to the version that worked
+  python3 master_chat_tasks/tools/upgrade.py recheck --from v2.0 --to stable
+  # Only if the failed version changed DATA (for example a registry field): restore the records
+  # from today's backup. Look first with --dry-run, then run without it.
+  rsync -a --dry-run "/home/user/master-task-chat/upgrade_plan/tmp/W1-039/dry/backup/20261104/records/" "/home/user/master-task-chat/"
+[exit 0]
+
+
+READING OF THE DRY RUN
+1. Preflight BLOCKED, as it should be today, for two real reasons: (a) template_check finds 87 conflicting lines in the 13 current templates (the P10 rollout step clears them; the dry run proves the gate catches old templates, P7 and P10); (b) the repo copy of the board shows 3 sessions running (records from 2 Nov; on the Mac this check must read 0 before an upgrade).
+2. Warnings: settings.json has no system.id yet (P17, add "system": {"id": "mc2"}); kit 487b4697 differs from the 57c22748 snapshot (already classified LENIENT with one MINOR in reports/KIT_CHANGE_487b4697.md; a new snapshot with a text copy is taken on Ayush's word after PROCEED, Q135).
+3. Passing: rules files, state card (7.9 KB on the 2 Nov records with first run news, under the 8 KB hard limit; the uniqueness line was left out and named, as designed), 23 Python files compile and answer --help, dockslot status on fake capacity, backup taken and matched.
+4. Recheck: the cold recovery test waits for Ayush; the known bundle precheck needs the Mac (precheck.sh reads the kit at a fixed Mac path); the rollback commands are printed.
+5. The dry folder (record copies, kit copy, test card) was removed after this run.

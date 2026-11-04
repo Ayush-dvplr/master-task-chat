@@ -75,7 +75,7 @@ Files
 9a. AYUSH_SUGGESTIONS.md: Ayush's suggestions and their status. QL_QUESTIONS.md: questions queued for the QL.
 9d. drafts/: draft files for each fix (P1 first). Nothing in drafts/ is applied before PROCEED.
 10. inputs/: material Ayush gave (RQ3 and RQ4 output pasted in chat on 3 Nov, saved by Claude).
-11. PLAN.md: the draft fix for each problem. Not approved.
+11. PLAN.md: the old draft fix per problem. PLAN_FINAL.md: the final plan for Ayush's approval before PROCEED.
 
 What Claude has seen so far
 This repo (master_chat_tasks/, master_chat_work/ at 10d3e3ff) plus Ayush's inputs on origin/main: Input_Bundle_QC, QC reports, harness queue, _runs, PL generator, opencode_dcp, anubis-stage-2 (teammate tasks). Not seen: the Mac itself, transcripts.
