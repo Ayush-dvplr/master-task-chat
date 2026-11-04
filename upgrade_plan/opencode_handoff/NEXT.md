@@ -4,6 +4,7 @@ WHAT IS LEFT (5 Nov 2026 01:35 IST, opencode session; RESUME.md RUNNING NOW is t
 2. How the system changes from now on: this session edits the worktree, runs the self tests and template_check, commits and makes a lightweight tag; Ayush runs the round in ROOT (backup, preflight, printed commands, recheck). Never move a tag (one exception used, ENTRY 106).
 3. Waiting in the worktree: commit 9718df83 (prompts in text code blocks, .omo/ in .gitignore), untagged; tag mc2-v2.5.4 when Ayush says.
 4. Data-product decisions, one at a time: item 2 TS-26 and JD-14 triage is asked and waiting (reports/DATA_PRODUCT_TRIAGE.md); then item 3 QL QC owed; then item 4 predicted final over the gate. Paid run S460 stays HELD.
+4a. Waiting for Ayush: reports/MASTER_GAPS.md (add the gaps to mc2-v2.5.4 or not; move the data-product decisions to the new master or not).
 5. QC kit classify in the new master (RESUME.md RUNNING NOW item 5), then the snapshot save on Ayush's words.
 6. Then ask: the six open questions of ENTRY 99, the old harness local edit flag, the state card size, the G1 task half check, the PL1 reading.
 7. STAGE B (rollout steps 6 to 10) needs its blockers (PLAN_FINAL.md section F: paid run wrap and task name guard in origin/main:"harness queue/master_queue.py" with Ayush's proceed, R35; Q78; Q19 Mac measurement tmp/W1-031/MEASURE.md; a short design) and Ayush typing PROCEED for STAGE B.
