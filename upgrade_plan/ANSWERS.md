@@ -672,3 +672,12 @@ ENTRY 94. 4 Nov 2026 17:50 IST (word for word)
 "update SETUP_STEPS so opencode is the only writer"
 
 Recorded as: from now on the opencode session on the Mac is the only writer of the new system branch mc2-v2 and its tags; the cloud planning session never changes it again; mc2.bundle stays frozen at mc2-v2.5.2 as the starting point. SETUP_STEPS step 5, AGENTS.md, NEXT.md and RESUME.md updated; ROOT gets later versions from the planning clone (one remote set-url).
+
+ENTRY 95. 4 Nov 2026 18:48 IST (word for word)
+"okay i will start on my mac now again but i have few small issues : 1. So basically I have two volumes separate. One is volume for my personal, where my personal Git is logged in, and apart from that volume, everywhere I am using the company's volume. Now the problem is, this project is my personal and I'm keeping it to my own volume, and the rest, the terminal bench or rest where the QC is, everything is, are on the company's Git. And so I want, where I take this pull, like on the desktop or any other place, first thing is this.
+
+2. So now second thing, I have few old tasks that I get my hands on. So I want you make a script that will check all those and decide on which we can test we work on as per our levers , is traps in as per trajectory score (score may be defective so scores can be wrong due to verifier access errror( you will just give a deatiled i will run that and select task in my local opencode ) but ask me questions to clear idea of everything before that you write a good and precise prompt.
+3. a detailed instruction again to setup and run the work on my local opencode 
+4. two readme files a. a shallow copy like book for me to understand what is complete idea b. a detailed that everything in technical and in detail about the this complete project"
+
+Recorded as: four new requests. (1) Two volumes on the Mac: a personal volume with Ayush's personal git login (this project lives there) and the company volume with Terminal Bench, the QC kit and everything on the company git; the setup must say where each clone goes and which git identity each uses. (2) P19: a prompt (and the script it builds) for Ayush's local opencode that checks a set of old tasks and ranks which are worth working on by our levers, traps and trajectory scores, treating scores as possibly wrong when the verifier had access errors; Claude asks questions first. (3) A detailed setup and run guide for the local opencode, again. (4) Two READMEs: a simple book like overview, and a detailed technical one. Questions Q159 to Q166.
