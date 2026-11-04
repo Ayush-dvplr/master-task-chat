@@ -657,3 +657,8 @@ ENTRY 91. 4 Nov 2026 15:50 IST (word for word)
 "verify end to end verify and will work on my local too if anything is breaking then do not directly fix it first report it then fix it okay ?"
 
 Recorded as: a full end to end verification of the delivery and the opencode handoff, as close to the Mac as this container allows; every problem is reported to Ayush first and fixed only after he says so.
+
+ENTRY 92. 4 Nov 2026 16:11 IST (word for word)
+"fix all"
+
+Recorded as: fix all 26 problems of tmp/W1-046/E2E_REPORT.md as proposed. The fixes go into a fix release tagged mc2-v2.5.1 (not mc2-v2.6, so the step numbers keep meaning rollout step N = mc2-v2.N; STAGE B step 6 stays mc2-v2.6). Delivery and setup guides become one clean install guide. Then the same end to end check runs again and its result goes to Ayush before he installs anything.
