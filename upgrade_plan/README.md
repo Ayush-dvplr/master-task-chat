@@ -58,7 +58,7 @@ Running, done, verified, rejected: statuses for helpers in WORKER_LOG.md.
 All times are IST.
 
 Files
-0. RESUME.md: the recovery card. Read first after any compaction or in a new session. Kept current after every step.
+0. RESUME.md: the recovery card. Read first after any compaction or in a new session. Kept current after every step. LESSONS.md: mistakes of the upgrade session and what each changed (read after RESUME.md).
 1. README.md: this file. Rules of the planning process and the index.
 2. PROBLEMS.md: the problems (P1 to P12 so far) in Ayush's words, plus any new problems he adds.
 3. FINDINGS.md: what Claude found in the repo for each problem, with file and line evidence.

@@ -19,7 +19,7 @@ RULES THAT ALWAYS APPLY
 
 READ ORDER AFTER COMPACTION
 0. In opencode on the Mac: upgrade_plan/opencode_handoff/AGENTS.md (session rules) and NEXT.md (what is left). Open item files: reports/DATA_PRODUCT_TRIAGE.md (waiting question). INSTALL_LOG.md only when a step needs install history.
-1. This card.
+1. This card, then LESSONS.md (mistakes of this session and what each changed).
 2. README.md.
 3. PROBLEMS.md, AYUSH_SUGGESTIONS.md, CONFLICT_REVIEW.md, RULE_REVIEW.md.
 4. QUESTIONS.md first 30 lines (LIVE NOW and the parked lists).
