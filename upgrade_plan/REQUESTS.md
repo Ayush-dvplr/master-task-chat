@@ -52,5 +52,5 @@ RQ8. Teammate tasks (DONE 3 Nov: anubis-stage-2/ on main)
 Push to main under teammate_tasks/<task name>/: the full bundle (instruction.md, task.toml, environment/, solution/, tests/) and, if you have them, each task's harness scores and QC result. Include the 10 tasks already studied in master_chat_work/20261102_test_design_study if possible, plus any others that scored under the gate. No personal data (emails, keys).
 
 RQ9. Installed DCP 3.2.0 options (DONE 3 Nov, inputs/dcp/RQ9_dcp_3.2.0_summary.md). Paste into opencode GPT Sol 6.1, bring back the reply. Prompt saved in prompts/RQ9_dcp_options.md.
-RQ10 (4 Nov, ENTRY 82). Push the updated QC kit to origin/main in the same folder as before (Input_Bundle_QC/, all files including Final_checklist.md and any scripts), and tell Claude the PL's kit commit hash and date if you have them. Status: OPEN.
+RQ10 (4 Nov, ENTRY 82). Push the updated QC kit to origin/main in the same folder as before (Input_Bundle_QC/, all files including Final_checklist.md and any scripts), and tell Claude the PL's kit commit hash and date if you have them. Status: DONE (487b4697, ENTRY 83).
 RQ11 (4 Nov, ENTRY 82). Paste the PL and QL answers to PL_QUESTIONS.md (PL1 to PL30) when they come back. Status: OPEN.
