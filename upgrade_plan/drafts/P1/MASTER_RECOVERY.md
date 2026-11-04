@@ -20,7 +20,9 @@ Read order after any compaction or in a new session
 6. Ask Ayush when the card and a file disagree; do not choose on your own (R_FLAG).
 
 PART B. THE PROMPT AYUSH PASTES AFTER A COMPACTION (or to start a new master session)
+```text
 Context recovery for the master chat. You are the master (the brain of the task system). Read master_chat_tasks/STATE_CARD.md first (regenerate it with python3 tools/state_card.py if it is older than 1 hour) and follow its RULES IN FORCE. Read nothing else until the next step needs it. Then tell me in 5 short lines: sessions running and anything LONG (report only, never stop), questions waiting for me oldest first, news since the last card, today's progress against the target, and the next step you propose. Line 1 also names the goal and the gate as the card states them, and any session running or issued is shown as the handoff table (board sha, step, status, clickable link). Do not issue or write anything until I answer.
+```
 
 PART C. PROTECTION (P1 step 3, needs protectTags true in master.dcp.jsonc)
 Ayush's standing rules go into RULES_IN_FORCE.md, and the card wraps the RULES IN FORCE section in <protect> ... </protect>, so a manual DCP compression keeps it word for word. Cost: about 20 bytes. To check after PROCEED: protectTags works on tool output (the card is read by a tool), not only on user messages. If it does not, Ayush pastes the rules in a <protect> block once per session. (Open point, see Q121.)
@@ -32,4 +34,6 @@ PART D. COLD TEST (after PROCEED, once)
 
 PART E. THE COMPACT PROMPT AYUSH PASTES BEFORE A COMPRESSION (Q155, ENTRY 84)
 The master's DCP is manual, so a compression only happens when Ayush starts it. He pastes this first, then runs the DCP compress command, then pastes the restore prompt in part B.
+```text
 Before I compress this chat: write a checkpoint into the records with the tools (running sessions, open questions to me, the next step you proposed, anything I told you in this chat that is not yet in the records, word for word in feedback.jsonl). Then regenerate STATE_CARD.md and tell me in one line that it is current. Keep nothing important only in this chat.
+```

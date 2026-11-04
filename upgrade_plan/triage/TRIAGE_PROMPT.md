@@ -1,7 +1,8 @@
-TRIAGE PROMPT FOR OPENCODE (P19). Ayush pastes everything after the line PROMPT START into his local opencode session (Opus 5.5) in the planning clone. Replace nothing by hand: the session asks for the folder.
+TRIAGE PROMPT FOR OPENCODE (P19). Ayush pastes the text inside the code block after the line PROMPT START into his local opencode session (Opus 5.5) in the planning clone. Replace nothing by hand: the session asks for the folder.
 
 PROMPT START
 
+```text
 Task: triage a folder of old teammate or assigned Harbor tasks, read only, and help me pick which ones to fix and push under the gate.
 
 Read first: upgrade_plan/opencode_handoff/AGENTS.md (rules, style, how to ask), upgrade_plan/triage/README.md (what the script reports and its limits), upgrade_plan/tmp/W1-035/P13_INTAKE.md (the outside intake), upgrade_plan/knowledge/PATTERNS.md (families D1 to D9), upgrade_plan/tmp/W1-030/FIX_MAP.md (fix map rows by check id), upgrade_plan/PLAN_FINAL.md sections H and K.
@@ -66,3 +67,4 @@ Questions you must ask (and your recommendation for each):
 6. For a task whose real score is unknown because every paid run is broken: accept the corrected score as a diagnostic only and plan one regrade or new run (Recommended), or drop it.
 
 Finish by telling me in at most 6 lines: the TRIAGE folder, the cards written, what each picked task needs next, and the questions still open.
+```
