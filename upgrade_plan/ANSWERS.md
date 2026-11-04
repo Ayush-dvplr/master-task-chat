@@ -580,3 +580,11 @@ Q154: "Never both at once (Recommended)"
 Q155: "ask me again in laymen terms", then: "similar to that context restore thing i will paste the prompt for both compact and then followed by restore one (flag me if i am wrong)"
 
 Recorded as: Q152 the system files go on a new GitHub branch of this repo, cloned into the new root folder; stable and v2 versions and tags on GitHub too; data out of git with a daily backup in a folder outside the root. Q153 system id mc2. Q154 standing rule: the same task never runs in both systems at once; the upgrade tool and the state card warn. Q155: Ayush pastes a compact prompt and then the restore prompt, as in this session. Claude's check: correct, not wrong, because the master's DCP is manual (Q98), so a compression only happens when Ayush starts it, and the restore prompt (MASTER_RECOVERY part B) makes the master reread the card. Claude adds a master compact prompt next to the restore prompt. Q156 (templates' old root path becomes a ROOT fill token) is part of Q144 and P17, no separate answer needed.
+
+ENTRY 85. 4 Nov 2026 12:50 IST (options dialogs, word for word)
+Data truth: "ask me in laymen terms again", then: "New one from day 1 (Recommended)"
+Count teammate: "Your word only"
+Old conflicts: "ask me again in laymen terms", then: "Check now, ask only leftovers (Recommended)"
+Approval: "Two stage approval (Recommended)"
+
+Recorded as (answers to the W1-040 cold test points): the new system's records are the truth from day 1; tasks already running in the old system finish there and their result is copied into the new records once by a small script. A teammate task counts for Ayush only on his word (ENTRY 65 stands). W1-002 conflicts C3 to C44 are mapped now by a helper; only the unsettled ones go to Ayush in one batch. Approval in two stages: rollout steps 0 to 5 are approved first with PROCEED; steps 6 to 10 get their missing designs (paid run wrap in master_queue.py, Q78 project config and global plugins) and a second approval.
