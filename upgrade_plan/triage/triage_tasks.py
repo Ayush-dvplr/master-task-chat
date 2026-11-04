@@ -192,13 +192,6 @@ def fnum(x):
         return None
 
 
-def pct(x):
-    """Score as a percent: values at most 1.0 from reward files are fractions."""
-    v = fnum(x)
-    if v is None:
-        return None
-    return v
-
 
 # ---------------------------------------------------------------- settings and kit
 
@@ -231,16 +224,15 @@ def load_kit(kit_dir):
         return found
     if not os.path.isdir(kit_dir):
         sys.exit("kit folder not found: %s" % kit_dir)
-    for name in sorted(os.listdir(kit_dir)):
-        p = os.path.join(kit_dir, name)
-        if not os.path.isfile(p) or not name.endswith((".md", ".py")):
-            continue
-        for i, line in enumerate(read_text(p).splitlines(), 1):
-            for cid in KIT_IDS:
-                if cid in found:
-                    continue
-                if re.match(r"^\s*(?:[-*|]\s*(?:\[ \]\s*)?)?%s\b" % re.escape(cid), line):
-                    found[cid] = "%s:%d" % (name, i)
+    files = [n for n in sorted(os.listdir(kit_dir)) if n.endswith((".md", ".py")) and os.path.isfile(os.path.join(kit_dir, n))]
+    lines = dict((n, read_text(os.path.join(kit_dir, n)).splitlines()) for n in files)
+    for cid, (home, _) in KIT_IDS.items():
+        rx = re.compile(r"^\s*(?:[-*|]\s*(?:\[ \]\s*)?)?%s\b" % re.escape(cid))
+        for n in ([home] if home in lines else []) + [x for x in files if x != home]:
+            hit = [i for i, line in enumerate(lines[n], 1) if rx.match(line)]
+            if hit:
+                found[cid] = "%s:%d" % (n, hit[0])
+                break
     return found
 
 
@@ -415,7 +407,7 @@ def test_criteria(b):
     """Current test checks from tests/test_output.py: {name: weight}."""
     t = read_text(os.path.join(b, "tests", "test_output.py"))
     out = OrderedDict()
-    for m in re.finditer(r"^criteria\.(\w+)\(\s*weight\s*=\s*(-?[\d.]+)", t, re.M):
+    for m in re.finditer(r"(?:^|;)[ \t]*criteria\.(\w+)\(\s*weight\s*=\s*(-?[\d.]+)", t, re.M):
         out[m.group(1)] = float(m.group(2))
     if not out:
         for m in re.finditer(r"^def (test_\w+)\(", t, re.M):
@@ -454,7 +446,7 @@ def find_summary(run_path, summaries):
     return None
 
 
-def model_of(run_path, result, summary, config):
+def model_of(rel_path, result, summary, config):
     if isinstance(summary, dict) and summary.get("model"):
         return str(summary["model"]), None
     agent = None
@@ -473,8 +465,10 @@ def model_of(run_path, result, summary, config):
             return str(a["model_name"]), agent or a.get("name")
         if a.get("name"):
             agent = agent or a.get("name")
-    for part in reversed(run_path.split(os.sep)):
-        if re.match(r"(claude|gpt|glm|gemini|o\d|oracle|nop|qwen|deepseek|kimi)", part, re.I):
+    if agent in ("oracle", "nop"):
+        return agent, agent
+    for part in reversed(rel_path.split(os.sep)):
+        if re.match(r"(claude-|gpt-|glm-|gemini-|qwen|deepseek|kimi|oracle$|nop$)", part, re.I):
             return part, agent
     return agent or "unknown", agent
 
@@ -661,11 +655,11 @@ def classify(run, task):
             break
     for j in run["judge"]:
         if API_RE.search(j["why"] or ""):
-            sig.append(("BROKEN", "judge or API error", "%s judge %s: %s" % (run["checks_source"] or "score.json", j["id"] or j["name"], snip(j["why"], 120))))
+            sig.append(("BROKEN", "judge or API error", "%s judge %s: %s" % (rel_v(run, run["checks_source"] or "score.json"), j["id"] or j["name"], snip(j["why"], 120))))
             break
     if run["judge"] and all(not (j["why"] or "").strip() for j in run["judge"]) and all((j["value"] or 0) == 0 for j in run["judge"] if j["weight"] > 0):
         sig.append(("UNSURE", "judge gave no reasoning and no points", "%s: %d criteria, all empty" % (run["rel"], len(run["judge"]))))
-    if task.get("judge_crits") and run["checks_source"] and not run["judge"] and not run.get("summary_only"):
+    if task.get("judge_crits") and run["paid"] and run["checks_source"] and not run["judge"] and not run.get("summary_only"):
         sig.append(("UNSURE", "judge criteria missing from the run", "%s: judge.toml has %d criteria, the run has none" % (run["rel"], len(task["judge_crits"]))))
     if (run["tests"] == 0 and (run["rubric"] or 0) == 0 and run["final"] is not None and run["final"] <= 0
             and any(s[0] == "BROKEN" for s in sig)):
@@ -721,7 +715,7 @@ def classify(run, task):
         sig.append(("UNSURE", "agent barely ran", "%s: %d agent steps in agent/trajectory.json" % (run["rel"], steps)))
     if run["final"] is None and not any(s[0] == "BROKEN" for s in sig):
         sig.append(("UNSURE", "no score found", "%s: no score in any run file" % run["rel"]))
-    prio = ["permission denied", "permission denied (inferred)", "grader crash", "grader timeout", "judge or API error",
+    prio = ["permission denied", "permission denied (inferred)", "grader timeout", "judge or API error", "grader crash",
             "missing outputs", "all zero with errors"]
     broken = sorted([s for s in sig if s[0] == "BROKEN"], key=lambda s: prio.index(s[1]) if s[1] in prio else 99)
     run["signals"] = broken + [s for s in sig if s[0] != "BROKEN"]
@@ -744,8 +738,8 @@ def read_run(path, top, summaries, settings, task):
     spath = find_summary(path, summaries)
     summary = load_json(spath) if spath else None
     run["summary_path"] = spath
-    model, agent = model_of(path, run["result"], summary, load_json(os.path.join(path, "config.json")))
-    run["model"], run["agent"] = model, agent
+    model, agent = model_of(rel, run["result"], summary, load_json(os.path.join(path, "config.json")))
+    run["model"], run["agent"] = str(model).split("/")[-1], agent
     run["paid"] = model == settings["paid_model"] and (agent or "") not in ("oracle", "nop")
     parse_checks(run)
     scores(run, summary)
@@ -785,15 +779,6 @@ def read_run(path, top, summaries, settings, task):
     classify(run, task)
     return run
 
-
-def summary_only_runs(summaries, claimed, top, settings, task_of):
-    out = []
-    for s in summaries:
-        d = os.path.dirname(s)
-        if any(r.startswith(d + os.sep) for r in claimed):
-            continue
-        out.append(d)
-    return out
 
 
 # ---------------------------------------------------------------- levers and QC hints
@@ -907,22 +892,15 @@ def levers(task, settings):
     # largest share one slip took: single check or one property across inputs
     names = [k for k, _ in lost_list]
     weight_of = dict(lost_list)
-    parent = {k: k for k in names}
-
-    def root(x):
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        return x
-    toks = {k: k.split("_") for k in names}
-    for i, a in enumerate(names):
-        for bname in names[i + 1:]:
-            ta, tb = toks[a], toks[bname]
-            if len(ta) == len(tb) and len(ta) >= 2 and sum(1 for x, y in zip(ta, tb) if x != y) == 1:
-                parent[root(a)] = root(bname)
+    # one property across inputs: names equal except in one token position (no chaining)
     groups = {}
     for k in names:
-        groups.setdefault(root(k), []).append(k)
+        tk = k.split("_")
+        groups.setdefault(("single", k), []).append(k)
+        if len(tk) < 2:
+            continue
+        for i in range(len(tk)):
+            groups.setdefault((len(tk), i, tuple(tk[:i] + tk[i + 1:])), []).append(k)
     best = (None, 0.0)
     for g in groups.values():
         w = sum(weight_of[x] for x in g)
@@ -969,7 +947,7 @@ def qc_hints(task, settings, kit):
         whole = sum(w for k, w in cur.items() if w and w > 0 and WHOLE_DOC_NAME.search(k) and not PER_ROW_NAME.search(k))
         perrow = [k for k, w in cur.items() if w and w > 0 and PER_ROW_NAME.search(k)]
         if whole / wsum >= 0.8 and not perrow:
-            hints.append(("CL-4", "tests/test_output.py: %.0f%% of positive weight on whole document checks, no per row or per field check" % (100 * whole / wsum)))
+            hints.append(("CL-4", "tests/test_output.py: %.0f percent of positive weight on whole document checks, no per row or per field check" % (100 * whole / wsum)))
     npos = len([k for k, w in cur.items() if w is None or w > 0])
     if cur:
         if len(cur) < 10:
@@ -993,7 +971,7 @@ def qc_hints(task, settings, kit):
     if perm.get("drop") and not perm.get("fix"):
         hints.append(("TS-24", "%s runs agent code as another uid; no read grant for the delivered program found (an editor written file is 0600)" % perm["drop"]))
     if task.get("slip") and task["slip"][1] > settings["slip_cap_pct"]:
-        hints.append(("SLIP", "one slip took %.1f%% of positive test points (%s), cap %.0f%%" % (task["slip"][1], task["slip"][0], settings["slip_cap_pct"])))
+        hints.append(("SLIP", "one slip took %.1f percent of positive test points (%s), cap %.0f percent" % (task["slip"][1], task["slip"][0], settings["slip_cap_pct"])))
     if task.get("trusted") and task["trusted"]["tests"] is not None and task["trusted"]["tests"] < 10:
         hints.append(("DS-21", "trusted tests under 10 percent: check that a shipped line decides every graded value before trusting the low score"))
     return [(cid, cid_ref(cid, kit), text) for cid, text in hints]
@@ -1249,8 +1227,8 @@ def write_outputs(tasks, settings, kit, out_dir, tops):
         if not t["runs"]:
             L.append("1. none found")
         for n, r in enumerate(t["runs"], 1):
-            L.append("%d. %s %s, model %s%s: tests %s, rubric %s, final %s (from %s)%s" % (
-                n, r["status"], ("(" + r["sign"] + ")") if r["sign"] else "", r["model"],
+            L.append("%d. %s%s, model %s%s: tests %s, rubric %s, final %s (from %s)%s" % (
+                n, r["status"], (" (" + r["sign"] + ")") if r["sign"] else "", r["model"],
                 "" if r["paid"] else " (not the paid model, shown only)", fmt(r["tests"]), fmt(r["rubric"]), fmt(r["final"]),
                 r["score_source"], ("; evidence: " + r["evidence"]) if r["evidence"] else ""))
             L.append("   folder %s" % r["rel"])

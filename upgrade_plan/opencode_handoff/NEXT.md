@@ -13,3 +13,5 @@ FIRST SMALL TASK FOR THE OPENCODE SESSION (Ayush agreed, ENTRY 98): fix release 
 2. master_chat_tasks/README.md rule U13 and the knowledge/BUILD_RULES.md QC FIX STEPS line still call a finding on unchanged lines "noise"; PL5 (ENTRY 88) dropped that rule: every finding is judged on its merits.
 3. tools/intake.py has the gate numbers written in its code; read them from settings gate (planned as STAGE B step 6, may be done now on Ayush's word).
 Then run the self tests and template_check, tag mc2-v2.5.3 (lightweight), and upgrade ROOT through the normal loop (backup, preflight, printed commands, recheck), after the one time remote set-url in SETUP_STEPS step 5.
+
+TRIAGE OF OLD TEAMMATE OR ASSIGNED TASKS (P19, ENTRY 97): when Ayush asks, paste upgrade_plan/triage/TRIAGE_PROMPT.md; it runs upgrade_plan/triage/triage_tasks.py read only on the folder he names and asks before any Docker run.
