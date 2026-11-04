@@ -1,6 +1,6 @@
-MC2 INSTALL GUIDE (STAGE A, up to mc2-v2.5.1). This is the only install text you need. Earlier reports in upgrade_plan/tmp/ (STEP0_REPORT.md and the others) are history; do not follow them.
+MC2 INSTALL GUIDE (STAGE A, up to mc2-v2.5.2). This is the only install text you need. Earlier reports in upgrade_plan/tmp/ (STEP0_REPORT.md and the others) are history; do not follow them.
 
-What you get: a new folder ROOT = "/Users/mac/Desktop/mc2_root" that holds the new master chat system (mc2). It is a git clone of the file mc2.bundle in this folder, so it carries every version as a git tag: mc2-v2.0 (the old system files plus the upgrade tools) up to mc2-v2.5.1 (the newest). You install mc2-v2.0 first, copy your data in once, then move up one tag at a time with checks before and after each step. The old system in "/Users/mac/Desktop/Terminal Bench" keeps running and is only read, never written.
+What you get: a new folder ROOT = "/Users/mac/Desktop/mc2_root" that holds the new master chat system (mc2). It is a git clone of the file mc2.bundle in this folder, so it carries every version as a git tag: mc2-v2.0 (the old system files plus the upgrade tools) up to mc2-v2.5.2 (the newest). You install mc2-v2.0 first, copy your data in once, then move up one tag at a time with checks before and after each step. The old system in "/Users/mac/Desktop/Terminal Bench" keeps running and is only read, never written.
 
 How to read this guide: every line indented by four spaces is one command to paste into Terminal. Lines that are not indented are explanations. Run the steps in order. Every path is in double quotes because "Terminal Bench" has a space.
 
@@ -17,27 +17,27 @@ How to read this guide: every line indented by four spaces is one command to pas
 2. The planning clone and the bundle. PLAN is the planning clone made by upgrade_plan/opencode_handoff/SETUP_STEPS.md step 1 (a separate folder, never the Terminal Bench folder). Bring it up to date and check the bundle:
     git -C "$PLAN" pull
     git -C "$PLAN" bundle verify "$BUNDLE"
-   Expected: "The bundle records a complete history" and "okay". The list shows mc2-v2, mc2-stable and the tags mc2-v2.0 to mc2-v2.5.1.
+   Expected: "The bundle records a complete history" and "okay". The list shows mc2-v2, mc2-stable and the eight tags mc2-v2.0 to mc2-v2.5.2.
 
 3. Create ROOT from the bundle (it must not exist yet; if it does, stop and ask the master, never delete it):
     git clone -b mc2-stable "$BUNDLE" "$ROOT"
     git -C "$ROOT" tag -l "mc2-v*"
     cat "$ROOT/SYSTEM_VERSION"
-   Expected: the six tags and "version = v2.0". ROOT's git remote "origin" is the bundle file, not GitHub; later fetches read the newest mc2.bundle from that same path.
+   Expected: eight tags, mc2-v2.0, mc2-v2.1, mc2-v2.2, mc2-v2.3, mc2-v2.4, mc2-v2.5, mc2-v2.5.1 and mc2-v2.5.2 (the newest), and "version = v2.0". ROOT's git remote "origin" is the bundle file, not GitHub; later fetches read the newest mc2.bundle from that same path.
 
-4. Two local helpers, made once. The first line tells git to ignore your local settings file at every version (so "git status --porcelain" stays empty). The last two lines take the newest upgrade tool out of the bundle into ROOT/master_chat_work/_upgrade/ (DATA, ignored by git). You run that copy for every step, because the tool inside older versions prints comments after commands, which a plain zsh misreads, and has known bugs fixed in mc2-v2.5.1.
+4. Two local helpers, made once. The first line tells git to ignore your local settings file at every version (so "git status --porcelain" stays empty). The last two lines take the newest upgrade tool out of the bundle into ROOT/master_chat_work/_upgrade/ (DATA, ignored by git). You run that copy for every step, because the tool inside older versions prints comments after commands, which a plain zsh misreads, and has known bugs fixed in mc2-v2.5.1 and mc2-v2.5.2.
     printf '%s\n' "master_chat_tasks/settings.local.json" >> "$ROOT/.git/info/exclude"
     mkdir -p "$ROOT/master_chat_work/_upgrade"
     NEWEST="$(git -C "$ROOT" tag -l "mc2-v*" --sort=-v:refname | head -n 1)"
     git -C "$ROOT" show "$NEWEST:master_chat_tasks/tools/upgrade.py" > "$UP"
-   Expected: echo "$NEWEST" prints mc2-v2.5.1. Running the printf line twice only adds a duplicate line, which is harmless.
+   Expected: echo "$NEWEST" prints mc2-v2.5.2. Running the printf line twice only adds a duplicate line, which is harmless.
 
 5. The harness clone in ROOT. The QC kit (Terminal_2.0_Harbor_Harness/Input_Bundle_QC) and the harness scripts belong in ROOT. Make a read only clone of the PL repo from your old folder's clone (git only reads the old folder), then point it at the same remote the old clone uses:
     git clone --no-hardlinks "$OLD/Terminal_2.0_Harbor_Harness" "$ROOT/Terminal_2.0_Harbor_Harness"
     git -C "$ROOT/Terminal_2.0_Harbor_Harness" remote set-url origin "$(git -C "$OLD/Terminal_2.0_Harbor_Harness" remote get-url origin)"
     git -C "$ROOT/Terminal_2.0_Harbor_Harness" rev-parse --short=8 HEAD
    Expected: the same commit as the old folder (git -C "$OLD/Terminal_2.0_Harbor_Harness" rev-parse --short=8 HEAD). This brings the tracked harness files and the kit. It does not bring the old jobs/, Tasks_INPUT/ and Output_RFP/ folders: old tasks finish in the old folder. Never pull, commit or push in this clone yourself; it is read only like the old one.
-   If you skip this step: from mc2-v2.5.1 on, precheck.sh, kit_watch.py, the state card and issue.py use the old folder's kit and harness (read only) and print a one line NOTE saying so. Before mc2-v2.5.1 they do not (see step 11 for what fails then).
+   If you skip this step: from mc2-v2.5.1 on, precheck.sh, kit_watch.py, the state card and issue.py use the old folder's kit and harness (read only) and say so: precheck.sh, kit_watch.py and issue.py print a one line NOTE, and the state card labels its kit line "QC KIT (old folder kit)" instead. Before mc2-v2.5.1 they do not (see step 11 for what fails then).
 
 6. Copy the DATA once from the old folder (the old folder is only read). Run this while no old session is writing, or accept that a record written during the copy shows up later through carry_over.py. Every command copies into the parent folder, so a second run overwrites in place and never nests a folder; but a second run later would also replace ROOT's newer records with the old ones, so run it only now.
     MO="$OLD/master_chat_tasks"
@@ -82,9 +82,9 @@ How to read this guide: every line indented by four spaces is one command to pas
     KB="$OLD/Terminal_2.0_Harbor_Harness/Tasks_INPUT/SLUG"
     printf '{\n  "upgrade": {\n    "known_bundle": "%s"\n  }\n}\n' "$KB" > "$ROOT/master_chat_tasks/settings.local.json"
     git -C "$ROOT" status --porcelain
-   The last line must print nothing. Every mc2-v2.5.1 tool merges settings.local.json over settings.json; older versions do not read it, so until mc2-v2.5.1 the recheck shows the dry precheck as WAIT, which is fine. Never put known_bundle into settings.json itself.
+   The last line must print nothing. The recheck is always run by the newest upgrade.py (the copy from step 4), and that copy reads settings.local.json at every tag. So with this step done, the dry precheck in the recheck passes from mc2-v2.3 on ("PASS dry precheck on a known bundle" and "PRECHECK CLEAN"). At mc2-v2.1 and mc2-v2.2 it stays WAIT, because the precheck.sh of those versions looks for the kit at one fixed path; that is fine. The tools inside ROOT read settings.local.json from mc2-v2.5.1 on. Never put known_bundle into settings.json itself.
 
-10. The upgrade loop, one tag at a time. Repeat 10.1 to 10.4 until preflight says UP TO DATE.
+10. The upgrade loop, one tag at a time. Repeat 10.1 to 10.5 until preflight says UP TO DATE. From mc2-v2.0 that is seven rounds: mc2-v2.1, mc2-v2.2, mc2-v2.3, mc2-v2.4, mc2-v2.5, mc2-v2.5.1 and mc2-v2.5.2. The loop ends at mc2-v2.5.2, the newest tag in this bundle; there preflight says "UP TO DATE: ROOT runs mc2-v2.5.2".
    10.1 Backup and preflight:
     cd "$ROOT"
     python3 "$UP" backup
@@ -98,19 +98,20 @@ How to read this guide: every line indented by four spaces is one command to pas
     python3 "$ROOT/master_chat_tasks/tools/issue.py" --render "$ROOT/master_chat_tasks/prompts/templates/P11_full_qc_v3.md" > "$ROOT/master_chat_work/_upgrade/P11_rendered.md"
     python3 "$ROOT/master_chat_tasks/tools/issue.py" cold-chain-backbone-quote qc "$PLAN/upgrade_plan/delivery/s3_sample_draft_P11.md" "[[ROOT]]/QC/reports/cold-chain-backbone-quote" --dry-run
    Open "$ROOT/master_chat_work/_upgrade/P11_rendered.md" in any editor: the numbers come from settings and every path starts with ROOT; the [[NAME]] fields left in it are the ones the master fills. The dry run prints "DRY RUN ok" with cap warnings only. delivery/s3_sample_issued_P11.md shows how a really issued prompt looks. If you do issue a real prompt, its board row is live and the next preflight is BLOCKED until that session finishes or you end the row, for example: python3 "$ROOT/master_chat_tasks/tools/board.py" set SHA status=done (SHA from the issue output); then run the backup again before preflight.
+   10.5 From mc2-v2.5 on, preflight shows a WARN row "kit_watch status" with "QC KIT: CHANGED n files (...)" (8 files on 4 Nov) and "kit changed since the snapshot: classify it (S7, Q86); a MAJOR change blocks", and still ends "VERDICT: READY". That is expected. The kit snapshot (knowledge/fingerprints/qc.json, copied from the old folder in step 6) was taken on 25 Oct (kit head 5574d77e); the PL changed the QC kit after that (4 Nov, "updated QC bundle"), so the live kit differs from the snapshot. A WARN never stops the upgrade loop: go on with 10.2. "A MAJOR change blocks" is about the task work, not the upgrade: the master does not change templates, rules or FIX_MAP for a MAJOR kit change until you decide. What clears the WARN, after the loop: the master first has the change classified with master_chat_tasks/knowledge/KIT_CLASSIFY_PROMPT.md (LENIENT, MINOR or MAJOR) and shows you the result; then you give your word, and the master runs kit_watch.py save --by "<your exact words>" (step 12.2). From then on the row is PASS with "QC KIT: unchanged since snapshot".
 
 11. What is expected to fail or wait when the harness is not in ROOT (step 5 skipped), and why it does not block the loop:
    1. At mc2-v2.3 to mc2-v2.5, precheck.sh runs the four kit scripts against a missing folder (every script exit 2) and kit_watch.py stops with "kit folder not found"; issued prompts name [[ROOT]]/Terminal_2.0_Harbor_Harness. Do not issue real build or QC prompts from ROOT before mc2-v2.5.1 or before step 5.
-   2. From mc2-v2.5.1: precheck.sh, kit_watch.py, the state card and issue.py use the old folder's kit and print a NOTE; precheck.sh stops with "PRECHECK: STOP. QC kit folder not found" only when neither folder has a kit.
-   3. Self tests: preflight runs only the tests that need no harness. From mc2-v2.5.1, test_e3_e6_tools.py and test_upgrade_tools.py (intake and repackage parts) say "skipped: needs the harness clone in ROOT" instead of failing; before mc2-v2.5.1 they fail when run by hand.
-   4. Recheck from mc2-v2.2 on: "cold recovery test" is WAIT until you run it (step 12); "dry precheck on a known bundle" is WAIT until step 9.
-   5. Preflight at mc2-v2.5 and later: "kit_watch status" is WAIT when no kit is found in ROOT or the old folder, and then no command is printed; place the harness (step 5) or give --kit.
+   2. From mc2-v2.5.1: precheck.sh, kit_watch.py, the state card and issue.py use the old folder's kit. precheck.sh, kit_watch.py and issue.py print a NOTE line; the state card prints no NOTE about the kit but labels its kit line "QC KIT (old folder kit)" in STATE_CARD.md. precheck.sh stops with "PRECHECK: STOP. QC kit folder not found" only when neither folder has a kit.
+   3. Self tests: preflight runs only the tests that need no harness. From mc2-v2.5.1, test_e3_e6_tools.py says "skipped: needs the harness clone in ROOT" (3 tests) instead of failing; before mc2-v2.5.1 it fails when run by hand. The 9 intake and repackage tests in test_upgrade_tools.py are skipped in every case, with or without step 5: they need real harness job folders (jobs/ and Tasks_INPUT/ left by real harness runs on the Mac), and the harness clone of step 5 does not bring those (they stay in the old folder). From mc2-v2.5.2 the skip text says exactly that. "OK (skipped=9)" for test_upgrade_tools.py is expected and is no problem.
+   4. Recheck from mc2-v2.2 on: "cold recovery test" is WAIT until you run it (step 12); "dry precheck on a known bundle" is WAIT until step 9, and with step 9 done it passes from mc2-v2.3 on (step 9 says why).
+   5. Preflight at mc2-v2.5 and later: "kit_watch status" is WAIT when no kit is found in ROOT or the old folder, and then no command is printed; place the harness (step 5) or give --kit. The old folder is the one --old names, else settings upgrade.old_root (the upgrade.py of mc2-v2.5.2 tries both). When a kit is found, the WARN "kit changed since the snapshot" is expected (10.5).
 
-12. At mc2-v2.5.1 (the newest tag in this bundle):
+12. At mc2-v2.5.2 (the newest tag in this bundle):
    1. Cold recovery test: the recheck output shows the prompt in full (the same text is in master_chat_tasks/README.md, section "Compact and restore prompts", part B). Paste it into a fresh master session and compare the reply with the PASS line, then:
-    python3 "$UP" recheck --from mc2-v2.5 --to mc2-v2.5.1 --cold-result pass
-   With the cold test passed and a known bundle that precheck finds clean, it ends UPGRADE GOOD and prints the git branch -f mc2-stable mc2-v2.5.1 line to paste.
-   2. The new kit snapshot is saved only on your word (the master runs kit_watch.py save --by "<your exact words>").
+    python3 "$UP" recheck --from mc2-v2.5.1 --to mc2-v2.5.2 --cold-result pass
+   With the cold test passed and a known bundle that precheck finds clean, it ends UPGRADE GOOD and prints the git branch -f mc2-stable mc2-v2.5.2 line to paste.
+   2. The kit snapshot (see 10.5): the master has the kit change classified with KIT_CLASSIFY_PROMPT.md first, then saves the new snapshot only on your word (the master runs kit_watch.py save --by "<your exact words>"). After that the kit_watch WARN "kit changed since the snapshot" is gone.
    3. A later bundle: the master puts a newer mc2.bundle into this folder. Then:
     git -C "$PLAN" pull
     git -C "$ROOT" fetch origin --tags
@@ -118,8 +119,8 @@ How to read this guide: every line indented by four spaces is one command to pas
     git -C "$ROOT" show "$NEWEST:master_chat_tasks/tools/upgrade.py" > "$UP"
    and run the loop of step 10 again.
 
-13. Rollback, any time after a step (the tool only prints; you paste). Example from mc2-v2.5.1 back to mc2-v2.5:
-    python3 "$UP" rollback --from mc2-v2.5.1 --to mc2-v2.5
+13. Rollback, any time after a step (the tool only prints; you paste). Example from mc2-v2.5.2 back to mc2-v2.5.1:
+    python3 "$UP" rollback --from mc2-v2.5.2 --to mc2-v2.5.1
    It prints: git checkout of the older tag, a recheck (which then says "ROLLBACK DONE"; it prints a git branch -f mc2-stable line only when mc2-stable still points at the version you left), and, only if the failed version changed DATA, an rsync line that restores the records from the backup taken while the older version ran (look with --dry-run first). Every backup run has its own folder, so a rollback over two steps finds the records from before the first.
 
 14. Optional: keep the versions on GitHub too. Push only named refs; the local before-* marker tags are never pushed this way. If GitHub refuses the mc2 branches, keep them local; the bundle and ROOT hold everything.
@@ -127,6 +128,6 @@ How to read this guide: every line indented by four spaces is one command to pas
     git -C "$ROOT" push github "refs/remotes/origin/mc2-v2:refs/heads/mc2-v2" "mc2-stable" "refs/tags/mc2-v2.*:refs/tags/mc2-v2.*"
 
 Notes
-1. Tags: every mc2 tag from mc2-v2.1 on is a lightweight tag, and so is every later tag. mc2-v2.0 alone is annotated, so git rev-parse mc2-v2.0 prints the tag object 719a09c8 and git rev-parse "mc2-v2.0^{commit}" prints the commit 8d1c963e. A fix release has three numbers (mc2-v2.5.1).
-2. Status on 4 Nov 2026: tags mc2-v2.0 to mc2-v2.5.1 on branch mc2-v2; mc2-stable points at mc2-v2.0 until you mark a newer tag stable (step 10.3 or 12).
+1. Tags: every mc2 tag from mc2-v2.1 on is a lightweight tag, and so is every later tag. mc2-v2.0 alone is annotated, so git rev-parse mc2-v2.0 prints the tag object 719a09c8 and git rev-parse "mc2-v2.0^{commit}" prints the commit 8d1c963e. A fix release has three numbers (mc2-v2.5.1, mc2-v2.5.2).
+2. Status on 4 Nov 2026: eight tags, mc2-v2.0 to mc2-v2.5.2 (the newest), on branch mc2-v2; mc2-stable points at mc2-v2.0 until you mark a newer tag stable (step 10.3 or 12).
 3. Files in this folder: README.md (this guide), mc2.bundle, s3_sample_issued_P11.md (an issued prompt), s3_sample_draft_P11.md (the master's draft used in step 10.4).

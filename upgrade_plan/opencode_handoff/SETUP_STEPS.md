@@ -28,7 +28,7 @@ Every line indented by four spaces is one command for Terminal (zsh). Paths are 
    If "/Users/mac/Desktop/mc2_worktree" already exists from an earlier setup, skip the worktree add line and use the two update lines below. The fetch goes into bundle/... names, never into the branch the worktree has checked out, so it can be run again. When a newer mc2.bundle arrives (after git -C "$PLAN" pull), run the same fetch again and then move the worktree forward:
     git fetch upgrade_plan/delivery/mc2.bundle "+refs/heads/mc2-v2:refs/remotes/bundle/mc2-v2" "+refs/heads/mc2-stable:refs/remotes/bundle/mc2-stable" --tags
     git -C "/Users/mac/Desktop/mc2_worktree" merge --ff-only bundle/mc2-v2
-   One writer at a time for mc2-v2: until Ayush says otherwise, the cloud planning session writes it and ships it in mc2.bundle (now mc2-v2.5.1). The opencode session commits in the worktree only after Ayush says so, and only on top of the newest bundle. If merge --ff-only refuses, the two sides diverged: stop and ask; never force. New commits get new tags (mc2-v2.6 and up after the STAGE B approval; a fix release gets three numbers such as mc2-v2.5.2), always lightweight tags.
+   One writer at a time for mc2-v2: until Ayush says otherwise, the cloud planning session writes it and ships it in mc2.bundle (now mc2-v2.5.2). The opencode session commits in the worktree only after Ayush says so, and only on top of the newest bundle. If merge --ff-only refuses, the two sides diverged: stop and ask; never force. New commits get new tags (mc2-v2.6 and up after the STAGE B approval; a fix release gets three numbers such as mc2-v2.5.3), always lightweight tags.
 
 6. Before every compression paste COMPACT_PROMPT.md, compress, then paste START_PROMPT.md again.
 

@@ -93,4 +93,5 @@ W1-047 | W1 helper | 4 Nov 2026 16:11 | fix all 26 E2E problems in the mc2 workt
   Result: 25 of 26 fixed and proven by a literal install run; 15 closed by the master in RESUME.md. About 386k tokens.
 W1-048 | W1 helper | 4 Nov 2026 16:47 | second end to end check of the new INSTALL guide and SETUP_STEPS from the rebuilt bundle, REPORT ONLY | ENTRY 92 | verified (master confirmed kit_watch.py:342 120 character cut, issue.py:164 fixed text, README 'six tags') | tmp/W1-048/E2E2_REPORT.md
   Result: 0 BREAKS, 3 CONFUSING, 6 MINOR, 30 passed, real zsh 5.9 run; old folder untouched (1567 files same checksums). Waiting for Ayush before fixing (ENTRY 91).
-W1-049 | W1 helper | 4 Nov 2026 17:23 | fix the 9 W1-048 issues as mc2-v2.5.2 in the mc2 worktree, update INSTALL guide and handoff files, rerun tests | ENTRY 93 | running | tmp/W1-049/
+W1-049 | W1 helper | 4 Nov 2026 17:23 | fix the 9 W1-048 issues as mc2-v2.5.2 in the mc2 worktree, update INSTALL guide and handoff files, rerun tests | ENTRY 93 | verified (master: tag mc2-v2.5.2 fe8e377a, SYSTEM_VERSION v2.5.2, 65 passed 29 skipped, template_check 0, secret scan clean, bundle rebuilt and verified, guide names mc2-v2.5.2) | tmp/W1-049/FIX2_REPORT.md
+  Result: 8 of 8 fixed (issue 9 by the master); zsh upgrade v2.5.1 to v2.5.2 UP TO DATE. About 155k tokens.
