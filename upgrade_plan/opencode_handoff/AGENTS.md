@@ -25,6 +25,7 @@ HELPERS (subagents)
 
 STYLE (Ayush's preference, in chat and in files)
 No dashes or hyphens as punctuation or list markers, no bold, italic or # headings, all contractions written out ("do not", "it is"). Numbered lists. Exact names and ids keep their own spelling.
+Every prompt Ayush copies and pastes goes alone in a code block opened with three backticks and the word text, closed with three backticks, prompt word for word (ENTRY 110).
 
 COMPRESSION
 DCP here is manual. Before Ayush compresses he pastes upgrade_plan/opencode_handoff/COMPACT_PROMPT.md; after, he pastes START_PROMPT.md. Never keep anything important only in chat.
