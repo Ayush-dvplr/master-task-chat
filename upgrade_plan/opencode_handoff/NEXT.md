@@ -2,6 +2,7 @@ WHAT IS LEFT (5 Nov 2026 01:35 IST, opencode session; RESUME.md RUNNING NOW is t
 
 1. DONE: STAGE A is installed in ROOT "/Users/mac/Desktop/mc2_root" at mc2-v2.5.3, UPGRADE GOOD, mc2-stable at mc2-v2.5.3; the mc2 worktree exists at "/Volumes/ayush_prsnl/mc2_worktree"; ROOT origin points at this planning clone. History: INSTALL_LOG.md.
 2. How the system changes from now on: this session edits the worktree, runs the self tests and template_check, commits and makes a lightweight tag; Ayush runs the round in ROOT (backup, preflight, printed commands, recheck). Never move a tag (one exception used, ENTRY 106).
+2a. FIRST (5 Nov 08:16): ROOT has 8 uncommitted master edits to system files; settle QUESTION A and B in upgrade_plan/reports/ROOT_EDITS.md before any release or round.
 3. Waiting in the worktree: commit 9718df83 (prompts in text code blocks, .omo/ in .gitignore), untagged; tag mc2-v2.5.4 when Ayush says.
 4. Data-product decisions, one at a time: item 2 TS-26 and JD-14 triage is asked and waiting (reports/DATA_PRODUCT_TRIAGE.md); then item 3 QL QC owed; then item 4 predicted final over the gate. Paid run S460 stays HELD.
 4a. Waiting for Ayush: reports/MASTER_GAPS.md (add the gaps to mc2-v2.5.4 or not; move the data-product decisions to the new master or not).

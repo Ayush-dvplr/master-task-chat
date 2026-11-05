@@ -36,3 +36,8 @@ LESSONS OF THE UPGRADE SESSION (started 5 Nov 2026, ENTRY 111). One entry per mi
 8. The card showed old events as if they were live (4 Nov 23:55, ENTRY 103).
    What happened: both cold masters proposed work on hangar-check-replan (pushed) and sensor-network-lsq-correlated-adjustment (parked), because the card's NEWS lines showed old board events without the stage now.
    Changed: NEWS lines show "(now <stage>)" (mc2-v2.5.3).
+
+9. A rule told to Ayush was never put where the master reads it (5 Nov 08:16, found by Ayush's question, reports/ROOT_EDITS.md).
+   What happened: the session told Ayush that system changes happen only here and the new master only does task work. The ROOT master then edited RULES_IN_FORCE.md (02:28) and 7 knowledge and template files (08:13) on Ayush's word, so ROOT no longer matches mc2-v2.5.3 and the next round's git status step stops.
+   Mistake: the rule lived only in chat and in upgrade_plan; the master's RULES_IN_FORCE ROLE (R1) still says it "writes and tunes prompts", and no tool checks it.
+   Changed: before telling Ayush how the system behaves, check that the master's own rules or tools say so; if not, say "not enforced yet" and ask. The fix itself waits for Ayush (QUESTION A and B in reports/ROOT_EDITS.md).
