@@ -41,3 +41,7 @@ LESSONS OF THE UPGRADE SESSION (started 5 Nov 2026, ENTRY 111). One entry per mi
    What happened: the session told Ayush that system changes happen only here and the new master only does task work. The ROOT master then edited RULES_IN_FORCE.md (02:28) and 7 knowledge and template files (08:13) on Ayush's word, so ROOT no longer matches mc2-v2.5.3 and the next round's git status step stops.
    Mistake: the rule lived only in chat and in upgrade_plan; the master's RULES_IN_FORCE ROLE (R1) still says it "writes and tunes prompts", and no tool checks it.
    Changed: before telling Ayush how the system behaves, check that the master's own rules or tools say so; if not, say "not enforced yet" and ask. The fix itself waits for Ayush (QUESTION A and B in reports/ROOT_EDITS.md).
+
+10. Commit run in parallel with a file write that failed (5 Nov 08:40, b9c09a25).
+   Mistake: the write of reports/HANDOFF_NEW_OLD.md failed (file not read first) while the commit ran beside it, so b9c09a25 says the file was updated when it was not; fixed in 10a70339.
+   Changed: commit only after every edit of that step has returned success, never in the same parallel batch.
