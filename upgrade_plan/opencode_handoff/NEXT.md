@@ -2,7 +2,7 @@ WHAT IS LEFT (5 Nov 2026 01:35 IST, opencode session; RESUME.md RUNNING NOW is t
 
 1. DONE: STAGE A is installed in ROOT "/Users/mac/Desktop/mc2_root" at mc2-v2.5.3, UPGRADE GOOD, mc2-stable at mc2-v2.5.3; the mc2 worktree exists at "/Volumes/ayush_prsnl/mc2_worktree"; ROOT origin points at this planning clone. History: INSTALL_LOG.md.
 2. How the system changes from now on: this session edits the worktree, runs the self tests and template_check, commits and makes a lightweight tag; Ayush runs the round in ROOT (backup, preflight, printed commands, recheck). Never move a tag (one exception used, ENTRY 106).
-2a. FIRST: mc2-v2.5.4 is built (worktree 98c33185, untagged; ENTRY 112 to 115). Answer reports/V254_BEFORE_TAG.md, tag, then the ROOT round (restore the 8 master edited files after checking the diff still has sha256 f468065e; they come back in the release).
+2a. FIRST: mc2-v2.5.4 is tagged (dd7e147b; ENTRY 112 to 116). Answer reports/OLD_SYNC.md (old system work after the install, running sessions), then the ROOT round (restore the 8 master edited files after checking the diff still has sha256 f468065e; they come back in the release).
 3. (merged into 2a)
 4. Data-product decisions: handed over to the new master (ENTRY 113).
 4a. MASTER_GAPS: in mc2-v2.5.4.
