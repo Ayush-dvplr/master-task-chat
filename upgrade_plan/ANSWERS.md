@@ -813,3 +813,8 @@ ENTRY 117. 5 Nov 2026 11:51 IST (chat, word for word)
 "few more things are run and complete on old one check and let me know how we can resync that sompletely and after i will not use old one do not assume check and let me know "
 
 Recorded as: Ayush stops using the old system after a complete resync. Checked read only 11:49 (carry_over.py dry run, file times after 4 Nov 21:00, records compared line by line); findings and the resync plan with questions in reports/OLD_SYNC.md (rewritten). The 5 questions of ENTRY 116 there are replaced by this version: S460 is answered by the records (data-product paid run done in the old system 09:50).
+
+ENTRY 118. 5 Nov 2026 11:54 IST (chat, word for word, answer to the 5 questions of reports/OLD_SYNC.md)
+"all your recomendations "
+
+Recorded as: each option 1: (1) resync now, the round after 31c1a08 and 0e4f7f9 finish and the master issues nothing new; (2) carry data-product and Nikhil's multi-tenant records with carry_over.py --apply; (3) append the 5 decisions and 1 feedback lines once, marked carried, skipping duplicates; (4) copy the data-product bundle into ROOT now; (5) until STAGE B paid runs stay in the old harness folder (Ayush runs them, the new master records them with intake); the old master is closed and the old folder is never deleted.
