@@ -1,4 +1,5 @@
-DATA-PRODUCT TRIAGE (data-product-config-compiler, item 2 of 4, ENTRY 107). Asked Ayush 5 Nov about 00:40 IST; WAITING for his answer.
+HANDED OVER to the new master (ENTRY 113, 5 Nov 08:30): items 2 and 4 and paid run S460 are decided there; item 3 (QL QC before the paid run) is gone by the new ORDER. Kept for reference.
+DATA-PRODUCT TRIAGE (data-product-config-compiler, item 2 of 4, ENTRY 107). Asked Ayush 5 Nov about 00:40 IST.
 
 Source: old system QC v2 "/Users/mac/Desktop/Terminal Bench/QC/reports/data-product-config-compiler/v2.md" (lines 42, 43, 159, 179, 276) closed TS-26 and JD-14 as "acknowledged (carry-over)" from KEPT.md; QC v1 recorded them as warns. ENTRY 105 removed that kind of closing: Ayush decides. Bundle: "/Users/mac/Desktop/Terminal Bench/Terminal_2.0_Harbor_Harness/Tasks_INPUT/data-product-config-compiler" (frozen tree 2ad86997ab52). Kit: ROOT harness Input_Bundle_QC at 48726eb7.
 
