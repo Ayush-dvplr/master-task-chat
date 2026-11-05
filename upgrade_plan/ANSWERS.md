@@ -798,3 +798,8 @@ ENTRY 114. 5 Nov 2026 08:32 IST (chat, word for word, on QUESTION 1 of reports/H
 "1. no generally what happens is when i have to the a promt in old sessions in the prompt no where is mention to change the board id because its a part of that sessions (check and flag me if i am wrong) (verify this then ask me questions again )"
 
 Recorded as: QUESTION 1 option 2 as first stated (no earlier sha in the cell), with Ayush's reason: an old session stays under its own board id. Checked (R_FLAG, partly): the old-session prompt 39a3f9a (prompts/issued/cohort-retention-reconciliation/20261105T0808_rebuild.md line 4) DOES say "First thing: rename this session to 39a3f9a"; but tools/name_session.py only renames a session whose first message holds that board id, so in an old session it prints NOT RENAMED, and opencode shows the window still titled a9e68ee (ses_e57965ecaffeEwip6dut9pBya2; also depot ses_e57963c70ffeu8ddhO9gqLDZb4 titled a4ae480). So the effect Ayush describes is right, the wording is not. Questions asked again with this fact.
+
+ENTRY 115. 5 Nov 2026 08:35 IST (chat, word for word, answer to reports/HANDOFF_NEW_OLD.md)
+"questions 104 all your recomendations "
+
+Recorded as: read as "questions 1 to 4" (typo), each option 1: (1) an old-session cell shows "<new sha> . old (<window name>)", the window name being the first board id of that session; a new session shows "<sha> . new"; (1b) an old-session prompt carries no rename line, issue.py checks it; (2) the master decides when it issues, saved in the board row; (3) shown in the issue.py handoff, the master's handoff tables, BOARD.md and the state card. Build of mc2-v2.5.4 starts now.
